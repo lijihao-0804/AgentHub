@@ -1,0 +1,2264 @@
+{
+  "archive_commit": "e0fe09bbe0c7ff5b674a204606f038524b63065f",
+  "archive_path": "benchmarks/public_rag/results/published/refusal-consistency-20261114",
+  "entry": "POST /api/v1/knowledge/query (Citation QA); no tool stage on these calls",
+  "new_physical_requests": 0,
+  "qasper_train_sha256": "9458bfe76074a8fa8d1685af02bcc73537aa6d338ad20591dfaff1946bc88bf4",
+  "rows": [
+    {
+      "question_id": "e12674f0466f8c0da109b6076d9939b30952c7da",
+      "question": "In the paper “Important Attribute Identification in Knowledge Graph”, What do you use to calculate word/sub-word embeddings",
+      "target_paper": "1810.05320",
+      "snapshot": "720fe330-c632-4de1-813c-359bf089d3f6",
+      "source_fact": {
+        "text": "FastText performs best",
+        "paper_char_start": 22642,
+        "paper_char_end": 22664,
+        "official_evidence": [
+          "Evaluating FastText, GloVe and word2vec, we show that compared to other word representation learning algorithms, the FastText performs best. We sample and analyze the category attributes and find that many self-filled attributes contain misspellings. The FastText algorithm represents words by a sum of its character n-grams and it is much robust against problems like misspellings. In summary, FastText has greater advantages in dealing with natural language corpus usually with spelling mistakes."
+        ]
+      },
+      "literal_pool": {
+        "gold_source": true,
+        "gold_paragraph": false,
+        "answer_span": false
+      },
+      "literal_reader": {
+        "gold_source": true,
+        "gold_paragraph": false,
+        "answer_span": false
+      },
+      "source_review": "ABSENT_FROM_POOL",
+      "rationale": "The target paper's four candidates describe generic word/sub-word matching or previous research. None identifies the selected algorithm.",
+      "candidate_records": [
+        {
+          "source": "1810.05320",
+          "ordinal": 0,
+          "chunk_id": "36e7e5b18aacb608dc9c700fbb8dd9658b7cc8e00f8ef7eaa43d0d3dc40008fd",
+          "revision": "8cc61619-a351-4600-99a5-1f483192c87f",
+          "locator": {
+            "type": "text_range",
+            "char_start": 0,
+            "char_end": 1200
+          },
+          "fusion_rank": 1,
+          "whole_score": 4.57421875,
+          "sentence_score": 3.5419921875,
+          "reviewed_support_in_chunk": false,
+          "reader_position": 1
+        },
+        {
+          "source": "1912.02761",
+          "ordinal": 0,
+          "chunk_id": "a4e31c97ed533a21b4d1ccdf8f14f3784e7f6b8d13ba18fab6809f6ff9372fa4",
+          "revision": "961541d8-6430-4d44-b88a-20fe8fa28d6a",
+          "locator": {
+            "type": "text_range",
+            "char_start": 0,
+            "char_end": 1200
+          },
+          "fusion_rank": 2,
+          "whole_score": -1.1474609375,
+          "sentence_score": -2.53564453125,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1810.05320",
+          "ordinal": 23,
+          "chunk_id": "4e3129d83ad0e8229b9a6b6b86b7d8bcfd79543061f463d24528e208f99469fa",
+          "revision": "8cc61619-a351-4600-99a5-1f483192c87f",
+          "locator": {
+            "type": "text_range",
+            "char_start": 23000,
+            "char_end": 24200
+          },
+          "fusion_rank": 3,
+          "whole_score": 3.22265625,
+          "sentence_score": 2.3359375,
+          "reviewed_support_in_chunk": false,
+          "reader_position": 3
+        },
+        {
+          "source": "1912.02761",
+          "ordinal": 2,
+          "chunk_id": "2e5a4bbdcb70f689105f09d9d8a994eb711748cb3f8caff3559896b04b57abf2",
+          "revision": "961541d8-6430-4d44-b88a-20fe8fa28d6a",
+          "locator": {
+            "type": "text_range",
+            "char_start": 2000,
+            "char_end": 3200
+          },
+          "fusion_rank": 4,
+          "whole_score": -2.748046875,
+          "sentence_score": -3.6103515625,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1810.05320",
+          "ordinal": 8,
+          "chunk_id": "a9e7f6ebd11c7a6ba839283f472b8bfa5f7c5e6ef966e8637887ed9203fbd774",
+          "revision": "8cc61619-a351-4600-99a5-1f483192c87f",
+          "locator": {
+            "type": "text_range",
+            "char_start": 8000,
+            "char_end": 9200
+          },
+          "fusion_rank": 5,
+          "whole_score": 3.13671875,
+          "sentence_score": 2.37939453125,
+          "reviewed_support_in_chunk": false,
+          "reader_position": 2
+        },
+        {
+          "source": "1909.03544",
+          "ordinal": 13,
+          "chunk_id": "41dac1932d056d834aa7a549c9aa760e2d6733d3bde37e5f5178a8f251bd88c8",
+          "revision": "5a78ce0f-cbc6-4c41-9396-35258804bfe2",
+          "locator": {
+            "type": "text_range",
+            "char_start": 13000,
+            "char_end": 14200
+          },
+          "fusion_rank": 6,
+          "whole_score": -2.513671875,
+          "sentence_score": -1.85595703125,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1911.03270",
+          "ordinal": 16,
+          "chunk_id": "16f3d532517c6c6e44e7504d07b02090c07f54f6aef8c2bcbdf1e405f4e9c738",
+          "revision": "87777314-8463-46dc-b64f-1c0609180ab4",
+          "locator": {
+            "type": "text_range",
+            "char_start": 16000,
+            "char_end": 17200
+          },
+          "fusion_rank": 7,
+          "whole_score": -3.900390625,
+          "sentence_score": -3.826171875,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1909.03544",
+          "ordinal": 10,
+          "chunk_id": "fc5269b26585ebbb7e836d4226bfb174bd90ca7c1fac858b4050fc7fd7685b04",
+          "revision": "5a78ce0f-cbc6-4c41-9396-35258804bfe2",
+          "locator": {
+            "type": "text_range",
+            "char_start": 10000,
+            "char_end": 11200
+          },
+          "fusion_rank": 8,
+          "whole_score": -2.294921875,
+          "sentence_score": -1.9052734375,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1909.03544",
+          "ordinal": 11,
+          "chunk_id": "8c87b3747ab39befb06995ff1e5ef1ee74ecac0e92f3f9180f3bda99d551493b",
+          "revision": "5a78ce0f-cbc6-4c41-9396-35258804bfe2",
+          "locator": {
+            "type": "text_range",
+            "char_start": 11000,
+            "char_end": 12200
+          },
+          "fusion_rank": 9,
+          "whole_score": -2.677734375,
+          "sentence_score": -0.8662109375,
+          "reviewed_support_in_chunk": false,
+          "reader_position": 5
+        },
+        {
+          "source": "1808.03894",
+          "ordinal": 1,
+          "chunk_id": "62e47c374076b7e0188f0144b22c6a898e7519bbe9b7c93435b00416485086e9",
+          "revision": "fb9d4297-7553-4e90-8e1b-99644ae78340",
+          "locator": {
+            "type": "text_range",
+            "char_start": 1000,
+            "char_end": 2200
+          },
+          "fusion_rank": 10,
+          "whole_score": -2.521484375,
+          "sentence_score": -2.486328125,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1704.06125",
+          "ordinal": 9,
+          "chunk_id": "b968ed6bf148a0922f19864e9b5fe115d1a43e745085efe0e41e0be984cfe9d3",
+          "revision": "a541b0a8-b73d-4460-85d3-2fd3da76d3de",
+          "locator": {
+            "type": "text_range",
+            "char_start": 9000,
+            "char_end": 10200
+          },
+          "fusion_rank": 11,
+          "whole_score": -1.953125,
+          "sentence_score": -1.96875,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1912.02761",
+          "ordinal": 3,
+          "chunk_id": "7134a5bc6f37633069a99c3e13c1b18d492f64f47db955967f43be30d440d130",
+          "revision": "961541d8-6430-4d44-b88a-20fe8fa28d6a",
+          "locator": {
+            "type": "text_range",
+            "char_start": 3000,
+            "char_end": 4200
+          },
+          "fusion_rank": 12,
+          "whole_score": -2.5078125,
+          "sentence_score": -2.9677734375,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1901.00603",
+          "ordinal": 4,
+          "chunk_id": "72793d26f4863275ad9d1edfbb6e0b2fc0066221e158b54cd55c9052e90b3802",
+          "revision": "c2080b73-df69-46a5-80ea-8c91b54870e8",
+          "locator": {
+            "type": "text_range",
+            "char_start": 4000,
+            "char_end": 5200
+          },
+          "fusion_rank": 13,
+          "whole_score": -0.53759765625,
+          "sentence_score": -0.595947265625,
+          "reviewed_support_in_chunk": false,
+          "reader_position": 4
+        },
+        {
+          "source": "1912.02761",
+          "ordinal": 5,
+          "chunk_id": "7bc38417e830661f6981557809f8eb1a0743c9498dfcf4a7121e202fd17a2d42",
+          "revision": "961541d8-6430-4d44-b88a-20fe8fa28d6a",
+          "locator": {
+            "type": "text_range",
+            "char_start": 5000,
+            "char_end": 6200
+          },
+          "fusion_rank": 14,
+          "whole_score": -0.16357421875,
+          "sentence_score": -1.732177734375,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1705.03261",
+          "ordinal": 16,
+          "chunk_id": "4ce667bf8109125f6866e309733553d83b614e69ba65c01a10bd15d8991118d8",
+          "revision": "1078fa79-d177-4ca5-8863-348979c20857",
+          "locator": {
+            "type": "text_range",
+            "char_start": 16000,
+            "char_end": 17200
+          },
+          "fusion_rank": 15,
+          "whole_score": -1.8994140625,
+          "sentence_score": -1.359375,
+          "reviewed_support_in_chunk": false,
+          "reader_position": 6
+        },
+        {
+          "source": "1903.03467",
+          "ordinal": 6,
+          "chunk_id": "b0ff87eca74940fe12c8ee166c7dffe0385f2a3759000c1fdd8acbb079d3533f",
+          "revision": "a9a83f27-3b70-4bd8-a80a-122dd113f180",
+          "locator": {
+            "type": "text_range",
+            "char_start": 6000,
+            "char_end": 7200
+          },
+          "fusion_rank": 16,
+          "whole_score": -8.7265625,
+          "sentence_score": -8.353515625,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1810.05320",
+          "ordinal": 7,
+          "chunk_id": "0729945d6172f48fa505a38082012e1d374b2b600411c0a87f07d642d66fa670",
+          "revision": "8cc61619-a351-4600-99a5-1f483192c87f",
+          "locator": {
+            "type": "text_range",
+            "char_start": 7000,
+            "char_end": 8200
+          },
+          "fusion_rank": 17,
+          "whole_score": -2.498046875,
+          "sentence_score": -5.7802734375,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1912.02761",
+          "ordinal": 4,
+          "chunk_id": "524863eac56758b71660d4a08c78a5bb54c78b80a5b31e93a1fcb3d5ad2203c2",
+          "revision": "961541d8-6430-4d44-b88a-20fe8fa28d6a",
+          "locator": {
+            "type": "text_range",
+            "char_start": 4000,
+            "char_end": 5200
+          },
+          "fusion_rank": 18,
+          "whole_score": -1.875,
+          "sentence_score": -1.47021484375,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1805.07966",
+          "ordinal": 16,
+          "chunk_id": "cfd138347b8c7fcb79de841dbfb4d8c5261aa9aeb4611d346233508a62022353",
+          "revision": "1f85bb46-03f7-4201-981b-b264d0953c54",
+          "locator": {
+            "type": "text_range",
+            "char_start": 16000,
+            "char_end": 17200
+          },
+          "fusion_rank": 19,
+          "whole_score": -1.8310546875,
+          "sentence_score": -1.5390625,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1805.07966",
+          "ordinal": 11,
+          "chunk_id": "165d153ef164a8f604a041eb0df43fe751c1885b5a625730b991b9388b60936c",
+          "revision": "1f85bb46-03f7-4201-981b-b264d0953c54",
+          "locator": {
+            "type": "text_range",
+            "char_start": 11000,
+            "char_end": 12200
+          },
+          "fusion_rank": 20,
+          "whole_score": -2.095703125,
+          "sentence_score": -2.7158203125,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        }
+      ],
+      "initial_wire_user_sha256": "322975a88adb82d58d5698cf15c88ef8ff6d0677e80243e1cd6f48a2fd925420",
+      "reader_entries": [
+        {
+          "number": 1,
+          "chunk_id": "36e7e5b18aacb608dc9c700fbb8dd9658b7cc8e00f8ef7eaa43d0d3dc40008fd",
+          "document_id": "cebcda1e-d295-4bfa-ade3-3e972bc57788",
+          "document_revision_id": "8cc61619-a351-4600-99a5-1f483192c87f",
+          "source": "document:cebcda1e-d295-4bfa-ade3-3e972bc57788/revision:8cc61619-a351-4600-99a5-1f483192c87f",
+          "locator": {
+            "type": "text_range",
+            "char_end": 1200,
+            "char_start": 0
+          },
+          "lifecycle": {
+            "superseded": false
+          },
+          "text": "Important Attribute Identification in Knowledge Graph\n\nThe knowledge graph(KG) composed of entities with their descriptions and attributes, and relationship between entities, is finding more and more application scenarios in various natural language processing tasks. In a typical knowledge graph like Wikidata, entities usually have a large number of attributes, but it is difficult to know which ones are important. The importance of attributes can be a valuable piece of information in various applications spanning from information retrieval to natural language generation. In this paper, we propose a general method of using external user generated text data to evaluate the relative importance of an entity's attributes. To be more specific, we use the word/sub-word embedding techniques to match the external textual data back to entities' attribute name and values and rank the attributes by their matching cohesiveness. To our best knowledge, this is the first work of applying vector based semantic matching to important attribute identification, and our method outperforms the previous traditional methods. We also apply the outcome of the detected important attributes to a language gener"
+        },
+        {
+          "number": 2,
+          "chunk_id": "a9e7f6ebd11c7a6ba839283f472b8bfa5f7c5e6ef966e8637887ed9203fbd774",
+          "document_id": "cebcda1e-d295-4bfa-ade3-3e972bc57788",
+          "document_revision_id": "8cc61619-a351-4600-99a5-1f483192c87f",
+          "source": "document:cebcda1e-d295-4bfa-ade3-3e972bc57788/revision:8cc61619-a351-4600-99a5-1f483192c87f",
+          "locator": {
+            "type": "text_range",
+            "char_end": 9200,
+            "char_start": 8000
+          },
+          "lifecycle": {
+            "superseded": false
+          },
+          "text": "ng knowledge graph which has completed attribute extractions, we found only a few existing research, all of which used simple co-occurrences to rank entity attributes. In reality, many knowledge graphs do not contain attribute importance information, for example, in the most famous Wikidata, a large amount of entities have many attributes, and it is difficult to know which attributes are significant and deserve more attention. In this research we focus on identifying important attributes in existing knowledge graphs. Specifically, we propose a new method of using extra user generated data source for evaluating the attribute importance, and we use the recently proposed state-of-the-art word/sub-word embedding techniques to match the external data with the attribute definition and values from entities in knowledge graphs. And then we use the statistics obtained from the matching to compare the attribute importance. Our method has general extensibility to any knowledge graph without attribute importance. When there is a possibility of finding external textual data source, our proposed method will work, even if the external data does not exactly match the attribute textual data, since"
+        },
+        {
+          "number": 3,
+          "chunk_id": "4e3129d83ad0e8229b9a6b6b86b7d8bcfd79543061f463d24528e208f99469fa",
+          "document_id": "cebcda1e-d295-4bfa-ade3-3e972bc57788",
+          "document_revision_id": "8cc61619-a351-4600-99a5-1f483192c87f",
+          "source": "document:cebcda1e-d295-4bfa-ade3-3e972bc57788/revision:8cc61619-a351-4600-99a5-1f483192c87f",
+          "locator": {
+            "type": "text_range",
+            "char_end": 24200,
+            "char_start": 23000
+          },
+          "lifecycle": {
+            "superseded": false
+          },
+          "text": "with spelling mistakes.\n\nWe also applied the detected attributes in the automatic enquiry generation task and we obtained significantly better generated enquiries compared to previous rigid templates. Due to space limitation, we skip the explanation and leave it for future publications.\n\nConclusions and Future work \n\nIn this paper, we proposed a new general method of identifying important attributes for entities from a knowledge graph. This is a relatively new task and our proposed method of using external textual data and performing semantic matching via word/sub-word embeddings obtained better result compared to other work of using naive string matching and counting. In addition, we also successfully applied the detected important attributes in our real world application of smart composing. In summary, the method is extensible to any knowledge graph without attribute importance information and outperforms previous method.\n\nIn future work, there are two major areas with potential of improving the detection accuracy. The first one is about sentence splitting. What we are trying to get is semantic cohesive unit, which can be used to match an attribute, and there might be more compre"
+        },
+        {
+          "number": 4,
+          "chunk_id": "72793d26f4863275ad9d1edfbb6e0b2fc0066221e158b54cd55c9052e90b3802",
+          "document_id": "3374d0b0-e6c4-4ee2-abcc-97c9a707b1f6",
+          "document_revision_id": "c2080b73-df69-46a5-80ea-8c91b54870e8",
+          "source": "document:3374d0b0-e6c4-4ee2-abcc-97c9a707b1f6/revision:c2080b73-df69-46a5-80ea-8c91b54870e8",
+          "locator": {
+            "type": "text_range",
+            "char_end": 5200,
+            "char_start": 4000
+          },
+          "lifecycle": {
+            "superseded": false
+          },
+          "text": "endent representations between these mentions and the query. While low-level encodings of the inputs are shared between modules, we show that this division of labour allows the attention hierarchies in each module to focus on different parts of the input. This enables the model to more effectively represent a large number of potentially long support documents.\n\nSuppose we are given a query, a set of $$ support documents, and a set of $$ candidates. Without loss of generality, let us consider the $i$ th document and the $j$ th candidate. Let $\\in {\\times }$ , $\\in {\\times }$ , and $\\in {\\times }$ respectively denote the word embeddings of the query, the $i$ th support document, and the $j$ th candidate answer. Here, $$ , $$0 , and $$1 are the number of words in the corresponding sequence. $$2 is the size of the word embedding. We begin by encoding each sequence using a bidirectional Gated Recurrent Units (GRUs) BIBREF8 . \n\n$$&=& {\\tanh (W_q + b_q) } \\in {\\times }\n\\\\\n&=& {} \\in {\\times }\n\\\\\n&=& {} \\in {\\times }$$   (Eq. 2) \n\nHere, $$ , $$ , and $$ are the encodings of the query, support, and candidate. $W_q$ and $b_q$ are parameters of a query projection layer. $$ is the size of the"
+        },
+        {
+          "number": 5,
+          "chunk_id": "8c87b3747ab39befb06995ff1e5ef1ee74ecac0e92f3f9180f3bda99d551493b",
+          "document_id": "7cbd3d55-933d-422a-817d-5429cf13574f",
+          "document_revision_id": "5a78ce0f-cbc6-4c41-9396-35258804bfe2",
+          "source": "document:7cbd3d55-933d-422a-817d-5429cf13574f/revision:5a78ce0f-cbc6-4c41-9396-35258804bfe2",
+          "locator": {
+            "type": "text_range",
+            "char_end": 12200,
+            "char_start": 11000
+          },
+          "lifecycle": {
+            "superseded": false
+          },
+          "text": "EF27 of dimension 300, which we pretrain on Czech Wikipedia using segmentation and tokenization trained from the UD data.\n\nBERT BIBREF1: Pretrained contextual word embeddings of dimension 768 from the Base model. We average the last four layers of the BERT model to produce the embeddings. Because BERT utilizes word pieces, we decompose UD words into appropriate subwords and then average the generated embeddings over subwords belonging to the same word.\n\nFlair BIBREF2: Pretrained contextual word embeddings of dimension 4096.\n\nNeural Architectures ::: POS Tagging, Lemmatization, and Dependency Parsing ::: POS Tags and Lemmas Decoding\n\nOptionally, we employ a morphological dictionary MorfFlex BIBREF28 during decoding. If the morphological dictionary is used, it may produce analyses for an input word as (POS tag, lemma) pairs. If any are generated, we choose the pair with maximum likelihood given by both the POS tag and lemmatization model.\n\nNeural Architectures ::: Named Entity Recognition\n\nWe use a novel approach BIBREF29 for nested named entity recognition (NER) to capture the nested entities in the Czech Named Entity Corpus. The nested entities are encoded in a sequence and the pro"
+        },
+        {
+          "number": 6,
+          "chunk_id": "4ce667bf8109125f6866e309733553d83b614e69ba65c01a10bd15d8991118d8",
+          "document_id": "37cc93aa-376a-4eaf-9a04-efd57b7a365c",
+          "document_revision_id": "1078fa79-d177-4ca5-8863-348979c20857",
+          "source": "document:37cc93aa-376a-4eaf-9a04-efd57b7a365c/revision:1078fa79-d177-4ca5-8863-348979c20857",
+          "locator": {
+            "type": "text_range",
+            "char_end": 17200,
+            "char_start": 16000
+          },
+          "lifecycle": {
+            "superseded": false
+          },
+          "text": "ngs and Training\n\nWe use TensorFlow BIBREF27 r0.11 to implement the proposed model. The input of each word is an ordered triple (word, relative distance from drug1, relative distance from drug2). The sentence, which is represented as a matrix, is fed to the model. The output of the model is a INLINEFORM0 -dimensional vector representing the probabilities of being corresponding DDI. It is the network, parameters, and hyperparameters which decides the output vector. The network's parameters are adjusted during training, where the hyperparameters are tuned by hand. The hyperparameters after tuning are as follows. The word embedding's dimension INLINEFORM1 , the position embedding's dimension INLINEFORM2 , the hidden state's dimension INLINEFORM3 , the probability of dropout INLINEFORM4 , other hyperparameters which are not shown here are set to TensorFlow's default values.\n\nThe word embedding is initialized by pre-trained word vectors using GloVe BIBREF28 , while other parameters are initialized randomly. During each training step, a mini-batch (the mini-batch size INLINEFORM0 in our implementation) of sentences is selected from training set. The gradient of objective function is calc"
+        }
+      ],
+      "answer": "The provided evidence does not identify the specific tool, model, or method used to calculate the word/sub-word embeddings. The paper only describes generally that it uses \"word/sub-word embedding techniques\" (referred to as recently proposed state-of-the-art techniques) to match external textual data to entities' attribute names and values and to rank attributes by matching cohesiveness. No named embedding algorithm or pretrained embedding source is given in the available excerpts, so this question cannot be answered from the supplied evidence.",
+      "insufficient": true,
+      "citations": [],
+      "physical_model_requests_historical": 2
+    },
+    {
+      "question_id": "2efdcebebeb970021233553104553205ce5d6567",
+      "question": "In the paper “Interpreting Recurrent and Attention-Based Neural Models: a Case Study on Natural Language Inference”, How many layers are there in their model?",
+      "target_paper": "1808.03894",
+      "snapshot": "720fe330-c632-4de1-813c-359bf089d3f6",
+      "source_fact": {
+        "text": "Another round of LSTM reading then produces the final representations",
+        "paper_char_start": 3509,
+        "paper_char_end": 3578,
+        "official_evidence": [
+          "Instead of considering individual dimensions of the gating signals, we aggregate them to consider their norm, both for the signal and for its saliency. Note that ESIM models have two LSTM layers, the first (input) LSTM performs the input encoding and the second (inference) LSTM generates the representation for inference."
+        ]
+      },
+      "literal_pool": {
+        "gold_source": true,
+        "gold_paragraph": false,
+        "answer_span": false
+      },
+      "literal_reader": {
+        "gold_source": true,
+        "gold_paragraph": false,
+        "answer_span": false
+      },
+      "source_review": "LOST_AT_SELECTION",
+      "rationale": "The Task and Model passage first describes independent LSTM encoding, then another round of LSTM reading. This answers the two-LSTM-layer question without repeating the official answer string. Visible chunk 14 mentions another BiLSTM, but does not establish the complete first-stage description.",
+      "candidate_records": [
+        {
+          "source": "1808.03894",
+          "ordinal": 0,
+          "chunk_id": "3aebfe69338dcc509a0a0d55c7b0fda711f981bfb0b0104ec6cd86b3b6c809aa",
+          "revision": "fb9d4297-7553-4e90-8e1b-99644ae78340",
+          "locator": {
+            "type": "text_range",
+            "char_start": 0,
+            "char_end": 1200
+          },
+          "fusion_rank": 1,
+          "whole_score": -1.009765625,
+          "sentence_score": -2.9736328125,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1808.03894",
+          "ordinal": 14,
+          "chunk_id": "0a201aa29fee72d85645cf34f834f98cd263a2aa1a0c1cb2312ba5e4f6721020",
+          "revision": "fb9d4297-7553-4e90-8e1b-99644ae78340",
+          "locator": {
+            "type": "text_range",
+            "char_start": 14000,
+            "char_end": 15200
+          },
+          "fusion_rank": 2,
+          "whole_score": -0.10882568359375,
+          "sentence_score": -0.978240966796875,
+          "reviewed_support_in_chunk": false,
+          "reader_position": 3
+        },
+        {
+          "source": "1705.03261",
+          "ordinal": 6,
+          "chunk_id": "90f43d6c0f6c451f2b2abd2905413c3078723b79c23c3110304d4c011e3355ad",
+          "revision": "1078fa79-d177-4ca5-8863-348979c20857",
+          "locator": {
+            "type": "text_range",
+            "char_start": 6000,
+            "char_end": 7200
+          },
+          "fusion_rank": 3,
+          "whole_score": -1.7373046875,
+          "sentence_score": -2.09130859375,
+          "reviewed_support_in_chunk": false,
+          "reader_position": 5
+        },
+        {
+          "source": "1808.03894",
+          "ordinal": 4,
+          "chunk_id": "2f9e15224b4af58eaf17541bb55523cd03419714410d5c21537b7bd0df835d12",
+          "revision": "fb9d4297-7553-4e90-8e1b-99644ae78340",
+          "locator": {
+            "type": "text_range",
+            "char_start": 4000,
+            "char_end": 5200
+          },
+          "fusion_rank": 4,
+          "whole_score": -1.326171875,
+          "sentence_score": -2.1591796875,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1606.01433",
+          "ordinal": 4,
+          "chunk_id": "1c649ba404c4016a50082afabe3fae82328506e4643839576572ec6dae6ef8d2",
+          "revision": "6f70792b-4a25-4d53-802f-b54595188547",
+          "locator": {
+            "type": "text_range",
+            "char_start": 4000,
+            "char_end": 5200
+          },
+          "fusion_rank": 5,
+          "whole_score": -3.5703125,
+          "sentence_score": -4.15234375,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1911.03584",
+          "ordinal": 0,
+          "chunk_id": "7bc1e77f87bf7f24e2b00e785b34447183bd94a45b46351926c2f7e3f98a07ae",
+          "revision": "af01f4d1-b46b-4ea0-a78c-88fae1777fd0",
+          "locator": {
+            "type": "text_range",
+            "char_start": 0,
+            "char_end": 1200
+          },
+          "fusion_rank": 6,
+          "whole_score": -3.03125,
+          "sentence_score": -4.109375,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1808.03894",
+          "ordinal": 3,
+          "chunk_id": "6bc773b4cf9796dbb1c28d75f84cd657da035ba4c9deea6ac49cc6d5e6aaa3b4",
+          "revision": "fb9d4297-7553-4e90-8e1b-99644ae78340",
+          "locator": {
+            "type": "text_range",
+            "char_start": 3000,
+            "char_end": 4200
+          },
+          "fusion_rank": 7,
+          "whole_score": -1.9638671875,
+          "sentence_score": -4.19287109375,
+          "reviewed_support_in_chunk": true,
+          "reader_position": null
+        },
+        {
+          "source": "1808.03894",
+          "ordinal": 2,
+          "chunk_id": "b692aed55358c863cf3e3bd459aa1794a5a5211b5ebf149950892249b718302d",
+          "revision": "fb9d4297-7553-4e90-8e1b-99644ae78340",
+          "locator": {
+            "type": "text_range",
+            "char_start": 2000,
+            "char_end": 3200
+          },
+          "fusion_rank": 8,
+          "whole_score": -1.6328125,
+          "sentence_score": -2.6708984375,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1808.03894",
+          "ordinal": 1,
+          "chunk_id": "62e47c374076b7e0188f0144b22c6a898e7519bbe9b7c93435b00416485086e9",
+          "revision": "fb9d4297-7553-4e90-8e1b-99644ae78340",
+          "locator": {
+            "type": "text_range",
+            "char_start": 1000,
+            "char_end": 2200
+          },
+          "fusion_rank": 9,
+          "whole_score": -0.93359375,
+          "sentence_score": -2.71875,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "2002.00317",
+          "ordinal": 9,
+          "chunk_id": "33f37d4f0163ec67ac4bbb57030210904daf7a500b329e67f0e7608516fee7df",
+          "revision": "4b52888c-4fc6-47c4-8d32-ca9e92089b7c",
+          "locator": {
+            "type": "text_range",
+            "char_start": 9000,
+            "char_end": 10200
+          },
+          "fusion_rank": 10,
+          "whole_score": -5.4765625,
+          "sentence_score": -6.66015625,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1911.03584",
+          "ordinal": 28,
+          "chunk_id": "c9c6e367a85c6eed7d97959749c5db421fcf170a3a78a2c6ddae0c50d356f652",
+          "revision": "af01f4d1-b46b-4ea0-a78c-88fae1777fd0",
+          "locator": {
+            "type": "text_range",
+            "char_start": 28000,
+            "char_end": 28991
+          },
+          "fusion_rank": 11,
+          "whole_score": -0.544921875,
+          "sentence_score": -1.5703125,
+          "reviewed_support_in_chunk": false,
+          "reader_position": 4
+        },
+        {
+          "source": "1701.04653",
+          "ordinal": 16,
+          "chunk_id": "e32222ccac90a48ff5d740a11f5f27bb9235746bc5465a7694b508723c0a3551",
+          "revision": "5912fe51-5853-481e-b9fc-c735ef2ac18b",
+          "locator": {
+            "type": "text_range",
+            "char_start": 16000,
+            "char_end": 17200
+          },
+          "fusion_rank": 12,
+          "whole_score": -6.1171875,
+          "sentence_score": -6.681640625,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1911.03584",
+          "ordinal": 20,
+          "chunk_id": "e430fbf9ace50b16bdbbd7a943d260f5814250e16e6aa5db328eff64b155de42",
+          "revision": "af01f4d1-b46b-4ea0-a78c-88fae1777fd0",
+          "locator": {
+            "type": "text_range",
+            "char_start": 20000,
+            "char_end": 21200
+          },
+          "fusion_rank": 13,
+          "whole_score": -0.77099609375,
+          "sentence_score": -0.54541015625,
+          "reviewed_support_in_chunk": false,
+          "reader_position": 2
+        },
+        {
+          "source": "1905.11901",
+          "ordinal": 0,
+          "chunk_id": "c5136d87465bc7dc10e7fae79fe2f5bd9455b37f74d8bf1ae9fab8b5f51b4083",
+          "revision": "6436cc81-7a2f-4413-9d06-c799be4478eb",
+          "locator": {
+            "type": "text_range",
+            "char_start": 0,
+            "char_end": 1200
+          },
+          "fusion_rank": 14,
+          "whole_score": -4.49609375,
+          "sentence_score": -6.462890625,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1705.03261",
+          "ordinal": 5,
+          "chunk_id": "c427989d77dffcbf450bbd699e34a4debb735ed1c7d72c9d7309aedd602a196c",
+          "revision": "1078fa79-d177-4ca5-8863-348979c20857",
+          "locator": {
+            "type": "text_range",
+            "char_start": 5000,
+            "char_end": 6200
+          },
+          "fusion_rank": 15,
+          "whole_score": -1.7021484375,
+          "sentence_score": -3.35498046875,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1705.03261",
+          "ordinal": 21,
+          "chunk_id": "a428549e88540e80a340d9c03ce8e296dfc2f990ff0e8ffb5f5935e26bbee7e4",
+          "revision": "1078fa79-d177-4ca5-8863-348979c20857",
+          "locator": {
+            "type": "text_range",
+            "char_start": 21000,
+            "char_end": 22200
+          },
+          "fusion_rank": 16,
+          "whole_score": 1.236328125,
+          "sentence_score": -0.34326171875,
+          "reviewed_support_in_chunk": false,
+          "reader_position": 1
+        },
+        {
+          "source": "1709.00387",
+          "ordinal": 12,
+          "chunk_id": "1f27e979e22b792c5c093178c983ea23753e389106a67467131e04cac467f421",
+          "revision": "c8de41bc-0610-472c-98bc-6a9a0a15c633",
+          "locator": {
+            "type": "text_range",
+            "char_start": 12000,
+            "char_end": 13200
+          },
+          "fusion_rank": 17,
+          "whole_score": -2.25390625,
+          "sentence_score": -4.109375,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1705.03261",
+          "ordinal": 0,
+          "chunk_id": "5d212452aad479fbe19eaee4d3b0305d1afa4d89c98222b56249e38a856495b5",
+          "revision": "1078fa79-d177-4ca5-8863-348979c20857",
+          "locator": {
+            "type": "text_range",
+            "char_start": 0,
+            "char_end": 1200
+          },
+          "fusion_rank": 18,
+          "whole_score": -2.19921875,
+          "sentence_score": -2.0947265625,
+          "reviewed_support_in_chunk": false,
+          "reader_position": 6
+        },
+        {
+          "source": "1911.03584",
+          "ordinal": 12,
+          "chunk_id": "a757d0677234b7a45cae9bf3d45be509e4df2a1425fd02865062652af0c09156",
+          "revision": "af01f4d1-b46b-4ea0-a78c-88fae1777fd0",
+          "locator": {
+            "type": "text_range",
+            "char_start": 12000,
+            "char_end": 13200
+          },
+          "fusion_rank": 19,
+          "whole_score": -2.83203125,
+          "sentence_score": -3.642578125,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1606.01433",
+          "ordinal": 0,
+          "chunk_id": "2672a71c063a176d11bceccf9c3d42483daa078500cf8ba979fa255f6a4f6b12",
+          "revision": "6f70792b-4a25-4d53-802f-b54595188547",
+          "locator": {
+            "type": "text_range",
+            "char_start": 0,
+            "char_end": 1200
+          },
+          "fusion_rank": 20,
+          "whole_score": -4.890625,
+          "sentence_score": -6.66015625,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        }
+      ],
+      "initial_wire_user_sha256": "f14f27501bbf95ca5d74f9a1bc9e4e292a0b6bf69b94d49cb186d436b795026a",
+      "reader_entries": [
+        {
+          "number": 1,
+          "chunk_id": "a428549e88540e80a340d9c03ce8e296dfc2f990ff0e8ffb5f5935e26bbee7e4",
+          "document_id": "37cc93aa-376a-4eaf-9a04-efd57b7a365c",
+          "document_revision_id": "1078fa79-d177-4ca5-8863-348979c20857",
+          "source": "document:37cc93aa-376a-4eaf-9a04-efd57b7a365c/revision:1078fa79-d177-4ca5-8863-348979c20857",
+          "locator": {
+            "type": "text_range",
+            "char_end": 22200,
+            "char_start": 21000
+          },
+          "lifecycle": {
+            "superseded": false
+          },
+          "text": "o clusters, causing that most of the “mechanism” DDIs are classified to two types: “False” and “Mechanism”. In short, the visualizability of feature mapping gives better explanations for the prediction results and the quality of captured features.\n\nConclusion and Future Work\n\nTo conclude, we propose a recurrent neural network with multiple attention layers to extract DDIs from biomedical text. The sentence level attention layer, which combines other sentences containing the same drugs, has been added to our model. The experiments shows that our model outperforms the state-of-the-art DDI extraction systems. Task relevant word embedding and two attention layers improved the performance to some extent.\n\nThe imbalance of the classes and the ambiguity of semantics cause most of the misclassifications. We consider that instance generation using generative adversarial networks would cover the instance shortage in specific category. It is also reasonable to use distant supervision learning (which utilize other relevant material) for knowledge supplement and obtain a better performed DDI extraction system.\n\nAcknowledgment\n\nThis work is supported by the NSFC under Grant 61303191, 61303190, 6"
+        },
+        {
+          "number": 2,
+          "chunk_id": "e430fbf9ace50b16bdbbd7a943d260f5814250e16e6aa5db328eff64b155de42",
+          "document_id": "e8d84ed0-a3a1-4e03-8f5a-aeec5a545c08",
+          "document_revision_id": "af01f4d1-b46b-4ea0-a78c-88fae1777fd0",
+          "source": "document:e8d84ed0-a3a1-4e03-8f5a-aeec5a545c08/revision:af01f4d1-b46b-4ea0-a78c-88fae1777fd0",
+          "locator": {
+            "type": "text_range",
+            "char_end": 21200,
+            "char_start": 20000
+          },
+          "lifecycle": {
+            "superseded": false
+          },
+          "text": "ve position encoding introduced in (SECREF3), attention layers learn to behave like convolutional layers. We train nine attention heads at each layer to be on par with the $3\\times 3$ kernels used predominantly by the ResNet architecture. The center of attention of each head $h$ is initialized to $\\Delta ^{(h)} \\sim \\mathcal {N}({0}, 2_2)$.\n\nfig:isoduringtraining shows how the initial positions of the heads (different colors) at layer 4 changed during training. We can see that after optimization, the heads attend on specific pixel of the image forming a grid around the query pixel. Our intuition that Self-Attention applied to images learn convolutional filter around the queried pixel is then confirmed.\n\nfig:isoattentionfinal displays all attention head at each layer of the model at the end of the training. It can be seen that in the first few layers the heads tend to focus on local patterns (layers 1 and 2), while deeper layers (layers 3-6) also attend to larger patterns by positioning the center of attention further from the queried pixel position. We also include in the Appendix a plot of the attention positions for a higher number of heads ($N_h=16$), fig:isomanyheads displays b"
+        },
+        {
+          "number": 3,
+          "chunk_id": "0a201aa29fee72d85645cf34f834f98cd263a2aa1a0c1cb2312ba5e4f6721020",
+          "document_id": "fe9e5300-558a-497c-b4a0-6ad5a2f5e769",
+          "document_revision_id": "fb9d4297-7553-4e90-8e1b-99644ae78340",
+          "source": "document:fe9e5300-558a-497c-b4a0-6ad5a2f5e769/revision:fb9d4297-7553-4e90-8e1b-99644ae78340",
+          "locator": {
+            "type": "text_range",
+            "char_end": 15200,
+            "char_start": 14000
+          },
+          "lifecycle": {
+            "superseded": false
+          },
+          "text": "the extracted relevant information of $n$2 by attending to $n$3 . Next, it passes the enriched information through a projector layer which produce the final output of attention stage. Equations 22 and 23 formally represent this process. \n\n$$p$$   (Eq. ) \n\n$$q$$   (Eq. ) Here $n$4 stands for element-wise product while $n$5 and $n$6 are the trainable weights and biases of the projector layer respectively. $n$7 and $n$8 indicate the output of attention devision for premise and hypothesis respectively. Inference During this phase, it uses another BiLSTM to aggregate the two sequences of computed matching vectors, $n$9 and $m$0 from the attention stage (Equations 27 and 28 ). \n\n$$\\emph {softmax}$$   (Eq. ) \n\n$$\\hat{u} = \\textit {BiLSTM}(u)$$   (Eq. 16) where $m$1 and $m$2 are the reading sequences of $m$3 and $m$4 respectively. Finally the concatenation max and average pooling of $m$5 and $m$6 are pass through a multilayer perceptron (MLP) classifier that includes a hidden layer with $m$7 activation and $m$8 output layer. The model is trained in an end-to-end manner. Attention Study Here we provide more examples on the NLI task which intend to examine specific behavior in this model. S"
+        },
+        {
+          "number": 4,
+          "chunk_id": "c9c6e367a85c6eed7d97959749c5db421fcf170a3a78a2c6ddae0c50d356f652",
+          "document_id": "e8d84ed0-a3a1-4e03-8f5a-aeec5a545c08",
+          "document_revision_id": "af01f4d1-b46b-4ea0-a78c-88fae1777fd0",
+          "source": "document:e8d84ed0-a3a1-4e03-8f5a-aeec5a545c08/revision:af01f4d1-b46b-4ea0-a78c-88fae1777fd0",
+          "locator": {
+            "type": "text_range",
+            "char_end": 28991,
+            "char_start": 28000
+          },
+          "lifecycle": {
+            "superseded": false
+          },
+          "text": "layer. This means that these layers cannot express a $3 \\times 3$ kernel anymore. As shown in yellow on fig:learningcurve, this ablation initially hurts a bit the performance, probably due to off biases, but after a few epochs of continued training with a smaller learning rate (divided by 10) the accuracy recovers its unpruned value. Hence, without sacrificing performance, we reduce the size of the parameters and the number of FLOPS by a fourth.\n\nAppendix ::: Increasing the Number of Heads\n\nFor completeness, we also tested increasing the number of heads of our architecture from 9 to 16.\n\nSimilar to Figure FIGREF23, we see that the network distinguishes two main types of attention patterns. Localized heads (i.e., those that attend to nearly individual pixels) appear more frequently in the first few layers. The self-attention layer uses these heads to act in a manner similar to how convolutional layers do. Heads with less-localized attention become more common at higher layers."
+        },
+        {
+          "number": 5,
+          "chunk_id": "90f43d6c0f6c451f2b2abd2905413c3078723b79c23c3110304d4c011e3355ad",
+          "document_id": "37cc93aa-376a-4eaf-9a04-efd57b7a365c",
+          "document_revision_id": "1078fa79-d177-4ca5-8863-348979c20857",
+          "source": "document:37cc93aa-376a-4eaf-9a04-efd57b7a365c/revision:1078fa79-d177-4ca5-8863-348979c20857",
+          "locator": {
+            "type": "text_range",
+            "char_end": 7200,
+            "char_start": 6000
+          },
+          "lifecycle": {
+            "superseded": false
+          },
+          "text": "e information, after which a pooling layer and MLP have been set to extract feature and classify the relation. Attention mechanism is added to bidirectional LSTM in BIBREF17 for relation extraction. An attention layer gives each memory cell a weight so that classifier can catch the principal feature for the relation detection. The Attention based bidirectional LSTM has been proven better than previous work.\n\nProposed Model\n\nIn this section, we present our bidirectional recurrent neural network with multiple attention layer model. The overview of our architecture is shown in figure FIGREF15 . For a given instance, which describes the details about two or more drugs, the model represents each word as a vector in embedding layer. Then the bidirectional RNN layer generates a sentence matrix, each column vector in which is the semantic representation of the corresponding word. The word level attention layer transforms the sentence matrix to vector representation. Then sentence level attention layer generates final representation for the instance by combining several relevant sentences in view of the fact that these sentences have the same drug pair. Followed by a softmax classifier, the"
+        },
+        {
+          "number": 6,
+          "chunk_id": "5d212452aad479fbe19eaee4d3b0305d1afa4d89c98222b56249e38a856495b5",
+          "document_id": "37cc93aa-376a-4eaf-9a04-efd57b7a365c",
+          "document_revision_id": "1078fa79-d177-4ca5-8863-348979c20857",
+          "source": "document:37cc93aa-376a-4eaf-9a04-efd57b7a365c/revision:1078fa79-d177-4ca5-8863-348979c20857",
+          "locator": {
+            "type": "text_range",
+            "char_end": 1200,
+            "char_start": 0
+          },
+          "lifecycle": {
+            "superseded": false
+          },
+          "text": "Drug-drug Interaction Extraction via Recurrent Neural Network with Multiple Attention Layers\n\nDrug-drug interaction (DDI) is a vital information when physicians and pharmacists intend to co-administer two or more drugs. Thus, several DDI databases are constructed to avoid mistakenly combined use. In recent years, automatically extracting DDIs from biomedical text has drawn researchers' attention. However, the existing work utilize either complex feature engineering or NLP tools, both of which are insufficient for sentence comprehension. Inspired by the deep learning approaches in natural language processing, we propose a recur- rent neural network model with multiple attention layers for DDI classification. We evaluate our model on 2013 SemEval DDIExtraction dataset. The experiments show that our model classifies most of the drug pairs into correct DDI categories, which outperforms the existing NLP or deep learning methods.\n\nIntroduction\n\nDrug-drug interaction (DDI) is a situation when one drug increases or decreases the effect of another drug BIBREF0 . Adverse drug reactions may cause severe side effect, if two or more medicines were taken and their DDI were not investigated in de"
+        }
+      ],
+      "answer": "The provided evidence does not specify the total number of layers in the model from that paper. It only describes components such as BiLSTM layers, an attention stage, and an MLP classifier with a hidden layer and an output layer, so the total layer count cannot be determined from the evidence.",
+      "insufficient": true,
+      "citations": [],
+      "physical_model_requests_historical": 1
+    },
+    {
+      "question_id": "7486c9d9e6c407c0c3bc012405d689dbee072327",
+      "question": "In the paper “Measuring the Reliability of Hate Speech Annotations: The Case of the European Refugee Crisis”, What languages are were included in the dataset of hateful content?",
+      "target_paper": "1701.08118",
+      "snapshot": "720fe330-c632-4de1-813c-359bf089d3f6",
+      "source_fact": {
+        "text": "there is no German hate speech corpus available for our needs",
+        "paper_char_start": 5258,
+        "paper_char_end": 5319,
+        "official_evidence": [
+          "As previously mentioned, there is no German hate speech corpus available for our needs, especially not for the very recent topic of the refugee crisis in Europe. We therefore had to compile our own corpus. We used Twitter as a source as it offers recent comments on current events. In our study we only considered the textual content of tweets that contain certain keywords, ignoring those that contain pictures or links. This section provides a detailed description of the approach we used to select the tweets and subsequently annotate them."
+        ]
+      },
+      "literal_pool": {
+        "gold_source": true,
+        "gold_paragraph": true,
+        "answer_span": true
+      },
+      "literal_reader": {
+        "gold_source": true,
+        "gold_paragraph": false,
+        "answer_span": false
+      },
+      "source_review": "LOST_AT_SELECTION",
+      "rationale": "The corpus compilation section motivates building a German corpus and identifies Twitter as its source. The visible passage on annotator agreement omits this context.",
+      "candidate_records": [
+        {
+          "source": "1701.08118",
+          "ordinal": 0,
+          "chunk_id": "982ef5de958df5fb88ebb94b1968d1a9186ea31b729814812c76d1333b45e69d",
+          "revision": "169a7963-aa3a-408d-8739-56c42cf5e7e5",
+          "locator": {
+            "type": "text_range",
+            "char_start": 0,
+            "char_end": 1200
+          },
+          "fusion_rank": 1,
+          "whole_score": -0.427978515625,
+          "sentence_score": -2.9093017578125,
+          "reviewed_support_in_chunk": false,
+          "reader_position": 6
+        },
+        {
+          "source": "1905.12516",
+          "ordinal": 6,
+          "chunk_id": "a93f71e5e1d910bc0b8f9e70a305753cf9b4638bf8ba05b11268f1a6b2cf1bb9",
+          "revision": "df6bf6d4-2a62-4b65-bd42-35119e4b2798",
+          "locator": {
+            "type": "text_range",
+            "char_start": 6000,
+            "char_end": 7200
+          },
+          "fusion_rank": 2,
+          "whole_score": -0.9990234375,
+          "sentence_score": 0.083984375,
+          "reviewed_support_in_chunk": false,
+          "reader_position": 1
+        },
+        {
+          "source": "1701.08118",
+          "ordinal": 2,
+          "chunk_id": "4c5b950a2cea32fa0ef174886452f1c0c212a927561c142f4538e93c538384cb",
+          "revision": "169a7963-aa3a-408d-8739-56c42cf5e7e5",
+          "locator": {
+            "type": "text_range",
+            "char_start": 2000,
+            "char_end": 3200
+          },
+          "fusion_rank": 3,
+          "whole_score": -3.123046875,
+          "sentence_score": -4.0322265625,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1905.12516",
+          "ordinal": 8,
+          "chunk_id": "acb7d29fb769662260f813cd45db0bc3f255cac69ce6591121d5ac16d2d80bea",
+          "revision": "df6bf6d4-2a62-4b65-bd42-35119e4b2798",
+          "locator": {
+            "type": "text_range",
+            "char_start": 8000,
+            "char_end": 9200
+          },
+          "fusion_rank": 4,
+          "whole_score": -2.576171875,
+          "sentence_score": -1.97607421875,
+          "reviewed_support_in_chunk": false,
+          "reader_position": 4
+        },
+        {
+          "source": "1905.12516",
+          "ordinal": 5,
+          "chunk_id": "67881934ecd16287955c31ed599960e4b57417c89e425cca963bb831e6d56d99",
+          "revision": "df6bf6d4-2a62-4b65-bd42-35119e4b2798",
+          "locator": {
+            "type": "text_range",
+            "char_start": 5000,
+            "char_end": 6200
+          },
+          "fusion_rank": 5,
+          "whole_score": -2.572265625,
+          "sentence_score": -2.4560546875,
+          "reviewed_support_in_chunk": false,
+          "reader_position": 5
+        },
+        {
+          "source": "1701.08118",
+          "ordinal": 3,
+          "chunk_id": "8ab41f1e00751fcf4720086ab7a966e53a1b0602a5b8509df17208b77654a444",
+          "revision": "169a7963-aa3a-408d-8739-56c42cf5e7e5",
+          "locator": {
+            "type": "text_range",
+            "char_start": 3000,
+            "char_end": 4200
+          },
+          "fusion_rank": 6,
+          "whole_score": -2.916015625,
+          "sentence_score": -4.3837890625,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1905.12516",
+          "ordinal": 0,
+          "chunk_id": "b06afd837db930d4a3a28908e2057b169ff676f22ae37e8c1a497a6558b2a353",
+          "revision": "df6bf6d4-2a62-4b65-bd42-35119e4b2798",
+          "locator": {
+            "type": "text_range",
+            "char_start": 0,
+            "char_end": 1200
+          },
+          "fusion_rank": 7,
+          "whole_score": -1.4130859375,
+          "sentence_score": -0.986572265625,
+          "reviewed_support_in_chunk": false,
+          "reader_position": 2
+        },
+        {
+          "source": "1701.08118",
+          "ordinal": 1,
+          "chunk_id": "b6eb76477a0c52dae0e19ae5cf4d12dc7f8382dd82dbd9965c3d3cd93e8c0d22",
+          "revision": "169a7963-aa3a-408d-8739-56c42cf5e7e5",
+          "locator": {
+            "type": "text_range",
+            "char_start": 1000,
+            "char_end": 2200
+          },
+          "fusion_rank": 8,
+          "whole_score": -2.78515625,
+          "sentence_score": -3.62890625,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1905.12516",
+          "ordinal": 7,
+          "chunk_id": "d67067f111aa59cd07735c872bc4789665838cf489647c7c4cdb1d00c9c6dbcb",
+          "revision": "df6bf6d4-2a62-4b65-bd42-35119e4b2798",
+          "locator": {
+            "type": "text_range",
+            "char_start": 7000,
+            "char_end": 8200
+          },
+          "fusion_rank": 9,
+          "whole_score": -4.32421875,
+          "sentence_score": -4.6640625,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1701.08118",
+          "ordinal": 5,
+          "chunk_id": "704cefb0874956be1bc38c1c9fe3cb906ef9e826c9c26c50dec0333327f1fb2c",
+          "revision": "169a7963-aa3a-408d-8739-56c42cf5e7e5",
+          "locator": {
+            "type": "text_range",
+            "char_start": 5000,
+            "char_end": 6200
+          },
+          "fusion_rank": 10,
+          "whole_score": -1.0927734375,
+          "sentence_score": -3.01904296875,
+          "reviewed_support_in_chunk": true,
+          "reader_position": null
+        },
+        {
+          "source": "1701.08118",
+          "ordinal": 13,
+          "chunk_id": "561aae4fbf173b71ee0c33aa4f4934e701e2474e24536cee51dc22aabfb2fcf1",
+          "revision": "169a7963-aa3a-408d-8739-56c42cf5e7e5",
+          "locator": {
+            "type": "text_range",
+            "char_start": 13000,
+            "char_end": 13810
+          },
+          "fusion_rank": 11,
+          "whole_score": -4.33984375,
+          "sentence_score": -4.607421875,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1910.02334",
+          "ordinal": 0,
+          "chunk_id": "043e5173f63c0fdf48056921decb1309c8cc1a82dd95fc0b2a888bcc8a8cbbf2",
+          "revision": "3d5f4b52-2068-4edd-837d-25e172ce7875",
+          "locator": {
+            "type": "text_range",
+            "char_start": 0,
+            "char_end": 1200
+          },
+          "fusion_rank": 12,
+          "whole_score": -4.41796875,
+          "sentence_score": -3.486328125,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1910.02334",
+          "ordinal": 6,
+          "chunk_id": "9faffb57abad2393deac2bcf186d6ed9b6ee82327fcb68f3cd03800e64eb40ca",
+          "revision": "3d5f4b52-2068-4edd-837d-25e172ce7875",
+          "locator": {
+            "type": "text_range",
+            "char_start": 6000,
+            "char_end": 7200
+          },
+          "fusion_rank": 13,
+          "whole_score": -4.3203125,
+          "sentence_score": -3.916015625,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1701.08118",
+          "ordinal": 4,
+          "chunk_id": "bc2ade1b4830505edfaa63ff6d59cf7c09532486d2989b5eda93f98f204192e5",
+          "revision": "169a7963-aa3a-408d-8739-56c42cf5e7e5",
+          "locator": {
+            "type": "text_range",
+            "char_start": 4000,
+            "char_end": 5200
+          },
+          "fusion_rank": 14,
+          "whole_score": -2.96484375,
+          "sentence_score": -4.306640625,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1905.12516",
+          "ordinal": 9,
+          "chunk_id": "01d567282f4c1d86dcefaa635b8ae29d43aae8a19c638338160d66b11e503570",
+          "revision": "df6bf6d4-2a62-4b65-bd42-35119e4b2798",
+          "locator": {
+            "type": "text_range",
+            "char_start": 9000,
+            "char_end": 10200
+          },
+          "fusion_rank": 15,
+          "whole_score": -4.40234375,
+          "sentence_score": -4.2265625,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1701.08118",
+          "ordinal": 9,
+          "chunk_id": "c3b688f2c9f5d6ad489609c31134eaecd8dbc8b6f56b2633344c0f0aa4be382f",
+          "revision": "169a7963-aa3a-408d-8739-56c42cf5e7e5",
+          "locator": {
+            "type": "text_range",
+            "char_start": 9000,
+            "char_end": 10200
+          },
+          "fusion_rank": 16,
+          "whole_score": -3.841796875,
+          "sentence_score": -5.3935546875,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1905.12516",
+          "ordinal": 4,
+          "chunk_id": "ea30eb052788e5a3d46fc5f41ed2501fc47e69891bf754d2d3b489d31aaa5e37",
+          "revision": "df6bf6d4-2a62-4b65-bd42-35119e4b2798",
+          "locator": {
+            "type": "text_range",
+            "char_start": 4000,
+            "char_end": 5200
+          },
+          "fusion_rank": 17,
+          "whole_score": -4.16796875,
+          "sentence_score": -3.8779296875,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "2001.05493",
+          "ordinal": 8,
+          "chunk_id": "8c75a4d0be0d3f543c44a68d5b092039ce539554051b38df7c32475098261bff",
+          "revision": "bc48117e-6422-4d9e-9abd-371e02366f8b",
+          "locator": {
+            "type": "text_range",
+            "char_start": 8000,
+            "char_end": 9200
+          },
+          "fusion_rank": 18,
+          "whole_score": -5.80859375,
+          "sentence_score": -5.66796875,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1905.12516",
+          "ordinal": 1,
+          "chunk_id": "80ced5457d7b5c390798e53f9e84030abb67c7762202108428381e60a8e8dd0b",
+          "revision": "df6bf6d4-2a62-4b65-bd42-35119e4b2798",
+          "locator": {
+            "type": "text_range",
+            "char_start": 1000,
+            "char_end": 2200
+          },
+          "fusion_rank": 19,
+          "whole_score": -1.4873046875,
+          "sentence_score": -1.4267578125,
+          "reviewed_support_in_chunk": false,
+          "reader_position": 3
+        },
+        {
+          "source": "1701.08118",
+          "ordinal": 11,
+          "chunk_id": "fe3f043040c827fb9f9dd2d5c34338045e6d2165c1c4c3a4f5c315cb763dcd1b",
+          "revision": "169a7963-aa3a-408d-8739-56c42cf5e7e5",
+          "locator": {
+            "type": "text_range",
+            "char_start": 11000,
+            "char_end": 12200
+          },
+          "fusion_rank": 20,
+          "whole_score": -2.580078125,
+          "sentence_score": -4.9189453125,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        }
+      ],
+      "initial_wire_user_sha256": "291d7bffbd4ea7d82d89a36eafa3e5d99b785f85c5adfb7b7205d9965fb28594",
+      "reader_entries": [
+        {
+          "number": 1,
+          "chunk_id": "a93f71e5e1d910bc0b8f9e70a305753cf9b4638bf8ba05b11268f1a6b2cf1bb9",
+          "document_id": "f1d5779f-77a8-40a6-be71-43778a8a636e",
+          "document_revision_id": "df6bf6d4-2a62-4b65-bd42-35119e4b2798",
+          "source": "document:f1d5779f-77a8-40a6-be71-43778a8a636e/revision:df6bf6d4-2a62-4b65-bd42-35119e4b2798",
+          "locator": {
+            "type": "text_range",
+            "char_end": 7200,
+            "char_start": 6000
+          },
+          "lifecycle": {
+            "superseded": false
+          },
+          "text": "tasets. They find that classifiers trained on these data tend to perform worse when female identity terms used, indicating gender bias in performance. We build upon this work by auditing a series of abusive language and hate speech detection datasets for racial biases. We evaluate how classification models trained on these datasets perform in the field, comparing their predictions for tweets written in language used by whites or African-Americans.\n\nHate speech and abusive language datasets\n\nWe focus on Twitter, the most widely used data source in abusive language research. We use all available datasets where tweets are labeled as various types of abuse and are written in English. We now briefly describe each of these datasets in chronological order.\n\n BIBREF9 collected 130k tweets containing one of seventeen different terms or phrases they considered to be hateful. They then annotated a sample of these tweets themselves, using guidelines inspired by critical race theory. These annotators were then reviewed by “a 25 year old woman studying gender studies and a nonactivist feminist” to check for bias. This dataset consists of 16,849 tweets labeled as either racism, sexism, or neither"
+        },
+        {
+          "number": 2,
+          "chunk_id": "b06afd837db930d4a3a28908e2057b169ff676f22ae37e8c1a497a6558b2a353",
+          "document_id": "f1d5779f-77a8-40a6-be71-43778a8a636e",
+          "document_revision_id": "df6bf6d4-2a62-4b65-bd42-35119e4b2798",
+          "source": "document:f1d5779f-77a8-40a6-be71-43778a8a636e/revision:df6bf6d4-2a62-4b65-bd42-35119e4b2798",
+          "locator": {
+            "type": "text_range",
+            "char_end": 1200,
+            "char_start": 0
+          },
+          "lifecycle": {
+            "superseded": false
+          },
+          "text": "Racial Bias in Hate Speech and Abusive Language Detection Datasets\n\nTechnologies for abusive language detection are being developed and applied with little consideration of their potential biases. We examine racial bias in five different sets of Twitter data annotated for hate speech and abusive language. We train classifiers on these datasets and compare the predictions of these classifiers on tweets written in African-American English with those written in Standard American English. The results show evidence of systematic racial bias in all datasets, as classifiers trained on them tend to predict that tweets written in African-American English are abusive at substantially higher rates. If these abusive language detection systems are used in the field they will therefore have a disproportionate negative impact on African-American social media users. Consequently, these systems may discriminate against the groups who are often the targets of the abuse we are trying to detect.\n\nIntroduction\n\nRecent work has shown evidence of substantial bias in machine learning systems, which is typically a result of bias in the training data. This includes both supervised BIBREF0 , BIBREF1 , BIBREF"
+        },
+        {
+          "number": 3,
+          "chunk_id": "80ced5457d7b5c390798e53f9e84030abb67c7762202108428381e60a8e8dd0b",
+          "document_id": "f1d5779f-77a8-40a6-be71-43778a8a636e",
+          "document_revision_id": "df6bf6d4-2a62-4b65-bd42-35119e4b2798",
+          "source": "document:f1d5779f-77a8-40a6-be71-43778a8a636e/revision:df6bf6d4-2a62-4b65-bd42-35119e4b2798",
+          "locator": {
+            "type": "text_range",
+            "char_end": 2200,
+            "char_start": 1000
+          },
+          "lifecycle": {
+            "superseded": false
+          },
+          "text": "tion\n\nRecent work has shown evidence of substantial bias in machine learning systems, which is typically a result of bias in the training data. This includes both supervised BIBREF0 , BIBREF1 , BIBREF2 , BIBREF3 and unsupervised natural language processing systems BIBREF4 , BIBREF5 , BIBREF6 . Machine learning models are currently being deployed in the field to detect hate speech and abusive language on social media platforms including Facebook, Instagram, and Youtube. The aim of these models is to identify abusive language that directly targets certain individuals or groups, particularly people belonging to protected categories BIBREF7 . Bias may reduce the accuracy of these models, and at worst, will mean that the models actively discriminate against the same groups they are designed to protect.\n\nOur study focuses on racial bias in hate speech and abusive language detection datasets BIBREF8 , BIBREF9 , BIBREF10 , BIBREF11 , BIBREF12 , all of which use data collected from Twitter. We train classifiers using each of the datasets and use a corpus of tweets with demographic information to compare how each classifier performs on tweets written in African-American English (AAE) versus"
+        },
+        {
+          "number": 4,
+          "chunk_id": "acb7d29fb769662260f813cd45db0bc3f255cac69ce6591121d5ac16d2d80bea",
+          "document_id": "f1d5779f-77a8-40a6-be71-43778a8a636e",
+          "document_revision_id": "df6bf6d4-2a62-4b65-bd42-35119e4b2798",
+          "source": "document:f1d5779f-77a8-40a6-be71-43778a8a636e/revision:df6bf6d4-2a62-4b65-bd42-35119e4b2798",
+          "locator": {
+            "type": "text_range",
+            "char_end": 9200,
+            "char_start": 8000
+          },
+          "lifecycle": {
+            "superseded": false
+          },
+          "text": "in prior work which considered all uses of particular terms as hate speech, crowdworkers were instructed not to make their decisions based upon any words or phrases in particular, no matter how offensive, but on the overall tweet and the inferred context. The dataset consists of 24,783 tweets annotated as hate speech, offensive language, or neither.\n\n BIBREF11 selected tweets using ten keywords and phrases related to anti-black racism, Islamophobia, homophobia, anti-semitism, and sexism. The authors developed a coding scheme to distinguish between potentially offensive content and serious harassment, such as threats or hate speech. After an initial round of coding, where tweets were assigned to a number of different categories, they simplified their analysis to include a binary harassment or non-harassment label for each tweet. The dataset consists of 20,360 tweets, each hand-labeled by the authors.\n\n BIBREF12 constructed a dataset intended to better approximate a real-world setting where abuse is relatively rare. They began with a random sample of tweets then augmented it by adding tweets containing one or more terms from the Hatebase lexicon and that had negative sentiment. They"
+        },
+        {
+          "number": 5,
+          "chunk_id": "67881934ecd16287955c31ed599960e4b57417c89e425cca963bb831e6d56d99",
+          "document_id": "f1d5779f-77a8-40a6-be71-43778a8a636e",
+          "document_revision_id": "df6bf6d4-2a62-4b65-bd42-35119e4b2798",
+          "source": "document:f1d5779f-77a8-40a6-be71-43778a8a636e/revision:df6bf6d4-2a62-4b65-bd42-35119e4b2798",
+          "locator": {
+            "type": "text_range",
+            "char_end": 6200,
+            "char_start": 5000
+          },
+          "lifecycle": {
+            "superseded": false
+          },
+          "text": "tudies have shown that false positive cases of hate speech are associated with the presence of terms related to race, gender, and sexuality BIBREF21 , BIBREF22 , BIBREF10 . While not directly measuring bias, prior work has explored how annotation schemes BIBREF10 and the identity of the annotators BIBREF8 might be manipulated to help to avoid bias. BIBREF23 directly measured biases in the Google Perspective API classifier, trained on data from Wikipedia talk comments, finding that it tended to give high toxicity scores to innocuous statements like “I am a gay man”. They called this “false positive bias”, caused by the model overgeneralizing from the training data, in this case from examples where “gay” was used pejoratively. They find that a number of such “identity terms” are disproportionately represented in the examples labeled as toxic. BIBREF24 build upon this study, using templates to study gender differences in performance across two hate speech and abusive language detection datasets. They find that classifiers trained on these data tend to perform worse when female identity terms used, indicating gender bias in performance. We build upon this work by auditing a series of a"
+        },
+        {
+          "number": 6,
+          "chunk_id": "982ef5de958df5fb88ebb94b1968d1a9186ea31b729814812c76d1333b45e69d",
+          "document_id": "b2137b06-4c44-4e19-b5f5-c7333a6a22e9",
+          "document_revision_id": "169a7963-aa3a-408d-8739-56c42cf5e7e5",
+          "source": "document:b2137b06-4c44-4e19-b5f5-c7333a6a22e9/revision:169a7963-aa3a-408d-8739-56c42cf5e7e5",
+          "locator": {
+            "type": "text_range",
+            "char_end": 1200,
+            "char_start": 0
+          },
+          "lifecycle": {
+            "superseded": false
+          },
+          "text": "Measuring the Reliability of Hate Speech Annotations: The Case of the European Refugee Crisis\n\nSome users of social media are spreading racist, sexist, and otherwise hateful content. For the purpose of training a hate speech detection system, the reliability of the annotations is crucial, but there is no universally agreed-upon definition. We collected potentially hateful messages and asked two groups of internet users to determine whether they were hate speech or not, whether they should be banned or not and to rate their degree of offensiveness. One of the groups was shown a definition prior to completing the survey. We aimed to assess whether hate speech can be annotated reliably, and the extent to which existing definitions are in accordance with subjective ratings. Our results indicate that showing users a definition caused them to partially align their own opinion with the definition but did not improve reliability, which was very low overall. We conclude that the presence of hate speech should perhaps not be considered a binary yes-or-no decision, and raters need more detailed instructions for the annotation.\n\nIntroduction\n\nSocial media are sometimes used to disseminate hate"
+        }
+      ],
+      "answer": "The supplied evidence does not specify which languages were included in the dataset of hateful content used in “Measuring the Reliability of Hate Speech Annotations: The Case of the European Refugee Crisis.” Therefore, there is insufficient evidence to answer the question.",
+      "insufficient": true,
+      "citations": [],
+      "physical_model_requests_historical": 1
+    },
+    {
+      "question_id": "b42323d60827ecf0d9e478c9a31f90940cfae975",
+      "question": "In the paper “Drug-drug Interaction Extraction via Recurrent Neural Network with Multiple Attention Layers”, How big is the evaluated dataset?",
+      "target_paper": "1705.03261",
+      "snapshot": "720fe330-c632-4de1-813c-359bf089d3f6",
+      "source_fact": {
+        "text": "The DDI corpus contains thousands of XML files",
+        "paper_char_start": 7287,
+        "paper_char_end": 7333,
+        "official_evidence": [
+          "The DDI corpus contains thousands of XML files, each of which are constructed by several records. For a sentence containing INLINEFORM0 drugs, there are INLINEFORM1 drug pairs. We replace the interested two drugs with “drug1” and “drug2” while the other drugs are replaced by “durg0”, as in BIBREF9 did. This step is called drug blinding. For example, the sentence in figure FIGREF5 generates 3 instances after drug blinding: “drug1: an increased risk of hepatitis has been reported to result from combined use of drug2 and drug0”, “drug1: an increased risk of hepatitis has been reported to result from combined use of drug0 and drug2”, “drug0: an increased risk of hepatitis has been reported to result from combined use of drug1 and drug2”. The drug blinded sentences are the instances that are fed to our model."
+        ]
+      },
+      "literal_pool": {
+        "gold_source": true,
+        "gold_paragraph": true,
+        "answer_span": true
+      },
+      "literal_reader": {
+        "gold_source": true,
+        "gold_paragraph": false,
+        "answer_span": false
+      },
+      "source_review": "LOST_AT_SELECTION",
+      "rationale": "Preprocessing gives the dataset unit, approximate count and multiple records per file. Numbers describing classification performance or an example's instances do not establish dataset size.",
+      "candidate_records": [
+        {
+          "source": "1705.03261",
+          "ordinal": 0,
+          "chunk_id": "5d212452aad479fbe19eaee4d3b0305d1afa4d89c98222b56249e38a856495b5",
+          "revision": "1078fa79-d177-4ca5-8863-348979c20857",
+          "locator": {
+            "type": "text_range",
+            "char_start": 0,
+            "char_end": 1200
+          },
+          "fusion_rank": 1,
+          "whole_score": 1.1025390625,
+          "sentence_score": -2.07958984375,
+          "reviewed_support_in_chunk": false,
+          "reader_position": 1
+        },
+        {
+          "source": "1705.03261",
+          "ordinal": 4,
+          "chunk_id": "f84283ef3fdc33c59f26c78056dd905361356b59de6f8c9dcea90f2b436ecf51",
+          "revision": "1078fa79-d177-4ca5-8863-348979c20857",
+          "locator": {
+            "type": "text_range",
+            "char_start": 4000,
+            "char_end": 5200
+          },
+          "fusion_rank": 2,
+          "whole_score": -1.369140625,
+          "sentence_score": -3.9150390625,
+          "reviewed_support_in_chunk": false,
+          "reader_position": 4
+        },
+        {
+          "source": "1705.03261",
+          "ordinal": 5,
+          "chunk_id": "c427989d77dffcbf450bbd699e34a4debb735ed1c7d72c9d7309aedd602a196c",
+          "revision": "1078fa79-d177-4ca5-8863-348979c20857",
+          "locator": {
+            "type": "text_range",
+            "char_start": 5000,
+            "char_end": 6200
+          },
+          "fusion_rank": 3,
+          "whole_score": -4.1328125,
+          "sentence_score": -6.15625,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1709.00387",
+          "ordinal": 12,
+          "chunk_id": "1f27e979e22b792c5c093178c983ea23753e389106a67467131e04cac467f421",
+          "revision": "c8de41bc-0610-472c-98bc-6a9a0a15c633",
+          "locator": {
+            "type": "text_range",
+            "char_start": 12000,
+            "char_end": 13200
+          },
+          "fusion_rank": 4,
+          "whole_score": -4.98046875,
+          "sentence_score": -6.537109375,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1606.01433",
+          "ordinal": 0,
+          "chunk_id": "2672a71c063a176d11bceccf9c3d42483daa078500cf8ba979fa255f6a4f6b12",
+          "revision": "6f70792b-4a25-4d53-802f-b54595188547",
+          "locator": {
+            "type": "text_range",
+            "char_start": 0,
+            "char_end": 1200
+          },
+          "fusion_rank": 5,
+          "whole_score": -4.77734375,
+          "sentence_score": -6.701171875,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1705.03261",
+          "ordinal": 6,
+          "chunk_id": "90f43d6c0f6c451f2b2abd2905413c3078723b79c23c3110304d4c011e3355ad",
+          "revision": "1078fa79-d177-4ca5-8863-348979c20857",
+          "locator": {
+            "type": "text_range",
+            "char_start": 6000,
+            "char_end": 7200
+          },
+          "fusion_rank": 6,
+          "whole_score": -2.6640625,
+          "sentence_score": -5.90625,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1705.03261",
+          "ordinal": 15,
+          "chunk_id": "2a71ad88f7766855d7cac558c7e3055cca7bcfe683a1b8e5772dce45d3addb98",
+          "revision": "1078fa79-d177-4ca5-8863-348979c20857",
+          "locator": {
+            "type": "text_range",
+            "char_start": 15000,
+            "char_end": 16200
+          },
+          "fusion_rank": 7,
+          "whole_score": -0.81005859375,
+          "sentence_score": -3.844482421875,
+          "reviewed_support_in_chunk": false,
+          "reader_position": 3
+        },
+        {
+          "source": "1808.03894",
+          "ordinal": 0,
+          "chunk_id": "3aebfe69338dcc509a0a0d55c7b0fda711f981bfb0b0104ec6cd86b3b6c809aa",
+          "revision": "fb9d4297-7553-4e90-8e1b-99644ae78340",
+          "locator": {
+            "type": "text_range",
+            "char_start": 0,
+            "char_end": 1200
+          },
+          "fusion_rank": 8,
+          "whole_score": -5.390625,
+          "sentence_score": -7.5,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1705.03261",
+          "ordinal": 21,
+          "chunk_id": "a428549e88540e80a340d9c03ce8e296dfc2f990ff0e8ffb5f5935e26bbee7e4",
+          "revision": "1078fa79-d177-4ca5-8863-348979c20857",
+          "locator": {
+            "type": "text_range",
+            "char_start": 21000,
+            "char_end": 22200
+          },
+          "fusion_rank": 9,
+          "whole_score": -1.1630859375,
+          "sentence_score": -5.54248046875,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1701.04653",
+          "ordinal": 17,
+          "chunk_id": "ebe57040a3641a4d37e6158b85033aa3a47375963e0fe9965b018c435aa13048",
+          "revision": "5912fe51-5853-481e-b9fc-c735ef2ac18b",
+          "locator": {
+            "type": "text_range",
+            "char_start": 17000,
+            "char_end": 18200
+          },
+          "fusion_rank": 10,
+          "whole_score": -5.78515625,
+          "sentence_score": -7.951171875,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1911.03270",
+          "ordinal": 7,
+          "chunk_id": "33e3a734309241a8ebb3a1a8712c84fd25879d32cc2a7a67eb9ab0c4869e12c5",
+          "revision": "87777314-8463-46dc-b64f-1c0609180ab4",
+          "locator": {
+            "type": "text_range",
+            "char_start": 7000,
+            "char_end": 8200
+          },
+          "fusion_rank": 11,
+          "whole_score": -3.796875,
+          "sentence_score": -4.3203125,
+          "reviewed_support_in_chunk": false,
+          "reader_position": 5
+        },
+        {
+          "source": "1701.04653",
+          "ordinal": 15,
+          "chunk_id": "eedd59af6121ec5b0899eac04610909013a08814ae7d3bd975b59c9c261981e8",
+          "revision": "5912fe51-5853-481e-b9fc-c735ef2ac18b",
+          "locator": {
+            "type": "text_range",
+            "char_start": 15000,
+            "char_end": 16200
+          },
+          "fusion_rank": 12,
+          "whole_score": -7.25390625,
+          "sentence_score": -8.240234375,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1705.03261",
+          "ordinal": 7,
+          "chunk_id": "02a8389038cc7bfee66f99df8f29b46def7752d581d7b871dd705767ae95c7f8",
+          "revision": "1078fa79-d177-4ca5-8863-348979c20857",
+          "locator": {
+            "type": "text_range",
+            "char_start": 7000,
+            "char_end": 8200
+          },
+          "fusion_rank": 13,
+          "whole_score": -4.0625,
+          "sentence_score": -6.3671875,
+          "reviewed_support_in_chunk": true,
+          "reader_position": null
+        },
+        {
+          "source": "1704.06125",
+          "ordinal": 16,
+          "chunk_id": "f5354a94b7bd580f3f7cf80d0e802d36b90055af7631965112e6642bd8f1d522",
+          "revision": "a541b0a8-b73d-4460-85d3-2fd3da76d3de",
+          "locator": {
+            "type": "text_range",
+            "char_start": 16000,
+            "char_end": 16684
+          },
+          "fusion_rank": 14,
+          "whole_score": -3.392578125,
+          "sentence_score": -5.6123046875,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1909.00100",
+          "ordinal": 10,
+          "chunk_id": "0bda06a3fde47bd9499d08bb2739155dfec7136dba6846e368862061c72e16e3",
+          "revision": "86713e50-c3a2-49e4-a631-803386521517",
+          "locator": {
+            "type": "text_range",
+            "char_start": 10000,
+            "char_end": 11200
+          },
+          "fusion_rank": 15,
+          "whole_score": -3.865234375,
+          "sentence_score": -5.1123046875,
+          "reviewed_support_in_chunk": false,
+          "reader_position": 6
+        },
+        {
+          "source": "1911.03584",
+          "ordinal": 12,
+          "chunk_id": "a757d0677234b7a45cae9bf3d45be509e4df2a1425fd02865062652af0c09156",
+          "revision": "af01f4d1-b46b-4ea0-a78c-88fae1777fd0",
+          "locator": {
+            "type": "text_range",
+            "char_start": 12000,
+            "char_end": 13200
+          },
+          "fusion_rank": 16,
+          "whole_score": -4.82421875,
+          "sentence_score": -6.642578125,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1705.03261",
+          "ordinal": 2,
+          "chunk_id": "2cdcf61bc3316ac2f6879ad4150064459a8d62c8447497a783b57305710c9901",
+          "revision": "1078fa79-d177-4ca5-8863-348979c20857",
+          "locator": {
+            "type": "text_range",
+            "char_start": 2000,
+            "char_end": 3200
+          },
+          "fusion_rank": 17,
+          "whole_score": -2.423828125,
+          "sentence_score": -6.1455078125,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1911.03270",
+          "ordinal": 22,
+          "chunk_id": "4a34ec39a04073265ebdc4b52d36acffa8591fb9e50f345f1847e60d84975b5f",
+          "revision": "87777314-8463-46dc-b64f-1c0609180ab4",
+          "locator": {
+            "type": "text_range",
+            "char_start": 22000,
+            "char_end": 23168
+          },
+          "fusion_rank": 18,
+          "whole_score": -4.10546875,
+          "sentence_score": -6.384765625,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1809.04960",
+          "ordinal": 15,
+          "chunk_id": "8c17909a6ae9a558594c0cb909270b6cf8af16feea056b7b6fff0a5e40a26a01",
+          "revision": "78556970-8b63-4723-a218-a50092833144",
+          "locator": {
+            "type": "text_range",
+            "char_start": 15000,
+            "char_end": 16200
+          },
+          "fusion_rank": 19,
+          "whole_score": -4.265625,
+          "sentence_score": -2.494384765625,
+          "reviewed_support_in_chunk": false,
+          "reader_position": 2
+        },
+        {
+          "source": "1909.03544",
+          "ordinal": 7,
+          "chunk_id": "a1351335a2b3057814cd3c6846d5fefc300398018f0110e596b121e940c45636",
+          "revision": "5a78ce0f-cbc6-4c41-9396-35258804bfe2",
+          "locator": {
+            "type": "text_range",
+            "char_start": 7000,
+            "char_end": 8200
+          },
+          "fusion_rank": 20,
+          "whole_score": -5.6171875,
+          "sentence_score": -6.984375,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        }
+      ],
+      "initial_wire_user_sha256": "b0ee942d0ed872209ae3e87e1d4566814c34864f141443c81632ccc9f81a2cc3",
+      "reader_entries": [
+        {
+          "number": 1,
+          "chunk_id": "5d212452aad479fbe19eaee4d3b0305d1afa4d89c98222b56249e38a856495b5",
+          "document_id": "37cc93aa-376a-4eaf-9a04-efd57b7a365c",
+          "document_revision_id": "1078fa79-d177-4ca5-8863-348979c20857",
+          "source": "document:37cc93aa-376a-4eaf-9a04-efd57b7a365c/revision:1078fa79-d177-4ca5-8863-348979c20857",
+          "locator": {
+            "type": "text_range",
+            "char_end": 1200,
+            "char_start": 0
+          },
+          "lifecycle": {
+            "superseded": false
+          },
+          "text": "Drug-drug Interaction Extraction via Recurrent Neural Network with Multiple Attention Layers\n\nDrug-drug interaction (DDI) is a vital information when physicians and pharmacists intend to co-administer two or more drugs. Thus, several DDI databases are constructed to avoid mistakenly combined use. In recent years, automatically extracting DDIs from biomedical text has drawn researchers' attention. However, the existing work utilize either complex feature engineering or NLP tools, both of which are insufficient for sentence comprehension. Inspired by the deep learning approaches in natural language processing, we propose a recur- rent neural network model with multiple attention layers for DDI classification. We evaluate our model on 2013 SemEval DDIExtraction dataset. The experiments show that our model classifies most of the drug pairs into correct DDI categories, which outperforms the existing NLP or deep learning methods.\n\nIntroduction\n\nDrug-drug interaction (DDI) is a situation when one drug increases or decreases the effect of another drug BIBREF0 . Adverse drug reactions may cause severe side effect, if two or more medicines were taken and their DDI were not investigated in de"
+        },
+        {
+          "number": 2,
+          "chunk_id": "8c17909a6ae9a558594c0cb909270b6cf8af16feea056b7b6fff0a5e40a26a01",
+          "document_id": "163cbd8b-5e29-44d9-9325-3c0a8e413524",
+          "document_revision_id": "78556970-8b63-4723-a218-a50092833144",
+          "source": "document:163cbd8b-5e29-44d9-9325-3c0a8e413524/revision:78556970-8b63-4723-a218-a50092833144",
+          "locator": {
+            "type": "text_range",
+            "char_end": 16200,
+            "char_start": 15000
+          },
+          "lifecycle": {
+            "superseded": false
+          },
+          "text": "unpaired data INLINEFORM3 , and paired data INLINEFORM4 .\n\nDatasets\n\nWe select a large-scale Chinese dataset BIBREF0 with millions of real comments and a human-annotated test set to evaluate our model. The dataset is collected from Tencent News, which is one of the most popular Chinese websites for news and opinion articles. The dataset consists of 198,112 news articles. Each piece of news contains a title, the content of the article, and a list of the users' comments. Following the previous work BIBREF0 , we tokenize all text with the popular python package Jieba, and filter out short articles with less than 30 words in content and those with less than 20 comments. The dataset is split into training/validation/test sets, and they contain 191,502/5,000/1,610 pieces of news, respectively. The whole dataset has a vocabulary size of 1,858,452. The average lengths of the article titles and content are 15 and 554 Chinese words. The average comment length is 17 words.\n\nImplementation Details\n\nThe hidden size of the model is 512, and the batch size is 64. The number of topics INLINEFORM0 is 100. The weight INLINEFORM1 in Eq. EQREF26 is 1.0 under the semi-supervised setting. We prune the"
+        },
+        {
+          "number": 3,
+          "chunk_id": "2a71ad88f7766855d7cac558c7e3055cca7bcfe683a1b8e5772dce45d3addb98",
+          "document_id": "37cc93aa-376a-4eaf-9a04-efd57b7a365c",
+          "document_revision_id": "1078fa79-d177-4ca5-8863-348979c20857",
+          "source": "document:37cc93aa-376a-4eaf-9a04-efd57b7a365c/revision:1078fa79-d177-4ca5-8863-348979c20857",
+          "locator": {
+            "type": "text_range",
+            "char_end": 16200,
+            "char_start": 15000
+          },
+          "lifecycle": {
+            "superseded": false
+          },
+          "text": "and test our model. The DDIs in this corpus are classified as five types. We give the definitions of these types and their example sentences, as shown in table TABREF4 . This standard dataset is made up of training set and testing set. We use the same metrics as in other drug-drug interaction extraction literature BIBREF11 , BIBREF10 , BIBREF25 , BIBREF9 , BIBREF8 , BIBREF12 : the overall precision, recall, and F1 score on testing set. INLINEFORM0 denotes the set of {False, Mechanism, Effect, Advise, Int}. The precision and recall of each INLINEFORM1 are calculated by DISPLAYFORM0 DISPLAYFORM1 \n\nThen the overall precision, recall, and F1 score are calculated by DISPLAYFORM0 \n\nBesides, we evaluate the captured feature vectors with t-SNE BIBREF26 , a visualizing and intuitive way to map a high dimensional vector into a 2 or 3-dimensional space. If the points in a low dimensional space are easy to be split, the feature vectors are believed to be more distinguishable.\n\nHyperparameter Settings and Training\n\nWe use TensorFlow BIBREF27 r0.11 to implement the proposed model. The input of each word is an ordered triple (word, relative distance from drug1, relative distance from drug2). The"
+        },
+        {
+          "number": 4,
+          "chunk_id": "f84283ef3fdc33c59f26c78056dd905361356b59de6f8c9dcea90f2b436ecf51",
+          "document_id": "37cc93aa-376a-4eaf-9a04-efd57b7a365c",
+          "document_revision_id": "1078fa79-d177-4ca5-8863-348979c20857",
+          "source": "document:37cc93aa-376a-4eaf-9a04-efd57b7a365c/revision:1078fa79-d177-4ca5-8863-348979c20857",
+          "locator": {
+            "type": "text_range",
+            "char_end": 5200,
+            "char_start": 4000
+          },
+          "lifecycle": {
+            "superseded": false
+          },
+          "text": "convolutional kernel size, the CNN can only extracted features of continuous 3 to 5 words rather than distant words. Liu et al. BIBREF8 proposed dependency-based CNN to handle distant but relevant words. Sahu et al. BIBREF12 proposed LSTM based DDI extraction approach and outperforms CNN based approach, since LSTM handles sentence as a sequence instead of slide windows. To conclude, Neural network based approaches have advantages of 1) less reliance on extra NLP toolkits, 2) simpler preprocessing procedure, 3) better performance than text analysis and machine learning methods.\n\nDrug-drug interaction extraction is a relation extraction task of natural language processing. Relation extraction aims to determine the relation between two given entities in a sentence. In recent years, attention mechanism and various neural networks are applied to relation extraction BIBREF17 , BIBREF18 , BIBREF19 , BIBREF20 , BIBREF21 . Convolutional deep neural network are utilized for extracting sentence level features in BIBREF19 . Then the sentence level features are concatenated with lexical level features, which are obtained by NLP toolkit WordNet BIBREF22 , followed by a multilayer perceptron (ML"
+        },
+        {
+          "number": 5,
+          "chunk_id": "33e3a734309241a8ebb3a1a8712c84fd25879d32cc2a7a67eb9ab0c4869e12c5",
+          "document_id": "19c16a2f-a9af-4d99-b932-d0f59d4a7b00",
+          "document_revision_id": "87777314-8463-46dc-b64f-1c0609180ab4",
+          "source": "document:19c16a2f-a9af-4d99-b932-d0f59d4a7b00/revision:87777314-8463-46dc-b64f-1c0609180ab4",
+          "locator": {
+            "type": "text_range",
+            "char_end": 8200,
+            "char_start": 7000
+          },
+          "lifecycle": {
+            "superseded": false
+          },
+          "text": "d to predict the labels of each character. We use a single dense layer as f or inference and $softmax$ to predict the probabilities of the labels $\\mathcal {L} = \\lbrace 0, 1\\rbrace $.\n\nEach character is assigned with the most probable label.\n\nThe parameters of the char-RNN are the following:\n\nEmbedding layer = 50 input dimensions;\n\nFeature layer = 64 bidirectional LSTM units;\n\nInference layer = 2 output neurons with softmax activation function mapped to each of 64 outputs.\n\nDataset\n\nIn this section we describe the datasets we used for hashtag segmentation. We experimented with Russian and English datasets to compare the performance of the char-RNN.\n\nDataset ::: Russian dataset\n\nTo our knowledge there is no available dataset for hashtag segmentation in Russian, so we faced the need to create our own dataset. Our approach to the dataset creation was twofold: the training data was created from social network texts by selecting frequent $n$-grams and generating hashtags following some hashtag patterns. The test dataset consists of real hashtags collected from vk.com (a Russian social network) and were segmented manually.\n\nWe followed the same strategy to create an English language dat"
+        },
+        {
+          "number": 6,
+          "chunk_id": "0bda06a3fde47bd9499d08bb2739155dfec7136dba6846e368862061c72e16e3",
+          "document_id": "133c6055-55b3-430e-8fc6-a10d2c9f4e40",
+          "document_revision_id": "86713e50-c3a2-49e4-a631-803386521517",
+          "source": "document:133c6055-55b3-430e-8fc6-a10d2c9f4e40/revision:86713e50-c3a2-49e4-a631-803386521517",
+          "locator": {
+            "type": "text_range",
+            "char_end": 11200,
+            "char_start": 10000
+          },
+          "lifecycle": {
+            "superseded": false
+          },
+          "text": "for mMiniBERT.\n\nHidden size = 256\n\nIntermediate layer size = 1024\n\nNum attention heads = 4\n\nLayers = 3\n\nThe Importance of Distillation\n\nTo understand the importance of distillation in training mMiniBERT, we compare it to a model with the MiniBERT structure trained from scratch using only labeled multilingual data the teacher is trained on. Table TABREF37 shows that distillation plays an important role in closing the accuracy gap between teacher and student.\n\nPer-Language Results\n\nWe show per-language F1 results of each model in Table SECREF38 and Table SECREF38 . For per-language models, no models are trained for treebanks without tuning data, and metrics of those languages are not reported. All macro-averaged results reported exclude those languages.\n\nlccccc treebankBERTMeta-LSTMmBERT mMeta-LSTM mMiniBERT\n\naf_afribooms97.6297.6397.4993.1696.08\n\nam_att3.285.63.16\n\nar_padt90.4690.5590.328990.06\n\nar_pud71.5968.9671.06\n\nbe_hse94.8191.0595.0287.5994.95\n\nbg_btb99.0198.7798.7296.4398.19\n\nca_ancora98.8498.6298.7797.5798.45\n\ncs_cac99.1799.4399.398.4698.48\n\ncs_cltt87.4887.2587.6787.6287.53\n\ncs_fictree98.6298.6398.2597.297.18\n\ncs_pdt99.0699.0798.9998.2298.61\n\ncs_pud97.1396.5397\n\nda_ddt97.599"
+        }
+      ],
+      "answer": "The evidence does not provide the size of the evaluated dataset. It only states that the model was evaluated on the 2013 SemEval DDIExtraction dataset, without reporting the number of sentences, drug pairs, or documents.",
+      "insufficient": true,
+      "citations": [],
+      "physical_model_requests_historical": 2
+    },
+    {
+      "question_id": "98daaa9eaa1e1e574be336b8933b861bfd242e5e",
+      "question": "In the paper “Hate Speech in Pixels: Detection of Offensive Memes towards Automatic Moderation”, How is each instance of the dataset annotated?",
+      "target_paper": "1910.02334",
+      "snapshot": "720fe330-c632-4de1-813c-359bf089d3f6",
+      "source_fact": {
+        "text": "weakly labeled into hate or non-hate memes, depending on their source",
+        "paper_char_start": 6315,
+        "paper_char_end": 6384,
+        "official_evidence": [
+          "We built a dataset for the task of hate speech detection in memes with 5,020 images that were weakly labeled into hate or non-hate memes, depending on their source. Hate memes were retrieved from Google Images with a downloading tool. We used the following queries to collect a total of 1,695 hate memes: racist meme (643 memes), jew meme (551 memes), and muslim meme (501 Memes). Non-hate memes were obtained from the Reddit Memes Dataset . We assumed that all memes in the dataset do not contain any hate message, as we considered that average Reddit memes do not belong to this class. A total of 3,325 non-hate memes were collected. We split the dataset into train (4266 memes) and validation (754 memes) subsets. The splits were random and the distribution of classes in the two subsets is the same. We didn't split the dataset into three subsets because of the small amount of data we had and decided to rely on the validation set metrics."
+        ]
+      },
+      "literal_pool": {
+        "gold_source": true,
+        "gold_paragraph": true,
+        "answer_span": true
+      },
+      "literal_reader": {
+        "gold_source": false,
+        "gold_paragraph": false,
+        "answer_span": false
+      },
+      "source_review": "LOST_AT_SELECTION",
+      "rationale": "The Dataset section describes weak labels assigned by collection source and the assumption made for the Reddit negatives. The reader received no passage at all from this paper.",
+      "candidate_records": [
+        {
+          "source": "1910.02334",
+          "ordinal": 0,
+          "chunk_id": "043e5173f63c0fdf48056921decb1309c8cc1a82dd95fc0b2a888bcc8a8cbbf2",
+          "revision": "3d5f4b52-2068-4edd-837d-25e172ce7875",
+          "locator": {
+            "type": "text_range",
+            "char_start": 0,
+            "char_end": 1200
+          },
+          "fusion_rank": 1,
+          "whole_score": -0.6591796875,
+          "sentence_score": -3.99365234375,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1910.02334",
+          "ordinal": 6,
+          "chunk_id": "9faffb57abad2393deac2bcf186d6ed9b6ee82327fcb68f3cd03800e64eb40ca",
+          "revision": "3d5f4b52-2068-4edd-837d-25e172ce7875",
+          "locator": {
+            "type": "text_range",
+            "char_start": 6000,
+            "char_end": 7200
+          },
+          "fusion_rank": 2,
+          "whole_score": -1.09765625,
+          "sentence_score": -2.583984375,
+          "reviewed_support_in_chunk": true,
+          "reader_position": null
+        },
+        {
+          "source": "1905.12516",
+          "ordinal": 0,
+          "chunk_id": "b06afd837db930d4a3a28908e2057b169ff676f22ae37e8c1a497a6558b2a353",
+          "revision": "df6bf6d4-2a62-4b65-bd42-35119e4b2798",
+          "locator": {
+            "type": "text_range",
+            "char_start": 0,
+            "char_end": 1200
+          },
+          "fusion_rank": 3,
+          "whole_score": -1.1376953125,
+          "sentence_score": -2.48095703125,
+          "reviewed_support_in_chunk": false,
+          "reader_position": 6
+        },
+        {
+          "source": "1701.08118",
+          "ordinal": 2,
+          "chunk_id": "4c5b950a2cea32fa0ef174886452f1c0c212a927561c142f4538e93c538384cb",
+          "revision": "169a7963-aa3a-408d-8739-56c42cf5e7e5",
+          "locator": {
+            "type": "text_range",
+            "char_start": 2000,
+            "char_end": 3200
+          },
+          "fusion_rank": 4,
+          "whole_score": 0.51220703125,
+          "sentence_score": -1.552490234375,
+          "reviewed_support_in_chunk": false,
+          "reader_position": 2
+        },
+        {
+          "source": "1905.12516",
+          "ordinal": 6,
+          "chunk_id": "a93f71e5e1d910bc0b8f9e70a305753cf9b4638bf8ba05b11268f1a6b2cf1bb9",
+          "revision": "df6bf6d4-2a62-4b65-bd42-35119e4b2798",
+          "locator": {
+            "type": "text_range",
+            "char_start": 6000,
+            "char_end": 7200
+          },
+          "fusion_rank": 5,
+          "whole_score": -0.20068359375,
+          "sentence_score": -2.229248046875,
+          "reviewed_support_in_chunk": false,
+          "reader_position": 5
+        },
+        {
+          "source": "1905.12516",
+          "ordinal": 5,
+          "chunk_id": "67881934ecd16287955c31ed599960e4b57417c89e425cca963bb831e6d56d99",
+          "revision": "df6bf6d4-2a62-4b65-bd42-35119e4b2798",
+          "locator": {
+            "type": "text_range",
+            "char_start": 5000,
+            "char_end": 6200
+          },
+          "fusion_rank": 6,
+          "whole_score": -1.39453125,
+          "sentence_score": -3.990234375,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1907.11499",
+          "ordinal": 11,
+          "chunk_id": "fef117677891a9d9a861ef4b3a4377fe665c94060328fb208e37c3b510b93e35",
+          "revision": "4c33c84b-35da-4243-ac55-5c72be372c6a",
+          "locator": {
+            "type": "text_range",
+            "char_start": 11000,
+            "char_end": 12200
+          },
+          "fusion_rank": 7,
+          "whole_score": -3.150390625,
+          "sentence_score": -1.983154296875,
+          "reviewed_support_in_chunk": false,
+          "reader_position": 4
+        },
+        {
+          "source": "1908.10275",
+          "ordinal": 3,
+          "chunk_id": "5732ed2f3406bc5bf5d21a4f11006aa70d0f1b898518c9d53cce02e0911a5156",
+          "revision": "c3b720ce-55b6-4c60-987b-93fb4aedf621",
+          "locator": {
+            "type": "text_range",
+            "char_start": 3000,
+            "char_end": 4200
+          },
+          "fusion_rank": 8,
+          "whole_score": -4.62890625,
+          "sentence_score": -3.509765625,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1905.12516",
+          "ordinal": 8,
+          "chunk_id": "acb7d29fb769662260f813cd45db0bc3f255cac69ce6591121d5ac16d2d80bea",
+          "revision": "df6bf6d4-2a62-4b65-bd42-35119e4b2798",
+          "locator": {
+            "type": "text_range",
+            "char_start": 8000,
+            "char_end": 9200
+          },
+          "fusion_rank": 9,
+          "whole_score": 0.63671875,
+          "sentence_score": -0.7880859375,
+          "reviewed_support_in_chunk": false,
+          "reader_position": 1
+        },
+        {
+          "source": "1911.03270",
+          "ordinal": 5,
+          "chunk_id": "02555870057bdec6a058ff2de81ed4ed996bea31eadd8398eea916a815edf70e",
+          "revision": "87777314-8463-46dc-b64f-1c0609180ab4",
+          "locator": {
+            "type": "text_range",
+            "char_start": 5000,
+            "char_end": 6200
+          },
+          "fusion_rank": 10,
+          "whole_score": -3.765625,
+          "sentence_score": -4.67578125,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "2001.05493",
+          "ordinal": 8,
+          "chunk_id": "8c75a4d0be0d3f543c44a68d5b092039ce539554051b38df7c32475098261bff",
+          "revision": "bc48117e-6422-4d9e-9abd-371e02366f8b",
+          "locator": {
+            "type": "text_range",
+            "char_start": 8000,
+            "char_end": 9200
+          },
+          "fusion_rank": 11,
+          "whole_score": -3.455078125,
+          "sentence_score": -4.2646484375,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1701.08118",
+          "ordinal": 3,
+          "chunk_id": "8ab41f1e00751fcf4720086ab7a966e53a1b0602a5b8509df17208b77654a444",
+          "revision": "169a7963-aa3a-408d-8739-56c42cf5e7e5",
+          "locator": {
+            "type": "text_range",
+            "char_start": 3000,
+            "char_end": 4200
+          },
+          "fusion_rank": 12,
+          "whole_score": -0.64013671875,
+          "sentence_score": -3.765380859375,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1910.02334",
+          "ordinal": 10,
+          "chunk_id": "dbcfc2d55e00f3fb63faf2b52b3ff46ab888da72292618e20caf1e6dadfd5834",
+          "revision": "3d5f4b52-2068-4edd-837d-25e172ce7875",
+          "locator": {
+            "type": "text_range",
+            "char_start": 10000,
+            "char_end": 11200
+          },
+          "fusion_rank": 13,
+          "whole_score": -1.2734375,
+          "sentence_score": -5.5390625,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1905.12516",
+          "ordinal": 9,
+          "chunk_id": "01d567282f4c1d86dcefaa635b8ae29d43aae8a19c638338160d66b11e503570",
+          "revision": "df6bf6d4-2a62-4b65-bd42-35119e4b2798",
+          "locator": {
+            "type": "text_range",
+            "char_start": 9000,
+            "char_end": 10200
+          },
+          "fusion_rank": 14,
+          "whole_score": -1.4375,
+          "sentence_score": -3.244140625,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1808.09409",
+          "ordinal": 2,
+          "chunk_id": "de2502742bbace0843ce084c61ecdf6aa84478b6f6f2d0552e1892d7edf2d443",
+          "revision": "58700f11-35ea-47e0-9106-82c3971b8936",
+          "locator": {
+            "type": "text_range",
+            "char_start": 2000,
+            "char_end": 3200
+          },
+          "fusion_rank": 15,
+          "whole_score": -6.24609375,
+          "sentence_score": -6.384765625,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1910.02334",
+          "ordinal": 2,
+          "chunk_id": "f859f2cdada3ce0a76079652281c5ab2fa189c2f9fefdba5e9fb84ea74d4dd3a",
+          "revision": "3d5f4b52-2068-4edd-837d-25e172ce7875",
+          "locator": {
+            "type": "text_range",
+            "char_start": 2000,
+            "char_end": 3200
+          },
+          "fusion_rank": 16,
+          "whole_score": -1.7041015625,
+          "sentence_score": -6.25439453125,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1908.02322",
+          "ordinal": 0,
+          "chunk_id": "e11d135d6a775ffbf59b7ebfb03810bafb0b6cb3ecc196d34da5e57ad11cc49f",
+          "revision": "1293fdb1-5505-4102-a8db-adbea276e824",
+          "locator": {
+            "type": "text_range",
+            "char_start": 0,
+            "char_end": 1200
+          },
+          "fusion_rank": 17,
+          "whole_score": -3.884765625,
+          "sentence_score": -2.75048828125,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1907.11499",
+          "ordinal": 20,
+          "chunk_id": "52ae2e0c854a6cecbc14126a6596972bf1f6feeea4c37efdfeffd6596fc90d52",
+          "revision": "4c33c84b-35da-4243-ac55-5c72be372c6a",
+          "locator": {
+            "type": "text_range",
+            "char_start": 20000,
+            "char_end": 21200
+          },
+          "fusion_rank": 18,
+          "whole_score": -8.046875,
+          "sentence_score": -8.4375,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1910.02334",
+          "ordinal": 4,
+          "chunk_id": "d42fa675bddd5d3553635e64109886161cf88032d740f0f1bd125bda4791a5b7",
+          "revision": "3d5f4b52-2068-4edd-837d-25e172ce7875",
+          "locator": {
+            "type": "text_range",
+            "char_start": 4000,
+            "char_end": 5200
+          },
+          "fusion_rank": 19,
+          "whole_score": -3.65234375,
+          "sentence_score": -6.021484375,
+          "reviewed_support_in_chunk": false,
+          "reader_position": null
+        },
+        {
+          "source": "1912.07025",
+          "ordinal": 25,
+          "chunk_id": "494a2d1a7e571ea27beec0866810f52bc0b68ad9f4d08c2c7326fa07ebee6af0",
+          "revision": "08c93bba-7c62-4ddf-9bb6-aac38ddb26af",
+          "locator": {
+            "type": "text_range",
+            "char_start": 25000,
+            "char_end": 26200
+          },
+          "fusion_rank": 20,
+          "whole_score": -2.263671875,
+          "sentence_score": -1.584716796875,
+          "reviewed_support_in_chunk": false,
+          "reader_position": 3
+        }
+      ],
+      "initial_wire_user_sha256": "3846e86e0e947e0d3ccd0c0ae084ed611e30c7880da1776365241c6763359c7f",
+      "reader_entries": [
+        {
+          "number": 1,
+          "chunk_id": "acb7d29fb769662260f813cd45db0bc3f255cac69ce6591121d5ac16d2d80bea",
+          "document_id": "f1d5779f-77a8-40a6-be71-43778a8a636e",
+          "document_revision_id": "df6bf6d4-2a62-4b65-bd42-35119e4b2798",
+          "source": "document:f1d5779f-77a8-40a6-be71-43778a8a636e/revision:df6bf6d4-2a62-4b65-bd42-35119e4b2798",
+          "locator": {
+            "type": "text_range",
+            "char_end": 9200,
+            "char_start": 8000
+          },
+          "lifecycle": {
+            "superseded": false
+          },
+          "text": "in prior work which considered all uses of particular terms as hate speech, crowdworkers were instructed not to make their decisions based upon any words or phrases in particular, no matter how offensive, but on the overall tweet and the inferred context. The dataset consists of 24,783 tweets annotated as hate speech, offensive language, or neither.\n\n BIBREF11 selected tweets using ten keywords and phrases related to anti-black racism, Islamophobia, homophobia, anti-semitism, and sexism. The authors developed a coding scheme to distinguish between potentially offensive content and serious harassment, such as threats or hate speech. After an initial round of coding, where tweets were assigned to a number of different categories, they simplified their analysis to include a binary harassment or non-harassment label for each tweet. The dataset consists of 20,360 tweets, each hand-labeled by the authors.\n\n BIBREF12 constructed a dataset intended to better approximate a real-world setting where abuse is relatively rare. They began with a random sample of tweets then augmented it by adding tweets containing one or more terms from the Hatebase lexicon and that had negative sentiment. They"
+        },
+        {
+          "number": 2,
+          "chunk_id": "4c5b950a2cea32fa0ef174886452f1c0c212a927561c142f4538e93c538384cb",
+          "document_id": "b2137b06-4c44-4e19-b5f5-c7333a6a22e9",
+          "document_revision_id": "169a7963-aa3a-408d-8739-56c42cf5e7e5",
+          "source": "document:b2137b06-4c44-4e19-b5f5-c7333a6a22e9/revision:169a7963-aa3a-408d-8739-56c42cf5e7e5",
+          "locator": {
+            "type": "text_range",
+            "char_end": 3200,
+            "char_start": 2000
+          },
+          "lifecycle": {
+            "superseded": false
+          },
+          "text": "on task: given an utterance, determine whether or not it contains hate speech. Training a classifier requires a large amount of data that is unambiguously hate speech. This data is typically obtained by manually annotating a set of texts based on whether a certain element contains hate speech.\n\nThe reliability of the human annotations is essential, both to ensure that the algorithm can accurately learn the characteristics of hate speech, and as an upper bound on the expected performance BIBREF1 , BIBREF2 . As a preliminary step, six annotators rated 469 tweets. We found that agreement was very low (see Section 3). We then carried out group discussions to find possible reasons. They revealed that there is considerable ambiguity in existing definitions. A given statement may be considered hate speech or not depending on someone's cultural background and personal sensibilities. The wording of the question may also play a role.\n\nWe decided to investigate the issue of reliability further by conducting a more comprehensive study across a large number of annotators, which we present in this paper.\n\nOur contribution in this paper is threefold:\n\nHate Speech\n\nFor the purpose of building a cl"
+        },
+        {
+          "number": 3,
+          "chunk_id": "494a2d1a7e571ea27beec0866810f52bc0b68ad9f4d08c2c7326fa07ebee6af0",
+          "document_id": "e6ce64d7-9b26-439f-ac0a-eecacc023d73",
+          "document_revision_id": "08c93bba-7c62-4ddf-9bb6-aac38ddb26af",
+          "source": "document:e6ce64d7-9b26-439f-ac0a-eecacc023d73/revision:08c93bba-7c62-4ddf-9bb6-aac38ddb26af",
+          "locator": {
+            "type": "text_range",
+            "char_end": 26200,
+            "char_start": 25000
+          },
+          "lifecycle": {
+            "superseded": false
+          },
+          "text": "of layout annotations will play a crucial role in reducing the overall complexity for OCR and other tasks such as word-spotting, style-and-content based retrieval. In the long-term, we intend to expand the dataset, not only numerically but also in terms of layout, script and language diversity. As a significant contribution, we have also adapted a deep-network based instance segmentation framework custom modified for fully automatic layout parsing. Given the general nature of our framework, advances in instance segmentation approaches can be leveraged thereby improving performance over time. Our proposed web-based annotator system, although designed for Indic manuscripts, is flexible, and could be reused for similar manuscripts from Asian subcontinent. We intend to expand the capabilities of our annotator system in many useful ways. For instance, the layout estimated by our deep-network could be provided to annotators for correction, thus reducing annotation efforts. Finally, we plan to have our dataset, instance segmentation system and annotator system publicly available. This would enable large-scale data collection and automated analysis efforts for Indic as well as other histo"
+        },
+        {
+          "number": 4,
+          "chunk_id": "fef117677891a9d9a861ef4b3a4377fe665c94060328fb208e37c3b510b93e35",
+          "document_id": "582c00b1-2c06-49a5-a9cc-5cc8d8a80208",
+          "document_revision_id": "4c33c84b-35da-4243-ac55-5c72be372c6a",
+          "source": "document:582c00b1-2c06-49a5-a9cc-5cc8d8a80208/revision:4c33c84b-35da-4243-ac55-5c72be372c6a",
+          "locator": {
+            "type": "text_range",
+            "char_end": 12200,
+            "char_start": 11000
+          },
+          "lifecycle": {
+            "superseded": false
+          },
+          "text": "les. For this, we created a third test set from the New York Times, in addition to our Wikipedia-based English and Chinese datasets. For all three corpora, we randomly sampled two documents for each domain, and then from each document, we sampled one long paragraph or a few consecutive short paragraphs containing 8–12 sentences. Amazon Mechanical Turkers were asked to read these sentences and assign a domain based on the seven labels used in this paper (multiple labels were allowed). Participants were provided with domain definitions. We obtained five annotations per sentence and adopted the majority label as the sentence's domain label. We obtained two annotated datasets for English (Wiki-en and NYT-en) and one for Chinese (Wiki-zh), consisting of 122/14, 111/11, and 117/12 sentences/documents each.\n\nWord-level domain evaluation is more challenging; taken out-of-context, individual words might be uninformative or carry meanings compatible with multiple domains. Expecting crowdworkers to annotate domain labels word-by-word with high confidence, might be therefore problematic. In order to reduce annotation complexity, we opted for a retrieval-style task for word evaluation. Specific"
+        },
+        {
+          "number": 5,
+          "chunk_id": "a93f71e5e1d910bc0b8f9e70a305753cf9b4638bf8ba05b11268f1a6b2cf1bb9",
+          "document_id": "f1d5779f-77a8-40a6-be71-43778a8a636e",
+          "document_revision_id": "df6bf6d4-2a62-4b65-bd42-35119e4b2798",
+          "source": "document:f1d5779f-77a8-40a6-be71-43778a8a636e/revision:df6bf6d4-2a62-4b65-bd42-35119e4b2798",
+          "locator": {
+            "type": "text_range",
+            "char_end": 7200,
+            "char_start": 6000
+          },
+          "lifecycle": {
+            "superseded": false
+          },
+          "text": "tasets. They find that classifiers trained on these data tend to perform worse when female identity terms used, indicating gender bias in performance. We build upon this work by auditing a series of abusive language and hate speech detection datasets for racial biases. We evaluate how classification models trained on these datasets perform in the field, comparing their predictions for tweets written in language used by whites or African-Americans.\n\nHate speech and abusive language datasets\n\nWe focus on Twitter, the most widely used data source in abusive language research. We use all available datasets where tweets are labeled as various types of abuse and are written in English. We now briefly describe each of these datasets in chronological order.\n\n BIBREF9 collected 130k tweets containing one of seventeen different terms or phrases they considered to be hateful. They then annotated a sample of these tweets themselves, using guidelines inspired by critical race theory. These annotators were then reviewed by “a 25 year old woman studying gender studies and a nonactivist feminist” to check for bias. This dataset consists of 16,849 tweets labeled as either racism, sexism, or neither"
+        },
+        {
+          "number": 6,
+          "chunk_id": "b06afd837db930d4a3a28908e2057b169ff676f22ae37e8c1a497a6558b2a353",
+          "document_id": "f1d5779f-77a8-40a6-be71-43778a8a636e",
+          "document_revision_id": "df6bf6d4-2a62-4b65-bd42-35119e4b2798",
+          "source": "document:f1d5779f-77a8-40a6-be71-43778a8a636e/revision:df6bf6d4-2a62-4b65-bd42-35119e4b2798",
+          "locator": {
+            "type": "text_range",
+            "char_end": 1200,
+            "char_start": 0
+          },
+          "lifecycle": {
+            "superseded": false
+          },
+          "text": "Racial Bias in Hate Speech and Abusive Language Detection Datasets\n\nTechnologies for abusive language detection are being developed and applied with little consideration of their potential biases. We examine racial bias in five different sets of Twitter data annotated for hate speech and abusive language. We train classifiers on these datasets and compare the predictions of these classifiers on tweets written in African-American English with those written in Standard American English. The results show evidence of systematic racial bias in all datasets, as classifiers trained on them tend to predict that tweets written in African-American English are abusive at substantially higher rates. If these abusive language detection systems are used in the field they will therefore have a disproportionate negative impact on African-American social media users. Consequently, these systems may discriminate against the groups who are often the targets of the abuse we are trying to detect.\n\nIntroduction\n\nRecent work has shown evidence of substantial bias in machine learning systems, which is typically a result of bias in the training data. This includes both supervised BIBREF0 , BIBREF1 , BIBREF"
+        }
+      ],
+      "answer": "The provided evidence does not include the paper “Hate Speech in Pixels: Detection of Offensive Memes towards Automatic Moderation,” so it is insufficient to determine how each dataset instance is annotated.",
+      "insufficient": true,
+      "citations": [],
+      "physical_model_requests_historical": 1
+    }
+  ]
+}

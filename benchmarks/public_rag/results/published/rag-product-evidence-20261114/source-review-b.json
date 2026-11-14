@@ -1,0 +1,105 @@
+[
+  {
+    "id": "4904ef32a8f84cf2f53b1532ccf7aa77273b3d19",
+    "cohort_index": 18,
+    "paper": "1908.06809",
+    "ruling": "unanswerable",
+    "expected": "No numerical margin against a specified comparator in the available article text. Up to five accuracy points or eight BLEU points refer to variability across retrainings.",
+    "quotes": [
+      "On Figure FIGREF25 one can see how new proposed architectures compare with another state of the art approaches in terms of BLEU between output and human-written reformulations.",
+      "Namely, accuracy can change up to 5 percentage points, whereas BLEU can vary up to 8 points."
+    ],
+    "reason": "Figure reference gives the human-reference BLEU comparison but supplies no numerical margin in paper_text."
+  },
+  {
+    "id": "a60030cfd95d0c10b1f5116c594d50cb96c87ae6",
+    "cohort_index": 20,
+    "paper": "2001.01798",
+    "ruling": "unanswerable",
+    "expected": "3,400 hours is duration of the speech recordings. Training elapsed time and number of epochs are not reported.",
+    "quotes": [
+      "For both training and adaptation, close-talk data consisting of 3400 hours of Microsoft live US English Cortana utterances are collected through a number of deployed speech services including voice search and SMD.",
+      "We first train an AED model predicting 34k mixed units with 3400 hours close-talk training data and it ground-truth labels for E2E ASR as in BIBREF32, BIBREF33, BIBREF34."
+    ],
+    "reason": "Reviewed training, adaptation and experimental methods. No wall-clock duration or epoch count for training the new model."
+  },
+  {
+    "id": "071bcb4b054215054f17db64bfd21f17fd9e1a80",
+    "cohort_index": 22,
+    "paper": "2003.08553",
+    "ruling": "answerable",
+    "expected": "It extracts QA pairs into a searchable knowledge base. The bot forwards the query to the WebApp, which reranks retrieved pairs. Multi-turn ranking incorporates the previous answer or the candidate’s parent QAs.",
+    "quotes": [
+      "QnaMaker Management APIs: This is used for the extraction of Question-Answer (QA) pairs from semi-structured content.",
+      "Azure Search Index: Stores the KB with questions and answers as indexable columns, thus acting as a retrieval layer.",
+      "QnaMaker WebApp: Acts as a layer between the Bot, Management APIs, and Azure Search Index.",
+      "Bot: Calls the WebApp with the User's query to get results.",
+      "$Query_{modified}$ = Query + Previous Answer; For instance, if user query is “yes\" and the previous answer is “do you want to know about XYZ\", the current query becomes “do you want to know about XYZ yes\".",
+      "Candidate QnA pairs are appended with its parent Questions and Answers; no contextual information is used from the user's query."
+    ],
+    "reason": "Architecture and contextual ranking sections directly describe query answering and multi-turn behavior."
+  },
+  {
+    "id": "736c74d2f61ac8d3ac31c45c6510a36c767a5d6d",
+    "cohort_index": 23,
+    "paper": "1804.06385",
+    "ruling": "answerable",
+    "expected": "It uses coarse property-set/sentence supervision to discover unknown fine word/property alignments. Training their joint representation and similarity reveals individual instance contributions.",
+    "quotes": [
+      "We assume that words from the text are positive labels for some property-values but we do not know which ones.",
+      "The intuition is that by learning a high similarity score for a property set ${{\\cal P}}$ and sentence pair $s$ , we will also learn the contribution of individual elements (i.e., words and property-values) to the overall similarity score."
+    ],
+    "reason": "The paper describes multi-instance learning in its data-to-text setting and specifies what is observed and what it learns."
+  },
+  {
+    "id": "045dbdbda5d96a672e5c69442e30dbf21917a1ee",
+    "cohort_index": 26,
+    "paper": "1909.00124",
+    "ruling": "unanswerable",
+    "expected": "The model alternates two CNNs for noisy labels and clean-label prediction and models noise via a transition matrix. A comparison to GAN training would require an external source.",
+    "quotes": [
+      "The key idea is to train two CNNs alternately, one for addressing the input noisy labels and the other for predicting `clean' labels.",
+      "Proposition 1 Noisy labels are flipped from clean labels by an unknown noise transition matrix."
+    ],
+    "reason": "The paper defines its own learning roles and loss, but does not describe GANs or compare the objectives."
+  },
+  {
+    "id": "052d19b456f1795acbb8463312251869cc5b38da",
+    "cohort_index": 30,
+    "paper": "2002.09637",
+    "ruling": "answerable",
+    "expected": "Cognate clustering uses B-Cubed precision, recall and F1. Tree reconstruction uses generalized quartet distance against an expert tree.",
+    "quotes": [
+      "To evaluate the cognate detection, I choose to use B-Cubed algorithm proposed by BIBREF25.",
+      "The algorithm is completely based on clusters in way of precision, recall and F1-score.",
+      "To test if the phylogenetic tree generation module is working good or not, I utilize Generalized Quartet Distance (GQD) matrix, which compares the tree from historical linguistic experts and the one generated by machine."
+    ],
+    "reason": "Both stages explicitly list their separate evaluation criteria."
+  },
+  {
+    "id": "57fdb0f6cd91b64a000630ecb711550941283091",
+    "cohort_index": 31,
+    "paper": "1709.05563",
+    "ruling": "ambiguous",
+    "expected": "The paper identifies challenges such as coder bias and validating unsupervised findings, and notes ethical limits on information targeting. It does not define a single approach or enumerate its potential harms.",
+    "quotes": [
+      "Validation of unsupervised learning results is less straight-forward than with supervised learning.",
+      "Online coders receive small specific tasks to reduce individual biases.",
+      "Consequently, within ethical boundaries, we may also be able to target information more efficiently."
+    ],
+    "reason": "The risk depends on whether the question means human coding, unsupervised validation or targeted messaging. Accept a qualified answer tied to an explicit scope."
+  },
+  {
+    "id": "7ccf2392422b44ede35a3fbd85bbb1da25adf795",
+    "cohort_index": 36,
+    "paper": "1602.03661",
+    "ruling": "unanswerable",
+    "expected": "Human languages and an online word-association experiment provide empirical reference data. Prior approaches are contrasted conceptually, but no competing named model is run as a benchmark.",
+    "quotes": [
+      "A thorough review of the attempts presented in literature is far from the scope of the present paper.",
+      "We have quantified in particular the notions of combinatoriality and compositionality as observed in real languages as well as in a large-scale dataset produced in the framework of a web-based word association experiment BIBREF1 .",
+      "We have paralleled this empirical analysis with a modeling scheme, the Blending Game, whose aim is that of identifying the main determinants for the emergence of duality of patterning in language."
+    ],
+    "reason": "Reviewed methods and discussion: changing parameters of the Blending Game and comparing with empirical observations does not identify another model used in a direct evaluation."
+  }
+]
