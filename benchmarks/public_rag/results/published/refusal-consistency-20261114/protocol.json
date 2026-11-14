@@ -1,0 +1,1180 @@
+{
+  "frozen_at_utc": "2026-11-14T07:41:10.782631+00:00",
+  "source_baseline_commit": "46362e9245c7a708d015f1bd2a462d850cb0e118",
+  "endpoint": "POST /api/v1/knowledge/query",
+  "dataset": "QASPER v0.3 official TRAIN only; paired development evaluation",
+  "train_sha256": "9458bfe76074a8fa8d1685af02bcc73537aa6d338ad20591dfaff1946bc88bf4",
+  "exposure_sha256_lf": "3e9a9ad0af85aec1800366a6c964bc76cafa1ab6ee9c7108197f47f10c4eb15e",
+  "acceptance_sha256_lf": "d126e1e3501c6dbd06d46fc4b683cb57667f5847b8f7a20318448cfe88fea9d7",
+  "semantic_rubric_sha256_lf": "d4243dcca58499dc00a3d15cb5a456de2301f7f85517ec2ba9093bf90ed8c1a0",
+  "whole_answer_rubric_sha256_lf": "ab4c2fe49ca3dbd444dbb07d057a9f99cdfeabec5d260c2663df5acd6876ea55",
+  "sample_salt": "qasper-refusal-consistency-20261114/sample-v1|",
+  "order_salt": "qasper-refusal-consistency-20261114/order-v1|",
+  "selection": "Ascending SHA-256(sample salt + official question ID). Exclude historical or reserved papers and questions; require one distinct normalized question wording and one question per paper, paper text <=30,000 characters, and exactly one annotation. A positive has one 2–100-character extractive answer in one <=1,200-character verbatim evidence paragraph. A negative has official unanswerable=true. Stop at 30 positives and 20 negatives.",
+  "schedule": "Independent questions sorted by SHA-256(order salt + official question ID). Alternate A/B first separately within each answerability stratum (15/15 answerable, 10/10 negative). One first HTTP dispatch per question per arm. Two arms share the 50-paper snapshot; retain every failure and capture internal provider calls separately.",
+  "historical_controls": "The 1,001-response and Python controls use the former 16-paper library; the Vietnamese platform control uses the former 48-paper library. Six additional first HTTP requests.",
+  "answer_scoring": "Two independently recorded arm-blind judgments and masked dispute resolution. Official negative labels are retained despite evidence conflicts. Score full correctness, positive false refusals, correct negative refusals, whole-answer claim support, and each returned citation. Use the frozen rubric and acceptance document.",
+  "corpora": {
+    "independent": [
+      "1606.01433",
+      "1701.03214",
+      "1701.04653",
+      "1701.08118",
+      "1704.06125",
+      "1705.03261",
+      "1706.01723",
+      "1709.00387",
+      "1709.01256",
+      "1802.05574",
+      "1804.10686",
+      "1805.07966",
+      "1807.00868",
+      "1807.08666",
+      "1808.03894",
+      "1808.09409",
+      "1809.04960",
+      "1810.05320",
+      "1812.08879",
+      "1901.00603",
+      "1903.03467",
+      "1905.01976",
+      "1905.11037",
+      "1905.11901",
+      "1905.12516",
+      "1907.08501",
+      "1907.11499",
+      "1908.01060",
+      "1908.02322",
+      "1908.06725",
+      "1908.10275",
+      "1909.00100",
+      "1909.00153",
+      "1909.00542",
+      "1909.03544",
+      "1909.08090",
+      "1909.11467",
+      "1909.13375",
+      "1910.02334",
+      "1911.03270",
+      "1911.03584",
+      "1911.06747",
+      "1912.02761",
+      "1912.07025",
+      "2001.00582",
+      "2001.05493",
+      "2002.00317",
+      "2002.01359",
+      "2003.08132",
+      "2004.03034"
+    ],
+    "historical": [
+      "1707.06939",
+      "1812.07023",
+      "2002.00750",
+      "1905.01715",
+      "1910.11471",
+      "2004.02451",
+      "1904.02357",
+      "1911.13066",
+      "1707.00995",
+      "2003.06044",
+      "1810.01570",
+      "1612.09113",
+      "1909.07512",
+      "1910.01363",
+      "1910.04601",
+      "1606.04631"
+    ],
+    "historical_vietnam": [
+      "2002.02427",
+      "1903.04715",
+      "2001.06354",
+      "1704.08960",
+      "1911.12569",
+      "1708.09609",
+      "1910.07181",
+      "1709.10217",
+      "1702.00500",
+      "1909.00997",
+      "1905.10810",
+      "2003.08529",
+      "2001.10179",
+      "1808.02113",
+      "2001.07209",
+      "1905.10238",
+      "1804.02233",
+      "1603.07044",
+      "1911.03648",
+      "1706.01450",
+      "1911.00473",
+      "1910.08418",
+      "1909.06522",
+      "1611.04361",
+      "1811.02076",
+      "1811.00625",
+      "1909.09986",
+      "1910.12129",
+      "1911.03243",
+      "1908.10322",
+      "1810.07091",
+      "1910.10869",
+      "1604.00117",
+      "2004.02393",
+      "2002.06675",
+      "1805.09055",
+      "1910.10324",
+      "1908.06606",
+      "1708.00077",
+      "1705.01991",
+      "1901.02534",
+      "1909.05358",
+      "1909.00430",
+      "2004.04315",
+      "1810.10797",
+      "2003.05377",
+      "1909.00279",
+      "1903.00058"
+    ]
+  },
+  "rendered_paper_utf8_sha256": {
+    "1603.07044": "828ac38a1b3f631db91ef4628ebb4b9f7b44f00a3f2c5c70093a2762ec5b9352",
+    "1604.00117": "c66919018a5e77e7715306fe5d916d9472a07da0346eb5a8cd4766c5bba1e17c",
+    "1606.01433": "a7f72966dbe4b6cc4a2490e623cc57afc4767b559dbabeff1263ffa1638a4c41",
+    "1606.04631": "20b68bf37c5ba3d5368c29983e073e30d28361c9fd75d0b1317f358492bf37b5",
+    "1611.04361": "2aee4ef70ac7cdcb692799fae1252ba5703d9f935b729dfe039a64192da935e1",
+    "1612.09113": "e4689123ef9d6fc677f01dc9dc20019c5c96502599634b026dd2360b75bf5ac2",
+    "1701.03214": "fce70dcf8afd120d8420e839a74bde9c1fee10c9fbe79d432119736adf4c5780",
+    "1701.04653": "6ca965d4a1fb5aa9988fe1182eed88a161c18827c99bd7deb34beecabac5812f",
+    "1701.08118": "cddcdc587574d4bc69bc4ab70b66fc0117b710d6a44dce21a974469ec49cce74",
+    "1702.00500": "62e9ff845fd34e2d1b1ba675b87c9bf51746dd38dda922bcc00d10ed6a4d1e73",
+    "1704.06125": "7a9c3cf0aa71c0cef2450d976836587ca67d4023bc1dec617f5666cd2a1e93ba",
+    "1704.08960": "f7b20a6afad8a5d033ba901579e36f71ed60613cb101850448747d085df604ce",
+    "1705.01991": "0684c7e47226ad059f9c758acbcce61eef5eb8b9609ec1a7254a26b227788850",
+    "1705.03261": "b01a75e789841081a1146ff4c25f27124d0d61d95fa2c0c63728f6a6b0811cb8",
+    "1706.01450": "1b227f9bc1ec486bc13bc54413f015023d451a0562de397d03100cafb2353def",
+    "1706.01723": "6836c0590bfd0309d49f975faf5c3681e4d6ae5a13836eb00b616ea64eb8f73c",
+    "1707.00995": "a07610edb10079679458fc5725b49d35edac9939cf820391bdbb2a1c53a2ec6a",
+    "1707.06939": "308d4192f7926ed24975401c6e65989f93d2fdbc8a7bf0fa6d391c031bf40e00",
+    "1708.00077": "461771cd15e85d269d4e66044c21cb40888fcb6b0dd36fd3c589a8da2cf7066b",
+    "1708.09609": "195ae33b75c861350cd468708c11c64f37462ccd7eeea04039a67b8a902a1c58",
+    "1709.00387": "5826e74e7da232561ef6a376476f77568b2847d11557909892d954c8508bb708",
+    "1709.01256": "27966b08d553057b2014345cb18eaf7e57245495adfb1ab665e4253065626a7c",
+    "1709.10217": "b877e2de67ca9a581e89c56c3477e461ed8b4ee0f1b000123f9c2f88d89ff8d3",
+    "1802.05574": "f7975a1e6f858efbf8b51cfdc2b05d6336c80e1b634e467726aae73dd66a74b5",
+    "1804.02233": "1c90b93cadadaad1f713842d51614ecbfd0f34ed370dfad8c100a65cd504a8ea",
+    "1804.10686": "abb6dd88e0239e1ff45381c5e4a51738c211c8cc4bf3763e447690663ebe4432",
+    "1805.07966": "2cf5f1e204cbf21fc810e81f402ef070651b98c906272e7b2dae3cd6d25a365f",
+    "1805.09055": "8e3165162627cb53fb6b18313801dd204c44b7d5186e00975771ca23fd29c966",
+    "1807.00868": "db7c7fc19cb0e5bda5860d547e1094d38928794c712ec215cbe24f8b7fe6f6c5",
+    "1807.08666": "e99737bfc285335a6923b4fa697d6fbe43fe1df91f8c74244e36cb8688d87906",
+    "1808.02113": "769d3efc508c563591117d8fc1136140fa0680377d0e6f84e93e514b9eced68b",
+    "1808.03894": "48e0d9bccad563961bf91eb1250bc5e07419d185741f432dfe049184c8912cc0",
+    "1808.09409": "b1940362065097678fe10d30d5aa823336b45010c5d7f45c65dc0a20b985f052",
+    "1809.04960": "b864e38d09e8ebde3d91273b121058c31191f10397f8ccf4dd286ebad63870aa",
+    "1810.01570": "128a7588de5ef6187fa40f78638cd9c136be7eb9a270ef1c0355feda3000f402",
+    "1810.05320": "566abaf58a577f7080fadf8cdc80e75bad70012c495f6804be5c5a04932dd36f",
+    "1810.07091": "894b292a5985ffce31ff4d9f3d8e7bf7731863f81b9326f8feb14e2955a8a080",
+    "1810.10797": "e0b795188764bfe7cac05c8ac75135aac0faf7a762ef4d5c83b5931bac29a33b",
+    "1811.00625": "f4c800c71bf5f5aa9fb873b841a44016e3ae882ed0031bd975f1dabe4f01a02e",
+    "1811.02076": "3908522b3f3131104e75ba080647d3c2b1215c046fa19a82336ea372468956c1",
+    "1812.07023": "d5c998c8202ceda75ce8a72bbc0162eb70ecb280afc26f06a1c629314b319788",
+    "1812.08879": "8666a5e6590191a8212d859dfd58ebc56702ec08cdb7abd1da0da86800628459",
+    "1901.00603": "f535d0142e7a76e660a7f5d1dc7c992e571df3026238e494c0987e04f86baa96",
+    "1901.02534": "cc89bcaea95935cfebe7bee8ace290837de4390f9763fb0a07992fd4e5963092",
+    "1903.00058": "120d751391b3556df3eb3d27b8a7b3ad191113283690b65b4807dd5bd87bdf95",
+    "1903.03467": "7b612e35d07eae989fcf5e9dcc92208c167d25f9343b6bca15b792834418867c",
+    "1903.04715": "c07c9b08ef0537656907e8f71a13126b6aa5ae68a61b91a58bc22a914a969c08",
+    "1904.02357": "0e4aa204a149ce4ae1a407f0bfa3151d11c85f463e41e3a1c414b986c13b4e5b",
+    "1905.01715": "88efb3f98220541521126ac93aea3b7e006297e509fac1cd24af462b89ff4e76",
+    "1905.01976": "b9d3c4a21658a3a3f92e6719a87a585222668da3f3b9b1cf7bc1138ea42fd1ca",
+    "1905.10238": "7186695e5c36a88c180f86ada0a35e7bde438d046d08c3ec2ceca36e3ce2d21a",
+    "1905.10810": "8d349fcdc91f0a7ee74b1cc6a4aa740a52c8e193ce4d9e6973fb67d0368f690b",
+    "1905.11037": "60cce8b54651273738d927944fde7c88eeb9e361bfcf04e67a36dd74ecdd5ffc",
+    "1905.11901": "0f3d9fba898418f2f0878576a54616e188e270ed68b01cf9ce7112d022a30c1f",
+    "1905.12516": "4b1671a05032d586cadbb9509ccf8bd19c7e0275912b0417b9238528165e9b3c",
+    "1907.08501": "c059191b52e9a39f9024ca236ada61cc789eab0fba0a84449c0a2c9897a3c090",
+    "1907.11499": "783aac370f6d2acc7d82db5ccc05850a2daee9ac7e1bb4553107bd1f00b2c6f6",
+    "1908.01060": "a19777ff347edda2bf88ef338b59ebd4b91f21e149e158471beb777a97eb0da0",
+    "1908.02322": "85765aabe899d9cef5176703c8a8bc1a86fe5a3722f0ce35882725b678fcf0ab",
+    "1908.06606": "39ca5649f31fed6c0335f32f2b2750959fda53db9b218658b2831e86fd54ff71",
+    "1908.06725": "6944b9d29967b46c18a81ac471b34d3b8393695f78b28e30d145fd4d5c556d12",
+    "1908.10275": "1bbe2d73300b755702ad539ee73aa48a14e16540d58bb562c132309595811bc4",
+    "1908.10322": "c0d2b5f53e368df0dc7f75add42c6a1c5d3702eb743baa81edb5eba561d941be",
+    "1909.00100": "4f238d8ea22929308fabae007019e61a2f3036d877c2c848acc895f4bb62bb9c",
+    "1909.00153": "c29eea6800d81d35851902fd936f0021f984d7966c3f0ddc65524239ab4735d9",
+    "1909.00279": "5e6f7ca77aa68f003a77e471a93aa28d1b9cdfab323d46021358f8e0503d083f",
+    "1909.00430": "e321cfac6c3cb7dd557c121c4785de22976a6f24f08502e2e10464b49a373040",
+    "1909.00542": "9e84361cff57b5d34b0f83e4511d5c3f436fe3d7c9512cab76b1441bc048c1d0",
+    "1909.00997": "ae5b4c04a2f52018639975bbeaa30ee4780fde93cd45a2625044add265acc280",
+    "1909.03544": "aee107f4d13014f2c1905a244d649d3780aa31adecac3fc31559c86b2edd0c51",
+    "1909.05358": "b8a48642ec4836c76975edc277e29bb93ee74561610fe654591257e4c7b86b48",
+    "1909.06522": "dfc8b1bbd644e22d5b279690959d6ba7bb9af9184935c949d9f7c3fdf7808ca5",
+    "1909.07512": "5500bf499d0566e39e45da5fab79ef9cdbcdaffdd32dbb64b9131cf546317401",
+    "1909.08090": "166f0ebd3b7007f3a8890de0862f60d5018a09eca7ae55896900a65b7e5ad9cd",
+    "1909.09986": "d7a5891da24b32b7d6fc06c69f188d75373c5023222460602bab6335903b21ac",
+    "1909.11467": "a95ef0179fcc117de9ccdc33c420cc5bb9bf0ce54695cc5257a66babc995ef76",
+    "1909.13375": "56ce7bf9c0a8bf95bb29bcda6552786c0063beea1e56fa0bc4911bb44f57deb1",
+    "1910.01363": "934886b4e6226878d40c22f1dca25ea47739a140bbb5f098114e0088ed1db196",
+    "1910.02334": "7b379a06a6e653a3448c8e28db87ed9e503eaa2e891cf6f7d3234f4f8e5e1a98",
+    "1910.04601": "1be4a5e49b5234d93bba5587b396048fee1ca6edda0cc631c49a16d66c46b62a",
+    "1910.07181": "3edffd14e4b33e7098789c737965ff7b878200452e5c43d90fd7607df8f0f47d",
+    "1910.08418": "442bbf55d99d8b4a11ca27ea04764699b7aae954569b0a726b46f48735dfed8b",
+    "1910.10324": "3231c3b34bb65eb94ead0a9d633951dcd02885c23546a6175a5c9c92d7df946d",
+    "1910.10869": "abc2479850a767db62c0c05684958efc6932046d875c16054f7c074670e50801",
+    "1910.11471": "a16f7585636a1a9caf47e60303e495e13fc142bb55ed7ff6360df735814a841b",
+    "1910.12129": "fb1fa12131b3406a6402df06e618e720d43b0a8f6a0d96b794c162d89d27939c",
+    "1911.00473": "12726dc962952a85d7e8d61075cd010911b7c39517fa08fbe8f4f8b0825661ef",
+    "1911.03243": "5ee9a28f63114ef4df50776a32608414a60b2d0bdeaacc107b2ba0a1f2256d6e",
+    "1911.03270": "e5cd6418848136d8862bd202c215887cf5d26520d11dcc7c815a7b2fed845620",
+    "1911.03584": "b47f00166ccbbd7b79fe155d3590e8cb15849bc517b9fcd8af3561aa0519c503",
+    "1911.03648": "c42e90f5ce3e0cc8a9c602297add4737afb91536d3e8ad279f25009eb66e5190",
+    "1911.06747": "003934be174090be3f97efa427cc56d3983088d8fe7f474a720915c6a9336fa7",
+    "1911.12569": "b51caab79476397400834b51742988f7af58b37c3676feaf3b914685645c5630",
+    "1911.13066": "4d70f13f3cc46322eb5ded194d77222ea2446fa3d894635ea14f1c4565e24ceb",
+    "1912.02761": "23f4b7ecf453657208a9aa275b4e5cfc9a02116b1c35a09c8bf9757b132b800b",
+    "1912.07025": "c791da11d621275896f8ef9dc96fa10094def98b442e3d51ae292bd3baff40ad",
+    "2001.00582": "2bcac527435e50caa7112aafaf3a994b33240d5aecc923546717e046e93c3b83",
+    "2001.05493": "149d14eeb888105f3f656351c0cdb80ed6b5436cdbca6df96bd14edcaa2c195f",
+    "2001.06354": "8a2cea97f029d020a0a8c06a7ef0980c018211dba354d1a0f5098fe235433e0d",
+    "2001.07209": "d774e07c87e39f30a007d3cd00fdc6bd7b548f1cd4d44e37b7b5ee1b5cc08d71",
+    "2001.10179": "8e8323a81ee74a26f114b4cef7afc4af386a7f55f4daa335b8390cd094f16de2",
+    "2002.00317": "467aabb1d1240e70c84d7c6b4d1dc2c316fb34daaa80dc7760fa660c797c1162",
+    "2002.00750": "20b1396edb55eca9213f6246b7b41859f6b02873ce09a080e7e060ab317f6609",
+    "2002.01359": "ecbf8577d69d9bc6756ebbdd396166554b8db86667a049137d7f7001cf49ede2",
+    "2002.02427": "33e3dffd2d593f768fad90b6bf40681ecf140f6d5ea8a8ab01a046d3d630e7e9",
+    "2002.06675": "e0c1f8f15504e5b7366e6fa4aefc8821f70f303f5f9bc2bd758f9f77cd4e3986",
+    "2003.05377": "c6477ca9a66325bc4bbdfef84934a58b23b6d1751ce51150222dfa1e8f40662e",
+    "2003.06044": "3bb47651017e1cae63ac3355b4d246ad94680ec93a3cf0b2c4dae47f74c0d3c0",
+    "2003.08132": "dd3fb1f313682e85b8f43da37e333cf3c74ebb7f169c9a57d71b46882b8166cf",
+    "2003.08529": "041f933526ba2a6fd07b9141737f2895e9c8fdcb86eb3e2a070a140b3c82ec20",
+    "2004.02393": "c3b7220f5a0dbe8bec776e596d549b7f20e2a54a0c70e827a9b65bcd4a44b8cf",
+    "2004.02451": "2de30f5a2809665737cef2f7884be3a18b91a78d06944c5ec0bba1e542452295",
+    "2004.03034": "b53578a6fc38b6102301179f10aa616ceeea151815939575f12c75aa61089092",
+    "2004.04315": "6b357b9451385d29a3f15fa1a57d0e332aaf1e6e44c596e8307ffc3a9de12613"
+  },
+  "cases": [
+    {
+      "id": "e12674f0466f8c0da109b6076d9939b30952c7da",
+      "scope": "independent",
+      "query": "In the paper “Important Attribute Identification in Knowledge Graph”, What do you use to calculate word/sub-word embeddings",
+      "gold_documents": [
+        "1810.05320"
+      ],
+      "negative": false,
+      "answers": [
+        "FastText"
+      ],
+      "evidence": [
+        "Evaluating FastText, GloVe and word2vec, we show that compared to other word representation learning algorithms, the FastText performs best. We sample and analyze the category attributes and find that many self-filled attributes contain misspellings. The FastText algorithm represents words by a sum of its character n-grams and it is much robust against problems like misspellings. In summary, FastText has greater advantages in dealing with natural language corpus usually with spelling mistakes."
+      ],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "id": "9a94dcee17cdb9a39d39977191e643adece58dfc",
+      "scope": "independent",
+      "query": "In the paper “Open Information Extraction on Scientific Text: An Evaluation”, Were the OpenIE systems more accurate on some scientific disciplines than others?",
+      "gold_documents": [
+        "1802.05574"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "id": "0428e06f0550e1063a64d181210795053a8e6436",
+      "scope": "independent",
+      "query": "In the paper “Harry Potter and the Action Prediction Challenge from Natural Language”, How well does a simple bag-of-words baseline do?",
+      "gold_documents": [
+        "1905.11037"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "arm_order": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "id": "5f0bb32d70ee8e4c4c59dc5c193bc0735fd751cc",
+      "scope": "independent",
+      "query": "In the paper “Schema-Guided Dialogue State Tracking Task at DSTC8”, Where is the dataset from?",
+      "gold_documents": [
+        "2002.01359"
+      ],
+      "negative": false,
+      "answers": [
+        "dialogue simulator"
+      ],
+      "evidence": [
+        "Our data collection setup uses a dialogue simulator to generate dialogue outlines first and then paraphrase them to obtain natural utterances. Using a dialogue simulator offers us multiple advantages. First, it ensures the coverage of a large variety of dialogue flows by filtering out similar flows in the simulation phase, thus creating a much diverse dataset. Second, simulated dialogues do not require manual annotation, as opposed to a Wizard-of-Oz setup BIBREF17, which is a common approach utilized in other datasets BIBREF0. It has been shown that such datasets suffer from substantial annotation errors BIBREF18. Thirdly, using a simulator greatly simplifies the data collection task and instructions as only paraphrasing is needed to achieve a natural dialogue. This is particularly important for creating a large dataset spanning multiple domains."
+      ],
+      "arm_order": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "id": "b6a4ab009e6f213f011320155a7ce96e713c11cf",
+      "scope": "independent",
+      "query": "In the paper “Classification Betters Regression in Query-based Multi-document Summarisation Techniques for Question Answering: Macquarie University at BioASQ7b”, How did the author's work rank among other submissions on the challenge?",
+      "gold_documents": [
+        "1909.00542"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "id": "b546f14feaa639e43aa64c799dc61b8ef480fb3d",
+      "scope": "independent",
+      "query": "In the paper “Measuring Social Bias in Knowledge Graph Embeddings”, How are these biases found?",
+      "gold_documents": [
+        "1912.02761"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "arm_order": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "id": "4f12b41bd3bb2610abf7d7835291496aa69fb78c",
+      "scope": "independent",
+      "query": "In the paper “An Empirical Comparison of Simple Domain Adaptation Methods for Neural Machine Translation”, How did they use the domain tags?",
+      "gold_documents": [
+        "1701.03214"
+      ],
+      "negative": false,
+      "answers": [
+        "Appending the domain tag “<2domain>\" to the source sentences of the respective corpora"
+      ],
+      "evidence": [
+        "The multi domain method is originally motivated by BIBREF14 , which uses tags to control the politeness of NMT translations. The overview of this method is shown in the dotted section in Figure 2 . In this method, we simply concatenate the corpora of multiple domains with two small modifications: a. Appending the domain tag “<2domain>\" to the source sentences of the respective corpora. This primes the NMT decoder to generate sentences for the specific domain. b. Oversampling the smaller corpus so that the training procedure pays equal attention to each domain."
+      ],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "id": "b69ffec1c607bfe5aa4d39254e0770a3433a191b",
+      "scope": "independent",
+      "query": "In the paper “Unsupervised Machine Commenting with Neural Variational Topic Model”, What news comment dataset was used?",
+      "gold_documents": [
+        "1809.04960"
+      ],
+      "negative": false,
+      "answers": [
+        "Chinese dataset BIBREF0"
+      ],
+      "evidence": [
+        "We select a large-scale Chinese dataset BIBREF0 with millions of real comments and a human-annotated test set to evaluate our model. The dataset is collected from Tencent News, which is one of the most popular Chinese websites for news and opinion articles. The dataset consists of 198,112 news articles. Each piece of news contains a title, the content of the article, and a list of the users' comments. Following the previous work BIBREF0 , we tokenize all text with the popular python package Jieba, and filter out short articles with less than 30 words in content and those with less than 20 comments. The dataset is split into training/validation/test sets, and they contain 191,502/5,000/1,610 pieces of news, respectively. The whole dataset has a vocabulary size of 1,858,452. The average lengths of the article titles and content are 15 and 554 Chinese words. The average comment length is 17 words."
+      ],
+      "arm_order": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "id": "ed4fb6bce855ca932548689e45fde21f26a71035",
+      "scope": "independent",
+      "query": "In the paper “Coarse-grain Fine-grain Coattention Network for Multi-evidence Question Answering”, What is coattention?",
+      "gold_documents": [
+        "1901.00603"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "id": "9d9f6cc0f026f7168fcea461baff4b8a925a185f",
+      "scope": "independent",
+      "query": "In the paper “Developing a Fine-Grained Corpus for a Less-resourced Language: the case of Kurdish”, How is the corpus normalized?",
+      "gold_documents": [
+        "1909.11467"
+      ],
+      "negative": false,
+      "answers": [
+        "by replacing zero-width-non-joiner (ZWNJ) BIBREF2 and manually verifying the orthography"
+      ],
+      "evidence": [
+        "KTC is composed of 31 educational textbooks published from 2011 to 2018 in various topics by the MoE. We received the material from the MoE partly in different versions of Microsoft Word and partly in Adobe InDesign formats. In the first step, we categorized each textbook based on the topics and chapters. As the original texts were not in Unicode, we converted the content to Unicode. This step was followed by a pre-processing stage where the texts were normalized by replacing zero-width-non-joiner (ZWNJ) BIBREF2 and manually verifying the orthography based on the reference orthography of the Kurdistan Region of Iraq. In the normalization process, we did not remove punctuation and special characters so that the corpus can be easily adapted our current task and also to future tasks where the integrity of the text may be required."
+      ],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "id": "a61732774faf30bab15bf944b2360ec4710870c1",
+      "scope": "independent",
+      "query": "In the paper “Char-RNN and Active Learning for Hashtag Segmentation”, What are the predefined morpho-syntactic patterns used to filter the training data?",
+      "gold_documents": [
+        "1911.03270"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "arm_order": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "id": "6adfa9eee76b96953a76c03356bf41d8a9378851",
+      "scope": "independent",
+      "query": "In the paper “Multilingual Speech Recognition with Corpus Relatedness Sampling”, By how much do they, on average, outperform the baseline multilingual model on 16 low-resource tasks?",
+      "gold_documents": [
+        "1908.01060"
+      ],
+      "negative": false,
+      "answers": [
+        "1.6% lower phone error rate on average"
+      ],
+      "evidence": [
+        "To evaluate our sampling strategy, we compare it with the pretrained model and fine-tuned model on 16 different corpora. The results show that our approach outperforms those baselines on all corpora: it achieves 1.6% lower phone error rate on average. Additionally, we demonstrate that our corpus-level embeddings are able to capture the characteristics of each corpus, especially the language and domain information. The main contributions of this paper are as follows:"
+      ],
+      "arm_order": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "id": "4319a13a6c4a9494ccb465509c9d4265f63dc9b5",
+      "scope": "independent",
+      "query": "In the paper “Variational Cross-domain Natural Language Generation for Spoken Dialogue Systems”, How is some information lost in the RNN-based generation models?",
+      "gold_documents": [
+        "1812.08879"
+      ],
+      "negative": false,
+      "answers": [
+        "the generated sentences often did not include all desired attributes."
+      ],
+      "evidence": [
+        "Natural language generation (NLG) is an essential component of an SDS. Given a semantic representation (SR) consisting of a dialogue act and a set of slot-value pairs, the generator should produce natural language containing the desired information. Traditionally NLG was based on templates BIBREF3 , which produce grammatically-correct sentences that contain all desired information. However, the lack of variation of these sentences made these systems seem tedious and monotonic. Trainable generators BIBREF4 , BIBREF5 can generate several sentences for the same SR, but the dependence on pre-defined operations limits their potential. Corpus-based approaches BIBREF6 , BIBREF7 learn to generate natural language directly from data without pre-defined rules. However, they usually require alignment between the sentence and the SR. Recently, Wen et al. wensclstm15 proposed an RNN-based approach, which outperformed previous methods on several metrics. However, the generated sentences often did not include all desired attributes."
+      ],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "id": "7befb7a8354fca9d2a94e3fd4364625c98067ebb",
+      "scope": "independent",
+      "query": "In the paper “Citation Text Generation”, How was the evaluation corpus collected?",
+      "gold_documents": [
+        "2002.00317"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "id": "a9def7958eac7b9a780403d4f136927f756bab83",
+      "scope": "independent",
+      "query": "In the paper “Tag-based Multi-Span Extraction in Reading Comprehension”, What is the previous model that attempted to tackle multi-span questions as a part of its design?",
+      "gold_documents": [
+        "1909.13375"
+      ],
+      "negative": false,
+      "answers": [
+        "MTMSN BIBREF4"
+      ],
+      "evidence": [
+        "MTMSN BIBREF4 is the first, and only model so far, that specifically tried to tackle the multi-span questions of DROP. Their approach consisted of two parts. The first was to train a dedicated categorical variable to predict the number of spans to extract. The second was to generalize the single-span head method of extracting a span, by utilizing the non-maximum suppression (NMS) algorithm BIBREF7 to find the most probable set of non-overlapping spans. The number of spans to extract was determined by the aforementioned categorical variable."
+      ],
+      "arm_order": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "id": "f6e5febf2ea53ec80135bbd532d6bb769d843dd8",
+      "scope": "independent",
+      "query": "In the paper “Gender Representation in Open Source Speech Resources”, What natural languages are represented in the speech resources studied?",
+      "gold_documents": [
+        "2003.08132"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "arm_order": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "id": "1a06b7a2097ebbad0afc787ea0756db6af3dadf4",
+      "scope": "independent",
+      "query": "In the paper “ASR-free CNN-DTW keyword spotting using multilingual bottleneck features for almost zero-resource languages”, What languages are considered?",
+      "gold_documents": [
+        "1807.08666"
+      ],
+      "negative": false,
+      "answers": [
+        "Bulgarian, Czech, French, German, Korean, Polish, Portuguese, Russian, Thai, Vietnamese"
+      ],
+      "evidence": [
+        "A 6-layer 10-language TDNN was trained on the GlobalPhone corpus, also using 40-high resolution MFCC features as input, as described in BIBREF20 . For speaker adaptation, a 100-dimensional i-vector was appended to the the MFCC input features. The TDNN was trained with a block-softmax, with the hidden layers shared across all languages and a separate output layer for each language. Each of the six hidden layers had 625 dimensions, and was followed by a 39-dimensional bottleneck layer with ReLU activations and batch normalisation. Training was accomplished using the Kaldi Babel receipe using 198 hours of data in 10 languages (Bulgarian, Czech, French, German, Korean, Polish, Portuguese, Russian, Thai, Vietnamese) from GlobalPhone."
+      ],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "id": "2efdcebebeb970021233553104553205ce5d6567",
+      "scope": "independent",
+      "query": "In the paper “Interpreting Recurrent and Attention-Based Neural Models: a Case Study on Natural Language Inference”, How many layers are there in their model?",
+      "gold_documents": [
+        "1808.03894"
+      ],
+      "negative": false,
+      "answers": [
+        "two LSTM layers"
+      ],
+      "evidence": [
+        "Instead of considering individual dimensions of the gating signals, we aggregate them to consider their norm, both for the signal and for its saliency. Note that ESIM models have two LSTM layers, the first (input) LSTM performs the input encoding and the second (inference) LSTM generates the representation for inference."
+      ],
+      "arm_order": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "id": "03502826f4919e251edba1525f84dd42f21b0253",
+      "scope": "independent",
+      "query": "In the paper “TextKD-GAN: Text Generation using KnowledgeDistillation and Generative Adversarial Networks”, How much better in terms of JSD measure did their model perform?",
+      "gold_documents": [
+        "1905.01976"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "id": "f197e0f61f7980c64a76a3a9657762f1f0edb65b",
+      "scope": "independent",
+      "query": "In the paper “Racial Bias in Hate Speech and Abusive Language Detection Datasets”, Any other bias may be detected?",
+      "gold_documents": [
+        "1905.12516"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "arm_order": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "id": "7486c9d9e6c407c0c3bc012405d689dbee072327",
+      "scope": "independent",
+      "query": "In the paper “Measuring the Reliability of Hate Speech Annotations: The Case of the European Refugee Crisis”, What languages are were included in the dataset of hateful content?",
+      "gold_documents": [
+        "1701.08118"
+      ],
+      "negative": false,
+      "answers": [
+        "German"
+      ],
+      "evidence": [
+        "As previously mentioned, there is no German hate speech corpus available for our needs, especially not for the very recent topic of the refugee crisis in Europe. We therefore had to compile our own corpus. We used Twitter as a source as it offers recent comments on current events. In our study we only considered the textual content of tweets that contain certain keywords, ignoring those that contain pictures or links. This section provides a detailed description of the approach we used to select the tweets and subsequently annotate them."
+      ],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "id": "3f85cc5be84479ba668db6d9f614fedbff6d77f1",
+      "scope": "independent",
+      "query": "In the paper “Semantic Document Distance Measures and Unsupervised Document Revision Detection”, How large is the Wikipedia revision dump dataset?",
+      "gold_documents": [
+        "1709.01256"
+      ],
+      "negative": false,
+      "answers": [
+        "eight GB"
+      ],
+      "evidence": [
+        "The Wikipedia revision dumps that were previously introduced by Leskovec et al. leskovec2010governance contain eight GB (compressed size) revision edits with meta data."
+      ],
+      "arm_order": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "id": "ef07ec34433221d4da79d5923fb00d8ac446b92c",
+      "scope": "independent",
+      "query": "In the paper “Adversarial Learning with Contextual Embeddings for Zero-resource Cross-lingual Classification and NER”, How do they quantify alignment between the embeddings of a document and its translation?",
+      "gold_documents": [
+        "1909.00153"
+      ],
+      "negative": false,
+      "answers": [
+        "median cosine similarity"
+      ],
+      "evidence": [
+        "We construct the embeddings for each document using BERT models finetuned on MLDoc. We mean-pool each document embedding to create a single vector per document. We then calculate the cosine similarity between the embeddings for the English document and its translation. In Table TABREF21 , we observe that the median cosine similarity increases dramatically with adversarial training, which suggests that the embeddings became more language-independent."
+      ],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "id": "b42323d60827ecf0d9e478c9a31f90940cfae975",
+      "scope": "independent",
+      "query": "In the paper “Drug-drug Interaction Extraction via Recurrent Neural Network with Multiple Attention Layers”, How big is the evaluated dataset?",
+      "gold_documents": [
+        "1705.03261"
+      ],
+      "negative": false,
+      "answers": [
+        "contains thousands of XML files, each of which are constructed by several records"
+      ],
+      "evidence": [
+        "The DDI corpus contains thousands of XML files, each of which are constructed by several records. For a sentence containing INLINEFORM0 drugs, there are INLINEFORM1 drug pairs. We replace the interested two drugs with “drug1” and “drug2” while the other drugs are replaced by “durg0”, as in BIBREF9 did. This step is called drug blinding. For example, the sentence in figure FIGREF5 generates 3 instances after drug blinding: “drug1: an increased risk of hepatitis has been reported to result from combined use of drug2 and drug0”, “drug1: an increased risk of hepatitis has been reported to result from combined use of drug0 and drug2”, “drug0: an increased risk of hepatitis has been reported to result from combined use of drug1 and drug2”. The drug blinded sentences are the instances that are fed to our model."
+      ],
+      "arm_order": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "id": "13f7d50b3b8b0b97d90401eeb0a4e97c9eab3a76",
+      "scope": "independent",
+      "query": "In the paper “Czech Text Processing with Contextual Embeddings: POS Tagging, Lemmatization, Parsing and NER”, What data is the Prague Dependency Treebank built on?",
+      "gold_documents": [
+        "1909.03544"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "id": "d5105a6a6d5d1931b0729dcf15ca862d6eac770f",
+      "scope": "independent",
+      "query": "In the paper “Community Question Answering Platforms vs. Twitter for Predicting Characteristics of Urban Neighbourhoods”, How many demographic attributes they try to predict?",
+      "gold_documents": [
+        "1701.04653"
+      ],
+      "negative": false,
+      "answers": [
+        "62"
+      ],
+      "evidence": [
+        "Social media data has been used in many domains to find links to the real-world attributes. Data generated on QA platforms, however, has not been used in the past for predicting such attributes. In this paper, we use discussions on Yahoo! Answers QA platform to make predictions of demographic attribute of city neighbourhoods. Previous work in this domain has mainly focused on predicting the deprivation index of areas BIBREF4 . In this work, we look at a wide range of attributes and report prediction results on 62 demographic attributes. Additionally, work in urban prediction uses geolocation-based platforms such as Twitter. QA data that has been utilised in this paper does not include geolocation information. Utilising such data presents its own challenges."
+      ],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "id": "7ac0cec79c8c2b1909b0a1cc0d4646fce09884ee",
+      "scope": "independent",
+      "query": "In the paper “On the Relationship between Self-Attention and Convolutional Layers”, Is there a way of converting existing convolution layers into self-attention to perform very same convolution?",
+      "gold_documents": [
+        "1911.03584"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "arm_order": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "id": "61404466cf86a21f0c1783ce535eb39a01528ce8",
+      "scope": "independent",
+      "query": "In the paper “A Unified System for Aggression Identification in English Code-Mixed and Uni-Lingual Texts”, What are the key differences in communication styles between Twitter and Facebook?",
+      "gold_documents": [
+        "2001.05493"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "id": "827b5bd215599623a3125afe331b56b89b42bf09",
+      "scope": "independent",
+      "query": "In the paper “Excitation-based Voice Quality Analysis and Modification”, What large corpus is used for experiments?",
+      "gold_documents": [
+        "2001.00582"
+      ],
+      "negative": false,
+      "answers": [
+        "The De7 database"
+      ],
+      "evidence": [
+        "The goal of this part is to highlight the differences present in the excitation when a given speaker produces different voice qualities. The De7 database used for this study was designed by Marc Schroeder as one of the first attempts of creating diphone databases for expressive speech synthesis BIBREF2. The database contains three voice qualities (modal, soft and loud) uttered by a German female speaker, with about 50 minutes of speech available for each voice quality. In Section SECREF1, the glottal flow estimation method and glottal flow parametrization used in this work are briefly presented. The harmonicity of speech is studied via the maximum voiced frequency in Section SECREF3. As an important perceptual charactersitic, spectral tilt is analyzed in Section SECREF4. Section SECREF6 compares the so-called eigenresiduals BIBREF3 of the different voice qualities. Finally Section SECREF8 quantifies the separability between the three voice qualities for the extracted excitation features."
+      ],
+      "arm_order": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "id": "a48cc6d3d322a7b159ff40ec162a541bf74321eb",
+      "scope": "independent",
+      "query": "In the paper “An Unsupervised Word Sense Disambiguation System for Under-Resourced Languages”, What evaluation is conducted?",
+      "gold_documents": [
+        "1804.10686"
+      ],
+      "negative": false,
+      "answers": [
+        "Word Sense Induction & Disambiguation"
+      ],
+      "evidence": [
+        "We conduct our experiments using the evaluation methodology of SemEval 2010 Task 14: Word Sense Induction & Disambiguation BIBREF5 . In the gold standard, each word is provided with a set of instances, i.e., the sentences containing the word. Each instance is manually annotated with the single sense identifier according to a pre-defined sense inventory. Each participating system estimates the sense labels for these ambiguous words, which can be viewed as a clustering of instances, according to sense labels. The system's clustering is compared to the gold-standard clustering for evaluation."
+      ],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "id": "65e2f97f2fe8eb5c2fa41cb95c02b577e8d6e5ee",
+      "scope": "independent",
+      "query": "In the paper “Towards Personalized Dialog Policies for Conversational Skill Discovery”, How did they measure effectiveness?",
+      "gold_documents": [
+        "1911.06747"
+      ],
+      "negative": false,
+      "answers": [
+        "number of dialogs that resulted in launching a skill divided by total number of dialogs"
+      ],
+      "evidence": [
+        "We trained the DQN agent using an $\\epsilon $-greedy policy with $\\epsilon $ decreasing linearly from 1 to $0.1$ over $100,000$ steps. Additionally, we tuned a window size to include previous dialog turns as input and set $\\gamma $ to $0.9$. We ran the method 30 times for $150,000$ steps, and in each run, after every 10,000 steps, we sampled $3,000$ dialog episodes with no exploration to evaluate the performance. The optimal parameters were found using Hyperopt BIBREF23 (see Appendix B). Figure FIGREF9 shows the simulation results during training. The Y-axis in the figure is the success rate of the agent (measured in terms of number of dialogs that resulted in launching a skill divided by total number of dialogs), and the X-axis is the number of learning steps. Given our choice of reward function, the increase in success rate is indicative of the agent learning to improve its policy over time. Furthermore, the RL agent outperformed the rule-based agent with average success rate of $68.00\\% (\\pm 2\\%$) in simulation."
+      ],
+      "arm_order": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "id": "20be7a776dfda0d3c9dc10270699061cb9bc8297",
+      "scope": "independent",
+      "query": "In the paper “Indiscapes: Instance Segmentation Networks for Layout Parsing of Historical Indic Manuscripts”, What language(s) are the manuscripts written in?",
+      "gold_documents": [
+        "1912.07025"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "arm_order": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "id": "676c874266ee0388fe5b9a75e1006796c68c3c13",
+      "scope": "independent",
+      "query": "In the paper “A General-Purpose Tagger with Convolutional Neural Networks”, How many parameters does their CNN have?",
+      "gold_documents": [
+        "1706.01723"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "id": "536e4a39b654b78228bf55fd09d1b433e0dae447",
+      "scope": "independent",
+      "query": "In the paper “Aff2Vec: Affect--Enriched Distributional Word Representations”, Is the affect of a word affected by context?",
+      "gold_documents": [
+        "1805.07966"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "arm_order": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "id": "3c16d4cf5dc23223980d9c0f924cb9e4e6943f13",
+      "scope": "independent",
+      "query": "In the paper “Align, Mask and Select: A Simple Method for Incorporating Commonsense Knowledge into Language Representation Models”, How do they select answer candidates for their QA task?",
+      "gold_documents": [
+        "1908.06725"
+      ],
+      "negative": false,
+      "answers": [
+        "AMS method."
+      ],
+      "evidence": [
+        "Each training sample is generated by three steps: align, mask and select, which we call as AMS method. Each sample in the dataset consists of a question and several candidate answers, which has the same form as the CommonsenseQA dataset. An example of constructing one training sample by masking concept $_2$ is shown in Table 2 ."
+      ],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "id": "441886f0497dc84f46ed8c32e8fa32983b5db42e",
+      "scope": "independent",
+      "query": "In the paper “DpgMedia2019: A Dutch News Dataset for Partisanship Detection”, What examples of applications are mentioned?",
+      "gold_documents": [
+        "1908.02322"
+      ],
+      "negative": false,
+      "answers": [
+        "partisan news detector"
+      ],
+      "evidence": [
+        "This dataset is aimed to contribute to developing a partisan news detector. There are several ways that the dataset can be used to devise the system. For example, it is possible to train the detector using publisher-level labels and test with article-level labels. It is also possible to use semi-supervised learning and treat the publisher-level part as unsupervised, or use only the article-level part. We also released the raw survey data so that new mechanisms to decide the article-level labels can be devised."
+      ],
+      "arm_order": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "id": "4fa2faa08eeabc09d78d89aaf0ea86bb36328172",
+      "scope": "independent",
+      "query": "In the paper “MIT-QCRI Arabic Dialect Identification System for the 2017 Multi-Genre Broadcast Challenge”, How do they explore dialect variability?",
+      "gold_documents": [
+        "1709.00387"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "id": "39492338e27cb90bf1763e4337c2f697cf5082ba",
+      "scope": "independent",
+      "query": "In the paper “BB_twtr at SemEval-2017 Task 4: Twitter Sentiment Analysis with CNNs and LSTMs”, How many CNNs and LSTMs were ensembled?",
+      "gold_documents": [
+        "1704.06125"
+      ],
+      "negative": false,
+      "answers": [
+        "10 CNNs and 10 LSTMs"
+      ],
+      "evidence": [
+        "To reduce variance and boost accuracy, we ensemble 10 CNNs and 10 LSTMs together through soft voting. The models ensembled have different random weight initializations, different number of epochs (from 4 to 20 in total), different set of filter sizes (either INLINEFORM0 , INLINEFORM1 or INLINEFORM2 ) and different embedding pre-training algorithms (either Word2vec or FastText)."
+      ],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "id": "0cfaca6f3f33ebdb338c5f991f6a7a33ff33844d",
+      "scope": "independent",
+      "query": "In the paper “Brundlefly at SemEval-2016 Task 12: Recurrent Neural Networks vs. Joint Inference for Clinical Temporal Information Extraction”, Which structured prediction approach do they adopt for temporal entity extraction?",
+      "gold_documents": [
+        "1606.01433"
+      ],
+      "negative": false,
+      "answers": [
+        "DeepDive BIBREF1"
+      ],
+      "evidence": [
+        "We examine a deep-learning approach to sequence labeling using a vanilla recurrent neural network (RNN) with word embeddings, as well as a joint inference, structured prediction approach using Stanford's knowledge base construction framework DeepDive BIBREF1 . Our DeepDive application outperformed the RNN and scored similarly to 2015's best-in-class extraction systems, even though it only used a small set of context window and dictionary features. Extraction performance, however lagged this year's best system submission. For document creation time relations, we again use DeepDive. Our system examined a simple temporal distant supervision rule for labeling time expressions and linking them to nearby event mentions via inference rules. Overall system performance was better than this year's median submission, but again fell short of the best system."
+      ],
+      "arm_order": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "id": "9653c89a93ac5c717a0a26cf80e9aa98a5ccf910",
+      "scope": "independent",
+      "query": "In the paper “A Comparative Evaluation of Visual and Natural Language Question Answering Over Linked Data”, Which four QA systems do they use?",
+      "gold_documents": [
+        "1907.08501"
+      ],
+      "negative": false,
+      "answers": [
+        "WDAqua BIBREF0 , QAKiS BIBREF7 , gAnswer BIBREF6 and Platypus BIBREF8"
+      ],
+      "evidence": [
+        "The same 36 questions were answered using four QALD tools: WDAqua BIBREF0 , QAKiS BIBREF7 , gAnswer BIBREF6 and Platypus BIBREF8 ."
+      ],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "id": "c80669cb444a6ec6249b971213b0226f59940a82",
+      "scope": "independent",
+      "query": "In the paper “Dover: A Method for Combining Diarization Outputs”, On average, by how much do they reduce the diarization error?",
+      "gold_documents": [
+        "1909.08090"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "arm_order": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "id": "f33a21c6a9c75f0479ffdbb006c40e0739134716",
+      "scope": "independent",
+      "query": "In the paper “Semantic Role Labeling for Learner Chinese: the Importance of Syntactic Parsing and L2-L1 Parallel Data”, Do the authors suggest why syntactic parsing is so important for semantic role labelling for interlanguages?",
+      "gold_documents": [
+        "1808.09409"
+      ],
+      "negative": false,
+      "answers": [
+        "syntax-based system may generate correct syntactic analyses for partial grammatical fragments"
+      ],
+      "evidence": [
+        "While the neural syntax-agnostic system obtains superior performance on the L1 data, the two syntax-based systems both produce better analyses on the L2 data. Furthermore, as illustrated in the comparison between different parsers, the better the parsing results we get, the better the performance on L2 we achieve. This shows that syntactic parsing is important in semantic construction for learner Chinese. The main reason, according to our analysis, is that the syntax-based system may generate correct syntactic analyses for partial grammatical fragments in L2 texts, which provides crucial information for SRL. Therefore, syntactic parsing helps build more generalizable SRL models that transfer better to new languages, and enhancing syntactic parsing can improve SRL to some extent."
+      ],
+      "arm_order": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "id": "e1f559da7fa501d3190073bca9ce4d4a12149e80",
+      "scope": "independent",
+      "query": "In the paper “Weakly Supervised Domain Detection”, What is the performance of their model?",
+      "gold_documents": [
+        "1907.11499"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "id": "6cdd61ebf84aa742155f4554456cc3233b6ae2bf",
+      "scope": "independent",
+      "query": "In the paper “The Role of Pragmatic and Discourse Context in Determining Argument Impact”, What models that rely only on claim-specific linguistic features are used as baselines?",
+      "gold_documents": [
+        "2004.03034"
+      ],
+      "negative": false,
+      "answers": [
+        "SVM with RBF kernel"
+      ],
+      "evidence": [
+        "Similar to BIBREF9, we experiment with SVM with RBF kernel, with features that represent (1) the simple characteristics of the argument tree and (2) the linguistic characteristics of the claim."
+      ],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "id": "0d6d5b6c00551dd0d2519f117ea81d1e9e8785ec",
+      "scope": "independent",
+      "query": "In the paper “Filling Gender&Number Gaps in Neural Machine Translation with Black-box Context Injection”, Which neural machine translation system is used?",
+      "gold_documents": [
+        "1903.03467"
+      ],
+      "negative": false,
+      "answers": [
+        "Google's machine translation system (GMT)"
+      ],
+      "evidence": [
+        "To demonstrate our method in a black-box setting, we focus our experiments on Google's machine translation system (GMT), accessed through its Cloud API. To test the method on real-world sentences, we consider a monologue from the stand-up comedy show “Sarah Silverman: A Speck of Dust”. The monologue consists of 1,244 English sentences, all by a female speaker conveyed to a plural, gender-neutral audience. Our parallel corpora consists of the 1,244 English sentences from the transcript, and their corresponding Hebrew translations based on the Hebrew subtitles. We translate the monologue one sentence at a time through the Google Cloud API. Eyeballing the results suggest that most of the translations use the incorrect, but default, masculine and singular forms for the speaker and the audience, respectively. We expect that by adding the relevant condition of “female speaking to an audience” we will get better translations, affecting both the gender of the speaker and the number of the audience."
+      ],
+      "arm_order": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "id": "8ca31caa34cc5b65dc1d01d0d1f36bf8c4928805",
+      "scope": "independent",
+      "query": "In the paper “Exploring End-to-End Techniques for Low-Resource Speech Recognition”, What kind of spontaneous speech is used?",
+      "gold_documents": [
+        "1807.00868"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "arm_order": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "id": "98daaa9eaa1e1e574be336b8933b861bfd242e5e",
+      "scope": "independent",
+      "query": "In the paper “Hate Speech in Pixels: Detection of Offensive Memes towards Automatic Moderation”, How is each instance of the dataset annotated?",
+      "gold_documents": [
+        "1910.02334"
+      ],
+      "negative": false,
+      "answers": [
+        "weakly labeled into hate or non-hate memes, depending on their source"
+      ],
+      "evidence": [
+        "We built a dataset for the task of hate speech detection in memes with 5,020 images that were weakly labeled into hate or non-hate memes, depending on their source. Hate memes were retrieved from Google Images with a downloading tool. We used the following queries to collect a total of 1,695 hate memes: racist meme (643 memes), jew meme (551 memes), and muslim meme (501 Memes). Non-hate memes were obtained from the Reddit Memes Dataset . We assumed that all memes in the dataset do not contain any hate message, as we considered that average Reddit memes do not belong to this class. A total of 3,325 non-hate memes were collected. We split the dataset into train (4266 memes) and validation (754 memes) subsets. The splits were random and the distribution of classes in the two subsets is the same. We didn't split the dataset into three subsets because of the small amount of data we had and decided to rely on the validation set metrics."
+      ],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "id": "95bb3ea4ebc3f2174846e8d422abc076e1407d6a",
+      "scope": "independent",
+      "query": "In the paper “The Wiki Music dataset: A tool for computational analysis of popular music”, Which decades did they look at?",
+      "gold_documents": [
+        "1908.10275"
+      ],
+      "negative": false,
+      "answers": [
+        "between 1900s and 2010s"
+      ],
+      "evidence": [
+        "time: decade (classes between 1900s and 2010s) and year representative of the time when the genre became meainstream"
+      ],
+      "arm_order": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "id": "e24fbcc8be922c43f6b6037cdf2bfd4c0a926c08",
+      "scope": "independent",
+      "query": "In the paper “Small and Practical BERT Models for Sequence Labeling”, What is the multilingual baseline?",
+      "gold_documents": [
+        "1909.00100"
+      ],
+      "negative": false,
+      "answers": [
+        " the Meta-LSTM BIBREF0"
+      ],
+      "evidence": [
+        "We discuss two core models for addressing sequence labeling problems and describe, for each, training them in a single-model multilingual setting: (1) the Meta-LSTM BIBREF0 , an extremely strong baseline for our tasks, and (2) a multilingual BERT-based model BIBREF1 ."
+      ],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "id": "9f3444c9fb2e144465d63abf58520cddd4165a01",
+      "scope": "independent",
+      "query": "In the paper “Revisiting Low-Resource Neural Machine Translation: A Case Study”, what are the methods they compare with in the korean-english dataset?",
+      "gold_documents": [
+        "1905.11901"
+      ],
+      "negative": false,
+      "answers": [
+        "gu-EtAl:2018:EMNLP1"
+      ],
+      "evidence": [
+        "Table TABREF21 shows results for Korean INLINEFORM0 English, using the same configurations (1, 2 and 8) as for German–English. Our results confirm that the techniques we apply are successful across datasets, and result in stronger systems than previously reported on this dataset, achieving 10.37 BLEU as compared to 5.97 BLEU reported by gu-EtAl:2018:EMNLP1."
+      ],
+      "arm_order": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "id": "c78f18606524539e4c573481e5bf1e0a242cc33c",
+      "scope": "historical",
+      "query": "In the paper “Autocompletion interfaces make crowd workers slower, but their use promotes response diversity”, How many responses did they obtain?",
+      "gold_documents": [
+        "1707.06939"
+      ],
+      "negative": false,
+      "answers": [
+        "1001"
+      ],
+      "evidence": [
+        "We recruited 176 AMT workers to participate in our conceptualization task. Of these workers, 90 were randomly assigned to the Control group and 86 to the AUI group. These workers completed 1001 tasks: 496 tasks in the control and 505 in the AUI. All responses were gathered within a single 24-hour period during April, 2017."
+      ],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    },
+    {
+      "id": "891cab2e41d6ba962778bda297592c916b432226",
+      "scope": "historical",
+      "query": "In the paper “Machine Translation from Natural Language to Code using Long-Short Term Memory”, What programming language is target language?",
+      "gold_documents": [
+        "1910.11471"
+      ],
+      "negative": false,
+      "answers": [
+        "Python"
+      ],
+      "evidence": [
+        "SMT techniques require a parallel corpus in thr source and thr target language. A text-code parallel corpus similar to Fig. FIGREF12 is used in training. This parallel corpus has 18805 aligned data in it . In source data, the expression of each line code is written in the English language. In target data, the code is written in Python programming language."
+      ],
+      "arm_order": [
+        "candidate",
+        "baseline"
+      ]
+    },
+    {
+      "id": "891c4af5bb77d6b8635ec4109572de3401b60631",
+      "scope": "historical_vietnam",
+      "query": "In the paper “Hate Speech Detection on Vietnamese Social Media Text using the Bidirectional-LSTM Model”, What social media platform does the data come from?",
+      "gold_documents": [
+        "1911.03648"
+      ],
+      "negative": true,
+      "answers": [],
+      "evidence": [],
+      "arm_order": [
+        "baseline",
+        "candidate"
+      ]
+    }
+  ]
+}

@@ -57,7 +57,9 @@ def project(protocol=None):
     return cases, docs
 
 
-def select(raw, previous_papers, previous_questions, salt, positives, negatives):
+def select(
+    raw, previous_papers, previous_questions, salt, positives, negatives, *, unique_wording=False
+):
     choices = []
     for key, paper in raw.items():
         if key in previous_papers:
@@ -81,14 +83,16 @@ def select(raw, previous_papers, previous_questions, salt, positives, negatives)
             ):
                 continue
             choices.append((sha(salt + uid), key, qa, a))
-    cases, seen = [], set()
+    cases, seen, wordings = [], set(), set()
     for _, key, qa, a in sorted(choices):
         neg = a["unanswerable"]
-        if key in seen or sum(c["negative"] == neg for c in cases) >= (
-            negatives if neg else positives
-        ):
+        wording = " ".join(qa["question"].casefold().split())
+        if key in seen or (unique_wording and wording in wordings):
+            continue
+        if sum(c["negative"] == neg for c in cases) >= (negatives if neg else positives):
             continue
         seen.add(key)
+        wordings.add(wording)
         cases.append(
             dict(
                 id=qa["question_id"],

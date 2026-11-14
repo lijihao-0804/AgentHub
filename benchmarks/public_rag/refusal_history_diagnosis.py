@@ -200,6 +200,18 @@ def build():
             "computed from the public fields and returns the replacement refusal text or null "
             "for an unchanged reply."
         ),
+        "coverage_limits": (
+            "This candidate recognizes certain explicit English or Chinese whole-question "
+            "abstentions and a restricted English single-entity pattern. It does not perform "
+            "source entailment or resolve other languages and paraphrases. Among the eight old "
+            "positive B responses to official negatives, it changes only the platform response. "
+            "The human-intuitions response also declines the main question but explains a "
+            "related procedure. Automatically suppressing all replies with missing-information "
+            "language would also discard answers with a known bound, named subset, or partial "
+            "definition. The training-hour requirement and tweet-language population require "
+            "a separate interpretation of the question and source. Four other replies answer "
+            "the question within a scope supported by their citations despite the official label."
+        ),
         "source_sha256_lf": {
             str(p.relative_to(HISTORY)).replace("\\", "/"): lf_digest(p) for p in files
         },

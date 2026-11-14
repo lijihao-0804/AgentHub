@@ -58,7 +58,7 @@ def save_new(path, obj):
         stream.write("\n")
 
 
-def historical_exposure(raw):
+def historical_exposure(raw, *, scratch_root=None, excluded_globs=SKIP, excluded_study=OUT):
     # Include paper-only identifiers, title-only mentions, questions with no IDs,
     # and questions' official parent papers as well as explicit reservations.
     labels = defaultdict(set)
@@ -93,7 +93,8 @@ def historical_exposure(raw):
     def scan():
         # Keep scratch inputs for the local exposure audit. Starting rg in the
         # archive directory permits the historical source scan's self-exclusion.
-        tmp = ROOT / ".scratch/evidence-retention-20261114" / f"exposure-{uuid4().hex}"
+        archive_root = scratch_root or ROOT / ".scratch/evidence-retention-20261114"
+        tmp = archive_root / f"exposure-{uuid4().hex}"
         tmp.mkdir(parents=True)
         patterns = tmp / "patterns.txt"
         patterns.write_text("\n".join(sorted(labels)), encoding="utf8")
@@ -102,7 +103,7 @@ def historical_exposure(raw):
         archives = tmp / "archives"
         archives.mkdir()
         for path in sorted((ROOT / "benchmarks/public_rag/results").rglob("*.zip")):
-            if OUT in path.parents:
+            if excluded_study in path.parents:
                 continue
             with ZipFile(path) as zipped:
                 for entry in zipped.infolist():
@@ -134,7 +135,7 @@ def historical_exposure(raw):
             "-g",
             "*.{" + ",".join(SUFFIXES) + "}",
         ]
-        for pattern in SKIP:
+        for pattern in excluded_globs:
             command.extend(("-g", pattern))
         scan_roots = [k for k in ROOTS if (ROOT / k).exists()]
         for location, targets in ((ROOT, scan_roots), (archives, ["."])):
@@ -160,7 +161,7 @@ def historical_exposure(raw):
     return {
         "scan_roots": scan_roots,
         "extensions": SUFFIXES,
-        "excluded_globs": SKIP,
+        "excluded_globs": excluded_globs,
         "archives": "Text members of local benchmarks/public_rag/results/**/*.zip",
         "matching": (
             "Case-insensitive literal official TRAIN paper ID, question ID, paper title or "
