@@ -1,4 +1,8 @@
-"""Check published first HTTP receipts, scores and historical attribution with stdlib only."""
+"""Check public receipts and the pinned provenance manifest with the standard library.
+
+The full reader --verification CLI also rebuilds source identities from Git
+and validates citation bytes against the original QASPER and SciFact corpora.
+"""
 
 import hashlib
 import json
@@ -96,6 +100,122 @@ def validate(directory, protocol_name, arms, scopes):
     )
 
 
+def validate_reader(directory, *, supplement=False):
+    from benchmarks.public_rag import qa_first_response_reader_review as check
+
+    inputs = check.supplement_inputs if supplement else check.primary_inputs
+    _, cases, groups = inputs(directory)
+    masked, keys = check.blind(cases, groups)
+    marks = read(directory / "judgments.json")
+    need(
+        check.report(cases, masked, keys, marks, supplement=supplement)
+        == read(directory / "review.json"),
+        "three-arm decisions",
+    )
+    quotes, http = 0, 0
+    paired = {}
+    coverage = check.auth_coverage(groups)
+    evidence = read(directory / "verification.json")
+    path = (directory.parent if supplement else directory) / "prompt-provenance.json"
+    need(
+        hashlib.sha256(path.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
+        == "1550a637b623ed8afca237532e6323ce86bcc568bcc61f5c1935ad0d66290fd2",
+        "frozen public source manifest",
+    )
+    provenance = read(path)
+    need(evidence["source_provenance"] == provenance, "recorded source provenance")
+    for arm in check.ARMS:
+        label = "strict" if arm == "C" else "original"
+        for receipt in groups[arm].values():
+            need(receipt["source"] == provenance[label]["source_raw_sha256"], "source receipt")
+            for row in receipt["rows"]:
+                http += 1
+                cid = row["id"]
+                if row["http"] == 401:
+                    audited = evidence["rows"][arm][cid]
+                    need(
+                        audited["authenticated"] is False
+                        and audited["http"] == 401
+                        and audited["wire_attempts"] == 0
+                        and not audited["verified_references"]
+                        and not audited["verified_citations"]
+                        and not audited["candidate"]
+                        and not audited["reader"]
+                        and not audited["responses"]
+                        and not audited["adapter_errors"]
+                        and audited["failure_observation"] == "authentication:ACCESS_TOKEN_EXPIRED"
+                        and not any(
+                            k in audited for k in ("digest", "system_prompt_sha256", "prompt_sha")
+                        ),
+                        "No retrieval or provider evidence for an expired token",
+                    )
+                    continue
+                (reader,) = (e for e in row["events"] if e["kind"] == "reader")
+                (retrieval,) = (e for e in row["events"] if e["kind"] == "retrieval")
+                fingerprint = (
+                    reader["prompt_sha256"],
+                    reader["chunks"],
+                    retrieval["candidate"],
+                    retrieval["reranked"],
+                )
+                need(fingerprint == paired.setdefault(cid, fingerprint), "three-arm evidence")
+                wire = [e for e in row["events"] if e["kind"] == "wire"]
+                audited = evidence["rows"][arm][cid]
+                need(
+                    audited["http"] == row["http"]
+                    and audited["authenticated"] is True
+                    and audited["wire_attempts"] == len(wire)
+                    and audited["prompt_sha"] == reader["prompt_sha256"]
+                    and audited["system_prompt_sha256"] == check.PROMPTS[label]
+                    and audited["verified_citations"] == len(row.get("citations", []))
+                    and audited["verified_references"]
+                    == [
+                        {k: v for k, v in cit.items() if k != "excerpt"}
+                        for cit in row.get("citations", [])
+                    ],
+                    "recorded wire and exact citation identities",
+                )
+                need(
+                    wire
+                    and all(
+                        w["system_prompt_sha256"] == check.PROMPTS[label]
+                        and w["max_tokens"] == (512 if arm == "A" else 2048)
+                        and w["timeout_seconds"] == 60
+                        and w["retry_limit"] == 0
+                        and w["temperature"] == 0
+                        and w["enable_thinking"] is None
+                        and w["prompt_sha256"] == reader["prompt_sha256"]
+                        for w in wire
+                    ),
+                    "three-arm wire",
+                )
+                for c in row.get("citations", []):
+                    n = c["number"]
+                    need(
+                        1 <= n <= len(reader["chunks"])
+                        and reader["chunks"][n - 1]["chunk_id"] == c["chunk_id"]
+                        and hashlib.sha256(c["excerpt"].encode()).hexdigest()
+                        == c["excerpt_sha256"],
+                        "three-arm citation receipt",
+                    )
+                    quotes += 1
+    need(
+        evidence["paired_questions"] == len(cases)
+        and evidence["auth_coverage_by_scope"] == coverage
+        and evidence["authenticated_pairs"] == len(paired)
+        and coverage[check.PRIMARY]["paired_questions"] == (4 if supplement else 16)
+        and coverage[check.PRIMARY]["authenticated_pairs"] == (4 if supplement else 12)
+        and sum(s["verified_original_citations"] for s in evidence["metrics"]["all"].values())
+        == quotes,
+        "three-arm original-source counts",
+    )
+    print(
+        f"{directory.name}: {http} first HTTP responses, {len(cases)} matched triples, "
+        f"{len(paired)} authenticated triples, {quotes} citation hashes, "
+        f"{len(marks)} distinct reviewed responses"
+    )
+
+
 if __name__ == "__main__":
     history = read(HERE / "history/first-502.json")
     stages = Counter(r["stage"] for r in history["failures"])
@@ -109,3 +229,5 @@ if __name__ == "__main__":
         HERE / "live", "protocol.json", ("baseline", "candidate"), ("independent", "qasper", "full")
     )
     validate(HERE / "budget", "protocol2.json", ("512", "2048"), ("reserve14", "qasper", "full"))
+    validate_reader(HERE / "reader")
+    validate_reader(HERE / "reader" / "authenticated-supplement", supplement=True)

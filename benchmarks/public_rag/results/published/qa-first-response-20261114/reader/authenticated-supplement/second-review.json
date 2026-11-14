@@ -1,0 +1,88 @@
+{
+  "distinct": 12,
+  "agreement_on_verdict_and_exact_supporting_citations": 12,
+  "second_judgments": {
+    "0bf3ce2e53fe08dc940c": {
+      "verdict": "refusal",
+      "supporting_citations": [],
+      "reason": "The answer is explicitly insufficient and uncited. It gives no specific recommendation. The official positive answer names reasoning or irony detection, so this refusal cannot count as a correct negative."
+    },
+    "25e6775a9b907be899d0": {
+      "verdict": "full",
+      "supporting_citations": [
+        1,
+        6
+      ],
+      "reason": "Excerpt 1 explicitly names WikiHop, the task type and all four sample and pool counts. Excerpt 6 confirms use of the supporting documents furnished by WikiHop."
+    },
+    "376ab213f3ad45a395d5": {
+      "verdict": "full",
+      "supporting_citations": [
+        1
+      ],
+      "reason": "Excerpt 1 specifically distinguishes METEOR as the metric adopted to evaluate this approach."
+    },
+    "3781bdda6072fb910da9": {
+      "verdict": "full",
+      "supporting_citations": [
+        1
+      ],
+      "reason": "Excerpt 1 gives the News Category Dataset name, HuffPost source, date range and Kaggle distribution."
+    },
+    "3b7b98eba922ca90cdec": {
+      "verdict": "full",
+      "supporting_citations": [
+        1,
+        4
+      ],
+      "reason": "Excerpt 1 distinguishes the four commonly used metrics from METEOR, chosen here for robustness. Excerpt 4 identifies the matchers and attributes the small-reference-set comparison to the CIDEr authors."
+    },
+    "7e9411ffe64fd2c127c0": {
+      "verdict": "full",
+      "supporting_citations": [
+        1,
+        4
+      ],
+      "reason": "Excerpt 1 names all four metrics and explicitly says METEOR was selected; excerpt 4 supports the comparison with CIDEr under small reference sets."
+    },
+    "8127a6e2ab5c437c409d": {
+      "verdict": "refusal",
+      "supporting_citations": [],
+      "reason": "The flagged answer gives no cited recommendation; pointing to error analysis does not supply the reasoning or irony-detection methods in the positive reference."
+    },
+    "ad168b4e6d774fef8f89": {
+      "verdict": "full",
+      "supporting_citations": [
+        1
+      ],
+      "reason": "Excerpt 1 states the name, publisher, 2012–2018 period, Kaggle source, 200k total headlines, and roughly 33k headlines in the 23-category sample."
+    },
+    "ba0af6835e91d73dfb5b": {
+      "verdict": "full",
+      "supporting_citations": [
+        1
+      ],
+      "reason": "Excerpt 1 explicitly says the authors used WikiHop and identifies it as an entity-based multi-hop QA dataset."
+    },
+    "c11d49f4fe336f6bd8b5": {
+      "verdict": "refusal",
+      "supporting_citations": [],
+      "reason": "The response flags insufficient evidence and gives no references or concrete method. This is a refusal on a positive question, whose annotation identifies reasoning and irony detection."
+    },
+    "cb5ad729e89eb0940e86": {
+      "verdict": "full",
+      "supporting_citations": [
+        1,
+        6
+      ],
+      "reason": "Excerpt 1 gives WikiHop and the two sampled counts; excerpt 6 explicitly states that the supporting documents came from WikiHop."
+    },
+    "fb58f1d7510ca6b4a020": {
+      "verdict": "full",
+      "supporting_citations": [
+        1
+      ],
+      "reason": "Excerpt 1 identifies the News Category Dataset, the HuffPost period, Kaggle distribution and the approximately 33k-headline sample across 23 categories."
+    }
+  }
+}

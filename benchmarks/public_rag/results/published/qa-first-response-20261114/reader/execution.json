@@ -1,0 +1,188 @@
+{
+  "job": {
+    "state": "completed",
+    "started_at": "2026-11-14T02:45:41.251171+00:00",
+    "finished_at": "2026-11-14T03:13:23.486034+00:00",
+    "exit_code": 0,
+    "elapsed_seconds": 1662.235
+  },
+  "receipts": {
+    "A-reserve16.json": {
+      "count": 16,
+      "http": {
+        "502": 3,
+        "200": 9,
+        "401": 4
+      },
+      "sha256_lf": "0ed04447ab518cc50c53d21bb98f82abdaa63188bf9516f4560d0e48e3b2928b"
+    },
+    "A-reserve14.json": {
+      "count": 2,
+      "http": {
+        "200": 1,
+        "502": 1
+      },
+      "sha256_lf": "42f674e817144c573181dd049c09f9b9178abc79cf9aa7d984fdb5db32d2123a"
+    },
+    "A-qasper.json": {
+      "count": 1,
+      "http": {
+        "200": 1
+      },
+      "sha256_lf": "80b1f428d2c297db005200911ce49be4ea61ffe942f09e9d1c73431ade32d9af"
+    },
+    "A-full.json": {
+      "count": 1,
+      "http": {
+        "200": 1
+      },
+      "sha256_lf": "d0c208bfa831de00715c98bb66d34c7a3ad77e0294fcb46ae668458d4a8f1185"
+    },
+    "B-reserve16.json": {
+      "count": 16,
+      "http": {
+        "200": 12,
+        "401": 4
+      },
+      "sha256_lf": "26431f8abca18f821ae78151946758092dc51c7476d987ef8faa0ef4c0addc3b"
+    },
+    "B-reserve14.json": {
+      "count": 2,
+      "http": {
+        "200": 2
+      },
+      "sha256_lf": "c29213add90ccbf8ae533e51d7e0a1b329e4224f65bff2746a87ecf97abebe3f"
+    },
+    "B-qasper.json": {
+      "count": 1,
+      "http": {
+        "200": 1
+      },
+      "sha256_lf": "c4cdf73515ed5f57b099a03a61fd82bb85ee3c88dd7a5ddc430fb1b09474df4a"
+    },
+    "B-full.json": {
+      "count": 1,
+      "http": {
+        "200": 1
+      },
+      "sha256_lf": "c442094223a38cd680bcf10671fc5ec6438f554380169d4aae78598b3c4e7941"
+    },
+    "C-reserve16.json": {
+      "count": 16,
+      "http": {
+        "200": 12,
+        "401": 4
+      },
+      "sha256_lf": "15f9abe23f662f5b41bc6cd8b1b0c492894928d8e279c8faa78afaf781f35f77"
+    },
+    "C-reserve14.json": {
+      "count": 2,
+      "http": {
+        "200": 2
+      },
+      "sha256_lf": "c500ef7bcaefac7fae99831d6aca6e2209454f8fe2a134f2517538a2b59e9b55"
+    },
+    "C-qasper.json": {
+      "count": 1,
+      "http": {
+        "200": 1
+      },
+      "sha256_lf": "80872c52360b160b2e23fee329837da89949fa2f3591b6c9119cc983d3e58778"
+    },
+    "C-full.json": {
+      "count": 1,
+      "http": {
+        "200": 1
+      },
+      "sha256_lf": "a08ab4037546505bced20f3a2bd422cbc7b4a2b47151906d9d3943ffcda8c453"
+    }
+  },
+  "auth_expirations": [
+    {
+      "arm": "A",
+      "id": "2e3265d83d2a595293ed458152d3ee76ad19e244",
+      "utc": "2026-11-14T03:05:22.621399+00:00",
+      "error": "ACCESS_TOKEN_EXPIRED",
+      "events": []
+    },
+    {
+      "arm": "A",
+      "id": "f0e8f045e2e33a2129e67fb32f356242db1dc280",
+      "utc": "2026-11-14T03:05:22.645602+00:00",
+      "error": "ACCESS_TOKEN_EXPIRED",
+      "events": []
+    },
+    {
+      "arm": "A",
+      "id": "7aba5e4483293f5847caad144ee0791c77164917",
+      "utc": "2026-11-14T03:05:22.662484+00:00",
+      "error": "ACCESS_TOKEN_EXPIRED",
+      "events": []
+    },
+    {
+      "arm": "A",
+      "id": "7c792cda220916df40edb3107e405c86455822ed",
+      "utc": "2026-11-14T03:05:22.682159+00:00",
+      "error": "ACCESS_TOKEN_EXPIRED",
+      "events": []
+    },
+    {
+      "arm": "B",
+      "id": "2e3265d83d2a595293ed458152d3ee76ad19e244",
+      "utc": "2026-11-14T03:05:22.642044+00:00",
+      "error": "ACCESS_TOKEN_EXPIRED",
+      "events": []
+    },
+    {
+      "arm": "B",
+      "id": "f0e8f045e2e33a2129e67fb32f356242db1dc280",
+      "utc": "2026-11-14T03:05:22.645602+00:00",
+      "error": "ACCESS_TOKEN_EXPIRED",
+      "events": []
+    },
+    {
+      "arm": "B",
+      "id": "7aba5e4483293f5847caad144ee0791c77164917",
+      "utc": "2026-11-14T03:05:22.658104+00:00",
+      "error": "ACCESS_TOKEN_EXPIRED",
+      "events": []
+    },
+    {
+      "arm": "B",
+      "id": "7c792cda220916df40edb3107e405c86455822ed",
+      "utc": "2026-11-14T03:05:22.676254+00:00",
+      "error": "ACCESS_TOKEN_EXPIRED",
+      "events": []
+    },
+    {
+      "arm": "C",
+      "id": "2e3265d83d2a595293ed458152d3ee76ad19e244",
+      "utc": "2026-11-14T03:05:22.608387+00:00",
+      "error": "ACCESS_TOKEN_EXPIRED",
+      "events": []
+    },
+    {
+      "arm": "C",
+      "id": "f0e8f045e2e33a2129e67fb32f356242db1dc280",
+      "utc": "2026-11-14T03:05:22.652800+00:00",
+      "error": "ACCESS_TOKEN_EXPIRED",
+      "events": []
+    },
+    {
+      "arm": "C",
+      "id": "7aba5e4483293f5847caad144ee0791c77164917",
+      "utc": "2026-11-14T03:05:22.666484+00:00",
+      "error": "ACCESS_TOKEN_EXPIRED",
+      "events": []
+    },
+    {
+      "arm": "C",
+      "id": "7c792cda220916df40edb3107e405c86455822ed",
+      "utc": "2026-11-14T03:05:22.671244+00:00",
+      "error": "ACCESS_TOKEN_EXPIRED",
+      "events": []
+    }
+  ],
+  "auth_ttl_seconds_effective": 900,
+  "auth_notes": "Original two clients logged in once at cohort start. 12 HTTP 401 entries have no retrieval or provider event; no re-dispatch was made in the preregistered run. The separate authenticated supplement uses fresh local login immediately before each request."
+}

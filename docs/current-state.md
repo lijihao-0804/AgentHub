@@ -1,5 +1,7 @@
 # AgentHub 当前状态
 
+2026-11-14 引用问答已能区分模型没有可见输出、JSON 或字段校验失败、以及引文校验失败。真实入口用三批公开独立题验证了首答和答案质量；历史第 620 题与 Visual Genome 数据规模题单列复测。公开 HTTP 错误码保持稳定。[逐题首答、原文引文与回归](../benchmarks/public_rag/results/published/qa-first-response-20261114/README.md)
+
 2026-11-14 已验证按文章融合后回选原段、索引标题和完整摘要两条路线。可直接复核第 753 题、原 6 道双路漏题、独立语料的前五来源变化及真实问答引文。[文章级召回验收与复跑](../benchmarks/public_rag/results/published/article-recall-20261114/README.md)
 
 2026-11-14 已重建 13 道 SciFact 候选漏例，并在另外 553 道题、两个 NFCorpus 样本和真实引用问答入口复验新策略。BM25 补位找回部分标注来源，但出现句级证据回退。主线已加入诊断和回归工具，继续沿用原检索路径。[逐题诊断、真实答复与验收](reviews/candidate-recall-20261114.md)

@@ -1,0 +1,348 @@
+{
+  "method": "Two independent Astra agents blind to arm/order using one frozen rubric, not human reviewers. Masked IDs are derived from the complete returned answer and citations. Identical replies to the same question appear once.",
+  "distinct": 52,
+  "agreement_on_verdict_and_exact_supporting_citations": 52,
+  "disagreements": {},
+  "second_judgments": {
+    "029e44bd40e00a14ddb2": {
+      "verdict": "refusal",
+      "supporting_citations": [],
+      "reason": "Provides no response count and marks evidence insufficient. The official positive target is 1,001; a rating count cannot substitute for it."
+    },
+    "1239278b28dc0ceb09a0": {
+      "verdict": "refusal",
+      "supporting_citations": [],
+      "reason": "Provides no response count and marks evidence insufficient. The official positive target is 1,001; a rating count cannot substitute for it."
+    },
+    "1b31eece4b5bde6815f6": {
+      "verdict": "refusal",
+      "supporting_citations": [],
+      "reason": "Provides no parameter count for the proposed joint ASR/LU model, explicitly marks evidence insufficient, and returns no references. This matches the frozen negative."
+    },
+    "1ec113f1d77bb414d768": {
+      "verdict": "refusal",
+      "supporting_citations": [],
+      "reason": "Explicitly declines to supply a fraction for the negative examples and gives no citations, matching the frozen negative."
+    },
+    "245f9b9d7feeeed08d31": {
+      "verdict": "full",
+      "supporting_citations": [
+        2,
+        6
+      ],
+      "reason": "Excerpt 6 reports precisely 313,813 annotated samples and the stratified 251,050/62,763 split. Excerpt 2 gives the rounded size."
+    },
+    "2a8ca38a9778adabaa70": {
+      "verdict": "refusal",
+      "supporting_citations": [],
+      "reason": "Distinguishes regular extraction from a specific duration or frequency; marks insufficient evidence with no citations, matching the frozen negative."
+    },
+    "2f5cb2aa08ee33688536": {
+      "verdict": "refusal",
+      "supporting_citations": [],
+      "reason": "Provides no parameter count for the proposed joint ASR/LU model, explicitly marks evidence insufficient, and returns no references. This matches the frozen negative."
+    },
+    "3c5b9000acde333b6019": {
+      "verdict": "full",
+      "supporting_citations": [
+        2,
+        3
+      ],
+      "reason": "Excerpt 3 explicitly names the Moses SMT baseline; excerpt 2 distinguishes the Moses and OpenNMT experiments and their Google Translate benchmark."
+    },
+    "4b68d4335392f3b43281": {
+      "verdict": "full",
+      "supporting_citations": [
+        2,
+        3,
+        4
+      ],
+      "reason": "Excerpt 3 identifies Moses as the SMT baseline. Excerpt 2 pairs SMT and NMT with their systems, and excerpt 4 independently confirms the Google Translate comparison."
+    },
+    "4d2c64fc7701439fe4d3": {
+      "verdict": "full",
+      "supporting_citations": [
+        3,
+        4
+      ],
+      "reason": "Excerpt 4 identifies the 30 writers per experiment, self-reported measures and independent raters of overall quality and the three improvement areas. Excerpt 3 names those areas."
+    },
+    "5cb3de1946eae323b7d5": {
+      "verdict": "refusal",
+      "supporting_citations": [],
+      "reason": "Explicitly declines to supply a fraction for the negative examples and gives no citations, matching the frozen negative."
+    },
+    "6f38e78381d73b800922": {
+      "verdict": "refusal",
+      "supporting_citations": [],
+      "reason": "Provides no parameter count for the proposed joint ASR/LU model, explicitly marks evidence insufficient, and returns no references. This matches the frozen negative."
+    },
+    "6f92c232964a696b180f": {
+      "verdict": "full",
+      "supporting_citations": [
+        1
+      ],
+      "reason": "Excerpt 1 explicitly identifies Python as the programming language on the target side of the parallel corpus."
+    },
+    "76624b8e6f82e7c3fe57": {
+      "verdict": "failure",
+      "supporting_citations": [],
+      "reason": "First HTTP response was 502 and supplied no answer or citations for How many responses did they obtain?"
+    },
+    "777bdacafd034cbbd458": {
+      "verdict": "full",
+      "supporting_citations": [
+        1,
+        3,
+        4
+      ],
+      "reason": "Excerpt 4 supports the recruitment, survey, times, bonus and separate evaluation. Excerpt 3 identifies the three target aspects. Excerpt 1 reports the 10–50% improvement and engagement and satisfaction results."
+    },
+    "7cc40886bb165bcea45a": {
+      "verdict": "full",
+      "supporting_citations": [
+        1,
+        2
+      ],
+      "reason": "Excerpt 1 states that target code is Python; excerpt 2 identifies primarily Python as the focus of the general-purpose translation framework."
+    },
+    "8999465ba2e82573a51c": {
+      "verdict": "full",
+      "supporting_citations": [
+        2,
+        6
+      ],
+      "reason": "Excerpt 6 provides the exact sample, class and split counts, and excerpt 2 describes more than 0.3 million records."
+    },
+    "8a7995cc117ea20dfd6f": {
+      "verdict": "full",
+      "supporting_citations": [
+        2,
+        3
+      ],
+      "reason": "Excerpt 3 explicitly identifies Moses for SMT, and excerpt 2 confirms use of Moses and OpenNMT in the SMT and NMT experiments respectively."
+    },
+    "a16448fdedbf3d7e654e": {
+      "verdict": "refusal",
+      "supporting_citations": [],
+      "reason": "Distinguishes regular extraction from a specific duration or frequency; marks insufficient evidence with no citations, matching the frozen negative."
+    },
+    "c61c8d73008d917f2792": {
+      "verdict": "full",
+      "supporting_citations": [
+        1,
+        2
+      ],
+      "reason": "Excerpt 1 names Python in the target data, and excerpt 2 names Python as the primary language of the framework."
+    },
+    "c9f9f70e911978bcc26a": {
+      "verdict": "refusal",
+      "supporting_citations": [],
+      "reason": "Distinguishes regular extraction from a specific duration or frequency; marks insufficient evidence with no citations, matching the frozen negative."
+    },
+    "d6e6c04ff2928ebba078": {
+      "verdict": "full",
+      "supporting_citations": [
+        6
+      ],
+      "reason": "Excerpt 6 gives the exact 313,813 samples and explicitly says they were manually annotated into 12 categories."
+    },
+    "de71fbade4bc4b440733": {
+      "verdict": "refusal",
+      "supporting_citations": [],
+      "reason": "Explicitly declines to supply a fraction for the negative examples and gives no citations, matching the frozen negative."
+    },
+    "e66c037eda173b6058c7": {
+      "verdict": "failure",
+      "supporting_citations": [],
+      "reason": "First HTTP response was 502 and supplied no answer or citations for How do they evaluate generated stories?"
+    },
+    "051ae1629e85e3e03fa8": {
+      "verdict": "failure",
+      "supporting_citations": [],
+      "reason": "First HTTP response was 401; there is neither a substantive answer nor a refusal to the question: What news dataset was used?"
+    },
+    "25c09f49bd0ef7ce6123": {
+      "verdict": "wrong",
+      "supporting_citations": [
+        1,
+        2,
+        3,
+        6
+      ],
+      "reason": "The official negative overlooks reportable performance: excerpts 1–3 support state of the art and faster convergence, and 6 supports the precision and nursing-system comparisons. However, excerpt 6 says only “binary INLINEFORM0 score of over 0.812”; no attached excerpt identifies this metric as F1. The material numeric F1 assertion is unsupported."
+    },
+    "32792cc7c459b421b929": {
+      "verdict": "refusal",
+      "supporting_citations": [],
+      "reason": "The answer declines to infer a natural language from the names Switchboard and DailyDialog, marks evidence insufficient, and has no citations. This matches the frozen negative."
+    },
+    "45d0d222018112fca950": {
+      "verdict": "wrong",
+      "supporting_citations": [
+        2
+      ],
+      "reason": "Excerpt 2 describes Huang’s LSTM and visual features and calls it the baseline surpassed by Calixto, in discussion of prior work. It does not establish that Huang is the baseline used in the authors’ own experiment. The answer positively identifies that system without qualifying this distinction; the official target is unanswerable."
+    },
+    "49fc8d1036d6fc11eb8c": {
+      "verdict": "failure",
+      "supporting_citations": [],
+      "reason": "First HTTP response was 401; there is neither a substantive answer nor a refusal to the question: what metrics were used for evaluation?"
+    },
+    "5793f1045ee9a9857d8a": {
+      "verdict": "refusal",
+      "supporting_citations": [],
+      "reason": "The answer declines to infer a natural language from the names Switchboard and DailyDialog, marks evidence insufficient, and has no citations. This matches the frozen negative."
+    },
+    "6b31535982d09e9f53d1": {
+      "verdict": "full",
+      "supporting_citations": [
+        3
+      ],
+      "reason": "Excerpt 3 describes the order POS, Chunk, then greedy language modeling and explicitly identifies language modeling as the auxiliary unsupervised task."
+    },
+    "771cb2be159dbc9fec2b": {
+      "verdict": "failure",
+      "supporting_citations": [],
+      "reason": "First HTTP response was 401; there is neither a substantive answer nor a refusal to the question: What dataset was used in the experiment?"
+    },
+    "7c71423db166cdf55956": {
+      "verdict": "refusal",
+      "supporting_citations": [],
+      "reason": "The answer declines to infer a natural language from the names Switchboard and DailyDialog, marks evidence insufficient, and has no citations. This matches the frozen negative."
+    },
+    "ad03ff53f6f9db1ed1f6": {
+      "verdict": "full",
+      "supporting_citations": [
+        1,
+        2,
+        3
+      ],
+      "reason": "Excerpt 1 establishes that the final task is auxiliary and unsupervised; 2 identifies the senior-layer role in semi-supervision, and 3 names greedy language modeling as that task."
+    },
+    "ae8a8da9d6591ccc4dd8": {
+      "verdict": "wrong",
+      "supporting_citations": [
+        2
+      ],
+      "reason": "Excerpt 2 describes Huang’s LSTM and visual features and calls it the baseline surpassed by Calixto, in discussion of prior work. It does not establish that Huang is the baseline used in the authors’ own experiment. The answer positively identifies that system without qualifying this distinction; the official target is unanswerable."
+    },
+    "aeb007c9631a53fb711b": {
+      "verdict": "failure",
+      "supporting_citations": [],
+      "reason": "First HTTP response was 502; there is neither a substantive answer nor a refusal to the question: What performance is achieved?"
+    },
+    "bc5f3e5ce8cee85eccca": {
+      "verdict": "wrong",
+      "supporting_citations": [
+        2
+      ],
+      "reason": "Excerpt 2 describes Huang’s LSTM and visual features and calls it the baseline surpassed by Calixto, in discussion of prior work. It does not establish that Huang is the baseline used in the authors’ own experiment. The answer positively identifies that system without qualifying this distinction; the official target is unanswerable."
+    },
+    "c63431dbd480113aca95": {
+      "verdict": "full",
+      "supporting_citations": [
+        1,
+        2,
+        3
+      ],
+      "reason": "Excerpt 1 establishes that the final task is auxiliary and unsupervised; 2 identifies the senior-layer role in semi-supervision, and 3 names greedy language modeling as that task."
+    },
+    "d7c709d379fea3d27ee2": {
+      "verdict": "failure",
+      "supporting_citations": [],
+      "reason": "First HTTP response was 401; there is neither a substantive answer nor a refusal to the question: What recommendations are made to improve the performance in future?"
+    },
+    "ffe50a68402ed8863a35": {
+      "verdict": "wrong",
+      "supporting_citations": [
+        1,
+        2,
+        3,
+        6
+      ],
+      "reason": "The official negative overlooks reportable performance: excerpts 1–3 support state of the art and faster convergence, and 6 supports the precision and nursing-system comparisons. However, excerpt 6 says only “binary INLINEFORM0 score of over 0.812”; no attached excerpt identifies this metric as F1. The material numeric F1 assertion is unsupported."
+    },
+    "03157db766a8823093fb": {
+      "verdict": "full",
+      "supporting_citations": [
+        1,
+        4,
+        6
+      ],
+      "reason": "Excerpt 6 gives the VG and ReferIt train sizes and the 85% split, 4 gives the selection task’s 1.73M/300K samples, and 1 explicitly gives 2,909 instance classes."
+    },
+    "174ab39a9be36c2fbcec": {
+      "verdict": "partial",
+      "supporting_citations": [
+        1
+      ],
+      "reason": "Excerpt 1 supports the mouse-model intervention, stromal depletion, vascular density, gemcitabine concentration and transient stabilization. The response expressly limits its conclusion because a reduction in fibrosis and the full efficacy claim are unestablished."
+    },
+    "3757b58f0538e0c52fde": {
+      "verdict": "full",
+      "supporting_citations": [
+        1
+      ],
+      "reason": "Excerpt 1 directly reports 2.6 GB, 421,829,960 words and 17,305,401 sentences; it also explicitly states the 618,224-word vocabulary after preprocessing."
+    },
+    "3c7bb41732666151b9cc": {
+      "verdict": "partial",
+      "supporting_citations": [
+        1
+      ],
+      "reason": "The cited mouse study directly supports transient vascular density, drug concentration and disease stabilization; it names stromal depletion. The answer explicitly distinguishes that from the unresolved fibrosis part of the claim."
+    },
+    "4686727ea863dee60416": {
+      "verdict": "refusal",
+      "supporting_citations": [],
+      "reason": "The response marks evidence insufficient and gives no citations. This case was not predeclared negative, so it is not a correct-negative credit."
+    },
+    "479d4b9d5debd4ba40f1": {
+      "verdict": "failure",
+      "supporting_citations": [],
+      "reason": "The first HTTP response was 502 and returned neither a substantive answer nor an insufficient-evidence response."
+    },
+    "4b471859eabcb25635b8": {
+      "verdict": "full",
+      "supporting_citations": [
+        1
+      ],
+      "reason": "Excerpt 1 supplies every size measure given, including both the exact word count and the exact sentence count."
+    },
+    "5992890351f40a22dd36": {
+      "verdict": "refusal",
+      "supporting_citations": [],
+      "reason": "The answer explicitly declines to supply the requested hashtag list, marks insufficient evidence, and has no citations, matching the frozen negative."
+    },
+    "aaf476747f14e34d9fc0": {
+      "verdict": "full",
+      "supporting_citations": [
+        1,
+        2
+      ],
+      "reason": "Excerpt 1 supports the exact counts, vocabulary and named Google News/chat sources. Unlike the size excerpt alone, excerpt 2 explicitly names the Italian Wikipedia dump and its date, so the added provenance is grounded."
+    },
+    "c647d81f828062fff04a": {
+      "verdict": "full",
+      "supporting_citations": [
+        4,
+        6
+      ],
+      "reason": "Excerpt 6 supplies the exact VG and ReferIt training counts. Excerpt 4 independently supplies the instance-selection training, validation and testing counts as described."
+    },
+    "cc95e90f8940fdc06eba": {
+      "verdict": "refusal",
+      "supporting_citations": [],
+      "reason": "The answer distinguishes one error-analysis example from the requested complete hashtag set, flags insufficient evidence and supplies no citations, matching the frozen negative."
+    },
+    "e020d04d6b4de6e90351": {
+      "verdict": "full",
+      "supporting_citations": [
+        4,
+        6
+      ],
+      "reason": "The two counts and 85% fraction for VG and the ReferIt counts are in excerpt 6. Excerpt 4 describes the sample pairs and gives both sizes for instance selection."
+    }
+  }
+}

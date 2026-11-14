@@ -1,0 +1,1669 @@
+{
+  "primary_cohort": "reserve16",
+  "primary_http_denominator": 16,
+  "primary_authenticated_pairs": 12,
+  "rows": {
+    "c78f18606524539e4c573481e5bf1e0a242cc33c": {
+      "A": {
+        "scope": "reserve16",
+        "masked_id": "76624b8e6f82e7c3fe57",
+        "verdict": "failure",
+        "supporting_citations": [],
+        "reason": "First HTTP response returned 502 with no answer or citation.",
+        "returned_citations": 0,
+        "http": 502,
+        "negative": false,
+        "unsupported_citations": []
+      },
+      "B": {
+        "scope": "reserve16",
+        "masked_id": "029e44bd40e00a14ddb2",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "Structured refusal without a citation on a positive question whose annotated answer is 1,001 responses. Counts of workers or ratings would measure a different task.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": false,
+        "unsupported_citations": []
+      },
+      "C": {
+        "scope": "reserve16",
+        "masked_id": "1239278b28dc0ceb09a0",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "Structured refusal without a citation on a positive question whose annotated answer is 1,001 responses. Counts of workers or ratings would measure a different task.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": false,
+        "unsupported_citations": []
+      }
+    },
+    "05e3b831e4c02bbd64a6e35f6c52f0922a41539a": {
+      "A": {
+        "scope": "reserve16",
+        "masked_id": "2a8ca38a9778adabaa70",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "Structured refusal without citations, consistent with the negative annotation. Regular extraction alone supplies neither the frame count per interval nor its duration.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true,
+        "unsupported_citations": []
+      },
+      "B": {
+        "scope": "reserve16",
+        "masked_id": "c9f9f70e911978bcc26a",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "Structured refusal without citations, consistent with the negative annotation. Regular extraction alone supplies neither the frame count per interval nor its duration.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true,
+        "unsupported_citations": []
+      },
+      "C": {
+        "scope": "reserve16",
+        "masked_id": "a16448fdedbf3d7e654e",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "Structured refusal without citations, consistent with the negative annotation. Regular extraction alone supplies neither the frame count per interval nor its duration.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true,
+        "unsupported_citations": []
+      }
+    },
+    "e06e1b103483e1e58201075c03e610202968c877": {
+      "A": {
+        "scope": "reserve16",
+        "masked_id": "2f5cb2aa08ee33688536",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "Structured refusal without citations on the official negative. The requested parameter count concerns the joint ASR/LU model; another model’s size would not answer it.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true,
+        "unsupported_citations": []
+      },
+      "B": {
+        "scope": "reserve16",
+        "masked_id": "6f38e78381d73b800922",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "Structured refusal without citations on the official negative. The requested parameter count concerns the joint ASR/LU model; another model’s size would not answer it.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true,
+        "unsupported_citations": []
+      },
+      "C": {
+        "scope": "reserve16",
+        "masked_id": "1b31eece4b5bde6815f6",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "Structured refusal without citations on the official negative. The requested parameter count concerns the joint ASR/LU model; another model’s size would not answer it.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true,
+        "unsupported_citations": []
+      }
+    },
+    "ebb7313eee2ea447abc83cb08b658b57c7eaa600": {
+      "A": {
+        "scope": "reserve16",
+        "masked_id": "3c5b9000acde333b6019",
+        "verdict": "full",
+        "supporting_citations": [
+          2,
+          3
+        ],
+        "reason": "[3] identifies Moses as the SMT baseline. [2] describes the paired Moses/OpenNMT experiments and the comparison to Google Translate.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false,
+        "unsupported_citations": []
+      },
+      "B": {
+        "scope": "reserve16",
+        "masked_id": "4b68d4335392f3b43281",
+        "verdict": "full",
+        "supporting_citations": [
+          2,
+          3,
+          4
+        ],
+        "reason": "[3] explicitly specifies Moses for SMT. [2] reports the SMT/NMT systems; [4] independently describes the Google Translate benchmark.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": false,
+        "unsupported_citations": []
+      },
+      "C": {
+        "scope": "reserve16",
+        "masked_id": "8a7995cc117ea20dfd6f",
+        "verdict": "full",
+        "supporting_citations": [
+          2,
+          3
+        ],
+        "reason": "[2] identifies the systems used for SMT and NMT and [3] explicitly names the SMT baseline as Moses.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false,
+        "unsupported_citations": []
+      }
+    },
+    "891cab2e41d6ba962778bda297592c916b432226": {
+      "A": {
+        "scope": "reserve16",
+        "masked_id": "7cc40886bb165bcea45a",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2
+        ],
+        "reason": "[1] directly identifies the target code as Python; [2] identifies Python as the framework’s primary target in the conclusion.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false,
+        "unsupported_citations": []
+      },
+      "B": {
+        "scope": "reserve16",
+        "masked_id": "c61c8d73008d917f2792",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2
+        ],
+        "reason": "[1] directly identifies the target code as Python; [2] identifies Python as the framework’s primary target in the conclusion.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false,
+        "unsupported_citations": []
+      },
+      "C": {
+        "scope": "reserve16",
+        "masked_id": "6f92c232964a696b180f",
+        "verdict": "full",
+        "supporting_citations": [
+          1
+        ],
+        "reason": "[1] explicitly says the target side of the parallel corpus contains Python code.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false,
+        "unsupported_citations": []
+      }
+    },
+    "87159024d4b6dac8c456bb74a91044df292f6b99": {
+      "A": {
+        "scope": "reserve16",
+        "masked_id": "de71fbade4bc4b440733",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "Structured refusal without citations, consistent with the negative annotation. A description of how examples are constructed does not give their proportion.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true,
+        "unsupported_citations": []
+      },
+      "B": {
+        "scope": "reserve16",
+        "masked_id": "5cb3de1946eae323b7d5",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "Structured refusal without citations, consistent with the negative annotation. A description of how examples are constructed does not give their proportion.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true,
+        "unsupported_citations": []
+      },
+      "C": {
+        "scope": "reserve16",
+        "masked_id": "1ec113f1d77bb414d768",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "Structured refusal without citations, consistent with the negative annotation. A description of how examples are constructed does not give their proportion.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true,
+        "unsupported_citations": []
+      }
+    },
+    "f27502c3ece9ade265389d5ace90ca9ca42b46f3": {
+      "A": {
+        "scope": "reserve16",
+        "masked_id": "e66c037eda173b6058c7",
+        "verdict": "failure",
+        "supporting_citations": [],
+        "reason": "First HTTP response returned 502 with no answer or citation.",
+        "returned_citations": 0,
+        "http": 502,
+        "negative": false,
+        "unsupported_citations": []
+      },
+      "B": {
+        "scope": "reserve16",
+        "masked_id": "777bdacafd034cbbd458",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          3,
+          4
+        ],
+        "reason": "[4] supports the 30 workers per experiment, 270 unique workers, time split, topic control, questionnaire, correction incentive and separate ratings. [3] names all three aspects. [1] supports the added quality improvement of 10–50% and higher engagement and satisfaction.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": false,
+        "unsupported_citations": []
+      },
+      "C": {
+        "scope": "reserve16",
+        "masked_id": "4d2c64fc7701439fe4d3",
+        "verdict": "full",
+        "supporting_citations": [
+          3,
+          4
+        ],
+        "reason": "[4] identifies the two human groups, 30 workers per experiment, the self-report and separate overall-quality ratings; [3] names the three targeted aspects and completes the clipped description in [4].",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false,
+        "unsupported_citations": []
+      }
+    },
+    "6ff240d985bbe96b9d5042c9b372b4e8f498f264": {
+      "A": {
+        "scope": "reserve16",
+        "masked_id": "245f9b9d7feeeed08d31",
+        "verdict": "full",
+        "supporting_citations": [
+          2,
+          6
+        ],
+        "reason": "[6] gives 313,813 annotated SMS samples, the stratified 80/20 split and both counts. [2] confirms a dataset of over 0.3 million records.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false,
+        "unsupported_citations": []
+      },
+      "B": {
+        "scope": "reserve16",
+        "masked_id": "8999465ba2e82573a51c",
+        "verdict": "full",
+        "supporting_citations": [
+          2,
+          6
+        ],
+        "reason": "[6] supports 313,813 samples in 12 categories and the exact training and testing counts. [2] supplies the rounded size.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false,
+        "unsupported_citations": []
+      },
+      "C": {
+        "scope": "reserve16",
+        "masked_id": "d6e6c04ff2928ebba078",
+        "verdict": "full",
+        "supporting_citations": [
+          6
+        ],
+        "reason": "[6] directly states 313,813 manually annotated records spanning 12 predefined categories.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false,
+        "unsupported_citations": []
+      }
+    },
+    "ec91b87c3f45df050e4e16018d2bf5b62e4ca298": {
+      "A": {
+        "scope": "reserve16",
+        "masked_id": "bc5f3e5ce8cee85eccca",
+        "verdict": "wrong",
+        "supporting_citations": [
+          2
+        ],
+        "reason": "[2] supports the architecture attributed to Huang and explicitly identifies it as the baseline that Calixto outperformed. This passage describes prior work. It does not identify the baseline used in the named paper’s own experiments. The scope error leaves the official negative unanswered.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": true,
+        "unsupported_citations": []
+      },
+      "B": {
+        "scope": "reserve16",
+        "masked_id": "45d0d222018112fca950",
+        "verdict": "wrong",
+        "supporting_citations": [
+          2
+        ],
+        "reason": "[2] supports the architecture attributed to Huang and explicitly identifies it as the baseline that Calixto outperformed. This passage describes prior work. It does not identify the baseline used in the named paper’s own experiments. The scope error leaves the official negative unanswered.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": true,
+        "unsupported_citations": []
+      },
+      "C": {
+        "scope": "reserve16",
+        "masked_id": "ae8a8da9d6591ccc4dd8",
+        "verdict": "wrong",
+        "supporting_citations": [
+          2
+        ],
+        "reason": "[2] supports the architecture attributed to Huang and explicitly identifies it as the baseline that Calixto outperformed. This passage describes prior work. It does not identify the baseline used in the named paper’s own experiments. The scope error leaves the official negative unanswered.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": true,
+        "unsupported_citations": []
+      }
+    },
+    "37103369e5792ece49a71666489016c4cea94cda": {
+      "A": {
+        "scope": "reserve16",
+        "masked_id": "32792cc7c459b421b929",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "Formal refusal without citations, consistent with the negative annotation. Naming Switchboard and DailyDialog does not by itself document the natural language studied.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true,
+        "unsupported_citations": []
+      },
+      "B": {
+        "scope": "reserve16",
+        "masked_id": "5793f1045ee9a9857d8a",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "Formal refusal without citations, consistent with the negative annotation. Naming Switchboard and DailyDialog does not by itself document the natural language studied.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true,
+        "unsupported_citations": []
+      },
+      "C": {
+        "scope": "reserve16",
+        "masked_id": "7c71423db166cdf55956",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "Formal refusal without citations, consistent with the negative annotation. Naming Switchboard and DailyDialog does not by itself document the natural language studied.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true,
+        "unsupported_citations": []
+      }
+    },
+    "d469c7de5c9e6dd8a901190e95688c446f12118f": {
+      "A": {
+        "scope": "reserve16",
+        "masked_id": "aeb007c9631a53fb711b",
+        "verdict": "failure",
+        "supporting_citations": [],
+        "reason": "The first HTTP response returned 502 with no answer or citations.",
+        "returned_citations": 0,
+        "http": 502,
+        "negative": true,
+        "unsupported_citations": []
+      },
+      "B": {
+        "scope": "reserve16",
+        "masked_id": "25c09f49bd0ef7ce6123",
+        "verdict": "wrong",
+        "supporting_citations": [
+          1,
+          2,
+          3,
+          6
+        ],
+        "reason": "Despite the negative annotation, [1]–[3] directly support state-of-the-art performance and faster convergence on two datasets. [6] supports the precision comparison, beating deidentify, and a binary score over 0.812. The returned excerpt renders the metric as INLINEFORM0 and does not establish the added F1 identification for that number.",
+        "returned_citations": 4,
+        "http": 200,
+        "negative": true,
+        "unsupported_citations": []
+      },
+      "C": {
+        "scope": "reserve16",
+        "masked_id": "ffe50a68402ed8863a35",
+        "verdict": "wrong",
+        "supporting_citations": [
+          1,
+          2,
+          3,
+          6
+        ],
+        "reason": "Despite the negative annotation, [1]–[3] directly support state-of-the-art performance and faster convergence on two datasets. [6] supports the precision comparison, beating deidentify, and a binary score over 0.812. The returned excerpt renders the metric as INLINEFORM0 and does not establish the added F1 identification for that number.",
+        "returned_citations": 4,
+        "http": 200,
+        "negative": true,
+        "unsupported_citations": []
+      }
+    },
+    "f4e1d2276d3fc781b686d2bb44eead73e06fbf3f": {
+      "A": {
+        "scope": "reserve16",
+        "masked_id": "ad03ff53f6f9db1ed1f6",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2,
+          3
+        ],
+        "reason": "[1] places the auxiliary unsupervised task at the final layer, [2] explains its senior role in semi-supervised learning, and [3] names the task as auxiliary greedy Language Modeling.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": false,
+        "unsupported_citations": []
+      },
+      "B": {
+        "scope": "reserve16",
+        "masked_id": "c63431dbd480113aca95",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2,
+          3
+        ],
+        "reason": "[1] places the auxiliary unsupervised task at the final layer, [2] explains its senior role in semi-supervised learning, and [3] names the task as auxiliary greedy Language Modeling.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": false,
+        "unsupported_citations": []
+      },
+      "C": {
+        "scope": "reserve16",
+        "masked_id": "6b31535982d09e9f53d1",
+        "verdict": "full",
+        "supporting_citations": [
+          3
+        ],
+        "reason": "[3] identifies Language Modeling as the added unsupervised task and places it after POS and Chunking in the hierarchy.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false,
+        "unsupported_citations": []
+      }
+    },
+    "2e3265d83d2a595293ed458152d3ee76ad19e244": {
+      "A": {
+        "scope": "reserve16",
+        "masked_id": "051ae1629e85e3e03fa8",
+        "verdict": "failure",
+        "supporting_citations": [],
+        "reason": "The first HTTP response returned 401. No model answer or citations were returned.",
+        "returned_citations": 0,
+        "http": 401,
+        "negative": false,
+        "unsupported_citations": []
+      },
+      "B": {
+        "scope": "reserve16",
+        "masked_id": "051ae1629e85e3e03fa8",
+        "verdict": "failure",
+        "supporting_citations": [],
+        "reason": "The first HTTP response returned 401. No model answer or citations were returned.",
+        "returned_citations": 0,
+        "http": 401,
+        "negative": false,
+        "unsupported_citations": []
+      },
+      "C": {
+        "scope": "reserve16",
+        "masked_id": "051ae1629e85e3e03fa8",
+        "verdict": "failure",
+        "supporting_citations": [],
+        "reason": "The first HTTP response returned 401. No model answer or citations were returned.",
+        "returned_citations": 0,
+        "http": 401,
+        "negative": false,
+        "unsupported_citations": []
+      }
+    },
+    "f0e8f045e2e33a2129e67fb32f356242db1dc280": {
+      "A": {
+        "scope": "reserve16",
+        "masked_id": "d7c709d379fea3d27ee2",
+        "verdict": "failure",
+        "supporting_citations": [],
+        "reason": "The first HTTP response returned 401. No model answer or citations were returned.",
+        "returned_citations": 0,
+        "http": 401,
+        "negative": false,
+        "unsupported_citations": []
+      },
+      "B": {
+        "scope": "reserve16",
+        "masked_id": "d7c709d379fea3d27ee2",
+        "verdict": "failure",
+        "supporting_citations": [],
+        "reason": "The first HTTP response returned 401. No model answer or citations were returned.",
+        "returned_citations": 0,
+        "http": 401,
+        "negative": false,
+        "unsupported_citations": []
+      },
+      "C": {
+        "scope": "reserve16",
+        "masked_id": "d7c709d379fea3d27ee2",
+        "verdict": "failure",
+        "supporting_citations": [],
+        "reason": "The first HTTP response returned 401. No model answer or citations were returned.",
+        "returned_citations": 0,
+        "http": 401,
+        "negative": false,
+        "unsupported_citations": []
+      }
+    },
+    "7aba5e4483293f5847caad144ee0791c77164917": {
+      "A": {
+        "scope": "reserve16",
+        "masked_id": "771cb2be159dbc9fec2b",
+        "verdict": "failure",
+        "supporting_citations": [],
+        "reason": "The first HTTP response returned 401. No model answer or citations were returned.",
+        "returned_citations": 0,
+        "http": 401,
+        "negative": false,
+        "unsupported_citations": []
+      },
+      "B": {
+        "scope": "reserve16",
+        "masked_id": "771cb2be159dbc9fec2b",
+        "verdict": "failure",
+        "supporting_citations": [],
+        "reason": "The first HTTP response returned 401. No model answer or citations were returned.",
+        "returned_citations": 0,
+        "http": 401,
+        "negative": false,
+        "unsupported_citations": []
+      },
+      "C": {
+        "scope": "reserve16",
+        "masked_id": "771cb2be159dbc9fec2b",
+        "verdict": "failure",
+        "supporting_citations": [],
+        "reason": "The first HTTP response returned 401. No model answer or citations were returned.",
+        "returned_citations": 0,
+        "http": 401,
+        "negative": false,
+        "unsupported_citations": []
+      }
+    },
+    "7c792cda220916df40edb3107e405c86455822ed": {
+      "A": {
+        "scope": "reserve16",
+        "masked_id": "49fc8d1036d6fc11eb8c",
+        "verdict": "failure",
+        "supporting_citations": [],
+        "reason": "The first HTTP response returned 401. No model answer or citations were returned.",
+        "returned_citations": 0,
+        "http": 401,
+        "negative": false,
+        "unsupported_citations": []
+      },
+      "B": {
+        "scope": "reserve16",
+        "masked_id": "49fc8d1036d6fc11eb8c",
+        "verdict": "failure",
+        "supporting_citations": [],
+        "reason": "The first HTTP response returned 401. No model answer or citations were returned.",
+        "returned_citations": 0,
+        "http": 401,
+        "negative": false,
+        "unsupported_citations": []
+      },
+      "C": {
+        "scope": "reserve16",
+        "masked_id": "49fc8d1036d6fc11eb8c",
+        "verdict": "failure",
+        "supporting_citations": [],
+        "reason": "The first HTTP response returned 401. No model answer or citations were returned.",
+        "returned_citations": 0,
+        "http": 401,
+        "negative": false,
+        "unsupported_citations": []
+      }
+    },
+    "3de27c81af3030eb2d9de1df5ec9bfacdef281a9": {
+      "A": {
+        "scope": "reserve14",
+        "masked_id": "aaf476747f14e34d9fc0",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2
+        ],
+        "reason": "[1] supports corpus totals, vocabulary count and the chatbot name. [2] identifies the dated Italian Wikipedia dump, and both excerpts support the other data sources.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false,
+        "unsupported_citations": []
+      },
+      "B": {
+        "scope": "reserve14",
+        "masked_id": "3757b58f0538e0c52fde",
+        "verdict": "full",
+        "supporting_citations": [
+          1
+        ],
+        "reason": "[1] gives 2.6 GB, 421,829,960 corpus words and 17,305,401 sentences. It separately gives the postprocessing vocabulary size of 618,224.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false,
+        "unsupported_citations": []
+      },
+      "C": {
+        "scope": "reserve14",
+        "masked_id": "4b471859eabcb25635b8",
+        "verdict": "full",
+        "supporting_citations": [
+          1
+        ],
+        "reason": "All three measurements of the training corpus are stated in [1], with bytes, words and sentences kept distinct.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false,
+        "unsupported_citations": []
+      }
+    },
+    "b3ec918827cd22b16212265fcdd5b3eadee654ae": {
+      "A": {
+        "scope": "reserve14",
+        "masked_id": "479d4b9d5debd4ba40f1",
+        "verdict": "failure",
+        "supporting_citations": [],
+        "reason": "First response returned HTTP 502 without an answer or citations.",
+        "returned_citations": 0,
+        "http": 502,
+        "negative": true,
+        "unsupported_citations": []
+      },
+      "B": {
+        "scope": "reserve14",
+        "masked_id": "5992890351f40a22dd36",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "Formal refusal with no citations, on an officially unanswerable question. A hashtag-supervision description or one error-analysis example does not supply the complete requested set.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true,
+        "unsupported_citations": []
+      },
+      "C": {
+        "scope": "reserve14",
+        "masked_id": "cc95e90f8940fdc06eba",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "Formal refusal with no citations, on an officially unanswerable question. A hashtag-supervision description or one error-analysis example does not supply the complete requested set.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true,
+        "unsupported_citations": []
+      }
+    },
+    "a130aa735de3b65c71f27018f20d3c068bafb826": {
+      "A": {
+        "scope": "qasper",
+        "masked_id": "03157db766a8823093fb",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          4,
+          6
+        ],
+        "reason": "[6] supports the VG training fraction and both datasets’ image/text counts. [4] gives the VG description/object-set sample count and combined validation/testing count. [1] supports 2,909 instance classes.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": false,
+        "unsupported_citations": []
+      },
+      "B": {
+        "scope": "qasper",
+        "masked_id": "e020d04d6b4de6e90351",
+        "verdict": "full",
+        "supporting_citations": [
+          4,
+          6
+        ],
+        "reason": "[6] gives 16k/740k for VG and 9k/54k for ReferIt. [4] specifies the separate instance-selection training set of 1.73M samples and the combined validation/testing pool of 300K.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false,
+        "unsupported_citations": []
+      },
+      "C": {
+        "scope": "qasper",
+        "masked_id": "c647d81f828062fff04a",
+        "verdict": "full",
+        "supporting_citations": [
+          4,
+          6
+        ],
+        "reason": "[6] gives 16k/740k for VG and 9k/54k for ReferIt. [4] specifies the separate instance-selection training set of 1.73M samples and the combined validation/testing pool of 300K.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false,
+        "unsupported_citations": []
+      }
+    },
+    "620": {
+      "A": {
+        "scope": "full",
+        "masked_id": "3c7bb41732666151b9cc",
+        "verdict": "partial",
+        "supporting_citations": [
+          1
+        ],
+        "reason": "[1] supports the mouse pancreatic cancer results for stromal depletion, intratumoral vascular density, drug concentration and transient stabilization. Both answers limit the conclusion to that experiment and explicitly leave fibrosis reduction unresolved.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false,
+        "unsupported_citations": []
+      },
+      "B": {
+        "scope": "full",
+        "masked_id": "174ab39a9be36c2fbcec",
+        "verdict": "partial",
+        "supporting_citations": [
+          1
+        ],
+        "reason": "[1] supports the mouse pancreatic cancer results for stromal depletion, intratumoral vascular density, drug concentration and transient stabilization. Both answers limit the conclusion to that experiment and explicitly leave fibrosis reduction unresolved.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false,
+        "unsupported_citations": []
+      },
+      "C": {
+        "scope": "full",
+        "masked_id": "4686727ea863dee60416",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "Formal abstention with no citations on a positive claim. It provides no supported component answer.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": false,
+        "unsupported_citations": []
+      }
+    }
+  },
+  "comparisons": {
+    "C-A": {
+      "baseline": "A",
+      "candidate": "C",
+      "summary": {
+        "full": {
+          "metrics": {
+            "baseline": {
+              "n": 1,
+              "http200": 1,
+              "answerable": 1,
+              "unanswerable": 0,
+              "positive_outcomes": {
+                "partial": 1
+              },
+              "negative_outcomes": {},
+              "supporting_citations": 1,
+              "returned_citations": 1
+            },
+            "candidate": {
+              "n": 1,
+              "http200": 1,
+              "answerable": 1,
+              "unanswerable": 0,
+              "positive_outcomes": {
+                "refusal": 1
+              },
+              "negative_outcomes": {},
+              "supporting_citations": 0,
+              "returned_citations": 0
+            }
+          },
+          "http200": {
+            "retained": [
+              "620"
+            ],
+            "lost": [],
+            "gained": []
+          },
+          "supported_answer": {
+            "retained": [],
+            "lost": [],
+            "gained": []
+          },
+          "correct_refusal": {
+            "retained": [],
+            "lost": [],
+            "gained": []
+          },
+          "wrong_positive": {
+            "retained": [],
+            "lost": [],
+            "gained": []
+          }
+        },
+        "qasper": {
+          "metrics": {
+            "baseline": {
+              "n": 1,
+              "http200": 1,
+              "answerable": 1,
+              "unanswerable": 0,
+              "positive_outcomes": {
+                "full": 1
+              },
+              "negative_outcomes": {},
+              "supporting_citations": 3,
+              "returned_citations": 3
+            },
+            "candidate": {
+              "n": 1,
+              "http200": 1,
+              "answerable": 1,
+              "unanswerable": 0,
+              "positive_outcomes": {
+                "full": 1
+              },
+              "negative_outcomes": {},
+              "supporting_citations": 2,
+              "returned_citations": 2
+            }
+          },
+          "http200": {
+            "retained": [
+              "a130aa735de3b65c71f27018f20d3c068bafb826"
+            ],
+            "lost": [],
+            "gained": []
+          },
+          "supported_answer": {
+            "retained": [
+              "a130aa735de3b65c71f27018f20d3c068bafb826"
+            ],
+            "lost": [],
+            "gained": []
+          },
+          "correct_refusal": {
+            "retained": [],
+            "lost": [],
+            "gained": []
+          },
+          "wrong_positive": {
+            "retained": [],
+            "lost": [],
+            "gained": []
+          }
+        },
+        "reserve14": {
+          "metrics": {
+            "baseline": {
+              "n": 2,
+              "http200": 1,
+              "answerable": 1,
+              "unanswerable": 1,
+              "positive_outcomes": {
+                "full": 1
+              },
+              "negative_outcomes": {
+                "failure": 1
+              },
+              "supporting_citations": 2,
+              "returned_citations": 2
+            },
+            "candidate": {
+              "n": 2,
+              "http200": 2,
+              "answerable": 1,
+              "unanswerable": 1,
+              "positive_outcomes": {
+                "full": 1
+              },
+              "negative_outcomes": {
+                "refusal": 1
+              },
+              "supporting_citations": 1,
+              "returned_citations": 1
+            }
+          },
+          "http200": {
+            "retained": [
+              "3de27c81af3030eb2d9de1df5ec9bfacdef281a9"
+            ],
+            "lost": [],
+            "gained": [
+              "b3ec918827cd22b16212265fcdd5b3eadee654ae"
+            ]
+          },
+          "supported_answer": {
+            "retained": [
+              "3de27c81af3030eb2d9de1df5ec9bfacdef281a9"
+            ],
+            "lost": [],
+            "gained": []
+          },
+          "correct_refusal": {
+            "retained": [],
+            "lost": [],
+            "gained": [
+              "b3ec918827cd22b16212265fcdd5b3eadee654ae"
+            ]
+          },
+          "wrong_positive": {
+            "retained": [],
+            "lost": [],
+            "gained": []
+          }
+        },
+        "reserve16": {
+          "metrics": {
+            "baseline": {
+              "n": 16,
+              "http200": 9,
+              "answerable": 10,
+              "unanswerable": 6,
+              "positive_outcomes": {
+                "failure": 6,
+                "full": 4
+              },
+              "negative_outcomes": {
+                "refusal": 4,
+                "wrong": 1,
+                "failure": 1
+              },
+              "supporting_citations": 10,
+              "returned_citations": 10
+            },
+            "candidate": {
+              "n": 16,
+              "http200": 12,
+              "answerable": 10,
+              "unanswerable": 6,
+              "positive_outcomes": {
+                "refusal": 1,
+                "full": 5,
+                "failure": 4
+              },
+              "negative_outcomes": {
+                "refusal": 4,
+                "wrong": 2
+              },
+              "supporting_citations": 12,
+              "returned_citations": 12
+            }
+          },
+          "http200": {
+            "retained": [
+              "05e3b831e4c02bbd64a6e35f6c52f0922a41539a",
+              "37103369e5792ece49a71666489016c4cea94cda",
+              "6ff240d985bbe96b9d5042c9b372b4e8f498f264",
+              "87159024d4b6dac8c456bb74a91044df292f6b99",
+              "891cab2e41d6ba962778bda297592c916b432226",
+              "e06e1b103483e1e58201075c03e610202968c877",
+              "ebb7313eee2ea447abc83cb08b658b57c7eaa600",
+              "ec91b87c3f45df050e4e16018d2bf5b62e4ca298",
+              "f4e1d2276d3fc781b686d2bb44eead73e06fbf3f"
+            ],
+            "lost": [],
+            "gained": [
+              "c78f18606524539e4c573481e5bf1e0a242cc33c",
+              "d469c7de5c9e6dd8a901190e95688c446f12118f",
+              "f27502c3ece9ade265389d5ace90ca9ca42b46f3"
+            ]
+          },
+          "supported_answer": {
+            "retained": [
+              "6ff240d985bbe96b9d5042c9b372b4e8f498f264",
+              "891cab2e41d6ba962778bda297592c916b432226",
+              "ebb7313eee2ea447abc83cb08b658b57c7eaa600",
+              "f4e1d2276d3fc781b686d2bb44eead73e06fbf3f"
+            ],
+            "lost": [],
+            "gained": [
+              "f27502c3ece9ade265389d5ace90ca9ca42b46f3"
+            ]
+          },
+          "correct_refusal": {
+            "retained": [
+              "05e3b831e4c02bbd64a6e35f6c52f0922a41539a",
+              "37103369e5792ece49a71666489016c4cea94cda",
+              "87159024d4b6dac8c456bb74a91044df292f6b99",
+              "e06e1b103483e1e58201075c03e610202968c877"
+            ],
+            "lost": [],
+            "gained": []
+          },
+          "wrong_positive": {
+            "retained": [
+              "ec91b87c3f45df050e4e16018d2bf5b62e4ca298"
+            ],
+            "lost": [],
+            "gained": [
+              "d469c7de5c9e6dd8a901190e95688c446f12118f"
+            ]
+          }
+        }
+      },
+      "historical_preservation": {
+        "full": {
+          "lost_supported": [],
+          "lost_correct_refusals": [],
+          "new_wrong_positives": []
+        },
+        "qasper": {
+          "lost_supported": [],
+          "lost_correct_refusals": [],
+          "new_wrong_positives": []
+        },
+        "reserve14": {
+          "lost_supported": [],
+          "lost_correct_refusals": [],
+          "new_wrong_positives": []
+        }
+      },
+      "http_discordant_gain_loss": [
+        3,
+        0
+      ],
+      "two_sided_exact_p_http": 0.25,
+      "note": "Source integrity, retrieval parity and historical controls are checked separately.",
+      "observed_benefits": {
+        "more_http_200": true,
+        "more_supported_answers": true,
+        "more_correct_refusals": false,
+        "fewer_incorrect_positives": false,
+        "higher_citation_precision": false
+      },
+      "primary_gate_checks": {
+        "http_200_improved": true,
+        "previously_correct_preserved": true,
+        "previously_correct_refusals_preserved": true,
+        "no_new_wrong_positive": false,
+        "semantic_citation_precision_preserved": true
+      },
+      "primary_semantic_and_http_gate_met": false
+    },
+    "C-B": {
+      "baseline": "B",
+      "candidate": "C",
+      "summary": {
+        "full": {
+          "metrics": {
+            "baseline": {
+              "n": 1,
+              "http200": 1,
+              "answerable": 1,
+              "unanswerable": 0,
+              "positive_outcomes": {
+                "partial": 1
+              },
+              "negative_outcomes": {},
+              "supporting_citations": 1,
+              "returned_citations": 1
+            },
+            "candidate": {
+              "n": 1,
+              "http200": 1,
+              "answerable": 1,
+              "unanswerable": 0,
+              "positive_outcomes": {
+                "refusal": 1
+              },
+              "negative_outcomes": {},
+              "supporting_citations": 0,
+              "returned_citations": 0
+            }
+          },
+          "http200": {
+            "retained": [
+              "620"
+            ],
+            "lost": [],
+            "gained": []
+          },
+          "supported_answer": {
+            "retained": [],
+            "lost": [],
+            "gained": []
+          },
+          "correct_refusal": {
+            "retained": [],
+            "lost": [],
+            "gained": []
+          },
+          "wrong_positive": {
+            "retained": [],
+            "lost": [],
+            "gained": []
+          }
+        },
+        "qasper": {
+          "metrics": {
+            "baseline": {
+              "n": 1,
+              "http200": 1,
+              "answerable": 1,
+              "unanswerable": 0,
+              "positive_outcomes": {
+                "full": 1
+              },
+              "negative_outcomes": {},
+              "supporting_citations": 2,
+              "returned_citations": 2
+            },
+            "candidate": {
+              "n": 1,
+              "http200": 1,
+              "answerable": 1,
+              "unanswerable": 0,
+              "positive_outcomes": {
+                "full": 1
+              },
+              "negative_outcomes": {},
+              "supporting_citations": 2,
+              "returned_citations": 2
+            }
+          },
+          "http200": {
+            "retained": [
+              "a130aa735de3b65c71f27018f20d3c068bafb826"
+            ],
+            "lost": [],
+            "gained": []
+          },
+          "supported_answer": {
+            "retained": [
+              "a130aa735de3b65c71f27018f20d3c068bafb826"
+            ],
+            "lost": [],
+            "gained": []
+          },
+          "correct_refusal": {
+            "retained": [],
+            "lost": [],
+            "gained": []
+          },
+          "wrong_positive": {
+            "retained": [],
+            "lost": [],
+            "gained": []
+          }
+        },
+        "reserve14": {
+          "metrics": {
+            "baseline": {
+              "n": 2,
+              "http200": 2,
+              "answerable": 1,
+              "unanswerable": 1,
+              "positive_outcomes": {
+                "full": 1
+              },
+              "negative_outcomes": {
+                "refusal": 1
+              },
+              "supporting_citations": 1,
+              "returned_citations": 1
+            },
+            "candidate": {
+              "n": 2,
+              "http200": 2,
+              "answerable": 1,
+              "unanswerable": 1,
+              "positive_outcomes": {
+                "full": 1
+              },
+              "negative_outcomes": {
+                "refusal": 1
+              },
+              "supporting_citations": 1,
+              "returned_citations": 1
+            }
+          },
+          "http200": {
+            "retained": [
+              "3de27c81af3030eb2d9de1df5ec9bfacdef281a9",
+              "b3ec918827cd22b16212265fcdd5b3eadee654ae"
+            ],
+            "lost": [],
+            "gained": []
+          },
+          "supported_answer": {
+            "retained": [
+              "3de27c81af3030eb2d9de1df5ec9bfacdef281a9"
+            ],
+            "lost": [],
+            "gained": []
+          },
+          "correct_refusal": {
+            "retained": [
+              "b3ec918827cd22b16212265fcdd5b3eadee654ae"
+            ],
+            "lost": [],
+            "gained": []
+          },
+          "wrong_positive": {
+            "retained": [],
+            "lost": [],
+            "gained": []
+          }
+        },
+        "reserve16": {
+          "metrics": {
+            "baseline": {
+              "n": 16,
+              "http200": 12,
+              "answerable": 10,
+              "unanswerable": 6,
+              "positive_outcomes": {
+                "refusal": 1,
+                "full": 5,
+                "failure": 4
+              },
+              "negative_outcomes": {
+                "refusal": 4,
+                "wrong": 2
+              },
+              "supporting_citations": 18,
+              "returned_citations": 18
+            },
+            "candidate": {
+              "n": 16,
+              "http200": 12,
+              "answerable": 10,
+              "unanswerable": 6,
+              "positive_outcomes": {
+                "refusal": 1,
+                "full": 5,
+                "failure": 4
+              },
+              "negative_outcomes": {
+                "refusal": 4,
+                "wrong": 2
+              },
+              "supporting_citations": 12,
+              "returned_citations": 12
+            }
+          },
+          "http200": {
+            "retained": [
+              "05e3b831e4c02bbd64a6e35f6c52f0922a41539a",
+              "37103369e5792ece49a71666489016c4cea94cda",
+              "6ff240d985bbe96b9d5042c9b372b4e8f498f264",
+              "87159024d4b6dac8c456bb74a91044df292f6b99",
+              "891cab2e41d6ba962778bda297592c916b432226",
+              "c78f18606524539e4c573481e5bf1e0a242cc33c",
+              "d469c7de5c9e6dd8a901190e95688c446f12118f",
+              "e06e1b103483e1e58201075c03e610202968c877",
+              "ebb7313eee2ea447abc83cb08b658b57c7eaa600",
+              "ec91b87c3f45df050e4e16018d2bf5b62e4ca298",
+              "f27502c3ece9ade265389d5ace90ca9ca42b46f3",
+              "f4e1d2276d3fc781b686d2bb44eead73e06fbf3f"
+            ],
+            "lost": [],
+            "gained": []
+          },
+          "supported_answer": {
+            "retained": [
+              "6ff240d985bbe96b9d5042c9b372b4e8f498f264",
+              "891cab2e41d6ba962778bda297592c916b432226",
+              "ebb7313eee2ea447abc83cb08b658b57c7eaa600",
+              "f27502c3ece9ade265389d5ace90ca9ca42b46f3",
+              "f4e1d2276d3fc781b686d2bb44eead73e06fbf3f"
+            ],
+            "lost": [],
+            "gained": []
+          },
+          "correct_refusal": {
+            "retained": [
+              "05e3b831e4c02bbd64a6e35f6c52f0922a41539a",
+              "37103369e5792ece49a71666489016c4cea94cda",
+              "87159024d4b6dac8c456bb74a91044df292f6b99",
+              "e06e1b103483e1e58201075c03e610202968c877"
+            ],
+            "lost": [],
+            "gained": []
+          },
+          "wrong_positive": {
+            "retained": [
+              "d469c7de5c9e6dd8a901190e95688c446f12118f",
+              "ec91b87c3f45df050e4e16018d2bf5b62e4ca298"
+            ],
+            "lost": [],
+            "gained": []
+          }
+        }
+      },
+      "historical_preservation": {
+        "full": {
+          "lost_supported": [],
+          "lost_correct_refusals": [],
+          "new_wrong_positives": []
+        },
+        "qasper": {
+          "lost_supported": [],
+          "lost_correct_refusals": [],
+          "new_wrong_positives": []
+        },
+        "reserve14": {
+          "lost_supported": [],
+          "lost_correct_refusals": [],
+          "new_wrong_positives": []
+        }
+      },
+      "http_discordant_gain_loss": [
+        0,
+        0
+      ],
+      "two_sided_exact_p_http": 1,
+      "note": "Source integrity, retrieval parity and historical controls are checked separately.",
+      "observed_benefits": {
+        "more_http_200": false,
+        "more_supported_answers": false,
+        "more_correct_refusals": false,
+        "fewer_incorrect_positives": false,
+        "higher_citation_precision": false
+      },
+      "primary_gate_checks": {
+        "previously_correct_preserved": true,
+        "previously_correct_refusals_preserved": true,
+        "no_new_wrong_positive": true,
+        "semantic_citation_precision_preserved": true,
+        "http_200_not_decreased": true,
+        "observed_benefit_over_B": false
+      },
+      "primary_semantic_and_http_gate_met": false
+    },
+    "B-A": {
+      "baseline": "A",
+      "candidate": "B",
+      "summary": {
+        "full": {
+          "metrics": {
+            "baseline": {
+              "n": 1,
+              "http200": 1,
+              "answerable": 1,
+              "unanswerable": 0,
+              "positive_outcomes": {
+                "partial": 1
+              },
+              "negative_outcomes": {},
+              "supporting_citations": 1,
+              "returned_citations": 1
+            },
+            "candidate": {
+              "n": 1,
+              "http200": 1,
+              "answerable": 1,
+              "unanswerable": 0,
+              "positive_outcomes": {
+                "partial": 1
+              },
+              "negative_outcomes": {},
+              "supporting_citations": 1,
+              "returned_citations": 1
+            }
+          },
+          "http200": {
+            "retained": [
+              "620"
+            ],
+            "lost": [],
+            "gained": []
+          },
+          "supported_answer": {
+            "retained": [],
+            "lost": [],
+            "gained": []
+          },
+          "correct_refusal": {
+            "retained": [],
+            "lost": [],
+            "gained": []
+          },
+          "wrong_positive": {
+            "retained": [],
+            "lost": [],
+            "gained": []
+          }
+        },
+        "qasper": {
+          "metrics": {
+            "baseline": {
+              "n": 1,
+              "http200": 1,
+              "answerable": 1,
+              "unanswerable": 0,
+              "positive_outcomes": {
+                "full": 1
+              },
+              "negative_outcomes": {},
+              "supporting_citations": 3,
+              "returned_citations": 3
+            },
+            "candidate": {
+              "n": 1,
+              "http200": 1,
+              "answerable": 1,
+              "unanswerable": 0,
+              "positive_outcomes": {
+                "full": 1
+              },
+              "negative_outcomes": {},
+              "supporting_citations": 2,
+              "returned_citations": 2
+            }
+          },
+          "http200": {
+            "retained": [
+              "a130aa735de3b65c71f27018f20d3c068bafb826"
+            ],
+            "lost": [],
+            "gained": []
+          },
+          "supported_answer": {
+            "retained": [
+              "a130aa735de3b65c71f27018f20d3c068bafb826"
+            ],
+            "lost": [],
+            "gained": []
+          },
+          "correct_refusal": {
+            "retained": [],
+            "lost": [],
+            "gained": []
+          },
+          "wrong_positive": {
+            "retained": [],
+            "lost": [],
+            "gained": []
+          }
+        },
+        "reserve14": {
+          "metrics": {
+            "baseline": {
+              "n": 2,
+              "http200": 1,
+              "answerable": 1,
+              "unanswerable": 1,
+              "positive_outcomes": {
+                "full": 1
+              },
+              "negative_outcomes": {
+                "failure": 1
+              },
+              "supporting_citations": 2,
+              "returned_citations": 2
+            },
+            "candidate": {
+              "n": 2,
+              "http200": 2,
+              "answerable": 1,
+              "unanswerable": 1,
+              "positive_outcomes": {
+                "full": 1
+              },
+              "negative_outcomes": {
+                "refusal": 1
+              },
+              "supporting_citations": 1,
+              "returned_citations": 1
+            }
+          },
+          "http200": {
+            "retained": [
+              "3de27c81af3030eb2d9de1df5ec9bfacdef281a9"
+            ],
+            "lost": [],
+            "gained": [
+              "b3ec918827cd22b16212265fcdd5b3eadee654ae"
+            ]
+          },
+          "supported_answer": {
+            "retained": [
+              "3de27c81af3030eb2d9de1df5ec9bfacdef281a9"
+            ],
+            "lost": [],
+            "gained": []
+          },
+          "correct_refusal": {
+            "retained": [],
+            "lost": [],
+            "gained": [
+              "b3ec918827cd22b16212265fcdd5b3eadee654ae"
+            ]
+          },
+          "wrong_positive": {
+            "retained": [],
+            "lost": [],
+            "gained": []
+          }
+        },
+        "reserve16": {
+          "metrics": {
+            "baseline": {
+              "n": 16,
+              "http200": 9,
+              "answerable": 10,
+              "unanswerable": 6,
+              "positive_outcomes": {
+                "failure": 6,
+                "full": 4
+              },
+              "negative_outcomes": {
+                "refusal": 4,
+                "wrong": 1,
+                "failure": 1
+              },
+              "supporting_citations": 10,
+              "returned_citations": 10
+            },
+            "candidate": {
+              "n": 16,
+              "http200": 12,
+              "answerable": 10,
+              "unanswerable": 6,
+              "positive_outcomes": {
+                "refusal": 1,
+                "full": 5,
+                "failure": 4
+              },
+              "negative_outcomes": {
+                "refusal": 4,
+                "wrong": 2
+              },
+              "supporting_citations": 18,
+              "returned_citations": 18
+            }
+          },
+          "http200": {
+            "retained": [
+              "05e3b831e4c02bbd64a6e35f6c52f0922a41539a",
+              "37103369e5792ece49a71666489016c4cea94cda",
+              "6ff240d985bbe96b9d5042c9b372b4e8f498f264",
+              "87159024d4b6dac8c456bb74a91044df292f6b99",
+              "891cab2e41d6ba962778bda297592c916b432226",
+              "e06e1b103483e1e58201075c03e610202968c877",
+              "ebb7313eee2ea447abc83cb08b658b57c7eaa600",
+              "ec91b87c3f45df050e4e16018d2bf5b62e4ca298",
+              "f4e1d2276d3fc781b686d2bb44eead73e06fbf3f"
+            ],
+            "lost": [],
+            "gained": [
+              "c78f18606524539e4c573481e5bf1e0a242cc33c",
+              "d469c7de5c9e6dd8a901190e95688c446f12118f",
+              "f27502c3ece9ade265389d5ace90ca9ca42b46f3"
+            ]
+          },
+          "supported_answer": {
+            "retained": [
+              "6ff240d985bbe96b9d5042c9b372b4e8f498f264",
+              "891cab2e41d6ba962778bda297592c916b432226",
+              "ebb7313eee2ea447abc83cb08b658b57c7eaa600",
+              "f4e1d2276d3fc781b686d2bb44eead73e06fbf3f"
+            ],
+            "lost": [],
+            "gained": [
+              "f27502c3ece9ade265389d5ace90ca9ca42b46f3"
+            ]
+          },
+          "correct_refusal": {
+            "retained": [
+              "05e3b831e4c02bbd64a6e35f6c52f0922a41539a",
+              "37103369e5792ece49a71666489016c4cea94cda",
+              "87159024d4b6dac8c456bb74a91044df292f6b99",
+              "e06e1b103483e1e58201075c03e610202968c877"
+            ],
+            "lost": [],
+            "gained": []
+          },
+          "wrong_positive": {
+            "retained": [
+              "ec91b87c3f45df050e4e16018d2bf5b62e4ca298"
+            ],
+            "lost": [],
+            "gained": [
+              "d469c7de5c9e6dd8a901190e95688c446f12118f"
+            ]
+          }
+        }
+      },
+      "historical_preservation": {
+        "full": {
+          "lost_supported": [],
+          "lost_correct_refusals": [],
+          "new_wrong_positives": []
+        },
+        "qasper": {
+          "lost_supported": [],
+          "lost_correct_refusals": [],
+          "new_wrong_positives": []
+        },
+        "reserve14": {
+          "lost_supported": [],
+          "lost_correct_refusals": [],
+          "new_wrong_positives": []
+        }
+      },
+      "http_discordant_gain_loss": [
+        3,
+        0
+      ],
+      "two_sided_exact_p_http": 0.25,
+      "note": "Source integrity, retrieval parity and historical controls are checked separately.",
+      "observed_benefits": {
+        "more_http_200": true,
+        "more_supported_answers": true,
+        "more_correct_refusals": false,
+        "fewer_incorrect_positives": false,
+        "higher_citation_precision": false
+      },
+      "primary_gate_checks": {
+        "http_200_improved": true,
+        "previously_correct_preserved": true,
+        "previously_correct_refusals_preserved": true,
+        "no_new_wrong_positive": false,
+        "semantic_citation_precision_preserved": true
+      },
+      "primary_semantic_and_http_gate_met": false
+    }
+  },
+  "interpretation": "Apply the two primary gates together with original-source verification; inspect the four historical controls separately. B-A is descriptive."
+}

@@ -136,7 +136,9 @@
     "retry": 0,
     "db": 1,
     "db-retry": 1,
-    "db-cold-sdk-fix": 0
+    "db-cold-sdk-fix": 0,
+    "approved-mode": 1,
+    "final-db": 0
   },
   "new_test_fixture_sha256_lf": "48f553ae8d28a0cf03a8534a632a8a50af683c761ce72e7d73fbcaf5000c187a",
   "manual_benchmark_checks": {
@@ -153,5 +155,39 @@
     ],
     "first_error_not_scored_as_refusal": true,
     "historical_7_qasper_scoring_reproduced": true
+  },
+  "approved-mode": {
+    "suites": [
+      {
+        "name": "pytest",
+        "errors": "4",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "76",
+        "time": "278.107",
+        "timestamp": "2026-11-14T11:02:44.141162+08:00",
+        "hostname": "DESKTOP-PVA3D0V"
+      }
+    ],
+    "sha256": "c637e998de3382d4659d059f4292d9a2d96ddc4f7dd529b1b11b903fce18e4d4",
+    "source": ".scratch\\qa-first-regression-20261114\\approved-mode.xml",
+    "scope": "Final default-route unit retest plus integration in same interpreter. Unit tests passed; database initialization used a cached localhost default before the dedicated test URL was applied."
+  },
+  "final-db": {
+    "suites": [
+      {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "4",
+        "time": "15.319",
+        "timestamp": "2026-11-14T11:09:01.081437+08:00",
+        "hostname": "DESKTOP-PVA3D0V"
+      }
+    ],
+    "sha256": "240d1c8e173ebca70f4d4bc101b4d85e37b69b0d47da5c1b58e8e531f031b9b3",
+    "source": ".scratch\\qa-first-regression-20261114\\final-db.xml",
+    "scope": "Fresh interpreter with both runtime and test URLs bound to the same isolated test database and the isolated Qdrant collection; all four QA and connection-lifetime integration scenarios passed."
   }
 }

@@ -175,7 +175,9 @@ def decision(summary, cohort="independent"):
         "historical_preservation": historical,
         "http_discordant_gain_loss": [up, down],
         "two_sided_exact_p_http": p,
-        "note": "Source integrity, retrieval parity and historical controls are checked separately.",
+        "note": (
+            "Source integrity, retrieval parity and historical controls are checked separately."
+        ),
     }
 
 

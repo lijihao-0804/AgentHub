@@ -1,0 +1,353 @@
+{
+  "cohort": "authenticated-supplement",
+  "questions": 4,
+  "rows": {
+    "2e3265d83d2a595293ed458152d3ee76ad19e244": {
+      "A": {
+        "scope": "reserve16",
+        "masked_id": "ad168b4e6d774fef8f89",
+        "verdict": "full",
+        "supporting_citations": [
+          1
+        ],
+        "reason": "[1] identifies the News Category Dataset, HuffPost publication dates and Kaggle source. The same passage supports the reported dataset and sample sizes where given.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false,
+        "unsupported_citations": []
+      },
+      "B": {
+        "scope": "reserve16",
+        "masked_id": "fb58f1d7510ca6b4a020",
+        "verdict": "full",
+        "supporting_citations": [
+          1
+        ],
+        "reason": "[1] identifies the News Category Dataset, HuffPost publication dates and Kaggle source. The same passage supports the reported dataset and sample sizes where given.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false,
+        "unsupported_citations": []
+      },
+      "C": {
+        "scope": "reserve16",
+        "masked_id": "3781bdda6072fb910da9",
+        "verdict": "full",
+        "supporting_citations": [
+          1
+        ],
+        "reason": "[1] identifies the News Category Dataset, HuffPost publication dates and Kaggle source. The same passage supports the reported dataset and sample sizes where given.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false,
+        "unsupported_citations": []
+      }
+    },
+    "f0e8f045e2e33a2129e67fb32f356242db1dc280": {
+      "A": {
+        "scope": "reserve16",
+        "masked_id": "8127a6e2ab5c437c409d",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "Explicit insufficiency without citations. On this positive question the answer supplies neither of the annotated suggestions, reasoning or irony detection.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": false,
+        "unsupported_citations": []
+      },
+      "B": {
+        "scope": "reserve16",
+        "masked_id": "c11d49f4fe336f6bd8b5",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "Explicit insufficiency without citations. On this positive question the answer supplies neither of the annotated suggestions, reasoning or irony detection.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": false,
+        "unsupported_citations": []
+      },
+      "C": {
+        "scope": "reserve16",
+        "masked_id": "0bf3ce2e53fe08dc940c",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "Explicit insufficiency without citations. On this positive question the answer supplies neither of the annotated suggestions, reasoning or irony detection.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": false,
+        "unsupported_citations": []
+      }
+    },
+    "7aba5e4483293f5847caad144ee0791c77164917": {
+      "A": {
+        "scope": "reserve16",
+        "masked_id": "cb5ad729e89eb0940e86",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          6
+        ],
+        "reason": "[1] names WikiHop, classifies it as entity-based multi-hop QA and gives sampled and original split sizes. [6] explicitly confirms use of WikiHop supporting documents.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false,
+        "unsupported_citations": []
+      },
+      "B": {
+        "scope": "reserve16",
+        "masked_id": "25e6775a9b907be899d0",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          6
+        ],
+        "reason": "[1] names WikiHop, classifies it as entity-based multi-hop QA and gives sampled and original split sizes. [6] explicitly confirms use of WikiHop supporting documents.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false,
+        "unsupported_citations": []
+      },
+      "C": {
+        "scope": "reserve16",
+        "masked_id": "ba0af6835e91d73dfb5b",
+        "verdict": "full",
+        "supporting_citations": [
+          1
+        ],
+        "reason": "[1] directly identifies the dataset as WikiHop and describes its entity-based multi-hop QA task.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false,
+        "unsupported_citations": []
+      }
+    },
+    "7c792cda220916df40edb3107e405c86455822ed": {
+      "A": {
+        "scope": "reserve16",
+        "masked_id": "3b7b98eba922ca90cdec",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          4
+        ],
+        "reason": "[1] distinguishes the four common metrics from the one actually adopted, METEOR. [4] supports the matcher discussion and the reported small-reference-set comparison with CIDEr.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false,
+        "unsupported_citations": []
+      },
+      "B": {
+        "scope": "reserve16",
+        "masked_id": "7e9411ffe64fd2c127c0",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          4
+        ],
+        "reason": "[1] distinguishes the four common metrics from the one actually adopted, METEOR. [4] supports the matcher discussion and the reported small-reference-set comparison with CIDEr.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false,
+        "unsupported_citations": []
+      },
+      "C": {
+        "scope": "reserve16",
+        "masked_id": "376ab213f3ad45a395d5",
+        "verdict": "full",
+        "supporting_citations": [
+          1
+        ],
+        "reason": "[1] explicitly states that the authors use METEOR for quantitative evaluation.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false,
+        "unsupported_citations": []
+      }
+    }
+  },
+  "diagnostic_comparisons": {
+    "C-A": {
+      "reserve16": {
+        "metrics": {
+          "baseline": {
+            "n": 4,
+            "http200": 4,
+            "answerable": 4,
+            "unanswerable": 0,
+            "positive_outcomes": {
+              "full": 3,
+              "refusal": 1
+            },
+            "negative_outcomes": {},
+            "supporting_citations": 5,
+            "returned_citations": 5
+          },
+          "candidate": {
+            "n": 4,
+            "http200": 4,
+            "answerable": 4,
+            "unanswerable": 0,
+            "positive_outcomes": {
+              "full": 3,
+              "refusal": 1
+            },
+            "negative_outcomes": {},
+            "supporting_citations": 3,
+            "returned_citations": 3
+          }
+        },
+        "http200": {
+          "retained": [
+            "2e3265d83d2a595293ed458152d3ee76ad19e244",
+            "7aba5e4483293f5847caad144ee0791c77164917",
+            "7c792cda220916df40edb3107e405c86455822ed",
+            "f0e8f045e2e33a2129e67fb32f356242db1dc280"
+          ],
+          "lost": [],
+          "gained": []
+        },
+        "supported_answer": {
+          "retained": [
+            "2e3265d83d2a595293ed458152d3ee76ad19e244",
+            "7aba5e4483293f5847caad144ee0791c77164917",
+            "7c792cda220916df40edb3107e405c86455822ed"
+          ],
+          "lost": [],
+          "gained": []
+        },
+        "correct_refusal": {
+          "retained": [],
+          "lost": [],
+          "gained": []
+        },
+        "wrong_positive": {
+          "retained": [],
+          "lost": [],
+          "gained": []
+        }
+      }
+    },
+    "C-B": {
+      "reserve16": {
+        "metrics": {
+          "baseline": {
+            "n": 4,
+            "http200": 4,
+            "answerable": 4,
+            "unanswerable": 0,
+            "positive_outcomes": {
+              "full": 3,
+              "refusal": 1
+            },
+            "negative_outcomes": {},
+            "supporting_citations": 5,
+            "returned_citations": 5
+          },
+          "candidate": {
+            "n": 4,
+            "http200": 4,
+            "answerable": 4,
+            "unanswerable": 0,
+            "positive_outcomes": {
+              "full": 3,
+              "refusal": 1
+            },
+            "negative_outcomes": {},
+            "supporting_citations": 3,
+            "returned_citations": 3
+          }
+        },
+        "http200": {
+          "retained": [
+            "2e3265d83d2a595293ed458152d3ee76ad19e244",
+            "7aba5e4483293f5847caad144ee0791c77164917",
+            "7c792cda220916df40edb3107e405c86455822ed",
+            "f0e8f045e2e33a2129e67fb32f356242db1dc280"
+          ],
+          "lost": [],
+          "gained": []
+        },
+        "supported_answer": {
+          "retained": [
+            "2e3265d83d2a595293ed458152d3ee76ad19e244",
+            "7aba5e4483293f5847caad144ee0791c77164917",
+            "7c792cda220916df40edb3107e405c86455822ed"
+          ],
+          "lost": [],
+          "gained": []
+        },
+        "correct_refusal": {
+          "retained": [],
+          "lost": [],
+          "gained": []
+        },
+        "wrong_positive": {
+          "retained": [],
+          "lost": [],
+          "gained": []
+        }
+      }
+    },
+    "B-A": {
+      "reserve16": {
+        "metrics": {
+          "baseline": {
+            "n": 4,
+            "http200": 4,
+            "answerable": 4,
+            "unanswerable": 0,
+            "positive_outcomes": {
+              "full": 3,
+              "refusal": 1
+            },
+            "negative_outcomes": {},
+            "supporting_citations": 5,
+            "returned_citations": 5
+          },
+          "candidate": {
+            "n": 4,
+            "http200": 4,
+            "answerable": 4,
+            "unanswerable": 0,
+            "positive_outcomes": {
+              "full": 3,
+              "refusal": 1
+            },
+            "negative_outcomes": {},
+            "supporting_citations": 5,
+            "returned_citations": 5
+          }
+        },
+        "http200": {
+          "retained": [
+            "2e3265d83d2a595293ed458152d3ee76ad19e244",
+            "7aba5e4483293f5847caad144ee0791c77164917",
+            "7c792cda220916df40edb3107e405c86455822ed",
+            "f0e8f045e2e33a2129e67fb32f356242db1dc280"
+          ],
+          "lost": [],
+          "gained": []
+        },
+        "supported_answer": {
+          "retained": [
+            "2e3265d83d2a595293ed458152d3ee76ad19e244",
+            "7aba5e4483293f5847caad144ee0791c77164917",
+            "7c792cda220916df40edb3107e405c86455822ed"
+          ],
+          "lost": [],
+          "gained": []
+        },
+        "correct_refusal": {
+          "retained": [],
+          "lost": [],
+          "gained": []
+        },
+        "wrong_positive": {
+          "retained": [],
+          "lost": [],
+          "gained": []
+        }
+      }
+    }
+  }
+}

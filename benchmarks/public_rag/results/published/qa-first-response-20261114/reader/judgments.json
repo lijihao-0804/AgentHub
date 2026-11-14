@@ -1,0 +1,342 @@
+{
+  "029e44bd40e00a14ddb2": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "Structured refusal without a citation on a positive question whose annotated answer is 1,001 responses. Counts of workers or ratings would measure a different task."
+  },
+  "1239278b28dc0ceb09a0": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "Structured refusal without a citation on a positive question whose annotated answer is 1,001 responses. Counts of workers or ratings would measure a different task."
+  },
+  "1b31eece4b5bde6815f6": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "Structured refusal without citations on the official negative. The requested parameter count concerns the joint ASR/LU model; another model’s size would not answer it."
+  },
+  "2f5cb2aa08ee33688536": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "Structured refusal without citations on the official negative. The requested parameter count concerns the joint ASR/LU model; another model’s size would not answer it."
+  },
+  "6f38e78381d73b800922": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "Structured refusal without citations on the official negative. The requested parameter count concerns the joint ASR/LU model; another model’s size would not answer it."
+  },
+  "1ec113f1d77bb414d768": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "Structured refusal without citations, consistent with the negative annotation. A description of how examples are constructed does not give their proportion."
+  },
+  "5cb3de1946eae323b7d5": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "Structured refusal without citations, consistent with the negative annotation. A description of how examples are constructed does not give their proportion."
+  },
+  "de71fbade4bc4b440733": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "Structured refusal without citations, consistent with the negative annotation. A description of how examples are constructed does not give their proportion."
+  },
+  "2a8ca38a9778adabaa70": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "Structured refusal without citations, consistent with the negative annotation. Regular extraction alone supplies neither the frame count per interval nor its duration."
+  },
+  "a16448fdedbf3d7e654e": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "Structured refusal without citations, consistent with the negative annotation. Regular extraction alone supplies neither the frame count per interval nor its duration."
+  },
+  "c9f9f70e911978bcc26a": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "Structured refusal without citations, consistent with the negative annotation. Regular extraction alone supplies neither the frame count per interval nor its duration."
+  },
+  "245f9b9d7feeeed08d31": {
+    "verdict": "full",
+    "supporting_citations": [
+      2,
+      6
+    ],
+    "reason": "[6] gives 313,813 annotated SMS samples, the stratified 80/20 split and both counts. [2] confirms a dataset of over 0.3 million records."
+  },
+  "8999465ba2e82573a51c": {
+    "verdict": "full",
+    "supporting_citations": [
+      2,
+      6
+    ],
+    "reason": "[6] supports 313,813 samples in 12 categories and the exact training and testing counts. [2] supplies the rounded size."
+  },
+  "d6e6c04ff2928ebba078": {
+    "verdict": "full",
+    "supporting_citations": [
+      6
+    ],
+    "reason": "[6] directly states 313,813 manually annotated records spanning 12 predefined categories."
+  },
+  "3c5b9000acde333b6019": {
+    "verdict": "full",
+    "supporting_citations": [
+      2,
+      3
+    ],
+    "reason": "[3] identifies Moses as the SMT baseline. [2] describes the paired Moses/OpenNMT experiments and the comparison to Google Translate."
+  },
+  "4b68d4335392f3b43281": {
+    "verdict": "full",
+    "supporting_citations": [
+      2,
+      3,
+      4
+    ],
+    "reason": "[3] explicitly specifies Moses for SMT. [2] reports the SMT/NMT systems; [4] independently describes the Google Translate benchmark."
+  },
+  "8a7995cc117ea20dfd6f": {
+    "verdict": "full",
+    "supporting_citations": [
+      2,
+      3
+    ],
+    "reason": "[2] identifies the systems used for SMT and NMT and [3] explicitly names the SMT baseline as Moses."
+  },
+  "4d2c64fc7701439fe4d3": {
+    "verdict": "full",
+    "supporting_citations": [
+      3,
+      4
+    ],
+    "reason": "[4] identifies the two human groups, 30 workers per experiment, the self-report and separate overall-quality ratings; [3] names the three targeted aspects and completes the clipped description in [4]."
+  },
+  "777bdacafd034cbbd458": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      3,
+      4
+    ],
+    "reason": "[4] supports the 30 workers per experiment, 270 unique workers, time split, topic control, questionnaire, correction incentive and separate ratings. [3] names all three aspects. [1] supports the added quality improvement of 10–50% and higher engagement and satisfaction."
+  },
+  "6f92c232964a696b180f": {
+    "verdict": "full",
+    "supporting_citations": [
+      1
+    ],
+    "reason": "[1] explicitly says the target side of the parallel corpus contains Python code."
+  },
+  "7cc40886bb165bcea45a": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      2
+    ],
+    "reason": "[1] directly identifies the target code as Python; [2] identifies Python as the framework’s primary target in the conclusion."
+  },
+  "c61c8d73008d917f2792": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      2
+    ],
+    "reason": "[1] directly identifies the target code as Python; [2] identifies Python as the framework’s primary target in the conclusion."
+  },
+  "76624b8e6f82e7c3fe57": {
+    "verdict": "failure",
+    "supporting_citations": [],
+    "reason": "First HTTP response returned 502 with no answer or citation."
+  },
+  "e66c037eda173b6058c7": {
+    "verdict": "failure",
+    "supporting_citations": [],
+    "reason": "First HTTP response returned 502 with no answer or citation."
+  },
+  "051ae1629e85e3e03fa8": {
+    "verdict": "failure",
+    "supporting_citations": [],
+    "reason": "The first HTTP response returned 401. No model answer or citations were returned."
+  },
+  "49fc8d1036d6fc11eb8c": {
+    "verdict": "failure",
+    "supporting_citations": [],
+    "reason": "The first HTTP response returned 401. No model answer or citations were returned."
+  },
+  "771cb2be159dbc9fec2b": {
+    "verdict": "failure",
+    "supporting_citations": [],
+    "reason": "The first HTTP response returned 401. No model answer or citations were returned."
+  },
+  "d7c709d379fea3d27ee2": {
+    "verdict": "failure",
+    "supporting_citations": [],
+    "reason": "The first HTTP response returned 401. No model answer or citations were returned."
+  },
+  "aeb007c9631a53fb711b": {
+    "verdict": "failure",
+    "supporting_citations": [],
+    "reason": "The first HTTP response returned 502 with no answer or citations."
+  },
+  "32792cc7c459b421b929": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "Formal refusal without citations, consistent with the negative annotation. Naming Switchboard and DailyDialog does not by itself document the natural language studied."
+  },
+  "5793f1045ee9a9857d8a": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "Formal refusal without citations, consistent with the negative annotation. Naming Switchboard and DailyDialog does not by itself document the natural language studied."
+  },
+  "7c71423db166cdf55956": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "Formal refusal without citations, consistent with the negative annotation. Naming Switchboard and DailyDialog does not by itself document the natural language studied."
+  },
+  "6b31535982d09e9f53d1": {
+    "verdict": "full",
+    "supporting_citations": [
+      3
+    ],
+    "reason": "[3] identifies Language Modeling as the added unsupervised task and places it after POS and Chunking in the hierarchy."
+  },
+  "ad03ff53f6f9db1ed1f6": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      2,
+      3
+    ],
+    "reason": "[1] places the auxiliary unsupervised task at the final layer, [2] explains its senior role in semi-supervised learning, and [3] names the task as auxiliary greedy Language Modeling."
+  },
+  "c63431dbd480113aca95": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      2,
+      3
+    ],
+    "reason": "[1] places the auxiliary unsupervised task at the final layer, [2] explains its senior role in semi-supervised learning, and [3] names the task as auxiliary greedy Language Modeling."
+  },
+  "45d0d222018112fca950": {
+    "verdict": "wrong",
+    "supporting_citations": [
+      2
+    ],
+    "reason": "[2] supports the architecture attributed to Huang and explicitly identifies it as the baseline that Calixto outperformed. This passage describes prior work. It does not identify the baseline used in the named paper’s own experiments. The scope error leaves the official negative unanswered."
+  },
+  "ae8a8da9d6591ccc4dd8": {
+    "verdict": "wrong",
+    "supporting_citations": [
+      2
+    ],
+    "reason": "[2] supports the architecture attributed to Huang and explicitly identifies it as the baseline that Calixto outperformed. This passage describes prior work. It does not identify the baseline used in the named paper’s own experiments. The scope error leaves the official negative unanswered."
+  },
+  "bc5f3e5ce8cee85eccca": {
+    "verdict": "wrong",
+    "supporting_citations": [
+      2
+    ],
+    "reason": "[2] supports the architecture attributed to Huang and explicitly identifies it as the baseline that Calixto outperformed. This passage describes prior work. It does not identify the baseline used in the named paper’s own experiments. The scope error leaves the official negative unanswered."
+  },
+  "25c09f49bd0ef7ce6123": {
+    "verdict": "wrong",
+    "supporting_citations": [
+      1,
+      2,
+      3,
+      6
+    ],
+    "reason": "Despite the negative annotation, [1]–[3] directly support state-of-the-art performance and faster convergence on two datasets. [6] supports the precision comparison, beating deidentify, and a binary score over 0.812. The returned excerpt renders the metric as INLINEFORM0 and does not establish the added F1 identification for that number."
+  },
+  "ffe50a68402ed8863a35": {
+    "verdict": "wrong",
+    "supporting_citations": [
+      1,
+      2,
+      3,
+      6
+    ],
+    "reason": "Despite the negative annotation, [1]–[3] directly support state-of-the-art performance and faster convergence on two datasets. [6] supports the precision comparison, beating deidentify, and a binary score over 0.812. The returned excerpt renders the metric as INLINEFORM0 and does not establish the added F1 identification for that number."
+  },
+  "03157db766a8823093fb": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      4,
+      6
+    ],
+    "reason": "[6] supports the VG training fraction and both datasets’ image/text counts. [4] gives the VG description/object-set sample count and combined validation/testing count. [1] supports 2,909 instance classes."
+  },
+  "c647d81f828062fff04a": {
+    "verdict": "full",
+    "supporting_citations": [
+      4,
+      6
+    ],
+    "reason": "[6] gives 16k/740k for VG and 9k/54k for ReferIt. [4] specifies the separate instance-selection training set of 1.73M samples and the combined validation/testing pool of 300K."
+  },
+  "e020d04d6b4de6e90351": {
+    "verdict": "full",
+    "supporting_citations": [
+      4,
+      6
+    ],
+    "reason": "[6] gives 16k/740k for VG and 9k/54k for ReferIt. [4] specifies the separate instance-selection training set of 1.73M samples and the combined validation/testing pool of 300K."
+  },
+  "174ab39a9be36c2fbcec": {
+    "verdict": "partial",
+    "supporting_citations": [
+      1
+    ],
+    "reason": "[1] supports the mouse pancreatic cancer results for stromal depletion, intratumoral vascular density, drug concentration and transient stabilization. Both answers limit the conclusion to that experiment and explicitly leave fibrosis reduction unresolved."
+  },
+  "3c7bb41732666151b9cc": {
+    "verdict": "partial",
+    "supporting_citations": [
+      1
+    ],
+    "reason": "[1] supports the mouse pancreatic cancer results for stromal depletion, intratumoral vascular density, drug concentration and transient stabilization. Both answers limit the conclusion to that experiment and explicitly leave fibrosis reduction unresolved."
+  },
+  "4686727ea863dee60416": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "Formal abstention with no citations on a positive claim. It provides no supported component answer."
+  },
+  "3757b58f0538e0c52fde": {
+    "verdict": "full",
+    "supporting_citations": [
+      1
+    ],
+    "reason": "[1] gives 2.6 GB, 421,829,960 corpus words and 17,305,401 sentences. It separately gives the postprocessing vocabulary size of 618,224."
+  },
+  "4b471859eabcb25635b8": {
+    "verdict": "full",
+    "supporting_citations": [
+      1
+    ],
+    "reason": "All three measurements of the training corpus are stated in [1], with bytes, words and sentences kept distinct."
+  },
+  "aaf476747f14e34d9fc0": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      2
+    ],
+    "reason": "[1] supports corpus totals, vocabulary count and the chatbot name. [2] identifies the dated Italian Wikipedia dump, and both excerpts support the other data sources."
+  },
+  "479d4b9d5debd4ba40f1": {
+    "verdict": "failure",
+    "supporting_citations": [],
+    "reason": "First response returned HTTP 502 without an answer or citations."
+  },
+  "5992890351f40a22dd36": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "Formal refusal with no citations, on an officially unanswerable question. A hashtag-supervision description or one error-analysis example does not supply the complete requested set."
+  },
+  "cc95e90f8940fdc06eba": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "Formal refusal with no citations, on an officially unanswerable question. A hashtag-supervision description or one error-analysis example does not supply the complete requested set."
+  }
+}

@@ -1,0 +1,238 @@
+{
+  "arm": "C",
+  "source": {
+    "packages/knowledge/citation_qa.py": "a4c55ceac30ec7f2ec87754cbd957e239a20be16a2d60be3584be98e4843c36d",
+    "apps/api/routes/citation_qa.py": "a5e055a69ac2581288e97415d74b75f9bb4b746d13861892f1b2864b88821a58",
+    "apps/api/schemas/citation_qa.py": "97947c9ff7adfa09101e5e2d7671f4f7c10f679f49fb7c7e945f1360a2a0f170",
+    "packages/model_gateway/adapters/litellm/adapter.py": "713416fe7c7552043844fb21d297dd765e2f5d8c96cd2ae0759c3afa7243d13f",
+    "packages/model_gateway/gateway.py": "08363e1e19f052dc964908937e658d722b25f37f95758f206d32174f161acb16",
+    "packages/model_gateway/contracts.py": "4115783734ebf776892af996a720205fbced5ddc51086d74fd1fb40c7b72f362",
+    "packages/model_gateway/errors.py": "a67f6259efb1f7be312489db73a717543fceb7feda98c8039825d06a958b1c60",
+    "packages/knowledge/retrieval.py": "14b58e01121dc46f328b11c6139f2c8a097ffd9fd57bfdcbef76864cbaa6f756"
+  },
+  "model": "deepseek-v4.1-flash-1017",
+  "profile": "174e5ef9-418e-4fa2-861e-499956058c10",
+  "snapshot": "986d92ba-b119-4418-b869-bd07081f49ad",
+  "snapshot_hash": "e972dfef136f6f067c8f12a81554433b5b6ca4b84c9b34fd1e3d8919c94cfb2b",
+  "documents": 5183,
+  "chunks": 9189,
+  "protocol_sha256": "d7e18814f84bab06090551bb39d0bc5dc285d52504aa656278dce753e2194766",
+  "endpoint": "POST /api/v1/knowledge/query",
+  "rows": [
+    {
+      "id": "620",
+      "state": "returned",
+      "utc": "2026-11-14T03:12:10.093524+00:00",
+      "http": 200,
+      "elapsed_s": 46.995,
+      "answer": "The evidence is insufficient to establish that increased vessel density along with a reduction in fibrosis improves the efficacy of chemotherapy treatments.",
+      "insufficient": true,
+      "citations": [],
+      "events": [
+        {
+          "kind": "retrieval",
+          "snapshot": "986d92ba-b119-4418-b869-bd07081f49ad",
+          "candidate": [
+            {
+              "source": "7986878",
+              "ordinal": 1,
+              "chunk_id": "4bce0ede90ef6e481fa36d715e272c469cb113882742ee5ddd92bbeed7b6ba9a"
+            },
+            {
+              "source": "25175997",
+              "ordinal": 0,
+              "chunk_id": "a7d065f5c2f04b37cc27e00b7257f5ddb77ffc217cc7b95e8dc46c7299a3c314"
+            },
+            {
+              "source": "4460880",
+              "ordinal": 1,
+              "chunk_id": "7cb52fd2d01fd529a5a27915d67bb43464b55f3dc7892f3822c3a2bf6de2aebb"
+            },
+            {
+              "source": "9929089",
+              "ordinal": 0,
+              "chunk_id": "b54a654db8b17d7c20780a057578afd058c9149b9712cd223f9b4409fb7c9fa2"
+            },
+            {
+              "source": "195680777",
+              "ordinal": 0,
+              "chunk_id": "fddeea7ff6696b24d921e44033285799424d322f8510ba5409b82ac7276671e5"
+            },
+            {
+              "source": "20888849",
+              "ordinal": 0,
+              "chunk_id": "607e80dd69b2da77178dab1db6ec6ea54bc8acdbe2e2cf0c02020ff4ebc8f5cf"
+            },
+            {
+              "source": "34338075",
+              "ordinal": 1,
+              "chunk_id": "ab4382000719d8fe953b13503e5ae45840673d1c6add275150091d8a3514d0b9"
+            },
+            {
+              "source": "5500086",
+              "ordinal": 0,
+              "chunk_id": "47cb8fcddad39d78041f73903cc6f445ca3468cefd8bd7cc53b4f663940ffbe5"
+            },
+            {
+              "source": "13464392",
+              "ordinal": 1,
+              "chunk_id": "92c9aa80c961666c599823dbc29dd396505a3b1de64a7e250831935ddc14c6ab"
+            },
+            {
+              "source": "2522977",
+              "ordinal": 1,
+              "chunk_id": "ab90c6c92f64b24774f6519dbdb35baccd3799338365cd4103030dca1c667175"
+            },
+            {
+              "source": "24974080",
+              "ordinal": 1,
+              "chunk_id": "0821200a087a269333d8efb22c7edae3ed29c829f80bf80a3b636c18da78921d"
+            },
+            {
+              "source": "19510470",
+              "ordinal": 0,
+              "chunk_id": "7175d3ae99ee7a791def309ed67eb11de28331bf8b91a6c5d093e372ffdf8a3f"
+            },
+            {
+              "source": "6374918",
+              "ordinal": 1,
+              "chunk_id": "a9cde9253086526e66e344d5ff15d2a86f2bf7049f0267af210335a81df23a97"
+            },
+            {
+              "source": "7821634",
+              "ordinal": 0,
+              "chunk_id": "b07b3ca638912b677fdf78798389f97d1ad47be680c4c64e17f65367275dd99c"
+            },
+            {
+              "source": "23036207",
+              "ordinal": 1,
+              "chunk_id": "43849513b8fd053ea19352770330a03b117a2d4a332cafcbf506124d9b4b83e9"
+            },
+            {
+              "source": "15946643",
+              "ordinal": 0,
+              "chunk_id": "fce06d2446b61a1402ec2bdde9628e59ff35add11f8d70202f48159257c3655f"
+            },
+            {
+              "source": "601033",
+              "ordinal": 1,
+              "chunk_id": "2992a7a5e5452338d642c419976f2f51ea4020e978c1b93ba402ca477bda32ce"
+            },
+            {
+              "source": "9588931",
+              "ordinal": 0,
+              "chunk_id": "3eae0fab05d71c9410ebb541843a3e0cb8c9e4db3f8943b8eeb949baf24d6e89"
+            },
+            {
+              "source": "14973286",
+              "ordinal": 1,
+              "chunk_id": "28ec87cb61ddd1b371496ffa12142913d9ec45966a2497f88c97b9297a00719f"
+            },
+            {
+              "source": "6421792",
+              "ordinal": 0,
+              "chunk_id": "734c7d0c1ce25776698021c996f7b0553b7ef44fc19225b1b3ff928841c3530d"
+            }
+          ],
+          "reranked": [
+            {
+              "source": "20888849",
+              "ordinal": 0,
+              "chunk_id": "607e80dd69b2da77178dab1db6ec6ea54bc8acdbe2e2cf0c02020ff4ebc8f5cf"
+            },
+            {
+              "source": "9929089",
+              "ordinal": 0,
+              "chunk_id": "b54a654db8b17d7c20780a057578afd058c9149b9712cd223f9b4409fb7c9fa2"
+            },
+            {
+              "source": "15946643",
+              "ordinal": 0,
+              "chunk_id": "fce06d2446b61a1402ec2bdde9628e59ff35add11f8d70202f48159257c3655f"
+            },
+            {
+              "source": "14973286",
+              "ordinal": 1,
+              "chunk_id": "28ec87cb61ddd1b371496ffa12142913d9ec45966a2497f88c97b9297a00719f"
+            },
+            {
+              "source": "195680777",
+              "ordinal": 0,
+              "chunk_id": "fddeea7ff6696b24d921e44033285799424d322f8510ba5409b82ac7276671e5"
+            },
+            {
+              "source": "25175997",
+              "ordinal": 0,
+              "chunk_id": "a7d065f5c2f04b37cc27e00b7257f5ddb77ffc217cc7b95e8dc46c7299a3c314"
+            }
+          ],
+          "times_ms": {
+            "dense": 9346.517,
+            "sparse": 1083.595,
+            "fusion": 0.173,
+            "rerank": 25904.884
+          },
+          "total_ms": 36382.993
+        },
+        {
+          "kind": "reader",
+          "prompt_sha256": "ca06a529a7b78d4df2a0d18b5f59f07ec14725fe12d639fa1578a14ca0613e4a",
+          "chunks": [
+            {
+              "source": "20888849",
+              "ordinal": 0,
+              "chunk_id": "607e80dd69b2da77178dab1db6ec6ea54bc8acdbe2e2cf0c02020ff4ebc8f5cf"
+            },
+            {
+              "source": "9929089",
+              "ordinal": 0,
+              "chunk_id": "b54a654db8b17d7c20780a057578afd058c9149b9712cd223f9b4409fb7c9fa2"
+            },
+            {
+              "source": "15946643",
+              "ordinal": 0,
+              "chunk_id": "fce06d2446b61a1402ec2bdde9628e59ff35add11f8d70202f48159257c3655f"
+            },
+            {
+              "source": "14973286",
+              "ordinal": 1,
+              "chunk_id": "28ec87cb61ddd1b371496ffa12142913d9ec45966a2497f88c97b9297a00719f"
+            },
+            {
+              "source": "195680777",
+              "ordinal": 0,
+              "chunk_id": "fddeea7ff6696b24d921e44033285799424d322f8510ba5409b82ac7276671e5"
+            },
+            {
+              "source": "25175997",
+              "ordinal": 0,
+              "chunk_id": "a7d065f5c2f04b37cc27e00b7257f5ddb77ffc217cc7b95e8dc46c7299a3c314"
+            }
+          ]
+        },
+        {
+          "kind": "wire",
+          "max_tokens": 2048,
+          "timeout_seconds": 60.0,
+          "system_prompt_sha256": "14dff03d37e6df47b06af8430061b880cc79379b4a9fe622ec24b0643e8c52a7",
+          "temperature": 0.0,
+          "model": "deepseek-v4.1-flash-1017",
+          "retry_limit": 0,
+          "enable_thinking": null,
+          "prompt_sha256": "ca06a529a7b78d4df2a0d18b5f59f07ec14725fe12d639fa1578a14ca0613e4a"
+        },
+        {
+          "kind": "response",
+          "elapsed_ms": 3934,
+          "finish_reason": "stop",
+          "content_present": true,
+          "usage": {
+            "input_tokens": 2191,
+            "output_tokens": 359,
+            "total_tokens": 2550
+          }
+        }
+      ]
+    }
+  ]
+}

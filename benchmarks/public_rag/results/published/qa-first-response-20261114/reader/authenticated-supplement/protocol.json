@@ -1,0 +1,165 @@
+{
+  "frozen_at": "2026-11-14T03:14:40.484184+00:00",
+  "parent_protocol_sha256": "d7e18814f84bab06090551bb39d0bc5dc285d52504aa656278dce753e2194766",
+  "purpose": "Four frozen cases first rejected before retrieval by expired benchmark logins. New separately reported authenticated requests with fresh login before every query. Original 60 first responses remain intact. Never use this supplement to override the first-response gate.",
+  "source_system_sha": {
+    "original": {
+      "system_prompt_sha256": "9921923abe84909a433d1333667a6cb16f7ba0928080ec0b21136d1b12238499",
+      "citation_qa_py_sha256_lf": "257588fa4bf0b83b47c6a5ad75a6cab9e3e9084f17c771a4971382b66dad0b53",
+      "source_raw_sha256": {
+        "packages/knowledge/citation_qa.py": "1968f8581b9954c4565ba3361b7a52965c8f048d8d092cb9e0ada42a6ec5daf8",
+        "apps/api/routes/citation_qa.py": "f818f3a8928bd7213317d4b21913824755f2276a32f64223926fecd0ba54cfdc",
+        "apps/api/schemas/citation_qa.py": "b9bfa5fcea10c45be4a33cf408a2546114f2e7800ff7d93c371cf51a048453c8",
+        "packages/model_gateway/adapters/litellm/adapter.py": "e768ea18574984723642b03f59e2385f12eeca09091f8485254dda46b0c6d6af",
+        "packages/model_gateway/gateway.py": "c6d02969e16ef7f825644b247c79e23905e39a2740ba936587f5401b696e9d92",
+        "packages/model_gateway/contracts.py": "6c6507db40e667883706e59c130cabba97827482a92fd6802fe489339475cda1",
+        "packages/model_gateway/errors.py": "600b6c85e4f50b353a7a5bba456df8d4fca63c3bbc8ead8c92478023b3a23349",
+        "packages/knowledge/retrieval.py": "83b29728707cac0f26b0a8edaf7d2e0e3a9ea33467f6975b17eae3a3233a88e7"
+      },
+      "source_lf_sha256": {
+        "packages/knowledge/citation_qa.py": "257588fa4bf0b83b47c6a5ad75a6cab9e3e9084f17c771a4971382b66dad0b53",
+        "apps/api/routes/citation_qa.py": "a5e055a69ac2581288e97415d74b75f9bb4b746d13861892f1b2864b88821a58",
+        "apps/api/schemas/citation_qa.py": "97947c9ff7adfa09101e5e2d7671f4f7c10f679f49fb7c7e945f1360a2a0f170",
+        "packages/model_gateway/adapters/litellm/adapter.py": "713416fe7c7552043844fb21d297dd765e2f5d8c96cd2ae0759c3afa7243d13f",
+        "packages/model_gateway/gateway.py": "08363e1e19f052dc964908937e658d722b25f37f95758f206d32174f161acb16",
+        "packages/model_gateway/contracts.py": "4115783734ebf776892af996a720205fbced5ddc51086d74fd1fb40c7b72f362",
+        "packages/model_gateway/errors.py": "a67f6259efb1f7be312489db73a717543fceb7feda98c8039825d06a958b1c60",
+        "packages/knowledge/retrieval.py": "14b58e01121dc46f328b11c6139f2c8a097ffd9fd57bfdcbef76864cbaa6f756"
+      }
+    },
+    "strict": {
+      "system_prompt_sha256": "14dff03d37e6df47b06af8430061b880cc79379b4a9fe622ec24b0643e8c52a7",
+      "citation_qa_py_sha256_lf": "a4c55ceac30ec7f2ec87754cbd957e239a20be16a2d60be3584be98e4843c36d",
+      "source_raw_sha256": {
+        "packages/knowledge/citation_qa.py": "a4c55ceac30ec7f2ec87754cbd957e239a20be16a2d60be3584be98e4843c36d",
+        "apps/api/routes/citation_qa.py": "a5e055a69ac2581288e97415d74b75f9bb4b746d13861892f1b2864b88821a58",
+        "apps/api/schemas/citation_qa.py": "97947c9ff7adfa09101e5e2d7671f4f7c10f679f49fb7c7e945f1360a2a0f170",
+        "packages/model_gateway/adapters/litellm/adapter.py": "713416fe7c7552043844fb21d297dd765e2f5d8c96cd2ae0759c3afa7243d13f",
+        "packages/model_gateway/gateway.py": "08363e1e19f052dc964908937e658d722b25f37f95758f206d32174f161acb16",
+        "packages/model_gateway/contracts.py": "4115783734ebf776892af996a720205fbced5ddc51086d74fd1fb40c7b72f362",
+        "packages/model_gateway/errors.py": "a67f6259efb1f7be312489db73a717543fceb7feda98c8039825d06a958b1c60",
+        "packages/knowledge/retrieval.py": "14b58e01121dc46f328b11c6139f2c8a097ffd9fd57bfdcbef76864cbaa6f756"
+      },
+      "source_lf_sha256": {
+        "packages/knowledge/citation_qa.py": "a4c55ceac30ec7f2ec87754cbd957e239a20be16a2d60be3584be98e4843c36d",
+        "apps/api/routes/citation_qa.py": "a5e055a69ac2581288e97415d74b75f9bb4b746d13861892f1b2864b88821a58",
+        "apps/api/schemas/citation_qa.py": "97947c9ff7adfa09101e5e2d7671f4f7c10f679f49fb7c7e945f1360a2a0f170",
+        "packages/model_gateway/adapters/litellm/adapter.py": "713416fe7c7552043844fb21d297dd765e2f5d8c96cd2ae0759c3afa7243d13f",
+        "packages/model_gateway/gateway.py": "08363e1e19f052dc964908937e658d722b25f37f95758f206d32174f161acb16",
+        "packages/model_gateway/contracts.py": "4115783734ebf776892af996a720205fbced5ddc51086d74fd1fb40c7b72f362",
+        "packages/model_gateway/errors.py": "a67f6259efb1f7be312489db73a717543fceb7feda98c8039825d06a958b1c60",
+        "packages/knowledge/retrieval.py": "14b58e01121dc46f328b11c6139f2c8a097ffd9fd57bfdcbef76864cbaa6f756"
+      }
+    },
+    "source_commit": "273f68383254735657a323748cc2a3c1d34bc37d",
+    "patch_sha256_lf": "f35259dd5a8aa1b3e7b9d06e770223cb797b320b31ac66ae604021809e1cf116",
+    "snapshots": {
+      "full": {
+        "snapshot": "986d92ba-b119-4418-b869-bd07081f49ad",
+        "snapshot_sha256": "e972dfef136f6f067c8f12a81554433b5b6ca4b84c9b34fd1e3d8919c94cfb2b",
+        "count": 5183
+      },
+      "qasper": {
+        "snapshot": "4bf2f6bd-a6f1-4ded-a622-44114187066d",
+        "snapshot_sha256": "043b5bac347b6e658c3f13aa09c99bc078f8adb85c95c8bc7eefaa96c8285bf5",
+        "count": 7
+      },
+      "reserve14": {
+        "snapshot": "4ebf2700-7b8f-4091-9e7d-b8aed4a44b11",
+        "snapshot_sha256": "8df6024d1dfcab92ff64c265d7f6531b4ca4f3e5dd077504336c0746912f8269",
+        "count": 14
+      },
+      "reserve16": {
+        "snapshot": "f3e33aa2-e0ed-4f87-9e72-d3b945adc1b5",
+        "snapshot_sha256": "7c5f4b690dfb3267dbc2456d15eebfd98bd0bd47ef789b01f96ec45ed86678bc",
+        "count": 16
+      }
+    },
+    "profiles": {
+      "512": "ce850b69-68c2-437d-89ec-5f66f488346b",
+      "2048": "174e5ef9-418e-4fa2-861e-499956058c10"
+    }
+  },
+  "cases": [
+    {
+      "id": "2e3265d83d2a595293ed458152d3ee76ad19e244",
+      "scope": "reserve16",
+      "query": "In the paper “Short-Text Classification Using Unsupervised Keyword Expansion”, What news dataset was used?",
+      "gold_documents": [
+        "1909.07512"
+      ],
+      "negative": false,
+      "answers": [
+        "collection of headlines published by HuffPost BIBREF12 between 2012 and 2018"
+      ],
+      "evidence": [
+        "The News Category Dataset BIBREF11 is a collection of headlines published by HuffPost BIBREF12 between 2012 and 2018, and was obtained online from Kaggle BIBREF13. The full dataset contains 200k news headlines with category labels, publication dates, and short text descriptions. For this analysis, a sample of roughly 33k headlines spanning 23 categories was used. Further analysis can be found in table SECREF12 in the appendix."
+      ],
+      "arm_order": [
+        "C",
+        "A",
+        "B"
+      ]
+    },
+    {
+      "id": "f0e8f045e2e33a2129e67fb32f356242db1dc280",
+      "scope": "reserve16",
+      "query": "In the paper “Mapping (Dis-)Information Flow about the MH17 Plane Crash”, What recommendations are made to improve the performance in future?",
+      "gold_documents": [
+        "1910.01363"
+      ],
+      "negative": false,
+      "answers": [
+        "applying reasoning BIBREF36 or irony detection methods BIBREF37"
+      ],
+      "evidence": [
+        "From the error analysis, we conclude that category I errors need further investigation, as here the model makes mistakes on seemingly easy instances. This might be due to the model not being able to correctly represent Twitter specific language or unknown words, such as Eukraine in example e). Category II and III errors are harder to avoid and could be improved by applying reasoning BIBREF36 or irony detection methods BIBREF37."
+      ],
+      "arm_order": [
+        "A",
+        "B",
+        "C"
+      ]
+    },
+    {
+      "id": "7aba5e4483293f5847caad144ee0791c77164917",
+      "scope": "reserve16",
+      "query": "In the paper “RC-QED: Evaluating Natural Language Derivations in Multi-Hop Reading Comprehension”, What dataset was used in the experiment?",
+      "gold_documents": [
+        "1910.04601"
+      ],
+      "negative": false,
+      "answers": [
+        "WikiHop"
+      ],
+      "evidence": [
+        "Our study uses WikiHop BIBREF0, as it is an entity-based multi-hop QA dataset and has been actively used. We randomly sampled 10,000 instances from 43,738 training instances and 2,000 instances from 5,129 validation instances (i.e. 36,000 annotation tasks were published on AMT). We manually converted structured WikiHop question-answer pairs (e.g. locatedIn(Macchu Picchu, Peru)) into natural language statements (Macchu Picchu is located in Peru) using a simple conversion dictionary."
+      ],
+      "arm_order": [
+        "B",
+        "A",
+        "C"
+      ]
+    },
+    {
+      "id": "7c792cda220916df40edb3107e405c86455822ed",
+      "scope": "reserve16",
+      "query": "In the paper “Bidirectional Long-Short Term Memory for Video Description”, what metrics were used for evaluation?",
+      "gold_documents": [
+        "1606.04631"
+      ],
+      "negative": false,
+      "answers": [
+        "METEOR"
+      ],
+      "evidence": [
+        "BLEU BIBREF28 , METEOR BIBREF29 , ROUGE-L BIBREF30 and CIDEr BIBREF31 are common evaluation metrics in image and video description, the first three were originally proposed to evaluate machine translation at the earliest and CIDEr was proposed to evaluate image description with sufficient reference sentences. To quantitatively evaluate the performance of our bidirectional recurrent based approach, we adopt METEOR metric because of its robust performance. Contrasting to the other three metrics, METEOR could capture semantic aspect since it identifies all possible matches by extracting exact matcher, stem matcher, paraphrase matcher and synonym matcher using WordNet database, and compute sentence level similarity scores according to matcher weights. The authors of CIDEr also argued for that METEOR outperforms CIDEr when the reference set is small BIBREF31 ."
+      ],
+      "arm_order": [
+        "C",
+        "B",
+        "A"
+      ]
+    }
+  ]
+}

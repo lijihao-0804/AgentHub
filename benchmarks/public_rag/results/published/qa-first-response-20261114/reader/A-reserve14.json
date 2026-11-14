@@ -1,0 +1,487 @@
+{
+  "arm": "A",
+  "source": {
+    "packages/knowledge/citation_qa.py": "1968f8581b9954c4565ba3361b7a52965c8f048d8d092cb9e0ada42a6ec5daf8",
+    "apps/api/routes/citation_qa.py": "f818f3a8928bd7213317d4b21913824755f2276a32f64223926fecd0ba54cfdc",
+    "apps/api/schemas/citation_qa.py": "b9bfa5fcea10c45be4a33cf408a2546114f2e7800ff7d93c371cf51a048453c8",
+    "packages/model_gateway/adapters/litellm/adapter.py": "e768ea18574984723642b03f59e2385f12eeca09091f8485254dda46b0c6d6af",
+    "packages/model_gateway/gateway.py": "c6d02969e16ef7f825644b247c79e23905e39a2740ba936587f5401b696e9d92",
+    "packages/model_gateway/contracts.py": "6c6507db40e667883706e59c130cabba97827482a92fd6802fe489339475cda1",
+    "packages/model_gateway/errors.py": "600b6c85e4f50b353a7a5bba456df8d4fca63c3bbc8ead8c92478023b3a23349",
+    "packages/knowledge/retrieval.py": "83b29728707cac0f26b0a8edaf7d2e0e3a9ea33467f6975b17eae3a3233a88e7"
+  },
+  "model": "deepseek-v4.1-flash-1017",
+  "profile": "ce850b69-68c2-437d-89ec-5f66f488346b",
+  "snapshot": "4ebf2700-7b8f-4091-9e7d-b8aed4a44b11",
+  "snapshot_hash": "8df6024d1dfcab92ff64c265d7f6531b4ca4f3e5dd077504336c0746912f8269",
+  "documents": 14,
+  "chunks": 285,
+  "protocol_sha256": "d7e18814f84bab06090551bb39d0bc5dc285d52504aa656278dce753e2194766",
+  "endpoint": "POST /api/v1/knowledge/query",
+  "rows": [
+    {
+      "id": "3de27c81af3030eb2d9de1df5ec9bfacdef281a9",
+      "state": "returned",
+      "utc": "2026-11-14T03:06:20.318446+00:00",
+      "http": 200,
+      "elapsed_s": 24.974,
+      "answer": "The dataset used to train Word2Vec for Italian is composed of 2.6 GB of raw text, including 421,829,960 words divided into 17,305,401 sentences [1]. It was obtained from a dump of the Italian Wikipedia (dated 2019.04.01), the main categories of Italian Google News, and anonymized chats between users and a customer care chatbot (Laila) [1][2]. After preprocessing, the resulting vocabulary consisted of 618,224 words [1].",
+      "insufficient": false,
+      "citations": [
+        {
+          "number": 1,
+          "source": "2001.09332",
+          "ordinal": 8,
+          "chunk_id": "7e670437108bc9abe84c9345b3a7d7411631686845a351cdf414af0f0682b1a2",
+          "revision": "9ca6b277-9800-41f8-ac77-a8546a4a7fd3",
+          "excerpt": "19.04.01), from the main categories of Italian Google News (WORLD, NATION, BUSINESS, TECHNOLOGY, ENTERTAINMENT, SPORTS, SCIENCE, HEALTH) and from some anonymized chats between users and a customer care chatbot (Laila). The dataset (composed of 2.6 GB of raw text) includes $421\\,829\\,960$ words divided into $17\\,305\\,401$ sentences.\n\nThe text was previously preprocessed by removing the words whose absolute frequency was less than 5 and eliminating all special characters. Since it is impossible to represent every imaginable numerical value, but not wanting to eliminate the concept of “numerical representation\" linked to certain words, it was also decided to replace every number present in the text with the particular $\\langle NUM \\rangle $ token; which probably also assumes a better representation in the embedding space (not separating into the various possible values). All the words were then transformed to lowercase (to avoid a double presence) finally producing a vocabulary of $618\\,224$ words.\n\nNote that among the special characters are also included punctuation marks, which therefore do not appear within the vocabulary. However, some of them (`.', `?' and `!') are later removed,",
+          "chunk_text_sha256": "b857febc7388ec207f98e0da94765e41f2bb2d049d7dfaa52b46aa1a95b0b9c5",
+          "excerpt_sha256": "b857febc7388ec207f98e0da94765e41f2bb2d049d7dfaa52b46aa1a95b0b9c5",
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1200,
+          "locator": {
+            "type": "text_range",
+            "char_end": 9200,
+            "char_start": 8000
+          }
+        },
+        {
+          "number": 2,
+          "source": "2001.09332",
+          "ordinal": 7,
+          "chunk_id": "ff0177b07f158858beeabf8fe96bc7871dea047be962c3c2f2b88772e4da3d7f",
+          "revision": "9ca6b277-9800-41f8-ac77-a8546a4a7fd3",
+          "excerpt": "every time. In practice, for each pair of words in the training set, the loss function is calculated only for the value 1 and for a few values 0 of the one-hot vector of the desired output. The computational cost is therefore reduced by choosing to backpropagate only $K$ words “negative\" and one positive, instead of the entire vocabulary. Typical values for negative sampling (the number of negative samples that will be backpropagated and to which therefore the only positive value will always be added), range from 2 to 20, depending on the size of the dataset.\n\nThe probability of selecting a negative word to backpropagate depends on its frequency, in particular through the formula:\n\nNegative samples are then selected by choosing a sort of “unigram distribution\", so that the most frequent words are also the most often backpropated ones.\n\nImplementation details\n\nThe dataset needed to train the W2V was obtained using the information extracted from a dump of the Italian Wikipedia (dated 2019.04.01), from the main categories of Italian Google News (WORLD, NATION, BUSINESS, TECHNOLOGY, ENTERTAINMENT, SPORTS, SCIENCE, HEALTH) and from some anonymized chats between users and a customer car",
+          "chunk_text_sha256": "781bad0c37f4e384656c687c0cbffb43ba67d6f51306af028756d8ed9a210086",
+          "excerpt_sha256": "781bad0c37f4e384656c687c0cbffb43ba67d6f51306af028756d8ed9a210086",
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1199,
+          "locator": {
+            "type": "text_range",
+            "char_end": 8200,
+            "char_start": 7000
+          }
+        }
+      ],
+      "events": [
+        {
+          "kind": "retrieval",
+          "snapshot": "4ebf2700-7b8f-4091-9e7d-b8aed4a44b11",
+          "candidate": [
+            {
+              "source": "2001.09332",
+              "ordinal": 0,
+              "chunk_id": "554fd3f409d9a4007b201c07501812b59330c2f864eb01e4037a904877ae5202"
+            },
+            {
+              "source": "2001.09332",
+              "ordinal": 14,
+              "chunk_id": "e1924ab9131b6e93fadaa74f70b18bd6a40bb5c3fcf1d64ffaddc0f814b13346"
+            },
+            {
+              "source": "2001.09332",
+              "ordinal": 7,
+              "chunk_id": "ff0177b07f158858beeabf8fe96bc7871dea047be962c3c2f2b88772e4da3d7f"
+            },
+            {
+              "source": "1906.07668",
+              "ordinal": 12,
+              "chunk_id": "7824fafb8fe8791bef7a186b6adb7b9f14f2e15b21a3df962688a78a03bde54d"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 15,
+              "chunk_id": "4d167740b93c9d47d666c3980c1baa979f2fa2f05b0f0a392d4ee0b2aa14833b"
+            },
+            {
+              "source": "2001.09332",
+              "ordinal": 5,
+              "chunk_id": "ed93fb447ca598b546fc80ecd35dc61beefaeeb036eedbb4db2b7f0c99ea14ca"
+            },
+            {
+              "source": "2001.09332",
+              "ordinal": 6,
+              "chunk_id": "17d792366ab5c847724afcbedcd92954d418cde1e3d8c7bd5260c01c301dffef"
+            },
+            {
+              "source": "2001.09332",
+              "ordinal": 2,
+              "chunk_id": "9918d7e0f814f46355ca5984127d090b15111580f35f79d5ff38b22098655944"
+            },
+            {
+              "source": "2001.09332",
+              "ordinal": 3,
+              "chunk_id": "f586ba139bf2ee8d2e605226da864d543072d196ce2ed9ad635b11cae496d7ff"
+            },
+            {
+              "source": "2001.09332",
+              "ordinal": 8,
+              "chunk_id": "7e670437108bc9abe84c9345b3a7d7411631686845a351cdf414af0f0682b1a2"
+            },
+            {
+              "source": "1607.00424",
+              "ordinal": 4,
+              "chunk_id": "f5577a6f710657dbfdb9e60ccb2df3d3a7765ec3d61de5030721a337903196f8"
+            },
+            {
+              "source": "1910.03814",
+              "ordinal": 5,
+              "chunk_id": "25feb09ee32892c4726fbe188263bf79f502e4b8316433ab9426735cfee1e95c"
+            },
+            {
+              "source": "1909.03526",
+              "ordinal": 15,
+              "chunk_id": "2579b9f8a1ed95d36d25babeff5a31153eb94bd557bec09aeed984400d4e4479"
+            },
+            {
+              "source": "2001.09332",
+              "ordinal": 13,
+              "chunk_id": "507bf14319f5262553c9d3bde9fd50ad5632209db6474070dc0f941e0c3819a0"
+            },
+            {
+              "source": "1810.03459",
+              "ordinal": 7,
+              "chunk_id": "876a2f3178a9e27b6ae7c5e0804d5a631525606ee4c49f8a521206666f71542a"
+            },
+            {
+              "source": "1909.00574",
+              "ordinal": 5,
+              "chunk_id": "fa090e063b908e9e88fe30697731078da1007909919350a9a816a02d3a006447"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 23,
+              "chunk_id": "ce9339e1d4eb37a777746f1239dff79da7329d5ef09a401437f8bf79ab4b38ec"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 18,
+              "chunk_id": "1d477be77fb68ad2c79e81644662f438de7d04d25e5233f86f05399458f30dbd"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 24,
+              "chunk_id": "fd40edad61383f15efb54281514967d65c5c1aa5d48422900500e764f6fd690c"
+            },
+            {
+              "source": "1910.03814",
+              "ordinal": 4,
+              "chunk_id": "c02e36e6fd722e984e28dd4180260ff4489e0a040385a15a17d258d52449e637"
+            }
+          ],
+          "reranked": [
+            {
+              "source": "2001.09332",
+              "ordinal": 8,
+              "chunk_id": "7e670437108bc9abe84c9345b3a7d7411631686845a351cdf414af0f0682b1a2"
+            },
+            {
+              "source": "2001.09332",
+              "ordinal": 7,
+              "chunk_id": "ff0177b07f158858beeabf8fe96bc7871dea047be962c3c2f2b88772e4da3d7f"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 15,
+              "chunk_id": "4d167740b93c9d47d666c3980c1baa979f2fa2f05b0f0a392d4ee0b2aa14833b"
+            },
+            {
+              "source": "2001.09332",
+              "ordinal": 14,
+              "chunk_id": "e1924ab9131b6e93fadaa74f70b18bd6a40bb5c3fcf1d64ffaddc0f814b13346"
+            },
+            {
+              "source": "2001.09332",
+              "ordinal": 6,
+              "chunk_id": "17d792366ab5c847724afcbedcd92954d418cde1e3d8c7bd5260c01c301dffef"
+            },
+            {
+              "source": "2001.09332",
+              "ordinal": 0,
+              "chunk_id": "554fd3f409d9a4007b201c07501812b59330c2f864eb01e4037a904877ae5202"
+            }
+          ],
+          "times_ms": {
+            "dense": 1701.394,
+            "sparse": 24.301,
+            "fusion": 0.108,
+            "rerank": 21216.299
+          },
+          "total_ms": 22959.418
+        },
+        {
+          "kind": "reader",
+          "prompt_sha256": "3851564ef6174fc15c3b0a0dc656b33220afec9e2ac71482f0135f0d1126490b",
+          "chunks": [
+            {
+              "source": "2001.09332",
+              "ordinal": 8,
+              "chunk_id": "7e670437108bc9abe84c9345b3a7d7411631686845a351cdf414af0f0682b1a2"
+            },
+            {
+              "source": "2001.09332",
+              "ordinal": 7,
+              "chunk_id": "ff0177b07f158858beeabf8fe96bc7871dea047be962c3c2f2b88772e4da3d7f"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 15,
+              "chunk_id": "4d167740b93c9d47d666c3980c1baa979f2fa2f05b0f0a392d4ee0b2aa14833b"
+            },
+            {
+              "source": "2001.09332",
+              "ordinal": 14,
+              "chunk_id": "e1924ab9131b6e93fadaa74f70b18bd6a40bb5c3fcf1d64ffaddc0f814b13346"
+            },
+            {
+              "source": "2001.09332",
+              "ordinal": 6,
+              "chunk_id": "17d792366ab5c847724afcbedcd92954d418cde1e3d8c7bd5260c01c301dffef"
+            },
+            {
+              "source": "2001.09332",
+              "ordinal": 0,
+              "chunk_id": "554fd3f409d9a4007b201c07501812b59330c2f864eb01e4037a904877ae5202"
+            }
+          ]
+        },
+        {
+          "kind": "wire",
+          "max_tokens": 512,
+          "timeout_seconds": 60.0,
+          "system_prompt_sha256": "9921923abe84909a433d1333667a6cb16f7ba0928080ec0b21136d1b12238499",
+          "temperature": 0.0,
+          "model": "deepseek-v4.1-flash-1017",
+          "retry_limit": 0,
+          "enable_thinking": null,
+          "prompt_sha256": "3851564ef6174fc15c3b0a0dc656b33220afec9e2ac71482f0135f0d1126490b"
+        },
+        {
+          "kind": "response",
+          "elapsed_ms": 1965,
+          "finish_reason": "stop",
+          "content_present": true,
+          "usage": {
+            "input_tokens": 2335,
+            "output_tokens": 166,
+            "total_tokens": 2501
+          }
+        }
+      ]
+    },
+    {
+      "id": "b3ec918827cd22b16212265fcdd5b3eadee654ae",
+      "state": "returned",
+      "utc": "2026-11-14T03:07:27.480913+00:00",
+      "http": 502,
+      "elapsed_s": 25.47,
+      "error": "MODEL_BAD_RESPONSE",
+      "message": "The model reached its output limit without visible content.",
+      "events": [
+        {
+          "kind": "retrieval",
+          "snapshot": "4ebf2700-7b8f-4091-9e7d-b8aed4a44b11",
+          "candidate": [
+            {
+              "source": "1610.00879",
+              "ordinal": 0,
+              "chunk_id": "875d7bab553a0973da525c2e5a5f44e6df54c6db0d2fcaa1047a7a0a02cf8314"
+            },
+            {
+              "source": "1610.00879",
+              "ordinal": 3,
+              "chunk_id": "4f111d7f3ab22ed63857d086448170a5a408b1f4d193bb0d944182130917c0f6"
+            },
+            {
+              "source": "1610.00879",
+              "ordinal": 1,
+              "chunk_id": "431f8b8fbeabb5280006a9a0b64ba4dc291e071ce9b6979bdd318c87762f7d08"
+            },
+            {
+              "source": "1607.00424",
+              "ordinal": 8,
+              "chunk_id": "9818c405f697ee85bb83785a82b4616d1d9db395b8f55f04f1b65c2d927488c8"
+            },
+            {
+              "source": "1607.00424",
+              "ordinal": 5,
+              "chunk_id": "aac5be0308c963d6e670ca1b31ac5f4dc804c95b029371b946d0fbbd54cc38c5"
+            },
+            {
+              "source": "1610.00879",
+              "ordinal": 8,
+              "chunk_id": "b9cf5d0982af8329988130aef7ba6ecf28c06248b95aaa52ced1b881aa33a9c4"
+            },
+            {
+              "source": "1610.00879",
+              "ordinal": 10,
+              "chunk_id": "fd1abdb1d46db792ccb54cd4ae25d6be9a0693774d52074301a19348ded7448d"
+            },
+            {
+              "source": "1610.00879",
+              "ordinal": 2,
+              "chunk_id": "9b856dc7b34a81a725a0befacaa0e90a923323e0fbba60605cd5fc454a7d8e81"
+            },
+            {
+              "source": "1610.00879",
+              "ordinal": 7,
+              "chunk_id": "79b3ba4b18f9471eb397872f0e11ca5585bb22959486e4de4a40f1652cb204e6"
+            },
+            {
+              "source": "1909.00574",
+              "ordinal": 9,
+              "chunk_id": "beafc8922bce69cae1e661a1fca186135563d357223ba1e95be3464116b4f06a"
+            },
+            {
+              "source": "1610.00879",
+              "ordinal": 4,
+              "chunk_id": "364fd3989601d88e0b3decdc9ad81b6bc57525d2f70f3e6a04806a33ca8cf6ed"
+            },
+            {
+              "source": "1909.00574",
+              "ordinal": 12,
+              "chunk_id": "e428f9b95157df1e409442349a2d038054968644191ea0460db6e7fd9fcb79b9"
+            },
+            {
+              "source": "1808.09633",
+              "ordinal": 18,
+              "chunk_id": "cfeb54b00e9eddabdf7d71521e80b324f7d316d1d865c95a157154d77dd2bc4f"
+            },
+            {
+              "source": "1610.00879",
+              "ordinal": 9,
+              "chunk_id": "e1b314b6844484dd6d8b5a807f305d18420cc456551534076917b489ad9e89d9"
+            },
+            {
+              "source": "1607.00424",
+              "ordinal": 1,
+              "chunk_id": "737af376a67b30b54c51801bb92420364c0cf5bb560163022f2c4a15fc25ea0f"
+            },
+            {
+              "source": "1906.07668",
+              "ordinal": 19,
+              "chunk_id": "7d0d8d4f1a58ed0a4e08d2abfd7e557724f7af2cb00defa10b8050ac323260b5"
+            },
+            {
+              "source": "1906.07668",
+              "ordinal": 18,
+              "chunk_id": "3c09b6dda7d81c6c88fcac40fbb0a88d17a91510ef54cb0226a81ac2b57183a7"
+            },
+            {
+              "source": "1909.00574",
+              "ordinal": 14,
+              "chunk_id": "ba71e89dd3f24ad796aee81bacde0b1a1cfed41f1a79da1ca5d0e42cdca816c6"
+            },
+            {
+              "source": "1909.00574",
+              "ordinal": 13,
+              "chunk_id": "2dbebec569807263fb5aaa4b3149f59d17223d41397bc2baab37720eff496732"
+            },
+            {
+              "source": "1906.07668",
+              "ordinal": 7,
+              "chunk_id": "d1989f7960864888ad78e0e197984a1fe6be18c2d1cb7ee78b704b46b39f5104"
+            }
+          ],
+          "reranked": [
+            {
+              "source": "1610.00879",
+              "ordinal": 0,
+              "chunk_id": "875d7bab553a0973da525c2e5a5f44e6df54c6db0d2fcaa1047a7a0a02cf8314"
+            },
+            {
+              "source": "1610.00879",
+              "ordinal": 3,
+              "chunk_id": "4f111d7f3ab22ed63857d086448170a5a408b1f4d193bb0d944182130917c0f6"
+            },
+            {
+              "source": "1610.00879",
+              "ordinal": 1,
+              "chunk_id": "431f8b8fbeabb5280006a9a0b64ba4dc291e071ce9b6979bdd318c87762f7d08"
+            },
+            {
+              "source": "1610.00879",
+              "ordinal": 8,
+              "chunk_id": "b9cf5d0982af8329988130aef7ba6ecf28c06248b95aaa52ced1b881aa33a9c4"
+            },
+            {
+              "source": "1610.00879",
+              "ordinal": 10,
+              "chunk_id": "fd1abdb1d46db792ccb54cd4ae25d6be9a0693774d52074301a19348ded7448d"
+            },
+            {
+              "source": "1610.00879",
+              "ordinal": 9,
+              "chunk_id": "e1b314b6844484dd6d8b5a807f305d18420cc456551534076917b489ad9e89d9"
+            }
+          ],
+          "times_ms": {
+            "dense": 392.897,
+            "sparse": 101.421,
+            "fusion": 0.157,
+            "rerank": 20305.306
+          },
+          "total_ms": 20827.043
+        },
+        {
+          "kind": "reader",
+          "prompt_sha256": "9c370741e427b61cd3d6658c87cda9c5faf1020e482b72e5391dfc5d7d790370",
+          "chunks": [
+            {
+              "source": "1610.00879",
+              "ordinal": 0,
+              "chunk_id": "875d7bab553a0973da525c2e5a5f44e6df54c6db0d2fcaa1047a7a0a02cf8314"
+            },
+            {
+              "source": "1610.00879",
+              "ordinal": 3,
+              "chunk_id": "4f111d7f3ab22ed63857d086448170a5a408b1f4d193bb0d944182130917c0f6"
+            },
+            {
+              "source": "1610.00879",
+              "ordinal": 1,
+              "chunk_id": "431f8b8fbeabb5280006a9a0b64ba4dc291e071ce9b6979bdd318c87762f7d08"
+            },
+            {
+              "source": "1610.00879",
+              "ordinal": 8,
+              "chunk_id": "b9cf5d0982af8329988130aef7ba6ecf28c06248b95aaa52ced1b881aa33a9c4"
+            },
+            {
+              "source": "1610.00879",
+              "ordinal": 10,
+              "chunk_id": "fd1abdb1d46db792ccb54cd4ae25d6be9a0693774d52074301a19348ded7448d"
+            },
+            {
+              "source": "1610.00879",
+              "ordinal": 9,
+              "chunk_id": "e1b314b6844484dd6d8b5a807f305d18420cc456551534076917b489ad9e89d9"
+            }
+          ]
+        },
+        {
+          "kind": "wire",
+          "max_tokens": 512,
+          "timeout_seconds": 60.0,
+          "system_prompt_sha256": "9921923abe84909a433d1333667a6cb16f7ba0928080ec0b21136d1b12238499",
+          "temperature": 0.0,
+          "model": "deepseek-v4.1-flash-1017",
+          "retry_limit": 0,
+          "enable_thinking": null,
+          "prompt_sha256": "9c370741e427b61cd3d6658c87cda9c5faf1020e482b72e5391dfc5d7d790370"
+        },
+        {
+          "kind": "response",
+          "elapsed_ms": 4580,
+          "finish_reason": "length",
+          "content_present": false,
+          "usage": {
+            "input_tokens": 2278,
+            "output_tokens": 512,
+            "total_tokens": 2790
+          }
+        }
+      ]
+    }
+  ]
+}

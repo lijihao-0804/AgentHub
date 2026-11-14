@@ -1,0 +1,32 @@
+{
+  "job": {
+    "state": "completed",
+    "started_at": "2026-11-14T03:14:40.728777+00:00",
+    "finished_at": "2026-11-14T03:20:05.270228+00:00",
+    "exit_code": 0,
+    "elapsed_seconds": 324.531
+  },
+  "receipts": {
+    "A-reserve16.json": {
+      "count": 4,
+      "http": {
+        "200": 4
+      },
+      "sha256_lf": "a251bef6141b923ac2d9e24dd209f44fe8bf19c478fa6309565271cc45981f77"
+    },
+    "B-reserve16.json": {
+      "count": 4,
+      "http": {
+        "200": 4
+      },
+      "sha256_lf": "69db276fcffe6f2106de2243493749be8d3edcd30e598c19069443e22f7371c0"
+    },
+    "C-reserve16.json": {
+      "count": 4,
+      "http": {
+        "200": 4
+      },
+      "sha256_lf": "44e62d915753d6ffb6d5a26c232a4562cb2944d8177491faa8ec33a24fea2e85"
+    }
+  }
+}

@@ -1,0 +1,273 @@
+{
+  "arm": "B",
+  "source": {
+    "packages/knowledge/citation_qa.py": "1968f8581b9954c4565ba3361b7a52965c8f048d8d092cb9e0ada42a6ec5daf8",
+    "apps/api/routes/citation_qa.py": "f818f3a8928bd7213317d4b21913824755f2276a32f64223926fecd0ba54cfdc",
+    "apps/api/schemas/citation_qa.py": "b9bfa5fcea10c45be4a33cf408a2546114f2e7800ff7d93c371cf51a048453c8",
+    "packages/model_gateway/adapters/litellm/adapter.py": "e768ea18574984723642b03f59e2385f12eeca09091f8485254dda46b0c6d6af",
+    "packages/model_gateway/gateway.py": "c6d02969e16ef7f825644b247c79e23905e39a2740ba936587f5401b696e9d92",
+    "packages/model_gateway/contracts.py": "6c6507db40e667883706e59c130cabba97827482a92fd6802fe489339475cda1",
+    "packages/model_gateway/errors.py": "600b6c85e4f50b353a7a5bba456df8d4fca63c3bbc8ead8c92478023b3a23349",
+    "packages/knowledge/retrieval.py": "83b29728707cac0f26b0a8edaf7d2e0e3a9ea33467f6975b17eae3a3233a88e7"
+  },
+  "model": "deepseek-v4.1-flash-1017",
+  "profile": "174e5ef9-418e-4fa2-861e-499956058c10",
+  "snapshot": "4bf2f6bd-a6f1-4ded-a622-44114187066d",
+  "snapshot_hash": "043b5bac347b6e658c3f13aa09c99bc078f8adb85c95c8bc7eefaa96c8285bf5",
+  "documents": 7,
+  "chunks": 99,
+  "protocol_sha256": "d7e18814f84bab06090551bb39d0bc5dc285d52504aa656278dce753e2194766",
+  "endpoint": "POST /api/v1/knowledge/query",
+  "rows": [
+    {
+      "id": "a130aa735de3b65c71f27018f20d3c068bafb826",
+      "state": "returned",
+      "utc": "2026-11-14T03:09:42.041359+00:00",
+      "http": 200,
+      "elapsed_s": 32.54,
+      "answer": "The paper reports the following data sizes: the VG training set consists of 85% of the data — 16k images with 740k corresponding region descriptions — while the ReferIt training data consists of 9k images and 54k referring expressions [6]. In addition, the instance selection model is trained using (region description, object set) pairs from the VG dataset, resulting in a training set of approximately 1.73M samples, with the remaining 300K samples split into validation and testing [4].",
+      "insufficient": false,
+      "citations": [
+        {
+          "number": 4,
+          "source": "1910.04887",
+          "ordinal": 7,
+          "chunk_id": "adc55a09e04f24def56839f292bcda780dbed6aecee8c30c490a01c4ffccccbe",
+          "revision": "f3469bcc-ab9f-4f8b-9f0f-018a732456a3",
+          "excerpt": "embeddings, 512 dimensional LSTM hidden units, and a max length of 50 characters per query, with Adam at a 5e-4 learning rate, and a batch size of 32 for 80K iterations. The instance selection model is trained using (region description, object set) pairs from the VG dataset resulting in a training set of approximately 1.73M samples. The remaining 300K samples are split into validation and testing. Our training procedure for the instance selection model fine tunes all 12 layers of BERT with 32 sample batch sizes for 250K iterations, using Adam and performing learning rate warm-up for the first 10% of iterations with a target 5e-5 learning rate. The entire training processes takes around a day on an NVIDIA Tesla P100 GPU.\n\nResults\n\nFigure 3 shows example results. We evaluate query completion by language perplexity and mean reciprocal rank (MRR) and evaluate instance selection by F1-score. We compare the perplexity on both sets of test queries using corresponding images vs. random noise as context. Table TABREF11 shows perplexity on the VG and ReferIt test queries with both corresponding images and random noise. The VG and ReferIt datasets have character vocabulary sizes of 89 and 77",
+          "chunk_text_sha256": "b8921d9fcdbd655731df3b78075db8625a7d29afed7c9ac8719863e8155930ec",
+          "excerpt_sha256": "b8921d9fcdbd655731df3b78075db8625a7d29afed7c9ac8719863e8155930ec",
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1199,
+          "locator": {
+            "type": "text_range",
+            "char_end": 8200,
+            "char_start": 7000
+          }
+        },
+        {
+          "number": 6,
+          "source": "1910.04887",
+          "ordinal": 6,
+          "chunk_id": "76a94c17da3d17cc758a9f8269e8959c6a42781ecc3953cc7ec9b91bf60e0d09",
+          "revision": "f3469bcc-ab9f-4f8b-9f0f-018a732456a3",
+          "excerpt": "e a replacement for queries since they mention various objects in different regions of each image. However, while some region descriptions are referring phrases, some are more similar to descriptions (see examples in Table TABREF10). The large number of examples makes the Visual Genome dataset particularly useful for our task. The smaller ReferIt dataset consists of referring expressions attached to images which more closely resemble potential user queries of images. We train separate models using both datasets.\n\nFor training, we aggregated (query, image) pairs using the region descriptions from the VG dataset and referring expressions from the ReferIt dataset. Our VG training set consists of 85% of the data: 16k images and 740k corresponding region descriptions. The Referit training data consists of 9k images and 54k referring expressions.\n\nThe query completion models are trained using a 128 dimensional image representation, a rank $r=64$ personalized matrix, 24 dimensional character embeddings, 512 dimensional LSTM hidden units, and a max length of 50 characters per query, with Adam at a 5e-4 learning rate, and a batch size of 32 for 80K iterations. The instance selection model i",
+          "chunk_text_sha256": "2ab3260a896f307000d00c6e1d3b086b052b20ba6850751703b2fd4d781043a8",
+          "excerpt_sha256": "2ab3260a896f307000d00c6e1d3b086b052b20ba6850751703b2fd4d781043a8",
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1200,
+          "locator": {
+            "type": "text_range",
+            "char_end": 7200,
+            "char_start": 6000
+          }
+        }
+      ],
+      "events": [
+        {
+          "kind": "retrieval",
+          "snapshot": "4bf2f6bd-a6f1-4ded-a622-44114187066d",
+          "candidate": [
+            {
+              "source": "1910.04887",
+              "ordinal": 0,
+              "chunk_id": "4e6c58d4d97888d9db4dbbd8ce1f5b1f0147918db4ee428a8797eae8165022ab"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 2,
+              "chunk_id": "59860a87f1fd646f2eef82237be7f185be5d5a21069016ce2ccbb0761718d44f"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 3,
+              "chunk_id": "dd989b93ff76afaa9cf12f655a3822a1d3b527ab28c3c51d1aaeb5fe4434cdc1"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 5,
+              "chunk_id": "ece6e2d6560f1316e2a1acb7afff0a5bbbe58f010c7d5458b7661b0bb8bea5bc"
+            },
+            {
+              "source": "1601.02166",
+              "ordinal": 3,
+              "chunk_id": "33b526efedd15ef5ff6ec1db44d543228f74d2183441cfcc4ce3bdd8f8316df0"
+            },
+            {
+              "source": "1707.08559",
+              "ordinal": 6,
+              "chunk_id": "19a8ae5700d0ce68fbefdea2f001dab2fbb46c9e1c34dfebb43840aa1be1db2d"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 4,
+              "chunk_id": "fddc00338b9c968585cd24d292c4c8df5a5ae43e6d9eedf23d174b30850b7f9a"
+            },
+            {
+              "source": "1911.01680",
+              "ordinal": 13,
+              "chunk_id": "1fed724e26090008085ef9d93e80a38c2623b05060cf2ad944fd294463500214"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 8,
+              "chunk_id": "d99e4cb013c520723ccd08ae1a8668c390c462c340c38d55be0346127078a977"
+            },
+            {
+              "source": "2002.01861",
+              "ordinal": 12,
+              "chunk_id": "c079d101a8f159611100aeae0e52b116ee1982fa2132cedc88383c557403eb5d"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 6,
+              "chunk_id": "76a94c17da3d17cc758a9f8269e8959c6a42781ecc3953cc7ec9b91bf60e0d09"
+            },
+            {
+              "source": "1601.02166",
+              "ordinal": 8,
+              "chunk_id": "0db3784f697c448fd38703b082b6a199f94475061a73af9b4ad80cb9631d1e1b"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 7,
+              "chunk_id": "adc55a09e04f24def56839f292bcda780dbed6aecee8c30c490a01c4ffccccbe"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 1,
+              "chunk_id": "368c75d5d0afa4fd7177b95140287c59e91399ee3d4f0eb1ca52aa85e0b0ab83"
+            },
+            {
+              "source": "1601.02166",
+              "ordinal": 7,
+              "chunk_id": "8caccd068b144ffcae30d54f91a58bdc71a5833b8e784318bde2cc92c949839c"
+            },
+            {
+              "source": "2002.01861",
+              "ordinal": 2,
+              "chunk_id": "73479e02dba02d46847bc243043afb69f18560ee718dce6787b3b6be9bb5be9d"
+            },
+            {
+              "source": "1707.06945",
+              "ordinal": 5,
+              "chunk_id": "3737597acdcff410b145d894c84ec9b5a1d6383ff81b36579ae2016fbdd762da"
+            },
+            {
+              "source": "1707.08559",
+              "ordinal": 8,
+              "chunk_id": "b9c8e5d87ccd6f3326d81298df9e30743583c99f3030e410f4a80b45200f5fa3"
+            },
+            {
+              "source": "1911.01680",
+              "ordinal": 3,
+              "chunk_id": "5425b5a0bbfd2c9de50565d0dec05e3530047ba32971bb6fe779276abaa9101c"
+            },
+            {
+              "source": "1911.01680",
+              "ordinal": 0,
+              "chunk_id": "c0c7580de7704d7d83c65620b6764f0d9ca4a614c932d8ce15ab2fdbabf2eca4"
+            }
+          ],
+          "reranked": [
+            {
+              "source": "1910.04887",
+              "ordinal": 8,
+              "chunk_id": "d99e4cb013c520723ccd08ae1a8668c390c462c340c38d55be0346127078a977"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 0,
+              "chunk_id": "4e6c58d4d97888d9db4dbbd8ce1f5b1f0147918db4ee428a8797eae8165022ab"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 2,
+              "chunk_id": "59860a87f1fd646f2eef82237be7f185be5d5a21069016ce2ccbb0761718d44f"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 7,
+              "chunk_id": "adc55a09e04f24def56839f292bcda780dbed6aecee8c30c490a01c4ffccccbe"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 3,
+              "chunk_id": "dd989b93ff76afaa9cf12f655a3822a1d3b527ab28c3c51d1aaeb5fe4434cdc1"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 6,
+              "chunk_id": "76a94c17da3d17cc758a9f8269e8959c6a42781ecc3953cc7ec9b91bf60e0d09"
+            }
+          ],
+          "times_ms": {
+            "dense": 281.732,
+            "sparse": 7.571,
+            "fusion": 0.132,
+            "rerank": 29569.957
+          },
+          "total_ms": 29875.26
+        },
+        {
+          "kind": "reader",
+          "prompt_sha256": "0a54d0d80b0f1a2a60a7fa278e8037e1e98920f3601eb3e1c6c5ff33d4cd788a",
+          "chunks": [
+            {
+              "source": "1910.04887",
+              "ordinal": 8,
+              "chunk_id": "d99e4cb013c520723ccd08ae1a8668c390c462c340c38d55be0346127078a977"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 0,
+              "chunk_id": "4e6c58d4d97888d9db4dbbd8ce1f5b1f0147918db4ee428a8797eae8165022ab"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 2,
+              "chunk_id": "59860a87f1fd646f2eef82237be7f185be5d5a21069016ce2ccbb0761718d44f"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 7,
+              "chunk_id": "adc55a09e04f24def56839f292bcda780dbed6aecee8c30c490a01c4ffccccbe"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 3,
+              "chunk_id": "dd989b93ff76afaa9cf12f655a3822a1d3b527ab28c3c51d1aaeb5fe4434cdc1"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 6,
+              "chunk_id": "76a94c17da3d17cc758a9f8269e8959c6a42781ecc3953cc7ec9b91bf60e0d09"
+            }
+          ]
+        },
+        {
+          "kind": "wire",
+          "max_tokens": 2048,
+          "timeout_seconds": 60.0,
+          "system_prompt_sha256": "9921923abe84909a433d1333667a6cb16f7ba0928080ec0b21136d1b12238499",
+          "temperature": 0.0,
+          "model": "deepseek-v4.1-flash-1017",
+          "retry_limit": 0,
+          "enable_thinking": null,
+          "prompt_sha256": "0a54d0d80b0f1a2a60a7fa278e8037e1e98920f3601eb3e1c6c5ff33d4cd788a"
+        },
+        {
+          "kind": "response",
+          "elapsed_ms": 2629,
+          "finish_reason": "stop",
+          "content_present": true,
+          "usage": {
+            "input_tokens": 2350,
+            "output_tokens": 253,
+            "total_tokens": 2603
+          }
+        }
+      ]
+    }
+  ]
+}

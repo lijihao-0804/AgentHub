@@ -113,8 +113,12 @@ def summarize(rows):
         "elapsed_s_median": statistics.median(times),
         "elapsed_s_p95_nearest_rank": times[math.ceil(0.95 * len(times)) - 1],
         "adapter_elapsed_s_median": statistics.median(
-            sum(e["elapsed_ms"] for e in r["responses"] + r["adapter_errors"]) / 1000 for r in rows
-        ),
+            sum(e["elapsed_ms"] for e in r["responses"] + r["adapter_errors"]) / 1000
+            for r in rows
+            if r["wire_attempts"]
+        )
+        if any(r["wire_attempts"] for r in rows)
+        else None,
         "wire_attempts": sum(r["wire_attempts"] for r in rows),
         "adapter_responses": len(responses),
         "usage_known": len(usage),
@@ -137,6 +141,70 @@ def summarize(rows):
     return result
 
 
+def audit_row(c, row, receipt, docs, *, cap, thinking):
+    (retr,) = events_of(row, "retrieval")
+    (reader,) = events_of(row, "reader")
+    wire = events_of(row, "wire")
+    require(retr["snapshot"] == receipt["snapshot"], "Retrieval snapshot")
+    require(
+        wire and all(w["prompt_sha256"] == reader["prompt_sha256"] for w in wire),
+        "Reader not at adapter",
+    )
+    require(
+        all(
+            w.get("enable_thinking") is thinking
+            and w["retry_limit"] == 0
+            and w["max_tokens"] == cap
+            and w["temperature"] == 0
+            and w["model"] == receipt["model"]
+            for w in wire
+        ),
+        "Provider mode or retries",
+    )
+    require(len(retr["candidate"]) <= 20 and len(reader["chunks"]) <= 6, "Retrieval budget")
+    for cit in row.get("citations", []):
+        verify_citation(cit, docs, reader["chunks"])
+    provider_results = events_of(row, "response")
+    last = (provider_results or [{}])[-1]
+    failure = None
+    if row["http"] != 200:
+        if (
+            row.get("error") == "MODEL_BAD_RESPONSE"
+            and last.get("content_present") is False
+            and last.get("finish_reason") == "length"
+        ):
+            failure = "gateway_empty_visible_content_at_length"
+        elif row.get("error") == "CITATION_QA_INVALID_MODEL_OUTPUT":
+            # On the historical code we can prove only this broader stage for one call.
+            failure = "qa_json_or_schema" if len(wire) == 1 else "qa_output_after_correction"
+            if last.get("finish_reason") == "length":
+                failure += "_at_length"
+        else:
+            failure = "gateway_or_transport:" + str(row.get("error", "unknown"))
+    return {
+        "identity": [receipt[k] for k in ("model", "profile", "snapshot", "snapshot_hash")],
+        "wire_settings": [(w["model"], w["max_tokens"], w["temperature"]) for w in wire],
+        "digest": {
+            k: sha(canon(v))
+            for k, v in (
+                ("pool", retr["candidate"]),
+                ("final", retr["reranked"]),
+                ("reader", reader["chunks"]),
+            )
+        },
+        "prompt_sha": reader["prompt_sha256"],
+        "elapsed_s": row["elapsed_s"],
+        "http": row["http"],
+        "verified_citations": len(row.get("citations", [])),
+        "wire_attempts": len(wire),
+        "responses": provider_results,
+        "failure_observation": failure,
+        "adapter_errors": events_of(row, "adapter_error"),
+        "candidate": reach(c, retr["candidate"], docs),
+        "reader": reach(c, reader["chunks"], docs),
+    }
+
+
 def audit(cases, a_files, b_files, corpora, protocol_sha):
     by_budget = any(c["scope"] == "reserve14" for c in cases.values())
     output = {}
@@ -157,76 +225,14 @@ def audit(cases, a_files, b_files, corpora, protocol_sha):
                 )
                 c = cases[cid]
                 docs = corpora["full" if c["scope"] == "full" else "qasper"]
-                (retr,) = events_of(row, "retrieval")
-                (reader,) = events_of(row, "reader")
-                wire = events_of(row, "wire")
-                require(retr["snapshot"] == receipt["snapshot"], "Retrieval snapshot")
-                require(
-                    wire and all(w["prompt_sha256"] == reader["prompt_sha256"] for w in wire),
-                    "Reader not at adapter",
+                output[arm][cid] = audit_row(
+                    c,
+                    row,
+                    receipt,
+                    docs,
+                    cap=cap,
+                    thinking=False if arm == "candidate" and not by_budget else None,
                 )
-                require(
-                    all(
-                        w.get("enable_thinking")
-                        is (False if arm == "candidate" and not by_budget else None)
-                        and w["retry_limit"] == 0
-                        and w["max_tokens"] == cap
-                        and w["temperature"] == 0
-                        and w["model"] == receipt["model"]
-                        for w in wire
-                    ),
-                    "Provider mode or retries",
-                )
-                require(
-                    len(retr["candidate"]) <= 20 and len(reader["chunks"]) <= 6, "Retrieval budget"
-                )
-                for cit in row.get("citations", []):
-                    verify_citation(cit, docs, reader["chunks"])
-                provider_results = events_of(row, "response")
-                last = (provider_results or [{}])[-1]
-                failure = None
-                if row["http"] != 200:
-                    if (
-                        row.get("error") == "MODEL_BAD_RESPONSE"
-                        and last.get("content_present") is False
-                        and last.get("finish_reason") == "length"
-                    ):
-                        failure = "gateway_empty_visible_content_at_length"
-                    elif row.get("error") == "CITATION_QA_INVALID_MODEL_OUTPUT":
-                        # On the historical code we can prove only this broader stage for one call.
-                        failure = (
-                            "qa_json_or_schema" if len(wire) == 1 else "qa_output_after_correction"
-                        )
-                        if last.get("finish_reason") == "length":
-                            failure += "_at_length"
-                    else:
-                        failure = "gateway_or_transport:" + str(row.get("error", "unknown"))
-                output[arm][cid] = {
-                    "identity": [
-                        receipt[k] for k in ("model", "profile", "snapshot", "snapshot_hash")
-                    ],
-                    "wire_settings": [
-                        (w["model"], w["max_tokens"], w["temperature"]) for w in wire
-                    ],
-                    "digest": {
-                        k: sha(canon(v))
-                        for k, v in (
-                            ("pool", retr["candidate"]),
-                            ("final", retr["reranked"]),
-                            ("reader", reader["chunks"]),
-                        )
-                    },
-                    "prompt_sha": reader["prompt_sha256"],
-                    "elapsed_s": row["elapsed_s"],
-                    "http": row["http"],
-                    "verified_citations": len(row.get("citations", [])),
-                    "wire_attempts": len(wire),
-                    "responses": provider_results,
-                    "failure_observation": failure,
-                    "adapter_errors": events_of(row, "adapter_error"),
-                    "candidate": reach(c, retr["candidate"], docs),
-                    "reader": reach(c, reader["chunks"], docs),
-                }
         require(set(output[arm]) == set(cases), "Missing cases")
     parity = Counter()
     for cid in cases:
