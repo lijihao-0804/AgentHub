@@ -1,0 +1,124 @@
+{
+  "workspace": "96ee3584-fc63-4964-88c6-2d81a0fa7c5e",
+  "kb": "d167012d-263d-4f7e-8771-058a65431545",
+  "collection": "sentence_retention_historical",
+  "snapshot": "9edd33ac-febc-41ac-b413-264c6a7407f4",
+  "snapshot_sha256": "c619dc7a7a77300d0be300b3c6f451435c351ab0f05ab67b1a0f288311106181",
+  "count": 16,
+  "chunks": 338,
+  "embedding_device": "cuda",
+  "documents": {
+    "1707.06939": {
+      "document_id": "a515b23f-cd4b-40d5-beef-1eb551e216d7",
+      "revision": "2ea06a54-b0be-4bee-944d-386109f92558",
+      "chunks": 20,
+      "paper_text_sha256": "308d4192f7926ed24975401c6e65989f93d2fdbc8a7bf0fa6d391c031bf40e00",
+      "normalized_sha256": "308d4192f7926ed24975401c6e65989f93d2fdbc8a7bf0fa6d391c031bf40e00"
+    },
+    "1812.07023": {
+      "document_id": "dec02553-2e2c-475d-8024-9bf6359854d4",
+      "revision": "b6a6f6b8-10cb-4a70-aff9-86794059c8e8",
+      "chunks": 22,
+      "paper_text_sha256": "d5c998c8202ceda75ce8a72bbc0162eb70ecb280afc26f06a1c629314b319788",
+      "normalized_sha256": "d5c998c8202ceda75ce8a72bbc0162eb70ecb280afc26f06a1c629314b319788"
+    },
+    "2002.00750": {
+      "document_id": "b1237962-af3a-467f-ab3a-8cd0b0596c73",
+      "revision": "63765558-fdf3-4453-b6bc-43e0813096d8",
+      "chunks": 19,
+      "paper_text_sha256": "20b1396edb55eca9213f6246b7b41859f6b02873ce09a080e7e060ab317f6609",
+      "normalized_sha256": "20b1396edb55eca9213f6246b7b41859f6b02873ce09a080e7e060ab317f6609"
+    },
+    "1905.01715": {
+      "document_id": "794a2134-69d8-462c-b1af-e3f17a4cd00b",
+      "revision": "ba86cfe3-bc74-43c7-8aab-3c60897b178e",
+      "chunks": 13,
+      "paper_text_sha256": "88efb3f98220541521126ac93aea3b7e006297e509fac1cd24af462b89ff4e76",
+      "normalized_sha256": "88efb3f98220541521126ac93aea3b7e006297e509fac1cd24af462b89ff4e76"
+    },
+    "1910.11471": {
+      "document_id": "d5ae157a-69aa-4dc1-981b-76977960668a",
+      "revision": "52ac54f5-a1b7-4554-880a-fef7412a3fed",
+      "chunks": 14,
+      "paper_text_sha256": "a16f7585636a1a9caf47e60303e495e13fc142bb55ed7ff6360df735814a841b",
+      "normalized_sha256": "a16f7585636a1a9caf47e60303e495e13fc142bb55ed7ff6360df735814a841b"
+    },
+    "2004.02451": {
+      "document_id": "c9b9afea-fec7-4b29-9a74-2efde1acfee3",
+      "revision": "8d4cdada-c76a-465d-be37-c3e9069481e2",
+      "chunks": 30,
+      "paper_text_sha256": "2de30f5a2809665737cef2f7884be3a18b91a78d06944c5ec0bba1e542452295",
+      "normalized_sha256": "2de30f5a2809665737cef2f7884be3a18b91a78d06944c5ec0bba1e542452295"
+    },
+    "1904.02357": {
+      "document_id": "67420cc5-2efd-4607-a51d-1ca0af48247a",
+      "revision": "52b05220-510c-4776-8d25-b6502f65ecef",
+      "chunks": 14,
+      "paper_text_sha256": "0e4aa204a149ce4ae1a407f0bfa3151d11c85f463e41e3a1c414b986c13b4e5b",
+      "normalized_sha256": "0e4aa204a149ce4ae1a407f0bfa3151d11c85f463e41e3a1c414b986c13b4e5b"
+    },
+    "1911.13066": {
+      "document_id": "291288bf-221b-4e18-9f76-6e19cfc9a109",
+      "revision": "ae9666f5-f091-462e-be89-1165409b3ff3",
+      "chunks": 22,
+      "paper_text_sha256": "4d70f13f3cc46322eb5ded194d77222ea2446fa3d894635ea14f1c4565e24ceb",
+      "normalized_sha256": "4d70f13f3cc46322eb5ded194d77222ea2446fa3d894635ea14f1c4565e24ceb"
+    },
+    "1707.00995": {
+      "document_id": "588895d4-4ffc-4b10-ac2c-2a976f51fe74",
+      "revision": "d74e5073-98a4-477b-bcce-9eb00f803c18",
+      "chunks": 25,
+      "paper_text_sha256": "a07610edb10079679458fc5725b49d35edac9939cf820391bdbb2a1c53a2ec6a",
+      "normalized_sha256": "a07610edb10079679458fc5725b49d35edac9939cf820391bdbb2a1c53a2ec6a"
+    },
+    "2003.06044": {
+      "document_id": "4a6ffed4-5351-4b78-8a59-a8e501f6d7dc",
+      "revision": "e6bfb376-fbca-4335-948c-e1e79b05a60a",
+      "chunks": 27,
+      "paper_text_sha256": "3bb47651017e1cae63ac3355b4d246ad94680ec93a3cf0b2c4dae47f74c0d3c0",
+      "normalized_sha256": "3bb47651017e1cae63ac3355b4d246ad94680ec93a3cf0b2c4dae47f74c0d3c0"
+    },
+    "1810.01570": {
+      "document_id": "e82a3f22-d5be-46cc-8063-5b2231ec888e",
+      "revision": "145c16ed-d212-4407-9316-42aaa5e8b2c6",
+      "chunks": 30,
+      "paper_text_sha256": "128a7588de5ef6187fa40f78638cd9c136be7eb9a270ef1c0355feda3000f402",
+      "normalized_sha256": "128a7588de5ef6187fa40f78638cd9c136be7eb9a270ef1c0355feda3000f402"
+    },
+    "1612.09113": {
+      "document_id": "96ec4d57-f153-4439-b094-726ca085e8dd",
+      "revision": "5af292c7-6f90-4112-8586-104df1b067a2",
+      "chunks": 11,
+      "paper_text_sha256": "e4689123ef9d6fc677f01dc9dc20019c5c96502599634b026dd2360b75bf5ac2",
+      "normalized_sha256": "e4689123ef9d6fc677f01dc9dc20019c5c96502599634b026dd2360b75bf5ac2"
+    },
+    "1909.07512": {
+      "document_id": "6f050e28-3fd8-44ef-96cd-f09856eb32d6",
+      "revision": "be8b40e5-1910-4f65-89fd-b32cc469a06d",
+      "chunks": 16,
+      "paper_text_sha256": "5500bf499d0566e39e45da5fab79ef9cdbcdaffdd32dbb64b9131cf546317401",
+      "normalized_sha256": "5500bf499d0566e39e45da5fab79ef9cdbcdaffdd32dbb64b9131cf546317401"
+    },
+    "1910.01363": {
+      "document_id": "76b2ebfe-8cd4-4591-8bc8-efb50350b9db",
+      "revision": "f59d6260-4dc3-44ca-9952-09f520d213fb",
+      "chunks": 28,
+      "paper_text_sha256": "934886b4e6226878d40c22f1dca25ea47739a140bbb5f098114e0088ed1db196",
+      "normalized_sha256": "934886b4e6226878d40c22f1dca25ea47739a140bbb5f098114e0088ed1db196"
+    },
+    "1910.04601": {
+      "document_id": "16f09383-0397-498c-b30c-b42b707f51fc",
+      "revision": "19fa0a84-a1bf-4ada-8c10-10a86e2a7c1b",
+      "chunks": 27,
+      "paper_text_sha256": "1be4a5e49b5234d93bba5587b396048fee1ca6edda0cc631c49a16d66c46b62a",
+      "normalized_sha256": "1be4a5e49b5234d93bba5587b396048fee1ca6edda0cc631c49a16d66c46b62a"
+    },
+    "1606.04631": {
+      "document_id": "f6ad2526-09d2-406c-aa7f-6b69c1445ba7",
+      "revision": "e8398356-2011-4562-8a8a-cf2a80b473af",
+      "chunks": 20,
+      "paper_text_sha256": "20b68bf37c5ba3d5368c29983e073e30d28361c9fd75d0b1317f358492bf37b5",
+      "normalized_sha256": "20b68bf37c5ba3d5368c29983e073e30d28361c9fd75d0b1317f358492bf37b5"
+    }
+  }
+}

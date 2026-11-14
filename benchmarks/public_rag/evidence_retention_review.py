@@ -125,20 +125,49 @@ def summary(subset):
             sum(r["returned_citations"] for r in rows),
         )
         distributions[arm] = {
-            "http_status": dict(sorted(Counter(r["http"] for r in rows).items())),
+            "http_status": dict(sorted(Counter(str(r["http"]) for r in rows).items())),
             "answerable": dict(
                 sorted(Counter(r["verdict"] for r in rows if not r["negative"]).items())
             ),
             "official_negative": dict(
                 sorted(Counter(r["verdict"] for r in rows if r["negative"]).items())
             ),
-            "source_label_conflict_ids": sorted(
-                cid for cid, r in negative.items() if r[arm]["verdict"] in {"full", "partial"}
+            "official_negative_full_answer_ids": sorted(
+                cid for cid, r in negative.items() if r[arm]["verdict"] == "full"
+            ),
+            "official_negative_partial_answer_ids": sorted(
+                cid for cid, r in negative.items() if r[arm]["verdict"] == "partial"
             ),
         }
     before, after = (precision[arm] for arm in ARMS)
     metrics["citation_precision"] = {**precision, "change_percentage_points": delta(before, after)}
     return {"n": len(subset), "metrics": metrics, "outcomes": distributions}
+
+
+def reconcile(packet, first, second, adjudication):
+    if not (set(first) == set(second) == set(packet)):
+        raise ValueError("Each independent review must cover every unique masked packet")
+    disagreements = set()
+    verdict_agreement = citation_agreement = 0
+    for uid, item in packet.items():
+        a, b = (review.assess(item, marks[uid]) for marks in (first, second))
+        same_verdict = a["verdict"] == b["verdict"]
+        same_cites = set(a["supporting_citations"]) == set(b["supporting_citations"])
+        verdict_agreement += int(same_verdict)
+        citation_agreement += int(same_cites)
+        if not (same_verdict and same_cites):
+            disagreements.add(uid)
+    if set(adjudication) != disagreements:
+        raise ValueError("An adjudication is required for each and only disputed masked judgment")
+    for uid, mark in adjudication.items():
+        review.assess(packet[uid], mark)
+    return {**first, **adjudication}, {
+        "unique_masked_packets": len(packet),
+        "verdict_agreement": rate(verdict_agreement, len(packet)),
+        "citation_set_agreement": rate(citation_agreement, len(packet)),
+        "both_agree": rate(len(packet) - len(disagreements), len(packet)),
+        "adjudicated_masked_ids": sorted(disagreements),
+    }
 
 
 def report(cases, rows, marks):
@@ -160,9 +189,10 @@ def report(cases, rows, marks):
     o, n = (cq[a] for a in ARMS)
     return {
         "judging": (
-            "One arm-masked assistant review of unique actual answers with their public returned "
-            "excerpts and official annotations. Identical packet contents share a judgment. "
-            "Each supporting citation grounds at least one substantive claim attached to it. "
+            "Arm-masked semantic assessment of unique actual answers with their public returned "
+            "excerpts and official annotations. Identical packet contents share one final "
+            "judgment. Each supporting citation grounds at least one substantive claim "
+            "attached to it. "
             "Exact paired p values are descriptive for this selected TRAIN cohort."
         ),
         "unique_masked_answers": len(masked),
@@ -197,14 +227,19 @@ def main():
     cli.add_argument("--start", type=int, default=0, help="First case offset for a masked packet")
     cli.add_argument("--count", type=int, help="Number of consecutive cases for a masked packet")
     cli.add_argument("--judgments", type=Path)
+    cli.add_argument("--first", type=Path, help="Independent first masked judgments")
+    cli.add_argument("--second", type=Path, help="Independent second masked judgments")
+    cli.add_argument("--adjudication", type=Path, help="Masked resolutions for disagreements")
     cli.add_argument("--report", type=Path)
     args = cli.parse_args()
+    reviews = (args.first, args.second, args.adjudication)
     if (
         not (args.packet or args.report)
         or bool(args.judgments) != bool(args.report)
         or (args.report and (args.start or args.count is not None))
         or args.start < 0
         or (args.count is not None and args.count < 1)
+        or (any(reviews) and not (all(reviews) and args.report))
     ):
         cli.error(
             "Write a packet or supply both judgments and a report; reports require all cases."
@@ -216,7 +251,15 @@ def main():
         packet, _ = review.packets(cases, rows)
         review.save(args.packet, packet)
     if args.report:
-        result = report(cases, rows, review.load(args.judgments))
+        marks = review.load(args.judgments)
+        if args.first:
+            packet, _ = review.packets(cases, rows)
+            agreed, audit = reconcile(packet, *(review.load(path) for path in reviews))
+            if agreed != marks:
+                raise ValueError("Final judgments differ from the blinded adjudication")
+        result = report(cases, rows, marks)
+        if args.first:
+            result["independent_review_agreement"] = audit
         result["protocol_sha256_lf"] = sha
         review.save(args.report, result)
         print(json.dumps(result["independent_semantic_gate"]))

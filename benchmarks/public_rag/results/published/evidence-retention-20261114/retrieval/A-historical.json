@@ -1,0 +1,840 @@
+{
+  "arm": "A",
+  "source": {
+    "packages/knowledge/citation_qa.py": "301297dd7c337a4bf5f008667ffc5309a6bd6c4b3d96f0aebed4a4a09378e56b",
+    "apps/api/routes/citation_qa.py": "27bda2b0201fe43be464fc0c4763f5c84e64009b4badf447cf2da07604c8de9e",
+    "apps/api/schemas/citation_qa.py": "aca3d1971e9c481c4a5ba0e5c8b682bb83b9c13ff861d48cc408063bf5545c10",
+    "packages/model_gateway/adapters/litellm/adapter.py": "e768ea18574984723642b03f59e2385f12eeca09091f8485254dda46b0c6d6af",
+    "packages/model_gateway/gateway.py": "c6d02969e16ef7f825644b247c79e23905e39a2740ba936587f5401b696e9d92",
+    "packages/model_gateway/contracts.py": "6c6507db40e667883706e59c130cabba97827482a92fd6802fe489339475cda1",
+    "packages/model_gateway/errors.py": "600b6c85e4f50b353a7a5bba456df8d4fca63c3bbc8ead8c92478023b3a23349",
+    "packages/knowledge/retrieval.py": "83b29728707cac0f26b0a8edaf7d2e0e3a9ea33467f6975b17eae3a3233a88e7",
+    "packages/knowledge/adapters/reranker.py": "76cab68df3cab27983719c53d0e5daf124d3fec00ddf9affb491bb3431bd9d1d",
+    "packages/knowledge/adapters/embeddings.py": "2a2dac86a87b862674de933c4572a1b15899e291d3906abf9a6dcf2a3aeb7752",
+    "packages/model_gateway/adapters/litellm/provider_http.py": "0a7d1a0c836950633edc933bb5f516e284a0adaf0a9b427cf148022fcc1cb3a1",
+    "packages/knowledge/structural_chunking.py": "cf98a9cd219d6a490dc452414d99c64aead835d584537d943ca2a60939e764a5",
+    "packages/knowledge/chunking.py": "09b569d3408dd98c157dad0ab4db4276f6430c324ae63c82903b86da29b51345",
+    "benchmarks/public_rag/evidence_sentence.py": "079962e1fe172a3e66b524ddf0a24c247cee07d4609521b95e45f75883494901",
+    "benchmarks/public_rag/evidence_retention_trace.py": "198850eed35508e5a002bf5ae7d6ea80af9533e7277d2041ff433dbbea46fdba",
+    "benchmarks/public_rag/evidence_retention_live.py": "a27c369889d6270bd82b73896ac3c220865ce7d1ecd4fce1e62d0d888a1979c5",
+    "benchmarks/public_rag/qa_first_response_trace.py": "a4ae473bfb7dde3faaadf1954ad2df462219204d904b21ddd61401b4625a47b3",
+    "benchmarks/public_rag/qa_first_response_live.py": "a685d951e374fb137df84e43c130a1d97b6dd893f7acba43106c8375da724fc4",
+    "scripts/citation_qa_profile.py": "6bc5f48c38dbd36190733fe8fb6866fb8a0a979da26122a813f8864f497b02c2"
+  },
+  "model": "deepseek-v4.1-flash-1017",
+  "profile": "e9065baf-83d3-4054-8502-8b894fb8a5a0",
+  "snapshot": "9edd33ac-febc-41ac-b413-264c6a7407f4",
+  "snapshot_hash": "c619dc7a7a77300d0be300b3c6f451435c351ab0f05ab67b1a0f288311106181",
+  "documents": 16,
+  "chunks": 338,
+  "protocol_sha256": "a99676109f90544c99cc3b69395ef4a0f49be2d4769a9a023c46448ad39ffaea",
+  "endpoint": "POST /api/v1/workspaces/{workspace_id}/knowledge-bases/{kb_id}/retrieval/playground",
+  "knowledge_base": "d167012d-263d-4f7e-8771-058a65431545",
+  "workspace": "96ee3584-fc63-4964-88c6-2d81a0fa7c5e",
+  "request_mode": "provider_default",
+  "output_mode": "PROMPT_JSON",
+  "retrieval_profile": {
+    "dense_top_k": 30,
+    "sparse_top_k": 30,
+    "candidate_top_k": 20,
+    "final_top_k": 6
+  },
+  "rows": [
+    {
+      "id": "c78f18606524539e4c573481e5bf1e0a242cc33c",
+      "state": "returned",
+      "utc": "2026-11-14T05:38:49.593276+00:00",
+      "elapsed_s": 22.763,
+      "http": 200,
+      "events": [
+        {
+          "kind": "rerank_scores",
+          "arm": "A",
+          "input_scores": [
+            {
+              "chunk_id": "c1129899a1f5a4a989380c76f93c6c3127d4e95d6dddf27e9d1505a01bfea691",
+              "whole_score": -0.96142578125,
+              "score": -0.96142578125
+            },
+            {
+              "chunk_id": "b8e35bddbc4d8acd109d11142491a31179a8d121de2d5d25f895c70453aac2ea",
+              "whole_score": -0.271240234375,
+              "score": -0.271240234375
+            },
+            {
+              "chunk_id": "362e9a531285800ccd3351f0a7be08fb17902575e8c514afcc6d176749f726a1",
+              "whole_score": -0.430908203125,
+              "score": -0.430908203125
+            },
+            {
+              "chunk_id": "c46746101fab8ff37988dc8def7ed38f74ecc82d659f0eabc44d0da1f1a05542",
+              "whole_score": -1.9462890625,
+              "score": -1.9462890625
+            },
+            {
+              "chunk_id": "8805d250b96a74e2e1bac16ae9cdba44dfe88b3414944c15e2fb55695df079f8",
+              "whole_score": -1.01171875,
+              "score": -1.01171875
+            },
+            {
+              "chunk_id": "325159d9f9fb83e3e394445530215a2a8eda507637349bdae9b42e2129ca16bb",
+              "whole_score": -1.7138671875,
+              "score": -1.7138671875
+            },
+            {
+              "chunk_id": "1abf5bb67135f9b0950cb9ef782fe1ceef5ee67bebe0b8d98c3f62781e0e2731",
+              "whole_score": -1.9404296875,
+              "score": -1.9404296875
+            },
+            {
+              "chunk_id": "4bd0c6ea8f9761a777cc6959a35cf06ac1ac7ca6b0cf3f05deabdb953b18b3b8",
+              "whole_score": -2.6875,
+              "score": -2.6875
+            },
+            {
+              "chunk_id": "0cceca8792fc1cdc7ed70947204622432360aa4e84287b7c30736ceddb7c81da",
+              "whole_score": -2.330078125,
+              "score": -2.330078125
+            },
+            {
+              "chunk_id": "e6f80ff9b93cad3184e99496b1c66beaf81f62629e381eff688b14154743a0e8",
+              "whole_score": 0.273193359375,
+              "score": 0.273193359375
+            },
+            {
+              "chunk_id": "10eb523c62309ac100b10690c4aafe1f268e2fb8530221319e79a3e649945ff9",
+              "whole_score": -3.37890625,
+              "score": -3.37890625
+            },
+            {
+              "chunk_id": "e1c5e7a2152c1afd130dc015744f710aecab19897de6798df8d21162a76d6e61",
+              "whole_score": -1.4208984375,
+              "score": -1.4208984375
+            },
+            {
+              "chunk_id": "2e81707ffbf2830d09a433cb92bef80a9ff68cbe761f852f60734227b719ccbe",
+              "whole_score": 0.053619384765625,
+              "score": 0.053619384765625
+            },
+            {
+              "chunk_id": "ba43e528f4e92444aa2c60751172a39de6748b08388ada7d2906f648f9f71f18",
+              "whole_score": 0.48486328125,
+              "score": 0.48486328125
+            },
+            {
+              "chunk_id": "14a3c9eca94b157ce8c16039da685076873ce4943c552f59ce2fe4f673aab8db",
+              "whole_score": -1.62890625,
+              "score": -1.62890625
+            },
+            {
+              "chunk_id": "a63b117d935938e94004f9f20719af60cbbdeb8d3113ebd0cde3b7d1cf72b620",
+              "whole_score": -2.162109375,
+              "score": -2.162109375
+            },
+            {
+              "chunk_id": "7c5b5bc9601d11fbffa6e33f59a2aad889532612bf75acdc8865c3e0a8e54ccf",
+              "whole_score": -1.6640625,
+              "score": -1.6640625
+            },
+            {
+              "chunk_id": "3d00c744f6ad6d61da0eceb8332992832f771dbeb795e71483fd9fb067ebfd90",
+              "whole_score": -3.80859375,
+              "score": -3.80859375
+            },
+            {
+              "chunk_id": "a84c241064cb339debd342ba6abbab1e0dff01e75efb0c20abf675b108654298",
+              "whole_score": -2.83203125,
+              "score": -2.83203125
+            },
+            {
+              "chunk_id": "3a796ae66b69409841484ad662395a8cb11a30ab3da689766161ae03f25eb402",
+              "whole_score": 0.5908203125,
+              "score": 0.5908203125
+            }
+          ]
+        },
+        {
+          "kind": "retrieval",
+          "snapshot": "9edd33ac-febc-41ac-b413-264c6a7407f4",
+          "candidate": [
+            {
+              "source": "1707.06939",
+              "ordinal": 0,
+              "chunk_id": "c1129899a1f5a4a989380c76f93c6c3127d4e95d6dddf27e9d1505a01bfea691"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 3,
+              "chunk_id": "b8e35bddbc4d8acd109d11142491a31179a8d121de2d5d25f895c70453aac2ea"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 15,
+              "chunk_id": "362e9a531285800ccd3351f0a7be08fb17902575e8c514afcc6d176749f726a1"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 2,
+              "chunk_id": "c46746101fab8ff37988dc8def7ed38f74ecc82d659f0eabc44d0da1f1a05542"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 19,
+              "chunk_id": "8805d250b96a74e2e1bac16ae9cdba44dfe88b3414944c15e2fb55695df079f8"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 1,
+              "chunk_id": "325159d9f9fb83e3e394445530215a2a8eda507637349bdae9b42e2129ca16bb"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 11,
+              "chunk_id": "1abf5bb67135f9b0950cb9ef782fe1ceef5ee67bebe0b8d98c3f62781e0e2731"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 5,
+              "chunk_id": "4bd0c6ea8f9761a777cc6959a35cf06ac1ac7ca6b0cf3f05deabdb953b18b3b8"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 6,
+              "chunk_id": "0cceca8792fc1cdc7ed70947204622432360aa4e84287b7c30736ceddb7c81da"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 10,
+              "chunk_id": "e6f80ff9b93cad3184e99496b1c66beaf81f62629e381eff688b14154743a0e8"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 4,
+              "chunk_id": "10eb523c62309ac100b10690c4aafe1f268e2fb8530221319e79a3e649945ff9"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 18,
+              "chunk_id": "e1c5e7a2152c1afd130dc015744f710aecab19897de6798df8d21162a76d6e61"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 16,
+              "chunk_id": "2e81707ffbf2830d09a433cb92bef80a9ff68cbe761f852f60734227b719ccbe"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 9,
+              "chunk_id": "ba43e528f4e92444aa2c60751172a39de6748b08388ada7d2906f648f9f71f18"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 7,
+              "chunk_id": "14a3c9eca94b157ce8c16039da685076873ce4943c552f59ce2fe4f673aab8db"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 14,
+              "chunk_id": "a63b117d935938e94004f9f20719af60cbbdeb8d3113ebd0cde3b7d1cf72b620"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 17,
+              "chunk_id": "7c5b5bc9601d11fbffa6e33f59a2aad889532612bf75acdc8865c3e0a8e54ccf"
+            },
+            {
+              "source": "1910.04601",
+              "ordinal": 7,
+              "chunk_id": "3d00c744f6ad6d61da0eceb8332992832f771dbeb795e71483fd9fb067ebfd90"
+            },
+            {
+              "source": "1910.04601",
+              "ordinal": 9,
+              "chunk_id": "a84c241064cb339debd342ba6abbab1e0dff01e75efb0c20abf675b108654298"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 8,
+              "chunk_id": "3a796ae66b69409841484ad662395a8cb11a30ab3da689766161ae03f25eb402"
+            }
+          ],
+          "reranked": [
+            {
+              "source": "1707.06939",
+              "ordinal": 8,
+              "chunk_id": "3a796ae66b69409841484ad662395a8cb11a30ab3da689766161ae03f25eb402"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 9,
+              "chunk_id": "ba43e528f4e92444aa2c60751172a39de6748b08388ada7d2906f648f9f71f18"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 10,
+              "chunk_id": "e6f80ff9b93cad3184e99496b1c66beaf81f62629e381eff688b14154743a0e8"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 16,
+              "chunk_id": "2e81707ffbf2830d09a433cb92bef80a9ff68cbe761f852f60734227b719ccbe"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 3,
+              "chunk_id": "b8e35bddbc4d8acd109d11142491a31179a8d121de2d5d25f895c70453aac2ea"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 15,
+              "chunk_id": "362e9a531285800ccd3351f0a7be08fb17902575e8c514afcc6d176749f726a1"
+            }
+          ],
+          "times_ms": {
+            "dense": 14372.634,
+            "sparse": 993.879,
+            "fusion": 0.126,
+            "rerank": 5878.528
+          },
+          "total_ms": 21285.091
+        },
+        {
+          "kind": "reader",
+          "prompt_sha256": "fbd9442921c9a22f7fa158b61cbe80c15e66f723ceea1f8a646b508782fd4978",
+          "chunks": [
+            {
+              "source": "1707.06939",
+              "ordinal": 8,
+              "chunk_id": "3a796ae66b69409841484ad662395a8cb11a30ab3da689766161ae03f25eb402"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 9,
+              "chunk_id": "ba43e528f4e92444aa2c60751172a39de6748b08388ada7d2906f648f9f71f18"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 10,
+              "chunk_id": "e6f80ff9b93cad3184e99496b1c66beaf81f62629e381eff688b14154743a0e8"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 16,
+              "chunk_id": "2e81707ffbf2830d09a433cb92bef80a9ff68cbe761f852f60734227b719ccbe"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 3,
+              "chunk_id": "b8e35bddbc4d8acd109d11142491a31179a8d121de2d5d25f895c70453aac2ea"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 15,
+              "chunk_id": "362e9a531285800ccd3351f0a7be08fb17902575e8c514afcc6d176749f726a1"
+            }
+          ],
+          "entries": [
+            {
+              "number": 1,
+              "chunk_id": "3a796ae66b69409841484ad662395a8cb11a30ab3da689766161ae03f25eb402",
+              "document_id": "a515b23f-cd4b-40d5-beef-1eb551e216d7",
+              "document_revision_id": "2ea06a54-b0be-4bee-944d-386109f92558",
+              "source": "document:a515b23f-cd4b-40d5-beef-1eb551e216d7/revision:2ea06a54-b0be-4bee-944d-386109f92558",
+              "locator": {
+                "type": "text_range",
+                "char_end": 9200,
+                "char_start": 8000
+              },
+              "lifecycle": {
+                "superseded": false
+              },
+              "text": "ted more often; we retained those extra ratings). We recruited 119 AMT workers (who were not members of the Control or AUI groups) who provided 4300 total ratings.\n\nDifferences in response time\n\nWe found that workers were slower overall with the AUI than without the AUI. In Fig. FIGREF16 we show the distributions of typing duration and submission delay. There was a slight difference in typing duration between Control and AUI (median 1.97s for Control compared with median 2.69s for AUI). However, there was a strong difference in the distributions of submission delay, with AUI workers taking longer to submit than Control workers (median submission delay of 7.27s vs. 4.44s). This is likely due to the time required to mentally process and select from the AUI options. We anticipated that the submission delay may be counter-balanced by the time saved entering text, but the total typing duration plus submission delay was still significantly longer for AUI than control (median 7.64s for Control vs. 12.14s for AUI). We conclude that the AUI makes workers significantly slower.\n\nWe anticipated that workers may learn over the course of multiple tasks. For example, the first time a worker sees"
+            },
+            {
+              "number": 2,
+              "chunk_id": "ba43e528f4e92444aa2c60751172a39de6748b08388ada7d2906f648f9f71f18",
+              "document_id": "a515b23f-cd4b-40d5-beef-1eb551e216d7",
+              "document_revision_id": "2ea06a54-b0be-4bee-944d-386109f92558",
+              "source": "document:a515b23f-cd4b-40d5-beef-1eb551e216d7/revision:2ea06a54-b0be-4bee-944d-386109f92558",
+              "locator": {
+                "type": "text_range",
+                "char_end": 10200,
+                "char_start": 9000
+              },
+              "lifecycle": {
+                "superseded": false
+              },
+              "text": "l vs. 12.14s for AUI). We conclude that the AUI makes workers significantly slower.\n\nWe anticipated that workers may learn over the course of multiple tasks. For example, the first time a worker sees the AUI will present a very different cognitive load than the 10th time. This learning may eventually lead to improved response times and so an AUI that may not be useful the first time may lead to performance gains as workers become more experienced.\n\nTo investigate learning effects, we recorded for each worker's question-response pair how many questions that worker had already answered, and examined the distributions of typing duration and submission delay conditioned on the number of previously answered questions (Fig. FIGREF17 ). Indeed, learning did occur: the submission delay (but not typing duration) decreased as workers responded to more questions. However, this did not translate to gains in overall performance between Control and AUI workers as learning occurred for both groups: Among AUI workers who answered 10 questions, the median submission delay on the 10th question was 8.02s, whereas for Control workers who answered 10 questions, the median delay on the 10th question was"
+            },
+            {
+              "number": 3,
+              "chunk_id": "e6f80ff9b93cad3184e99496b1c66beaf81f62629e381eff688b14154743a0e8",
+              "document_id": "a515b23f-cd4b-40d5-beef-1eb551e216d7",
+              "document_revision_id": "2ea06a54-b0be-4bee-944d-386109f92558",
+              "source": "document:a515b23f-cd4b-40d5-beef-1eb551e216d7/revision:2ea06a54-b0be-4bee-944d-386109f92558",
+              "locator": {
+                "type": "text_range",
+                "char_end": 11200,
+                "char_start": 10000
+              },
+              "lifecycle": {
+                "superseded": false
+              },
+              "text": "mong AUI workers who answered 10 questions, the median submission delay on the 10th question was 8.02s, whereas for Control workers who answered 10 questions, the median delay on the 10th question was only 4.178s. This difference between Control and AUI submission delays was significant (Mann-Whitney test: INLINEFORM0 , INLINEFORM1 , INLINEFORM2 , INLINEFORM3 ). In comparison, AUI (Control) workers answering their first question had a median submission delay of 10.97s (7.00s). This difference was also significant (Mann-Whitney test: INLINEFORM4 , INLINEFORM5 , INLINEFORM6 , INLINEFORM7 ). We conclude that experience with the AUI will not eventually lead to faster responses those of the control.\n\nDifferences in response diversity\n\nWe were also interested in determining whether or not the worker responses were more consistent or more diverse due to the AUI. Response consistency for natural language data is important when a crowdsourcer wishes to pool or aggregate a set of worker responses. We anticipated that the AUI would lead to greater consistency by, among other effects, decreasing the rates of typos and misspellings. At the same time, however, the AUI could lead to more diversit"
+            },
+            {
+              "number": 4,
+              "chunk_id": "2e81707ffbf2830d09a433cb92bef80a9ff68cbe761f852f60734227b719ccbe",
+              "document_id": "a515b23f-cd4b-40d5-beef-1eb551e216d7",
+              "document_revision_id": "2ea06a54-b0be-4bee-944d-386109f92558",
+              "source": "document:a515b23f-cd4b-40d5-beef-1eb551e216d7/revision:2ea06a54-b0be-4bee-944d-386109f92558",
+              "locator": {
+                "type": "text_range",
+                "char_end": 17200,
+                "char_start": 16000
+              },
+              "lifecycle": {
+                "superseded": false
+              },
+              "text": ", so that crowdsourcers can spend less time aggregating responses. We found that the AUI would likely not help with this in the sense that the sets of responses became more diverse, not less. Yet, this may in fact be desirable—if a crowdsourcer wants as much diverse information from workers as possible, then showing them dynamic AUI suggestions may provide a cognitive priming mechanism to inspire workers to consider responses which otherwise would not have occurred to them.\n\nOne potential explanation for the increased submission delay among AUI workers is an excessive number of options presented by the AUI. The goal of an AUI is to present the best options at the top of the drop down menu (Fig. FIGREF2 B). Then a worker can quickly start typing and choose the best option with a single keystroke or mouse click. However, if the best option appears farther down the menu, then the worker must commit more time to scan and process the AUI suggestions. Our AUI always presented six suggestions, with another six available by scrolling, and our experiment did not vary these numbers. Yet the size of the AUI and where options land may play significant roles in submission delay, especially if s"
+            },
+            {
+              "number": 5,
+              "chunk_id": "b8e35bddbc4d8acd109d11142491a31179a8d121de2d5d25f895c70453aac2ea",
+              "document_id": "a515b23f-cd4b-40d5-beef-1eb551e216d7",
+              "document_revision_id": "2ea06a54-b0be-4bee-944d-386109f92558",
+              "source": "document:a515b23f-cd4b-40d5-beef-1eb551e216d7/revision:2ea06a54-b0be-4bee-944d-386109f92558",
+              "locator": {
+                "type": "text_range",
+                "char_end": 4200,
+                "char_start": 3000
+              },
+              "lifecycle": {
+                "superseded": false
+              },
+              "text": "es or general strategies to achieve efficiency gains for creative crowdsourcing tasks.\n\nIn this work, we conducted a randomized trial of the benefits of allowing workers to answer a text-based question with the help of an autocompletion user interface. Workers interacted with a web form that recorded how quickly they entered text into the response field and how quickly they submitted their responses after typing is completed. After the experiment concluded, we measured response diversity using textual analyses and response quality using a followup crowdsourcing task with an independent population of workers. Our results indicate that the AUI treatment did not affect quality, and did not help workers perform more quickly or achieve greater response consensus. Instead, workers with the AUI were significantly slower and their responses were more diverse than workers in the non-AUI control group.\n\nRelated Work\n\nAn important goal of crowdsourcing research is achieving efficient scalability of the crowd to very large sets of tasks. Efficiency in crowdsourcing manifests both in receiving more effective information per worker and in making individual workers faster and/or more accurate. Th"
+            },
+            {
+              "number": 6,
+              "chunk_id": "362e9a531285800ccd3351f0a7be08fb17902575e8c514afcc6d176749f726a1",
+              "document_id": "a515b23f-cd4b-40d5-beef-1eb551e216d7",
+              "document_revision_id": "2ea06a54-b0be-4bee-944d-386109f92558",
+              "source": "document:a515b23f-cd4b-40d5-beef-1eb551e216d7/revision:2ea06a54-b0be-4bee-944d-386109f92558",
+              "locator": {
+                "type": "text_range",
+                "char_end": 16200,
+                "char_start": 15000
+              },
+              "lifecycle": {
+                "superseded": false
+              },
+              "text": "e two groups. There was also no statistical difference in the overall distributions of ratings per question (Fig. FIGREF23 B). We conclude that the AUI neither increased nor decreased response quality.\n\nDiscussion\n\nWe have showed via a randomized control trial that an autocompletion user interface (AUI) is not helpful in making workers more efficient. Further, the AUI led to a more lexically and semantically diverse set of text responses to a given task than if the AUI was not present. The AUI also had no noticeable impact, positive or negative, on response quality, as independently measured by other workers.\n\nA challenge with text-focused crowdsourcing is aggregation of natural language responses. Unlike binary labeling tasks, for example, normalizing text data can be challenging. Should casing be removed? Should words be stemmed? What to do with punctuation? Should typos be fixed? One of our goals when testing the effects of the AUI was to see if it helps with this normalization task, so that crowdsourcers can spend less time aggregating responses. We found that the AUI would likely not help with this in the sense that the sets of responses became more diverse, not less. Yet, thi"
+            }
+          ]
+        }
+      ],
+      "response_sha256": "49ce42d8c0cd55a0d9e682f7efa4c6fd45a14ac75e52f18b7b4f1b15ac928907",
+      "request_payload_sha256": "6b54543ac02bbbfdacd3754735e30ccc84d2f6e4ca6ea94840fff63c1925ceb2",
+      "request_id": "70318b98-3b9a-4262-ac2e-2d4ffb1ad041",
+      "physical_model_requests": 0
+    },
+    {
+      "id": "891cab2e41d6ba962778bda297592c916b432226",
+      "state": "returned",
+      "utc": "2026-11-14T05:39:14.832389+00:00",
+      "elapsed_s": 0.316,
+      "http": 200,
+      "events": [
+        {
+          "kind": "rerank_scores",
+          "arm": "A",
+          "input_scores": [
+            {
+              "chunk_id": "12c62c4e1e9dbbf8a11fd3f8e23818247d2e1281839575d3cc79fdc2ca477a03",
+              "whole_score": 2.3828125,
+              "score": 2.3828125
+            },
+            {
+              "chunk_id": "bb5722608f84b66fc4d7ef9266702eab5cb9012daf68725b8fc89c80ee68bb62",
+              "whole_score": 2.765625,
+              "score": 2.765625
+            },
+            {
+              "chunk_id": "cb35a93d4cf2194301995fb191fa1a2d3ec2de963d717812a83d1ab3b55f4021",
+              "whole_score": -1.84765625,
+              "score": -1.84765625
+            },
+            {
+              "chunk_id": "1434eade4f48eeab63c3cb470c713031bbb3488e76303396511719c93e7ca4cd",
+              "whole_score": -1.9658203125,
+              "score": -1.9658203125
+            },
+            {
+              "chunk_id": "a1b0d28e7e2deb2da5cc80cb9fa4f257fbd0529cd5759ace888222e225507ae6",
+              "whole_score": -4.0703125,
+              "score": -4.0703125
+            },
+            {
+              "chunk_id": "3c5e0bc58e725c495d55aae86924e71becb0cdc2c984561c2f92bd321441e8e6",
+              "whole_score": 2.568359375,
+              "score": 2.568359375
+            },
+            {
+              "chunk_id": "446674805780aba02c8058b6f173976d35bf3757faab90ac475a135e7774a18d",
+              "whole_score": -3.88671875,
+              "score": -3.88671875
+            },
+            {
+              "chunk_id": "b8e8072bb27494847a857f3ab8e88eafe8334bfb5c9242ff27d9a991f2e941be",
+              "whole_score": -3.439453125,
+              "score": -3.439453125
+            },
+            {
+              "chunk_id": "5d85771d594f979efbeab3f00f2d83fe0582d1646664e22bac60389c27327282",
+              "whole_score": -3.09765625,
+              "score": -3.09765625
+            },
+            {
+              "chunk_id": "eaef3462a1f3c99454c7f982fe240dd87384bbc50a06e6139498c441b7cea723",
+              "whole_score": -0.240966796875,
+              "score": -0.240966796875
+            },
+            {
+              "chunk_id": "a415e54d0f350643d1c839b35818c401f5105ecdfc4fbd571df1e02e3ac7a53d",
+              "whole_score": -3.912109375,
+              "score": -3.912109375
+            },
+            {
+              "chunk_id": "56954282eaf970823afe62cfa1d2033d6870545f128c439ea10c974fa140934a",
+              "whole_score": -4.421875,
+              "score": -4.421875
+            },
+            {
+              "chunk_id": "4b1b4869ffc2323ebb3401ebf16d70ac902b9ebe1ce8bf9ee75868044254e4b1",
+              "whole_score": -2.05859375,
+              "score": -2.05859375
+            },
+            {
+              "chunk_id": "9cdaeddb8eda91f3170e8498f3ba1a90ecc911459e22d95da99b6a8401cea05a",
+              "whole_score": -4.2734375,
+              "score": -4.2734375
+            },
+            {
+              "chunk_id": "0d28b9e7120a8fc343d2e529a81e8c825a0cb3526ec3b5145f9be86e70d7a666",
+              "whole_score": 0.513671875,
+              "score": 0.513671875
+            },
+            {
+              "chunk_id": "57b7f8611b67bd0785895ce08af2495a267438da342428267407a15a8fdc980e",
+              "whole_score": 0.353271484375,
+              "score": 0.353271484375
+            },
+            {
+              "chunk_id": "21ddd7a9fcd81ef49ca3741f4d88710e7faf310e626f939bd8aaa167b82892ea",
+              "whole_score": -5.0,
+              "score": -5.0
+            },
+            {
+              "chunk_id": "259e27318f95c61d1d23241d6da3a1b47697b9d462e1a24196f253ef1f226b81",
+              "whole_score": -3.498046875,
+              "score": -3.498046875
+            },
+            {
+              "chunk_id": "7ef3798e86144e9e7095d077f8cb24b719f078678d7906b8c3bd237154020172",
+              "whole_score": -8.2890625,
+              "score": -8.2890625
+            },
+            {
+              "chunk_id": "45f0a3460dfd9aa4c141702deae1225638f807aa1ba409cfd903de9f5bbf35b8",
+              "whole_score": -4.3359375,
+              "score": -4.3359375
+            }
+          ]
+        },
+        {
+          "kind": "retrieval",
+          "snapshot": "9edd33ac-febc-41ac-b413-264c6a7407f4",
+          "candidate": [
+            {
+              "source": "1910.11471",
+              "ordinal": 0,
+              "chunk_id": "12c62c4e1e9dbbf8a11fd3f8e23818247d2e1281839575d3cc79fdc2ca477a03"
+            },
+            {
+              "source": "1910.11471",
+              "ordinal": 8,
+              "chunk_id": "bb5722608f84b66fc4d7ef9266702eab5cb9012daf68725b8fc89c80ee68bb62"
+            },
+            {
+              "source": "1910.11471",
+              "ordinal": 7,
+              "chunk_id": "cb35a93d4cf2194301995fb191fa1a2d3ec2de963d717812a83d1ab3b55f4021"
+            },
+            {
+              "source": "1910.11471",
+              "ordinal": 2,
+              "chunk_id": "1434eade4f48eeab63c3cb470c713031bbb3488e76303396511719c93e7ca4cd"
+            },
+            {
+              "source": "1910.11471",
+              "ordinal": 1,
+              "chunk_id": "a1b0d28e7e2deb2da5cc80cb9fa4f257fbd0529cd5759ace888222e225507ae6"
+            },
+            {
+              "source": "1910.11471",
+              "ordinal": 12,
+              "chunk_id": "3c5e0bc58e725c495d55aae86924e71becb0cdc2c984561c2f92bd321441e8e6"
+            },
+            {
+              "source": "1606.04631",
+              "ordinal": 19,
+              "chunk_id": "446674805780aba02c8058b6f173976d35bf3757faab90ac475a135e7774a18d"
+            },
+            {
+              "source": "1910.11471",
+              "ordinal": 13,
+              "chunk_id": "b8e8072bb27494847a857f3ab8e88eafe8334bfb5c9242ff27d9a991f2e941be"
+            },
+            {
+              "source": "1606.04631",
+              "ordinal": 2,
+              "chunk_id": "5d85771d594f979efbeab3f00f2d83fe0582d1646664e22bac60389c27327282"
+            },
+            {
+              "source": "1910.11471",
+              "ordinal": 3,
+              "chunk_id": "eaef3462a1f3c99454c7f982fe240dd87384bbc50a06e6139498c441b7cea723"
+            },
+            {
+              "source": "1910.11471",
+              "ordinal": 9,
+              "chunk_id": "a415e54d0f350643d1c839b35818c401f5105ecdfc4fbd571df1e02e3ac7a53d"
+            },
+            {
+              "source": "1606.04631",
+              "ordinal": 3,
+              "chunk_id": "56954282eaf970823afe62cfa1d2033d6870545f128c439ea10c974fa140934a"
+            },
+            {
+              "source": "1911.13066",
+              "ordinal": 4,
+              "chunk_id": "4b1b4869ffc2323ebb3401ebf16d70ac902b9ebe1ce8bf9ee75868044254e4b1"
+            },
+            {
+              "source": "1810.01570",
+              "ordinal": 11,
+              "chunk_id": "9cdaeddb8eda91f3170e8498f3ba1a90ecc911459e22d95da99b6a8401cea05a"
+            },
+            {
+              "source": "1910.11471",
+              "ordinal": 6,
+              "chunk_id": "0d28b9e7120a8fc343d2e529a81e8c825a0cb3526ec3b5145f9be86e70d7a666"
+            },
+            {
+              "source": "1910.11471",
+              "ordinal": 5,
+              "chunk_id": "57b7f8611b67bd0785895ce08af2495a267438da342428267407a15a8fdc980e"
+            },
+            {
+              "source": "1911.13066",
+              "ordinal": 2,
+              "chunk_id": "21ddd7a9fcd81ef49ca3741f4d88710e7faf310e626f939bd8aaa167b82892ea"
+            },
+            {
+              "source": "1905.01715",
+              "ordinal": 1,
+              "chunk_id": "259e27318f95c61d1d23241d6da3a1b47697b9d462e1a24196f253ef1f226b81"
+            },
+            {
+              "source": "2002.00750",
+              "ordinal": 0,
+              "chunk_id": "7ef3798e86144e9e7095d077f8cb24b719f078678d7906b8c3bd237154020172"
+            },
+            {
+              "source": "1606.04631",
+              "ordinal": 0,
+              "chunk_id": "45f0a3460dfd9aa4c141702deae1225638f807aa1ba409cfd903de9f5bbf35b8"
+            }
+          ],
+          "reranked": [
+            {
+              "source": "1910.11471",
+              "ordinal": 8,
+              "chunk_id": "bb5722608f84b66fc4d7ef9266702eab5cb9012daf68725b8fc89c80ee68bb62"
+            },
+            {
+              "source": "1910.11471",
+              "ordinal": 12,
+              "chunk_id": "3c5e0bc58e725c495d55aae86924e71becb0cdc2c984561c2f92bd321441e8e6"
+            },
+            {
+              "source": "1910.11471",
+              "ordinal": 0,
+              "chunk_id": "12c62c4e1e9dbbf8a11fd3f8e23818247d2e1281839575d3cc79fdc2ca477a03"
+            },
+            {
+              "source": "1910.11471",
+              "ordinal": 6,
+              "chunk_id": "0d28b9e7120a8fc343d2e529a81e8c825a0cb3526ec3b5145f9be86e70d7a666"
+            },
+            {
+              "source": "1910.11471",
+              "ordinal": 5,
+              "chunk_id": "57b7f8611b67bd0785895ce08af2495a267438da342428267407a15a8fdc980e"
+            },
+            {
+              "source": "1910.11471",
+              "ordinal": 3,
+              "chunk_id": "eaef3462a1f3c99454c7f982fe240dd87384bbc50a06e6139498c441b7cea723"
+            }
+          ],
+          "times_ms": {
+            "dense": 49.485,
+            "sparse": 5.955,
+            "fusion": 0.112,
+            "rerank": 224.525
+          },
+          "total_ms": 294.145
+        },
+        {
+          "kind": "reader",
+          "prompt_sha256": "d8083e2b863a19b411f4fa70bd94257385f937660f746db03eadbe7f235f383e",
+          "chunks": [
+            {
+              "source": "1910.11471",
+              "ordinal": 8,
+              "chunk_id": "bb5722608f84b66fc4d7ef9266702eab5cb9012daf68725b8fc89c80ee68bb62"
+            },
+            {
+              "source": "1910.11471",
+              "ordinal": 12,
+              "chunk_id": "3c5e0bc58e725c495d55aae86924e71becb0cdc2c984561c2f92bd321441e8e6"
+            },
+            {
+              "source": "1910.11471",
+              "ordinal": 0,
+              "chunk_id": "12c62c4e1e9dbbf8a11fd3f8e23818247d2e1281839575d3cc79fdc2ca477a03"
+            },
+            {
+              "source": "1910.11471",
+              "ordinal": 6,
+              "chunk_id": "0d28b9e7120a8fc343d2e529a81e8c825a0cb3526ec3b5145f9be86e70d7a666"
+            },
+            {
+              "source": "1910.11471",
+              "ordinal": 5,
+              "chunk_id": "57b7f8611b67bd0785895ce08af2495a267438da342428267407a15a8fdc980e"
+            },
+            {
+              "source": "1910.11471",
+              "ordinal": 3,
+              "chunk_id": "eaef3462a1f3c99454c7f982fe240dd87384bbc50a06e6139498c441b7cea723"
+            }
+          ],
+          "entries": [
+            {
+              "number": 1,
+              "chunk_id": "bb5722608f84b66fc4d7ef9266702eab5cb9012daf68725b8fc89c80ee68bb62",
+              "document_id": "d5ae157a-69aa-4dc1-981b-76977960668a",
+              "document_revision_id": "52ac54f5-a1b7-4554-880a-fef7412a3fed",
+              "source": "document:d5ae157a-69aa-4dc1-981b-76977960668a/revision:52ac54f5-a1b7-4554-880a-fef7412a3fed",
+              "locator": {
+                "type": "text_range",
+                "char_end": 9200,
+                "char_start": 8000
+              },
+              "lifecycle": {
+                "superseded": false
+              },
+              "text": "Language Processing (NLP). SMT plays a significant role in translation from one language to another, especially in lexical and grammatical rule extraction. In SMT, bilingual grammatical structures are automatically formed by statistical approaches instead of explicitly providing a grammatical model. This reduces months and years of work which requires significant collaboration between bi-lingual linguistics. Here, a neural network based machine translation model is used to translate regular text into programming code.\n\nProposed Methodology ::: Statistical Machine Translation ::: Data Preparation\n\nSMT techniques require a parallel corpus in thr source and thr target language. A text-code parallel corpus similar to Fig. FIGREF12 is used in training. This parallel corpus has 18805 aligned data in it . In source data, the expression of each line code is written in the English language. In target data, the code is written in Python programming language.\n\nProposed Methodology ::: Statistical Machine Translation ::: Vocabulary Generation\n\nTo train the neural model, the texts should be converted to a computational entity. To do that, two separate vocabulary files are created - one for the"
+            },
+            {
+              "number": 2,
+              "chunk_id": "3c5e0bc58e725c495d55aae86924e71becb0cdc2c984561c2f92bd321441e8e6",
+              "document_id": "d5ae157a-69aa-4dc1-981b-76977960668a",
+              "document_revision_id": "52ac54f5-a1b7-4554-880a-fef7412a3fed",
+              "source": "document:d5ae157a-69aa-4dc1-981b-76977960668a/revision:52ac54f5-a1b7-4554-880a-fef7412a3fed",
+              "locator": {
+                "type": "text_range",
+                "char_end": 13200,
+                "char_start": 12000
+              },
+              "lifecycle": {
+                "superseded": false
+              },
+              "text": "rally requires a more extensive set of data (100k+ in such scenario) to build a more accurate model. The incoherence can be resolved by incorporating coding syntax tree model in future. For instance–\n\n\"define the method tzname with 2 arguments: self and dt.\"\n\nis translated into–\n\ndef __init__ ( self , regex ) :.\n\nThe translator is successfully generating the whole codeline automatically but missing the noun part (parameter and function name) part of the syntax.\n\nConclusion & Future Works\n\nThe main advantage of translating to a programming language is - it has a concrete and strict lexical and grammatical structure which human languages lack. The aim of this paper was to make the text-to-code framework work for general purpose programming language, primarily Python. In later phase, phrase-based word embedding can be incorporated for improved vocabulary mapping. To get more accurate target code for each line, Abstract Syntax Tree(AST) can be beneficial.\n\nThe contribution of this research is a machine learning model which can turn the human expression into coding expressions. This paper also discusses available methods which convert natural language to programming language successfull"
+            },
+            {
+              "number": 3,
+              "chunk_id": "12c62c4e1e9dbbf8a11fd3f8e23818247d2e1281839575d3cc79fdc2ca477a03",
+              "document_id": "d5ae157a-69aa-4dc1-981b-76977960668a",
+              "document_revision_id": "52ac54f5-a1b7-4554-880a-fef7412a3fed",
+              "source": "document:d5ae157a-69aa-4dc1-981b-76977960668a/revision:52ac54f5-a1b7-4554-880a-fef7412a3fed",
+              "locator": {
+                "type": "text_range",
+                "char_end": 1200,
+                "char_start": 0
+              },
+              "lifecycle": {
+                "superseded": false
+              },
+              "text": "Machine Translation from Natural Language to Code using Long-Short Term Memory\n\nMaking computer programming language more understandable and easy for the human is a longstanding problem. From assembly language to present day’s object-oriented programming, concepts came to make programming easier so that a programmer can focus on the logic and the architecture rather than the code and language itself. To go a step further in this journey of removing human-computer language barrier, this paper proposes machine learning approach using Recurrent Neural Network (RNN) and Long-Short Term Memory (LSTM) to convert human language into programming language code. The programmer will write expressions for codes in layman’s language, and the machine learning model will translate it to the targeted programming language. The proposed approach yields result with 74.40% accuracy. This can be further improved by incorporating additional techniques, which are also discussed in this paper.\n\nIntroduction\n\nRemoving computer-human language barrier is an inevitable advancement researchers are thriving to achieve for decades. One of the stages of this advancement will be coding through natural human langua"
+            },
+            {
+              "number": 4,
+              "chunk_id": "0d28b9e7120a8fc343d2e529a81e8c825a0cb3526ec3b5145f9be86e70d7a666",
+              "document_id": "d5ae157a-69aa-4dc1-981b-76977960668a",
+              "document_revision_id": "52ac54f5-a1b7-4554-880a-fef7412a3fed",
+              "source": "document:d5ae157a-69aa-4dc1-981b-76977960668a/revision:52ac54f5-a1b7-4554-880a-fef7412a3fed",
+              "locator": {
+                "type": "text_range",
+                "char_end": 7200,
+                "char_start": 6000
+              },
+              "lifecycle": {
+                "superseded": false
+              },
+              "text": "alness of programming BIBREF1. A number of research works have been conducted on text-to-code or code-to-text area in recent years. In 2015, Oda et al. proposed a way to translate each line of Python code into natural language pseudocode using Statistical Machine Learning Technique (SMT) framework BIBREF5 was used. This translation framework was able to - it can successfully translate the code to natural language pseudo coded text in both English and Japanese. In the same year, Chris Q. et al. mapped natural language with simple if-this-then-that logical rules BIBREF6. Tihomir G. and Viktor K. developed an Integrated Development Environment (IDE) integrated code assistant tool anyCode for Java which can search, import and call function just by typing desired functionality through text BIBREF7. They have used model and mapping framework between function signatures and utilized resources like WordNet, Java Corpus, relational mapping to process text online and offline.\n\nRecently in 2017, P. Yin and G. Neubig proposed a semantic parser which generates code through its neural model BIBREF8. They formulated a grammatical model which works as a skeleton for neural network training. The gr"
+            },
+            {
+              "number": 5,
+              "chunk_id": "57b7f8611b67bd0785895ce08af2495a267438da342428267407a15a8fdc980e",
+              "document_id": "d5ae157a-69aa-4dc1-981b-76977960668a",
+              "document_revision_id": "52ac54f5-a1b7-4554-880a-fef7412a3fed",
+              "source": "document:d5ae157a-69aa-4dc1-981b-76977960668a/revision:52ac54f5-a1b7-4554-880a-fef7412a3fed",
+              "locator": {
+                "type": "text_range",
+                "char_end": 6200,
+                "char_start": 5000
+              },
+              "lifecycle": {
+                "superseded": false
+              },
+              "text": "to extract information from the statements of the code accurately. Semantic analysis of linguistic expression plays an important role in this information extraction. For instance, in case of a loop, what is the initial value? What is the step value? When will the loop terminate?\n\nMihalcea R. et al. has achieved a variable success rate of 70-80% in producing code just from the problem statement expressed in human natural language BIBREF3. They focused solely on the detection of step and loops in their research. Another research group from MIT, Lei et al. use a semantic learning model for text to detect the inputs. The model produces a parser in C++ which can successfully parse more than 70% of the textual description of input BIBREF4. The test dataset and model was initially tested and targeted against ACM-ICPC participantsínputs which contains diverse and sometimes complex input instructions.\n\nA recent survey from Allamanis M. et al. presented the state-of-the-art on the area of naturalness of programming BIBREF1. A number of research works have been conducted on text-to-code or code-to-text area in recent years. In 2015, Oda et al. proposed a way to translate each line of Python"
+            },
+            {
+              "number": 6,
+              "chunk_id": "eaef3462a1f3c99454c7f982fe240dd87384bbc50a06e6139498c441b7cea723",
+              "document_id": "d5ae157a-69aa-4dc1-981b-76977960668a",
+              "document_revision_id": "52ac54f5-a1b7-4554-880a-fef7412a3fed",
+              "source": "document:d5ae157a-69aa-4dc1-981b-76977960668a/revision:52ac54f5-a1b7-4554-880a-fef7412a3fed",
+              "locator": {
+                "type": "text_range",
+                "char_end": 4200,
+                "char_start": 3000
+              },
+              "lifecycle": {
+                "superseded": false
+              },
+              "text": "solved–\n\nProblem Description ::: Programming Language Diversity\n\nAccording to the sources, there are more than a thousand actively maintained programming languages, which signifies the diversity of these language . These languages were created to achieve different purpose and use different syntaxes. Low-level languages such as assembly languages are easier to express in human language because of the low or no abstraction at all whereas high-level, or Object-Oriented Programing (OOP) languages are more diversified in syntax and expression, which is challenging to bring into a unified human language structure. Nonetheless, portability and transparency between different programming languages also remains a challenge and an open research area. George D. et al. tried to overcome this problem through XML mapping BIBREF2. They tried to convert codes from C++ to Java using XML mapping as an intermediate language. However, the authors encountered challenges to support different features of both languages.\n\nProblem Description ::: Human Language Factor\n\nOne of the motivations behind this paper is - as long as it is about programming, there is a finite and small set of expression which is us"
+            }
+          ]
+        }
+      ],
+      "response_sha256": "68c0a39c06ceffe8e2e734b19750b96f2150f6dac9d9f1ff8d984b76da32ec8c",
+      "request_payload_sha256": "f932e98076f926c94c70fc7075261f28b0d8ffda4f869bebb23a2d0bc180c84d",
+      "request_id": "f9cabcf4-e384-4f0b-b862-0dbd9d2349e1",
+      "physical_model_requests": 0
+    }
+  ]
+}

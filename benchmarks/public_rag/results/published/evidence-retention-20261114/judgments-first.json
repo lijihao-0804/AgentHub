@@ -1,0 +1,735 @@
+{
+  "001d54aa02081910d7dc": {
+    "verdict": "full",
+    "supporting_citations": [
+      1
+    ],
+    "reason": "[1] explicitly says the fine-tuning corpus consisted of hundreds of thousands of proprietary legal agreements."
+  },
+  "00ef0e520fecb496a365": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      2
+    ],
+    "reason": "Both blocks give roughly 836 million parameters and [2] completes the 66 thousand byte-embedding detail."
+  },
+  "0d25df5f5ce46be8c720": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "Returns a citation-free structured refusal because vocabulary size is unavailable."
+  },
+  "11f6fea08f9b75e24029": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      2
+    ],
+    "reason": "The original report source, 17,833 sentences, 826,987 characters and 2,714 pairs are in [1] and [2]. [2] also gives the exact train/test counts."
+  },
+  "14b0f39e93e8deb064b2": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "Returns a citation-free structured refusal because vocabulary size is unavailable."
+  },
+  "1bcafa64483ec0e801b6": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "The structured refusal says the FigureQA and DVQA sizes are unavailable and returns no citations."
+  },
+  "1bd02cecdfb8e54cf12a": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "The response leaves the model size unspecified, marks evidence insufficient, and returns no citations."
+  },
+  "1f51a3aef753c6203e5c": {
+    "verdict": "full",
+    "supporting_citations": [
+      1
+    ],
+    "reason": "The source explicitly describes Mboshi as Bantu C25."
+  },
+  "21624a9d04b696a8a452": {
+    "verdict": "full",
+    "supporting_citations": [
+      2,
+      3,
+      4
+    ],
+    "reason": "[4] gives the three-stage MTurk filtering and rewriting, worker selection, instructions and bias control. [2] and [3] confirm thorough/manual cleaning and the quality goal."
+  },
+  "2192db427f01556c6c74": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      2
+    ],
+    "reason": "[1] directly describes daily newspaper browsing and [2] daily French RSS retrieval. The answer reports that daily cadence."
+  },
+  "21d465d88afe2371b875": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      3
+    ],
+    "reason": "[1] directly identifies the parallel target text as Python code and [3] independently states the project primarily targets Python."
+  },
+  "2253783e8d1071631827": {
+    "verdict": "partial",
+    "supporting_citations": [
+      2,
+      3,
+      5
+    ],
+    "reason": "The response accurately explains conditional label expectations and label regularization from [2] and [3]. It correctly flags the missing equation in [5], leaving the requested algebraic definition unresolved."
+  },
+  "246da4713626df096efd": {
+    "verdict": "full",
+    "supporting_citations": [
+      2
+    ],
+    "reason": "[2] gives both unaligned corpora, their online sources, 163K quatrains and 337K paragraphs from 281 books, and the training/validation split."
+  },
+  "28a83a8517e958303e86": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      2,
+      3,
+      5
+    ],
+    "reason": "Despite the official negative, [3] contrasts sensitivity with some previous work; [1], [2] and [5] ground the actual/random-context test, conclusion and log-likelihood comparison including 0.40."
+  },
+  "2fe30e8ba58d1112b5d2": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      3,
+      5
+    ],
+    "reason": "[1] and [3] describe the actual coverage evaluation using expert/PropBank reference recall; [5] gives the counts and prior comparison. The old corpora in the official excerpt use a different per-predicate summary."
+  },
+  "30dabf7b0b5617bff42a": {
+    "verdict": "partial",
+    "supporting_citations": [
+      2,
+      4,
+      5
+    ],
+    "reason": "[5] identifies the fine-tuned adaptation comparator; [2] and [4] support the discussion of phrase-based and SMT work. The answer expressly leaves the main comparison unresolved and misses the standard Transformer Base baseline."
+  },
+  "31a860c32dd48a78208d": {
+    "verdict": "full",
+    "supporting_citations": [
+      2,
+      5,
+      6
+    ],
+    "reason": "[2] confirms cleaning, [5] states the heuristics and error categories, and [6] specifies the regex and meaning-representation fixes."
+  },
+  "3203bc94ca11ff1c8740": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      2,
+      5
+    ],
+    "reason": "[5] identifies the CNN with bilingual embeddings; [1] describes monolingual representations and [2] the cross-lingual CNN."
+  },
+  "328ef32cfa3be7bb19a3": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      3
+    ],
+    "reason": "[3] identifies the CNN trained on cross-lingual representations; [1] confirms the monolingual neural setting."
+  },
+  "342dc863da43be0cbefe": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      2,
+      3
+    ],
+    "reason": "[2] names bossa-nova and jovem-guarda among the most difficult; [1] reports poor pop classification and [3] describes MPB as most confused and the proposed reason."
+  },
+  "38bba7d4f52a56d2170d": {
+    "verdict": "full",
+    "supporting_citations": [
+      4,
+      6
+    ],
+    "reason": "[4] explicitly proposes fraud/anomaly detection and medical applications, and [6] confirms task independence given an attention layer. The source supports applicability as a proposal."
+  },
+  "3c04691b8e193f08b1f0": {
+    "verdict": "full",
+    "supporting_citations": [
+      3
+    ],
+    "reason": "The cited collection paragraph explicitly records 1,001 completed tasks, with 496 control and 505 AUI responses."
+  },
+  "3c37d278f6765e01145b": {
+    "verdict": "partial",
+    "supporting_citations": [
+      5,
+      6
+    ],
+    "reason": "[5] supports the chip power, input and speed; [6] supports the performance observations and suggested improvements. The answer explicitly leaves the effect of the implementation unresolved; it is returned as a positive answer."
+  },
+  "3c54488959f651b87a61": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      3
+    ],
+    "reason": "Both cited blocks give the 836-million total."
+  },
+  "3c5bfebae5c5ea96a8aa": {
+    "verdict": "partial",
+    "supporting_citations": [
+      2,
+      4,
+      5
+    ],
+    "reason": "[2] shows the equation placeholder; [4] gives the conditional-label goal and [5] the target proportions, summation and batched approximation. The response explicitly lacks the requested formula."
+  },
+  "3dc5d07dae132d924409": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "Makes a structured refusal on normalization of incomplete intermediate hypotheses and returns no citations."
+  },
+  "41bb83196575392b128b": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      2,
+      3
+    ],
+    "reason": "[1] and [3] explicitly define the study of learned and engineered text representations; [2] confirms combination and rapid evaluation. This directly answers the officially negative question."
+  },
+  "421be73d5609b8dd071e": {
+    "verdict": "wrong",
+    "supporting_citations": [
+      1
+    ],
+    "reason": "[1] specifically counts translation targets for the seed greetings. Reporting that count alone in response to the number of languages in observed tweets substitutes a different population; the paper passage does not count observed languages."
+  },
+  "432bd36fc95c919939c4": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      2,
+      3,
+      6
+    ],
+    "reason": "[1] names the Gal/Ghahramani baseline, [2] and [3] explain its RNN and Bayesian setting, and [6] gives the priors, row-wise mixture and dropout interpretation."
+  },
+  "44208a516168661c6281": {
+    "verdict": "full",
+    "supporting_citations": [
+      2
+    ],
+    "reason": "[2] explicitly identifies DL-61 as the 2018 winner."
+  },
+  "4448d8daa69613c237eb": {
+    "verdict": "full",
+    "supporting_citations": [
+      1
+    ],
+    "reason": "[1] directly identifies the OpenAI pretrained transformer, twelve blocks and the BookCorpus-trained language-modeling branch. A more specific name is absent in that excerpt."
+  },
+  "4694ee9f9eddc410f726": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      2
+    ],
+    "reason": "Both excerpts identify DL-61 as the 2018 winner."
+  },
+  "469e4228a0dd6ef62b1e": {
+    "verdict": "full",
+    "supporting_citations": [
+      2,
+      3
+    ],
+    "reason": "Both excerpts explicitly name the standard beam-search decoder with straightforward performance optimizations."
+  },
+  "4725b6e97e199e0de936": {
+    "verdict": "failure",
+    "supporting_citations": [],
+    "reason": "The first HTTP response was 502 and supplied neither an answer nor a structured refusal."
+  },
+  "4dc3de6998996a9bb529": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "The response leaves the model size unspecified, marks evidence insufficient, and returns no citations."
+  },
+  "4e2fccded04e238cae88": {
+    "verdict": "full",
+    "supporting_citations": [
+      1
+    ],
+    "reason": "[1] specifies 44,000 tweets and finance students as annotators."
+  },
+  "5516b94278027ffa82fc": {
+    "verdict": "full",
+    "supporting_citations": [
+      2,
+      3
+    ],
+    "reason": "[3] explicitly suggests other sequential tasks and names the examples. [2] verifies the technique is external and handles ambiguous attention without changing the model."
+  },
+  "57b83715c44e013d4270": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "Returns a citation-free structured refusal for the reasoning-chain count."
+  },
+  "57d7623703070d6042ed": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "The structured refusal specifies that a direct comparison with simple interpolation is missing."
+  },
+  "5c29af32ee8890aaf824": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      2
+    ],
+    "reason": "The supplied blocks identify the baseline as standard beam search with the described performance optimizations."
+  },
+  "5c2da595e62d76b23a6d": {
+    "verdict": "full",
+    "supporting_citations": [
+      5
+    ],
+    "reason": "[5] identifies the Google N-grams corpus as the source of embeddings used in the applications and explains its selection. This supplies a named source despite the official negative."
+  },
+  "5c31cb11c11ff5da5e05": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "Returns a structured refusal because the social-media platform is unidentified."
+  },
+  "61319f3b565dbc97d47f": {
+    "verdict": "full",
+    "supporting_citations": [
+      1
+    ],
+    "reason": "[1] gives the manually labeled subset size and identifies the annotators."
+  },
+  "6199e7ab02335fcd0254": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "The response leaves the interpolation comparison unresolved, returns no citation and marks evidence insufficient."
+  },
+  "6257c4067b967f3d9d72": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      2
+    ],
+    "reason": "[1] identifies the OpenAI release, twelve blocks and BookCorpus. [2] independently confirms that their entailment system uses the transformer with pretrained weights."
+  },
+  "649ae40c0aa9d7fba8ca": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      2
+    ],
+    "reason": "[2] specifies error/correction pairs, error types, both counts and the edit-history algorithm. [1] names Polish Wikipedia as the source."
+  },
+  "64e36f2666af3e5407c1": {
+    "verdict": "partial",
+    "supporting_citations": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "reason": "[1] and [2] report about 160 hours available per language. [3] and [4] report a 1,059-hour pooled experiment. Those are observed training amounts; the minimum needed is unestablished."
+  },
+  "64ff29a224e38f0fc0b6": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      2,
+      6
+    ],
+    "reason": "[1] identifies the Gal/Ghahramani VBD baseline, [2] the recurrent motivation, and [6] provides the Bayesian prior, mixture posterior and row-sampling details."
+  },
+  "6b55a269a2d5c16de1d1": {
+    "verdict": "full",
+    "supporting_citations": [
+      1
+    ],
+    "reason": "[1] states 75 meetings, about 70 hours of audio and six speakers per meeting on average."
+  },
+  "6ec9bbf13f8bba54890c": {
+    "verdict": "partial",
+    "supporting_citations": [
+      1,
+      2,
+      4,
+      5
+    ],
+    "reason": "Explicitly leaves the human elicitation method unresolved and explains a supported related procedure: [1] tests alignment with intuitions via simulations; [2], [4] and [5] specify trends. The response is a positive at the API."
+  },
+  "7183b73b4d6aa85fa96e": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "The response explicitly lacks a definition of Task 8 and returns a structured refusal without a citation."
+  },
+  "7858b3e1199997394890": {
+    "verdict": "full",
+    "supporting_citations": [
+      2,
+      3,
+      4
+    ],
+    "reason": "[2] names WNLaMPro and cloze phrases; [3] verifies the frequency splits and which were used; [4] explicitly names the probing task."
+  },
+  "78626b930fc68fdb2b1a": {
+    "verdict": "full",
+    "supporting_citations": [
+      3
+    ],
+    "reason": "[3] states there are two top-level categories, identifies both and distinguishes the 30 task-oriented subcategories."
+  },
+  "78badc2a5ddbf9284f4d": {
+    "verdict": "full",
+    "supporting_citations": [
+      2
+    ],
+    "reason": "All three numerical details are directly stated in [2]."
+  },
+  "7928e95ff8e949e64ed0": {
+    "verdict": "full",
+    "supporting_citations": [
+      3,
+      4
+    ],
+    "reason": "[3] explicitly says more than 3,934,610 Arabic tweets; the same excerpt later repeats the count with an inconsistent extra “million.” It also confirms the date range and Tweepy. [4] supports the corpus scope and keyword tracking."
+  },
+  "79905a1ff807fb4e76aa": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      2
+    ],
+    "reason": "[2] explicitly supplies the count as more than 3,934,610 Arabic tweets, despite the conflicting extra “million” in the official passage. [1] supports the Arabic COVID-19 corpus description; its numeral ends mid-count."
+  },
+  "7d2c1c03357bad94d07c": {
+    "verdict": "full",
+    "supporting_citations": [
+      2,
+      5,
+      6
+    ],
+    "reason": "[2] and [5] identify document-level SQuAD, [5] describes 5 and 20 percent fine-labeled sets paired with separate coarse sets, and [6] names D20fine and D70coarse."
+  },
+  "7d348aea152884cbe899": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      4,
+      5
+    ],
+    "reason": "[1] identifies parameter sharing. [4] describes the common attention-based sequence model with pointer-softmax; [5] explains the two target/conditioning directions and alternating minibatches."
+  },
+  "7fad7fe26e2c601ace20": {
+    "verdict": "full",
+    "supporting_citations": [
+      6
+    ],
+    "reason": "[6] directly reports a relative 10 percent WER improvement for multilingual training under the speaker-open setting."
+  },
+  "8233953534fb929d7eff": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "The response explicitly lacks a definition of Task 8 and returns a structured refusal without a citation."
+  },
+  "87857d7e12be5bc93f33": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "Returns a citation-free structured refusal and distinguishes intermediate hypothesis normalization from normalization of features."
+  },
+  "87a45c39a638eeb472b4": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      2
+    ],
+    "reason": "The two blocks identify document-level SQuAD and [2] explicitly specifies the 5 and 20 percent fine subsets and paired coarse data."
+  },
+  "89a7a1da9e7312234f77": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "The response leaves the parameter count unspecified and returns a structured refusal without a citation."
+  },
+  "8f6a26e19f988eaaf7d7": {
+    "verdict": "partial",
+    "supporting_citations": [
+      3,
+      6
+    ],
+    "reason": "[3] accurately gives the adaptation-specific fine-tuned comparator and [6] the evaluation corpora. The response scopes its details to adaptation and does not identify the main Transformer Base system requested by the annotation."
+  },
+  "919d0257d9b248b40873": {
+    "verdict": "full",
+    "supporting_citations": [
+      2,
+      4,
+      6
+    ],
+    "reason": "[2] states that manual and automatic evaluations were made, [4] explains the entity-sequence criterion, and [6] gives the 148-sample audit, categories, baselines and BLEU limitation."
+  },
+  "94baa86ac37a0e229acf": {
+    "verdict": "wrong",
+    "supporting_citations": [
+      1,
+      4,
+      5,
+      6
+    ],
+    "reason": "Calling simulation a way the intuitions were obtained conflates metric validation with the origins of the human expectations. [1], [5], [6] support the simulation setup or validation; [4] supports the reported trends."
+  },
+  "95281cbde5fab00c84d9": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "Structured refusal on a positive whose official annotation names the CoNLL-2012 shared-task corpus."
+  },
+  "9820adfdb61a065ec6ee": {
+    "verdict": "full",
+    "supporting_citations": [
+      4
+    ],
+    "reason": "[4] directly states that binary and CRF token classification were examined and effective, answering the question despite its official negative."
+  },
+  "9d3de375a556654b65e9": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      2,
+      3
+    ],
+    "reason": "[1] covers multiple annotators, consolidation and role gains; [3] gives predicate-macro recall and annotation counts; [2] confirms increased coverage over Dense. The paper explicitly evaluates its own coverage this way."
+  },
+  "9e2b36c26a715c9695f8": {
+    "verdict": "full",
+    "supporting_citations": [
+      1
+    ],
+    "reason": "[1] gives about 23 utterances per dialogue and connects this with context-rich language behavior."
+  },
+  "9f40d32f160154533cb9": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "The positive annotation identifies accuracy, but the endpoint returns a citation-free structured refusal."
+  },
+  "a23087eb3a14c12ccf7e": {
+    "verdict": "full",
+    "supporting_citations": [
+      2
+    ],
+    "reason": "[2] explicitly identifies binary and CRF classification in the study, answering the question despite its official negative."
+  },
+  "a7c547ad860202e10e93": {
+    "verdict": "full",
+    "supporting_citations": [
+      1
+    ],
+    "reason": "[1] explicitly reports about 23 utterances per dialogue."
+  },
+  "a8d4b1bd92678dcfa1d8": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "The structured refusal leaves the count unresolved on the answerable 1,001-responses question."
+  },
+  "ab5c984a32956ab382c9": {
+    "verdict": "partial",
+    "supporting_citations": [
+      1,
+      2
+    ],
+    "reason": "[1] and [2] support the characterizations of the handcrafted, feature-rich comparator and the performance comparison. The answer expressly leaves its identifying name unresolved."
+  },
+  "af92165c25cb1914f376": {
+    "verdict": "partial",
+    "supporting_citations": [
+      1,
+      2
+    ],
+    "reason": "[1] and [2] identify the roughly 160 hours actually used per language. That is an observed configuration, not a measured requirement."
+  },
+  "b4466e2b91851f1ca4ef": {
+    "verdict": "partial",
+    "supporting_citations": [
+      3,
+      5
+    ],
+    "reason": "[3] identifies the shared-task comments and posts, and [5] corroborates the organizers as data provider. The platform itself remains unidentified and the API marks this answer as positive."
+  },
+  "b628cb5cfd4c90dad4c1": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      2
+    ],
+    "reason": "[1] names and describes the WNLaMPro cloze task, and [2] names the probing task."
+  },
+  "b6d25f8a5a8030b62ba9": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      2,
+      3
+    ],
+    "reason": "[2] names the two difficult minority genres. [1] and [3] describe MPB as most confused. The answer maintains the distinction between the two descriptions."
+  },
+  "b854a588504d3de3b54a": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "The positive annotation identifies accuracy, but the endpoint returns a citation-free structured refusal."
+  },
+  "c0c94f3221a2f6e04ffd": {
+    "verdict": "full",
+    "supporting_citations": [
+      4
+    ],
+    "reason": "[4] expressly identifies the CoNLL-2012 evaluation corpus and OntoNotes 5.0."
+  },
+  "c61c8d73008d917f2792": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      2
+    ],
+    "reason": "[1] says the target data are Python code; [2] identifies Python as the primary target of the framework."
+  },
+  "c967bbaf19e19d7fd96b": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      2
+    ],
+    "reason": "[2] identifies error types and error/correction pairs; [1] identifies the annotated spelling corpus and its source."
+  },
+  "cb4d4d44574961cf7906": {
+    "verdict": "full",
+    "supporting_citations": [
+      1
+    ],
+    "reason": "[1] directly reports the proprietary fine-tuning corpus and its approximate size in agreements."
+  },
+  "cbf4c61b0623510dcae1": {
+    "verdict": "full",
+    "supporting_citations": [
+      3
+    ],
+    "reason": "[3] supports the 10 percent relative WER improvement, unit and speaker-open qualification, and JNAS/WSJ comparison. It gives no separate speaker-closed improvement amount."
+  },
+  "d6702b89191a8cd11a57": {
+    "verdict": "full",
+    "supporting_citations": [
+      2
+    ],
+    "reason": "[2] explicitly distinguishes the two top-level intents from 30 subcategories and names the top categories."
+  },
+  "d973e15a88a23921650e": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "The response leaves the parameter count unspecified and returns a structured refusal without a citation."
+  },
+  "da73c85b6d0f16c75fd5": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      3,
+      4
+    ],
+    "reason": "[4] explicitly identifies parameter sharing. [1] describes attention, pointer-softmax and the shared sequence formulation; [3] explains alternating training and the two task directions."
+  },
+  "dc3782966bb76e7835c0": {
+    "verdict": "wrong",
+    "supporting_citations": [
+      1
+    ],
+    "reason": "[1] supports five seed terms and 53 translation targets, but the requested quantity concerns languages actually present in the tweet corpus. The answer fails to distinguish them as a limitation."
+  },
+  "e048a9ee5e0615bdd012": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      2,
+      3
+    ],
+    "reason": "[1] states the two feature approaches and their combination, [3] describes learning, engineering and evaluation, and [2] supports flexible evaluation across tasks. The official negative conflicts with the passage."
+  },
+  "e8342149859256b6f740": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "Returns a citation-free structured refusal for the reasoning-chain count."
+  },
+  "e93c1acc22ffcd071a70": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      2
+    ],
+    "reason": "[1] and [2] directly support a daily cadence for collecting new words and retrieving newspaper articles."
+  },
+  "ea13b57de9cf0c8ced30": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "Returns a structured refusal on the effect of CNN-DSA on performance."
+  },
+  "ea63d384fc0cb166dc70": {
+    "verdict": "full",
+    "supporting_citations": [
+      1
+    ],
+    "reason": "[1] directly identifies the family and classification as Bantu C25."
+  },
+  "eb01d4431d2e3388c3f5": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "The structured refusal says the FigureQA and DVQA sizes are unavailable and returns no citations."
+  },
+  "ed3012b98f021ada7563": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      3,
+      4
+    ],
+    "reason": "The answer limits the comparison to some previous work as [3] and [4] do. [1] confirms the increased context sensitivity. The official negative conflicts with this bounded answer."
+  },
+  "f1a8439872ec8a34dbf7": {
+    "verdict": "full",
+    "supporting_citations": [
+      2,
+      5,
+      6
+    ],
+    "reason": "[2] identifies Google N-grams for the applications, [5] verifies the historical interval and examples, and [6] describes the 10,000 nouns and unnamed bibliographic source. These support the reported limits on provenance."
+  },
+  "f895df361e8431a64c64": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      2
+    ],
+    "reason": "[1] states all three totals, and [2] states both partition sizes and the corresponding numbers of sentences."
+  },
+  "fd30d6181011945b3587": {
+    "verdict": "full",
+    "supporting_citations": [
+      1
+    ],
+    "reason": "[1] states the poem and vernacular sources, sizes, genres, their lack of alignment and the training/validation split."
+  },
+  "ff25c9bd8b3c146388a6": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "Returns a structured refusal and leaves the identity of the strong feature-based method unresolved."
+  }
+}

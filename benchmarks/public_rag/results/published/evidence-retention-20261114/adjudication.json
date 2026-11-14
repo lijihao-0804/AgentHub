@@ -1,0 +1,26 @@
+{
+  "28a83a8517e958303e86": {
+    "verdict": "wrong",
+    "supporting_citations": [
+      1,
+      2,
+      3,
+      5
+    ],
+    "reason": "The opening extends the comparison to previous context-aware models as a group. The excerpts compare actual/random context, a likelihood-only baseline and some previous work. Each citation supports the narrower attached subclaim, while the initial generalization lacks an adequate comparison."
+  },
+  "421be73d5609b8dd071e": {
+    "verdict": "wrong",
+    "supporting_citations": [
+      1
+    ],
+    "reason": "[1] supports 53 translation targets for seed terms. The answer gives the count for a different population from languages actually observed in tweets, without explicitly identifying that requested count as unresolved."
+  },
+  "dc3782966bb76e7835c0": {
+    "verdict": "wrong",
+    "supporting_citations": [
+      1
+    ],
+    "reason": "[1] supports 53 translation targets for seed terms. The answer gives the count for a different population from languages actually observed in tweets, without explicitly identifying that requested count as unresolved."
+  }
+}

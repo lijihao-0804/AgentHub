@@ -1,0 +1,1836 @@
+{
+  "independent": {
+    "rows": {
+      "A": {
+        "0c29d08f766b06ceb2421aa402e71a2d65a5a381": {
+          "digest": {
+            "pool": "d97a5746648acbe06d1de314230a5f099a377863ec6956e06044d6ec0320c48d",
+            "final": "a1016d5ea96e6b9f040083a13597d27570f7a98a1d232de2a13cfab3d417039f",
+            "reader": "a1016d5ea96e6b9f040083a13597d27570f7a98a1d232de2a13cfab3d417039f"
+          },
+          "prompt_sha": "5ba0627c97e6579383bce9d2f64018405fbac53aaebfca9a003498c2fd972b1b",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": false
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": false
+          }
+        },
+        "6adde6bc3e27a32eac5daa57d30ab373f77690be": {
+          "digest": {
+            "pool": "8de73fb8afe334fadf43e232b38df6acdcaba53dd742d71349d8d1ccd99213fb",
+            "final": "39c87d3dabb49e028984ba704f2d89dd5508ff2a02b1c9744e6369179c996d11",
+            "reader": "39c87d3dabb49e028984ba704f2d89dd5508ff2a02b1c9744e6369179c996d11"
+          },
+          "prompt_sha": "703ccc97773ff57e1e535c477f5eee104af7d4b183f95ddd1b9fc0638f436447",
+          "candidate": {},
+          "reader": {}
+        },
+        "cee29acec4da1b247795daa4e2e82ef8a7b25a64": {
+          "digest": {
+            "pool": "9645f4e5dcb128ad8f9a9fb15259b86f1ac402ad621ace0f924a68b76188e45e",
+            "final": "e644af50293c0efd768f8ec9ff5f2811b6cddb55fcf09dc5516cc83d317e5827",
+            "reader": "e644af50293c0efd768f8ec9ff5f2811b6cddb55fcf09dc5516cc83d317e5827"
+          },
+          "prompt_sha": "3cfdb4767b15c2afcfba62a3cfb6aca719afcf64f9e04d50e54200c238392cd6",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": true
+          }
+        },
+        "62048ea0aab61abe21fb30d70c4a1bc5fb946137": {
+          "digest": {
+            "pool": "30f98211646cfa60e1ef1cc65f2793ed07a8c0203e7dae2b0da24b987039a045",
+            "final": "8db419612c1bb9d5aea3d54d95b34723af32c9cd8a0d43b99f7f9c51b0f4b233",
+            "reader": "8db419612c1bb9d5aea3d54d95b34723af32c9cd8a0d43b99f7f9c51b0f4b233"
+          },
+          "prompt_sha": "78240c44d00b1835a6528677ebdbfb66a4b653220291ea4ddf466f8237b8b0a3",
+          "candidate": {},
+          "reader": {}
+        },
+        "3d99bc8ab2f36d4742e408f211bec154bc6696f7": {
+          "digest": {
+            "pool": "1353c18303f96c59f6b5855f028560f3e8d18db441e0526b79c2b720c4897d0f",
+            "final": "3830967eb4f960f37618eec1b25f545d8ee995d133852970287e0f210156a8f3",
+            "reader": "3830967eb4f960f37618eec1b25f545d8ee995d133852970287e0f210156a8f3"
+          },
+          "prompt_sha": "368844fa1307cc5822099f798d8fec6442c26503df0fd7e307ee5385358a1dbb",
+          "candidate": {},
+          "reader": {}
+        },
+        "81686454f215e28987c7ad00ddce5ffe84b37195": {
+          "digest": {
+            "pool": "d9a66a9d78cbcbf597e39135ffff48b17aa0dac39a8265eb7722573b97a69754",
+            "final": "c1cec2f19a5e6b6fc728e99e4f2112b66a5fda38923ea97220fb7f9a711e765c",
+            "reader": "c1cec2f19a5e6b6fc728e99e4f2112b66a5fda38923ea97220fb7f9a711e765c"
+          },
+          "prompt_sha": "61aebc5436c1f27450e73e2758c9258cd5ac87fc9d4dc815f8c78d8700a3cfdc",
+          "candidate": {},
+          "reader": {}
+        },
+        "537b2d7799124d633892a1ef1a485b3b071b303d": {
+          "digest": {
+            "pool": "35b8532e9261f332d1865ba3e8dcdd2fa0dc4e4cb9888805e7cd88f746a704fc",
+            "final": "68c9c99a8ee33a3cef96143ab4ffa80a479fa4b8893ec349b5fc4a081eab4409",
+            "reader": "68c9c99a8ee33a3cef96143ab4ffa80a479fa4b8893ec349b5fc4a081eab4409"
+          },
+          "prompt_sha": "4761d14ff328dab8ce6b4dac951c9cecfe048a7e86fa384d04cd6048ba508afd",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          }
+        },
+        "0460019eb2186aef835f7852fc445b037bd43bb7": {
+          "digest": {
+            "pool": "39fd87cda10c87f85f0b3ecdbb227fabe6d5e2ea2726bee8f0b4c7a257db6ff7",
+            "final": "3bcb9a44368cd4e4756d6486a1934382daf39318e8d97549f29a30062bac317f",
+            "reader": "3bcb9a44368cd4e4756d6486a1934382daf39318e8d97549f29a30062bac317f"
+          },
+          "prompt_sha": "a38a6fb4de69dbef7f04fab6b6f6f5e7b92f26504c9753f792b39803dac668aa",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          }
+        },
+        "e79a5e435fcf5587535f06c9215d19a66caadaff": {
+          "digest": {
+            "pool": "ddf7c43a42cbef3696e4f7d2fbdc4badd4dae38b9842cf5fd10156e88cc4fe18",
+            "final": "4536c89fa23e9bdd79da0e237b20643819bbf7ebb10f850e7bae44b804a26f25",
+            "reader": "4536c89fa23e9bdd79da0e237b20643819bbf7ebb10f850e7bae44b804a26f25"
+          },
+          "prompt_sha": "82ffd17457818657c27d9ed63632f3528f228b7eecf740f1fd9a91726fb137c6",
+          "candidate": {},
+          "reader": {}
+        },
+        "6959e87cf2668a03854da3f042c87e6fdb2ade8a": {
+          "digest": {
+            "pool": "ea56b504328b06307790554ea73323279c37e14bec40628f763b6e1a269b6010",
+            "final": "1132b9734d210bc713634e491f517146f305643be2c4876af62e4af21fd7d173",
+            "reader": "1132b9734d210bc713634e491f517146f305643be2c4876af62e4af21fd7d173"
+          },
+          "prompt_sha": "627a146ade342ccf65e20f9c9c594386a1656447cefdc3eb303ac2ea97390ec4",
+          "candidate": {},
+          "reader": {}
+        },
+        "6a31bd676054222faf46229fc1d283322478a020": {
+          "digest": {
+            "pool": "7655505052c7cb9930cae6c04d65e734782a13172e6a30b565d12c6a66fc5c83",
+            "final": "27bab58440576ed33c283e3300b1c6a95197dbde426ced67a59e238663292fcc",
+            "reader": "27bab58440576ed33c283e3300b1c6a95197dbde426ced67a59e238663292fcc"
+          },
+          "prompt_sha": "e0caa251514a2ea8456f5d7d6fa3df75cc417dec92fc36dc84cc4c0b74ca74e4",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          }
+        },
+        "a8f1029f6766bffee38a627477f61457b2d6ed5c": {
+          "digest": {
+            "pool": "097939c77da7f6cc02acc491675b3f4bbe094dec012e6e6027b1e5a9fcb4efd9",
+            "final": "2cd7e5d06d630b78f80532f2231bb8bf3f3640869e16ab79267928e02829d4d4",
+            "reader": "2cd7e5d06d630b78f80532f2231bb8bf3f3640869e16ab79267928e02829d4d4"
+          },
+          "prompt_sha": "210b8ec2c208b6783e9527df48f020bb95678a7d835f7b17a07c57e69893c3c1",
+          "candidate": {},
+          "reader": {}
+        },
+        "38e2f07ba965b676a99be06e8872dade7c04722a": {
+          "digest": {
+            "pool": "f3de97ca549fedded632d8686e18f39b8a9bbf945aba576507182238d2d081bc",
+            "final": "9945500c5f3fcd94af0015460ef253c2d801856180465c3988000e18667499a1",
+            "reader": "9945500c5f3fcd94af0015460ef253c2d801856180465c3988000e18667499a1"
+          },
+          "prompt_sha": "b83d5e0120b6d29cf7913ee09ce01fa6b6ff248b59deb8ed496f71695e7820a5",
+          "candidate": {},
+          "reader": {}
+        },
+        "61aac406b648865f007a400dcd69f28e44efc636": {
+          "digest": {
+            "pool": "a09ed0e488840bfb91fbbf9cc51386616b6d55641a1549671d5cc7c802a85bf5",
+            "final": "6a687f1e280e29b92f7dfe2182eb8a736fce42e814a43255fa37e2ae803915f5",
+            "reader": "6a687f1e280e29b92f7dfe2182eb8a736fce42e814a43255fa37e2ae803915f5"
+          },
+          "prompt_sha": "e79f9a0635b9288516ecfd350fa29b64460bc6db3dae02a4ad6408228e01ae81",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          }
+        },
+        "4fcc668eb3a042f60c4ce2e7d008e7923b25b4fc": {
+          "digest": {
+            "pool": "8d23300f374e24c711dc90c8a29b549c0a6b593cc71d02b9c6231126ad46db3e",
+            "final": "5094dfd3cb7fed69b33b3b6be64e9ceacd34f04ad7185f0748ad8250a8f41eb2",
+            "reader": "5094dfd3cb7fed69b33b3b6be64e9ceacd34f04ad7185f0748ad8250a8f41eb2"
+          },
+          "prompt_sha": "cd954b1d5027dda8fd49d4246b260375f6295e06d9f9e9fc9f957a41befdf121",
+          "candidate": {},
+          "reader": {}
+        },
+        "4146e1d8f79902c0bc034695998b724515b6ac81": {
+          "digest": {
+            "pool": "1540c84f9c84e0a296c7fe7be76f34f415961f39d7ef49b36a618e84340054e2",
+            "final": "d2285fa992bd99e0787d59254238f34f5aba45f54354fbc258ffdc959cb93f24",
+            "reader": "d2285fa992bd99e0787d59254238f34f5aba45f54354fbc258ffdc959cb93f24"
+          },
+          "prompt_sha": "063358db69ae7e3836dc6bceeb707bb64664f82c53dc07b13a51c8530816787b",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": false
+          }
+        },
+        "dc28ac845602904c2522f5349374153f378c42d3": {
+          "digest": {
+            "pool": "bc8643efd3c30703ed1f6a1f9de69e1de3a964d52766ed471b1d600c643b6471",
+            "final": "aba619a778c02094cd22ae07957a167d7b0b88f012dc89e1201449c51a85e485",
+            "reader": "aba619a778c02094cd22ae07957a167d7b0b88f012dc89e1201449c51a85e485"
+          },
+          "prompt_sha": "3219a7cab2b0f9a8368a22a6450ecf06c750e0c4eaa0bbaa34d995abc1c111b3",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": true
+          }
+        },
+        "bc1bc92920a757d5ec38007a27d0f49cb2dde0d1": {
+          "digest": {
+            "pool": "5d4ae993a924c6828a87b5aea9c906b10a6944da307c42ebf92a84a2fdf201f1",
+            "final": "4f51d701047d2f4ad4fd822d3c0424b14e106cece130fa1e70e83f248cd2a87c",
+            "reader": "4f51d701047d2f4ad4fd822d3c0424b14e106cece130fa1e70e83f248cd2a87c"
+          },
+          "prompt_sha": "2d1b9badd6f7758347fe09c9bf06968b65f8bc19dea778df6e8644c4c39d3bd3",
+          "candidate": {},
+          "reader": {}
+        },
+        "891c4af5bb77d6b8635ec4109572de3401b60631": {
+          "digest": {
+            "pool": "7fdfc8f403e6c1460709e470dda538815890312d660908d2eb4f1ed5573b689b",
+            "final": "d27a6c8779769fabb48821a9c6aef5e73b88b09359f434541aa2db82c924fd71",
+            "reader": "d27a6c8779769fabb48821a9c6aef5e73b88b09359f434541aa2db82c924fd71"
+          },
+          "prompt_sha": "91e2c2bde98b9d3440eeedefdf88ede0a6416de51d0ede4d28b0a81a828fab97",
+          "candidate": {},
+          "reader": {}
+        },
+        "0fa81adf00662694e1dc74475ae2b9283c50748c": {
+          "digest": {
+            "pool": "78793fb4c38ec051404ee5391d195daf8a680b8ccfb27caad78f82ee7c7ded45",
+            "final": "ccf258d9fa0db98135628b3e5481deb06349ec19ad70e7692031c94a115afcb7",
+            "reader": "ccf258d9fa0db98135628b3e5481deb06349ec19ad70e7692031c94a115afcb7"
+          },
+          "prompt_sha": "d7aa38ad3ae23296873bacf3cc8f7eaf4733ea74f8e76c3f3f1ac01d3d9b1709",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": true
+          }
+        },
+        "504a069ccda21580ccbf18c34f5eefc0088fa105": {
+          "digest": {
+            "pool": "40d617d073b9da07036c074bf13b640bec3f6aaa4ce3274b0cb14a74f40fa07a",
+            "final": "e74ea4bdfb37cbc7be7da63fdc862fa949b443f1e83315411f0d51f57485469b",
+            "reader": "e74ea4bdfb37cbc7be7da63fdc862fa949b443f1e83315411f0d51f57485469b"
+          },
+          "prompt_sha": "b2cd085d27693e9419402ea96f16a6649026b1a4238c3ac624b15a927b443f5c",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": true
+          }
+        },
+        "557d1874f736d9d487eb823fe8f6dab4b17c3c42": {
+          "digest": {
+            "pool": "67a22d5687eead45c9b87b97f6bc158783a2be38665e5f93c1461896cde226de",
+            "final": "91a7ce8e4f0a718eaeecea6583f53b35cc5d7b863284232a57fe1c826ad7fbd6",
+            "reader": "91a7ce8e4f0a718eaeecea6583f53b35cc5d7b863284232a57fe1c826ad7fbd6"
+          },
+          "prompt_sha": "1ad97bee6279b7553dfd6179e957ce5520ea06e84a779b87e7d05a3b4c061f87",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          }
+        },
+        "9e2e5918608a2911b341d4887f58a4595d7d1429": {
+          "digest": {
+            "pool": "1dc2f80737efe7f56bbaa6897dc5bd87800a09fbe788ca7d785d2207f2b43691",
+            "final": "05e3857e436df8764fc95d27a33584ed739071f52d951b44a1dc78cb604010a5",
+            "reader": "05e3857e436df8764fc95d27a33584ed739071f52d951b44a1dc78cb604010a5"
+          },
+          "prompt_sha": "34cd982f2c913a0179cc4f050a9838b721faa160645a661e1da9277d44406672",
+          "candidate": {},
+          "reader": {}
+        },
+        "51d03f0741b72ae242c380266acd2321baf43444": {
+          "digest": {
+            "pool": "71c7d94c309f771971880b35a642f906c242fb1cf8b3e9866dde2c1426437608",
+            "final": "e9596c15300b8d688c41cf93734ac07c2180824da7a12378a505cdadc6c0f4ef",
+            "reader": "e9596c15300b8d688c41cf93734ac07c2180824da7a12378a505cdadc6c0f4ef"
+          },
+          "prompt_sha": "49dea6d7e1cbcd480418991bbc477818fdd65163673e9870dcaf617b5e32adaf",
+          "candidate": {},
+          "reader": {}
+        },
+        "21656039994cab07f79e89553cbecc31ba9853d4": {
+          "digest": {
+            "pool": "cb2a36c08d3a02524113371f79c12921be6107c9a3e7158df04353c48cb366dd",
+            "final": "1649ec9a7843716426c41adfc8de6dd64412f840b4bb392df4b4ea21ed7af8f1",
+            "reader": "1649ec9a7843716426c41adfc8de6dd64412f840b4bb392df4b4ea21ed7af8f1"
+          },
+          "prompt_sha": "72a7c670a69f791183d7b99b29e2e9d125b94b32415cf1d79c06e092395edb62",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          }
+        },
+        "d8cecea477dfc5163dca6e2078a2fe6bc94ce09f": {
+          "digest": {
+            "pool": "c61c2f2729a738c44999f63559dd667ef4fc423b94c9a692c7cf8ee67e4ed033",
+            "final": "0490d3957139ae8d0d668d893a1edcb58f03f61f4e2917ac9c04b327fab40f00",
+            "reader": "0490d3957139ae8d0d668d893a1edcb58f03f61f4e2917ac9c04b327fab40f00"
+          },
+          "prompt_sha": "352eb606ff8514a80a3655a38cee88851e117a8f46ed79ec60582221b05761d5",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": false
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": false
+          }
+        },
+        "73cd785d474bae7af974802715ef7ba5468d9139": {
+          "digest": {
+            "pool": "a6adaf448f410bffd72b28abc8e79226de8d723d8a25e88e4f28a4efed4fa097",
+            "final": "bc71ef5795b61578391f739844ed967c882aba9611ac2f4e5b0921ea8ec42863",
+            "reader": "bc71ef5795b61578391f739844ed967c882aba9611ac2f4e5b0921ea8ec42863"
+          },
+          "prompt_sha": "f8b1b52754e13a7443353c96d155808e701af05d11a52db6915345d8e90fa64e",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": false
+          }
+        },
+        "e93b4a15b54d139b768d5913fb5fd1aed8ab25da": {
+          "digest": {
+            "pool": "f67f75794ba7295d309dec59eec54432b50d811ef4b80936119da3f6e0197602",
+            "final": "b701bf8379c653406b218bbc2da13fcb170af89d136e72be5657188d239172ad",
+            "reader": "b701bf8379c653406b218bbc2da13fcb170af89d136e72be5657188d239172ad"
+          },
+          "prompt_sha": "e26785b46a7b9cba1e355f7f3ce8f8e76fb64257e39f9227fd927bc3016e032d",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          }
+        },
+        "f74eaee72cbd727a6dffa1600cdf1208672d713e": {
+          "digest": {
+            "pool": "77745b10ccb2debccdceaefa24bb0e563b06cf0abdbf3a85a22417fe517bf54b",
+            "final": "60037aac363c626f34b8feda5f0737b095ae96b126d5ffe44c6e12f673b5cd25",
+            "reader": "60037aac363c626f34b8feda5f0737b095ae96b126d5ffe44c6e12f673b5cd25"
+          },
+          "prompt_sha": "3b0c6f1219477438ee72eb8a37ec52f52d6fa1f651bbe7890ef151bbdf0ddf66",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": false
+          }
+        },
+        "fb427239c8d44f524a6c1bf1ce5c3383d5c33e52": {
+          "digest": {
+            "pool": "e6eb8589c3fbfe5e4f7ae5ab5fe6cf0274ae771ae1a1c8a3852b19a7dc12bd34",
+            "final": "09745d0ac95570bca86367234348a661b3e59370f33597aaf2cf7f2744dd3620",
+            "reader": "09745d0ac95570bca86367234348a661b3e59370f33597aaf2cf7f2744dd3620"
+          },
+          "prompt_sha": "ef6fc9e7d55156879acebd825f1c9c0f2e76091838503acf166bbd62ae2d3029",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": true
+          }
+        },
+        "7a70fb11cb3449749f0c2c06101965bf5d02c54a": {
+          "digest": {
+            "pool": "acf5f348a9665a2f2f0c63b7f81cb9ba397941ae6684f0291f4b981a38211330",
+            "final": "e2be30ed97f994edc9f2f24cf8e1434ea99befc0f03f3d09db055697dc29c142",
+            "reader": "e2be30ed97f994edc9f2f24cf8e1434ea99befc0f03f3d09db055697dc29c142"
+          },
+          "prompt_sha": "52b19da437cdfa4d846c8784874ab6718d257e9c666a672f97d4c2d833becf53",
+          "candidate": {},
+          "reader": {}
+        },
+        "fdd9dea06550a2fd0df7a1e6a5109facf3601d76": {
+          "digest": {
+            "pool": "d579888356dbf5c82e3c9478ab47639bf51b5f3fe604b9afdb52f8dc4077b7bf",
+            "final": "cf8ea62c73eab556bcb5b13243379ce27a6a48408bce626373667e519725a2d1",
+            "reader": "cf8ea62c73eab556bcb5b13243379ce27a6a48408bce626373667e519725a2d1"
+          },
+          "prompt_sha": "15bf5fc9ce83db9376687fc3cee455580f91cab4f13d98c96fe829b43295fcfe",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          }
+        },
+        "3b40799f25dbd98bba5b526e0a1d0d0bb51173e0": {
+          "digest": {
+            "pool": "33704980a4f2609604693c4d6760d0ad8ef59d2dd5e2b9917db9041998e76c47",
+            "final": "be96de4e816e10c5c1e4c8620a1d76967f1644891a4f4d82b2576dcf3c267be7",
+            "reader": "be96de4e816e10c5c1e4c8620a1d76967f1644891a4f4d82b2576dcf3c267be7"
+          },
+          "prompt_sha": "49dc1ca71c8ce2077be33742dae4d423c79b15df50e86e439012e9b53c797f7c",
+          "candidate": {},
+          "reader": {}
+        },
+        "2a950ede24b26a45613169348d5db9176fda4f82": {
+          "digest": {
+            "pool": "c71abfe6499856985bcc7a81dde0e82f8a1356bfbb6f822bec6bc0f7b0ab080e",
+            "final": "0bfd2a62f0c38414f64dea594cbb3350a22e6782bbed98d492e9a6c5b99ab805",
+            "reader": "0bfd2a62f0c38414f64dea594cbb3350a22e6782bbed98d492e9a6c5b99ab805"
+          },
+          "prompt_sha": "350c33c8532fcb58e903444235fbb44962bca43f47de531e73813b3b55a7658f",
+          "candidate": {},
+          "reader": {}
+        },
+        "526ae24fa861d52536b66bcc2d2ddfce483511d6": {
+          "digest": {
+            "pool": "f40b48cc90fac77f75b14e3698acf739b0d5409d9f2a895c552a5a08e76d3097",
+            "final": "4ad7d7aa3e54539d82dba51b6be2a4e11dc48e583879ceff971998aac2f68191",
+            "reader": "4ad7d7aa3e54539d82dba51b6be2a4e11dc48e583879ceff971998aac2f68191"
+          },
+          "prompt_sha": "de904419f1bf94c85b4b6a4ae839fbebee93e67425f28c8a9a9fccf90fa619a4",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          }
+        },
+        "e78a47aec37d9a3bec5a18706b0a462c148c118b": {
+          "digest": {
+            "pool": "5ec483cb46990c1b518ccffeef7c07dc275a3e58171aa5407a4c891f7f165fb6",
+            "final": "bdd06a903540025c5d640089d7db9612dff445bc87f0fa5c0f61d63f44245c27",
+            "reader": "bdd06a903540025c5d640089d7db9612dff445bc87f0fa5c0f61d63f44245c27"
+          },
+          "prompt_sha": "c82b3bf28fd9503e6c8b378ac9e06cedf14a99434c55a942d1885de887a682f7",
+          "candidate": {},
+          "reader": {}
+        },
+        "55c840a2f1f663ab2bff984ae71501b17429d0c0": {
+          "digest": {
+            "pool": "49e31254e69635e7b2755357be88a3e4151224e2aef51d2fa8f66a3751cb40e3",
+            "final": "75fc82b84089b52efe7aed53576423175ece6f1a0a0ccae86cdf68a711d6ff7b",
+            "reader": "75fc82b84089b52efe7aed53576423175ece6f1a0a0ccae86cdf68a711d6ff7b"
+          },
+          "prompt_sha": "524e12727564f98ba23d11acf34e753a1fc0384642770ccc45677b6d837a19bf",
+          "candidate": {},
+          "reader": {}
+        },
+        "326e08a0f5753b90622902bd4a9c94849a24b773": {
+          "digest": {
+            "pool": "d9b171df36c395dc9e287b495a3bed005ff7ed17d7caaa6a5e475e9187aa95f7",
+            "final": "db89c47979d40f764cd297b95ae92d497fb8047691c6739d4c66ab932c94aa67",
+            "reader": "db89c47979d40f764cd297b95ae92d497fb8047691c6739d4c66ab932c94aa67"
+          },
+          "prompt_sha": "c272492bdf3c8920e8a2b504cc24a16cd909f746a738eb61c9859dcce35e1140",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": true
+          }
+        },
+        "dee7383a92c78ea49859a2d5ff2a9d0a794c1f0f": {
+          "digest": {
+            "pool": "a9e0e9e4e42637bc221443cba436dc53fffeacc0e1a1dc32c652bae4cdfd1dd2",
+            "final": "634d2b6e950e90ee12aeb14f0c0de974628494340ad0e22a50001d66afb09471",
+            "reader": "634d2b6e950e90ee12aeb14f0c0de974628494340ad0e22a50001d66afb09471"
+          },
+          "prompt_sha": "ec344a9853f143a38a5e648b6a4f0f2cb723675b93650e2fb563f49a89809dfa",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          }
+        },
+        "69ca609e86888c7e4e2e3d33435a0a36f77601b5": {
+          "digest": {
+            "pool": "698d00df0527507c679379da9c9dc2fe51f5dfd69f951ebf836261c1ab67176c",
+            "final": "922a12b873f471f396b8a5d5a7ee2c80591c786a642ad054cd4f7bbb4542851a",
+            "reader": "922a12b873f471f396b8a5d5a7ee2c80591c786a642ad054cd4f7bbb4542851a"
+          },
+          "prompt_sha": "2cc06b568524fd813fbc1b76db2c94ee2fcc180e62d4bfde08f3e776e02daac4",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          }
+        },
+        "4ecb6674bcb4162bf71aea8d8b82759255875df3": {
+          "digest": {
+            "pool": "2d90412b6083baecedb0467b8fd8d7925ba66aada81c5e1eab2dc54bb191ed2f",
+            "final": "f999d8962878022ef845d2b91ddbb9eafde9c0d4ca0ca8f9fadc1a521c442db7",
+            "reader": "f999d8962878022ef845d2b91ddbb9eafde9c0d4ca0ca8f9fadc1a521c442db7"
+          },
+          "prompt_sha": "dbd6f7e76c662cc60c4978356433454a7f8da73766467cb0cc8d84627c7633f5",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          }
+        },
+        "221e9189a9d2431902d8ea833f486a38a76cbd8e": {
+          "digest": {
+            "pool": "7fac30ae23684aeaea0497566c8353164ef0102a746aaf8921ffe0ab2f7a6b00",
+            "final": "15d76e4b435b1b1a4da5ff72f92a7a4cc121530a1b31c76ea32ea06e6741bb5d",
+            "reader": "15d76e4b435b1b1a4da5ff72f92a7a4cc121530a1b31c76ea32ea06e6741bb5d"
+          },
+          "prompt_sha": "d4b182a742746cdbeaca084f901ee8037b383d33af2c34edc958ea3c2333918b",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          }
+        },
+        "e574f0f733fb98ecef3c64044004aa7a320439be": {
+          "digest": {
+            "pool": "b6bf448f859898a86cbd2c037891b9233358ebb86c1a5d447790f8c9bf19a623",
+            "final": "d35619f661bc823f09b54a22dbd48b4f719e03e181d498891541b8e9eedd9489",
+            "reader": "d35619f661bc823f09b54a22dbd48b4f719e03e181d498891541b8e9eedd9489"
+          },
+          "prompt_sha": "dc57f2812d9da533e832a38f5c3c9292a88c3ab1439d11d9d95ddd53627ee164",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": false
+          }
+        },
+        "19cdce39e8265e7806212eeee2fd55f8ef2f3d47": {
+          "digest": {
+            "pool": "22b06280e42dd84bcbeb4ca8b2fc86b0a8e48e2c0f2e6fff13a5bd17b593dbe3",
+            "final": "794e657f75c28d8f1568128765f77705cd3cdd126736c3431a75fcb2d9c907c4",
+            "reader": "794e657f75c28d8f1568128765f77705cd3cdd126736c3431a75fcb2d9c907c4"
+          },
+          "prompt_sha": "62fb14cfa5ad3d2df4cd3db3f815775195eb4e86a71a4c8346cc547480170196",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": true
+          }
+        },
+        "b974523a6cbd3cdc1fa924243ccc9711bbc7070d": {
+          "digest": {
+            "pool": "953765db185da050a2a3eebd5df4ca7acea07a5af306fd55aaefceb6fbdbefb9",
+            "final": "2558066397ab9149720fa1414ac7d2749ab3c7667b484838e617028329136d88",
+            "reader": "2558066397ab9149720fa1414ac7d2749ab3c7667b484838e617028329136d88"
+          },
+          "prompt_sha": "68d88d2f0559f022776cb6aff5609d00ad0fcbc63804f696c5294f857f99729a",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          }
+        },
+        "163a21c0701d5cda15be2d0eb4981a686e54a842": {
+          "digest": {
+            "pool": "ef6c10b4d6e93b81ccee7be5c4db3e292a4cec3de71d9476d80e97260f65152a",
+            "final": "65fef1e0eaaafcc85774be7a86f550df8bcedab695b50317f5cbc60ede85aef1",
+            "reader": "65fef1e0eaaafcc85774be7a86f550df8bcedab695b50317f5cbc60ede85aef1"
+          },
+          "prompt_sha": "ab6b42b163547fe84a6894b6bdbadd093f45956eed97ffa360ebe8e9712f1dfe",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          }
+        },
+        "5787ac3e80840fe4cf7bfae7e8983fa6644d6220": {
+          "digest": {
+            "pool": "f6d0c8bf17eb836c1739d1e7ca7378e694ba9e05d345f8c509d2f730f3de9b8e",
+            "final": "164216b70868e51739e932c3b5bad78498181190c8d3612b3dd82cb5c67c3cfa",
+            "reader": "164216b70868e51739e932c3b5bad78498181190c8d3612b3dd82cb5c67c3cfa"
+          },
+          "prompt_sha": "52bbcf15f7496401da2ae07845577ee66562d3c6aab953c148abd80440523c26",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          }
+        },
+        "24d06808fa3b903140659ee5a471fdfa86279980": {
+          "digest": {
+            "pool": "d6d2bd3e3f5239a01f08bf34014cece7cd8ee26ab58ec8cfc6bfc3535e80719b",
+            "final": "5fc03820f506ef6f7178f94a306e7de51c73e196eed3fe4bfa2f49bc224d3ed8",
+            "reader": "5fc03820f506ef6f7178f94a306e7de51c73e196eed3fe4bfa2f49bc224d3ed8"
+          },
+          "prompt_sha": "55a0e10236c927c8c80050fe2ea2d66809fa68e2d373b67f26ccb1a831833333",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": false
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": false
+          }
+        }
+      },
+      "B": {
+        "0c29d08f766b06ceb2421aa402e71a2d65a5a381": {
+          "digest": {
+            "pool": "d97a5746648acbe06d1de314230a5f099a377863ec6956e06044d6ec0320c48d",
+            "final": "16cd069ef6543be26c9152ef819c9d62b8e804a3bc5eb2e44d3e1b81607727b0",
+            "reader": "16cd069ef6543be26c9152ef819c9d62b8e804a3bc5eb2e44d3e1b81607727b0"
+          },
+          "prompt_sha": "acc943e1c69c34026438be4f6a0f84b324ae72e51be41517881c61bd82b99375",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": false
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": false
+          }
+        },
+        "6adde6bc3e27a32eac5daa57d30ab373f77690be": {
+          "digest": {
+            "pool": "8de73fb8afe334fadf43e232b38df6acdcaba53dd742d71349d8d1ccd99213fb",
+            "final": "34c32d00b824af4e18c8c32a13bc558d1636f7128e019d3776ee4868fe6ea521",
+            "reader": "34c32d00b824af4e18c8c32a13bc558d1636f7128e019d3776ee4868fe6ea521"
+          },
+          "prompt_sha": "4a3c36d4a799f49107ce72c16b5576944a41b6188d53052826b66b97e3867bd0",
+          "candidate": {},
+          "reader": {}
+        },
+        "cee29acec4da1b247795daa4e2e82ef8a7b25a64": {
+          "digest": {
+            "pool": "9645f4e5dcb128ad8f9a9fb15259b86f1ac402ad621ace0f924a68b76188e45e",
+            "final": "d9924d1d7056b9fcdbb3cbe3c6c97567faba0ed3a053d145ac70e5bfd9d6e658",
+            "reader": "d9924d1d7056b9fcdbb3cbe3c6c97567faba0ed3a053d145ac70e5bfd9d6e658"
+          },
+          "prompt_sha": "7aef813a802dc9aeea08322ea8ab87e0b1774ea4d521c08139711e31ff4618fc",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": true
+          }
+        },
+        "62048ea0aab61abe21fb30d70c4a1bc5fb946137": {
+          "digest": {
+            "pool": "30f98211646cfa60e1ef1cc65f2793ed07a8c0203e7dae2b0da24b987039a045",
+            "final": "86ca1714b62af93a76e756a2fee903a9e6f3d43110b077915f23342d063ff88e",
+            "reader": "86ca1714b62af93a76e756a2fee903a9e6f3d43110b077915f23342d063ff88e"
+          },
+          "prompt_sha": "f8561fa3d52cba9ffe2f402084de083a58f4db26eab35866fc9fc34f8fdc5b6b",
+          "candidate": {},
+          "reader": {}
+        },
+        "3d99bc8ab2f36d4742e408f211bec154bc6696f7": {
+          "digest": {
+            "pool": "1353c18303f96c59f6b5855f028560f3e8d18db441e0526b79c2b720c4897d0f",
+            "final": "d3129944970bafed31ae0934cb2e423f8344848f376aa314f03967564e7b5802",
+            "reader": "d3129944970bafed31ae0934cb2e423f8344848f376aa314f03967564e7b5802"
+          },
+          "prompt_sha": "e6891ad78ff40822b6639d296f93512270e5d94714da6639fd8abd1375bd8ae1",
+          "candidate": {},
+          "reader": {}
+        },
+        "81686454f215e28987c7ad00ddce5ffe84b37195": {
+          "digest": {
+            "pool": "d9a66a9d78cbcbf597e39135ffff48b17aa0dac39a8265eb7722573b97a69754",
+            "final": "f4dd9fecef4e69ac34b0e6e6e7e7a13e76a97e578d1c5914da4e7f789a1b847e",
+            "reader": "f4dd9fecef4e69ac34b0e6e6e7e7a13e76a97e578d1c5914da4e7f789a1b847e"
+          },
+          "prompt_sha": "3312540ad120d03504084d03fa9e12b9e9dd026d4510beb975d6dc4cbda34ff3",
+          "candidate": {},
+          "reader": {}
+        },
+        "537b2d7799124d633892a1ef1a485b3b071b303d": {
+          "digest": {
+            "pool": "35b8532e9261f332d1865ba3e8dcdd2fa0dc4e4cb9888805e7cd88f746a704fc",
+            "final": "e2f33c16832049c4451e61401c2e08b9e56a9999777bdbd8d1045443a664eacf",
+            "reader": "e2f33c16832049c4451e61401c2e08b9e56a9999777bdbd8d1045443a664eacf"
+          },
+          "prompt_sha": "c7b21a3894ec7813c5d945c8e333885f973f00e108f3abede9cb78848cad1561",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          }
+        },
+        "0460019eb2186aef835f7852fc445b037bd43bb7": {
+          "digest": {
+            "pool": "39fd87cda10c87f85f0b3ecdbb227fabe6d5e2ea2726bee8f0b4c7a257db6ff7",
+            "final": "94d3a1d0baf91d51705b839414c3bfcb5a73748cf204d93c8d3b0f70e3907780",
+            "reader": "94d3a1d0baf91d51705b839414c3bfcb5a73748cf204d93c8d3b0f70e3907780"
+          },
+          "prompt_sha": "f1c55150f6596844907df9a4c424b04657d9126b758fda6e8909212bc9748b6b",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          }
+        },
+        "e79a5e435fcf5587535f06c9215d19a66caadaff": {
+          "digest": {
+            "pool": "ddf7c43a42cbef3696e4f7d2fbdc4badd4dae38b9842cf5fd10156e88cc4fe18",
+            "final": "a2f00865df9709a3fe11eb7fedccc3dc5b1d309cb45a4b8441ba81a81de8b99a",
+            "reader": "a2f00865df9709a3fe11eb7fedccc3dc5b1d309cb45a4b8441ba81a81de8b99a"
+          },
+          "prompt_sha": "9fec63a9d848d7faa7624ee95a61b38701f63fc05ffc33db6c8475e4466b2255",
+          "candidate": {},
+          "reader": {}
+        },
+        "6959e87cf2668a03854da3f042c87e6fdb2ade8a": {
+          "digest": {
+            "pool": "ea56b504328b06307790554ea73323279c37e14bec40628f763b6e1a269b6010",
+            "final": "7d29f739d3d07bad75888442845cd57fab10061e175e0d78c05d4c4cead60359",
+            "reader": "7d29f739d3d07bad75888442845cd57fab10061e175e0d78c05d4c4cead60359"
+          },
+          "prompt_sha": "7b93c6d6770824a832f2939a87e83f41c03610e59ec8898c56c916212480e43e",
+          "candidate": {},
+          "reader": {}
+        },
+        "6a31bd676054222faf46229fc1d283322478a020": {
+          "digest": {
+            "pool": "7655505052c7cb9930cae6c04d65e734782a13172e6a30b565d12c6a66fc5c83",
+            "final": "04e6bb652adb4dbb25764dda5120311ba8c595a8a4c279b10f1614e76bae566f",
+            "reader": "04e6bb652adb4dbb25764dda5120311ba8c595a8a4c279b10f1614e76bae566f"
+          },
+          "prompt_sha": "a9b1df550d53c22b739164ec5894968e8c4d5afc3fbfdbb3e875d58a48ef595e",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          }
+        },
+        "a8f1029f6766bffee38a627477f61457b2d6ed5c": {
+          "digest": {
+            "pool": "097939c77da7f6cc02acc491675b3f4bbe094dec012e6e6027b1e5a9fcb4efd9",
+            "final": "e6d2cdcba7df63976ae906f2d9ef28523784e5062f99be762a3e42806155a0ee",
+            "reader": "e6d2cdcba7df63976ae906f2d9ef28523784e5062f99be762a3e42806155a0ee"
+          },
+          "prompt_sha": "4186385924861a83a4856c76eb3e54ab178820dfbbecf83d639471eb6cefd1c2",
+          "candidate": {},
+          "reader": {}
+        },
+        "38e2f07ba965b676a99be06e8872dade7c04722a": {
+          "digest": {
+            "pool": "f3de97ca549fedded632d8686e18f39b8a9bbf945aba576507182238d2d081bc",
+            "final": "489112ebfdba0dcb96dfff8f73df893432c3240abc4f1507e6ac41ff66ad41a3",
+            "reader": "489112ebfdba0dcb96dfff8f73df893432c3240abc4f1507e6ac41ff66ad41a3"
+          },
+          "prompt_sha": "315688235e70ac2c8dc96bd5512a0a3b976d40ec92b65de021ac3a4fa1a0aa41",
+          "candidate": {},
+          "reader": {}
+        },
+        "61aac406b648865f007a400dcd69f28e44efc636": {
+          "digest": {
+            "pool": "a09ed0e488840bfb91fbbf9cc51386616b6d55641a1549671d5cc7c802a85bf5",
+            "final": "9cbc66b92a34ac7c47f56e1b816bb2c2226c3083606afa92650076358715402e",
+            "reader": "9cbc66b92a34ac7c47f56e1b816bb2c2226c3083606afa92650076358715402e"
+          },
+          "prompt_sha": "95d8ace97a1cbeb3065da0724070f273063043fc9b2b226bd3c4decaeb6e8c10",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": false
+          }
+        },
+        "4fcc668eb3a042f60c4ce2e7d008e7923b25b4fc": {
+          "digest": {
+            "pool": "8d23300f374e24c711dc90c8a29b549c0a6b593cc71d02b9c6231126ad46db3e",
+            "final": "180083e5175eae67e20e9237b2c058d26e098567b2b7436120e3f1b38529881a",
+            "reader": "180083e5175eae67e20e9237b2c058d26e098567b2b7436120e3f1b38529881a"
+          },
+          "prompt_sha": "c81da98d291a33794834f9a7a6b519743aab46cd48d3416752b3d8f39bb9cab3",
+          "candidate": {},
+          "reader": {}
+        },
+        "4146e1d8f79902c0bc034695998b724515b6ac81": {
+          "digest": {
+            "pool": "1540c84f9c84e0a296c7fe7be76f34f415961f39d7ef49b36a618e84340054e2",
+            "final": "3295a1c4d6dd37ecca909b09cf4e455eab293b7e0a001e6fc365f2b3c4a8179c",
+            "reader": "3295a1c4d6dd37ecca909b09cf4e455eab293b7e0a001e6fc365f2b3c4a8179c"
+          },
+          "prompt_sha": "c714392f685cbe650ce013779be36a24ed36aa559ef10bf3ba95a938e3622d0b",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          }
+        },
+        "dc28ac845602904c2522f5349374153f378c42d3": {
+          "digest": {
+            "pool": "bc8643efd3c30703ed1f6a1f9de69e1de3a964d52766ed471b1d600c643b6471",
+            "final": "1a28a2d61196885c26e80c824b6d7d34c31be974a0abcd454a8cf73d16d09cae",
+            "reader": "1a28a2d61196885c26e80c824b6d7d34c31be974a0abcd454a8cf73d16d09cae"
+          },
+          "prompt_sha": "1747b0f4390931a4a65f4054328456b0f7aeaf1761ff0450f1a6b8204cdde44c",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": true
+          }
+        },
+        "bc1bc92920a757d5ec38007a27d0f49cb2dde0d1": {
+          "digest": {
+            "pool": "5d4ae993a924c6828a87b5aea9c906b10a6944da307c42ebf92a84a2fdf201f1",
+            "final": "59e5d4d3458055b362bfd3437907ac40eb6d1ba3d069a61c9fdf315a5ce1c30c",
+            "reader": "59e5d4d3458055b362bfd3437907ac40eb6d1ba3d069a61c9fdf315a5ce1c30c"
+          },
+          "prompt_sha": "34fc68abe09c424a27b084ff3a87fbc71487deed600ed6f5818d870d489e3658",
+          "candidate": {},
+          "reader": {}
+        },
+        "891c4af5bb77d6b8635ec4109572de3401b60631": {
+          "digest": {
+            "pool": "7fdfc8f403e6c1460709e470dda538815890312d660908d2eb4f1ed5573b689b",
+            "final": "1f9dd0543715c2cfe3bf326bca39f77b644384e7792ca3af66952612ea45c24b",
+            "reader": "1f9dd0543715c2cfe3bf326bca39f77b644384e7792ca3af66952612ea45c24b"
+          },
+          "prompt_sha": "1f64e8c61cc3a0d89013abad7f75a6914e9d95ce0365d1f9fe5fc6f9ad396622",
+          "candidate": {},
+          "reader": {}
+        },
+        "0fa81adf00662694e1dc74475ae2b9283c50748c": {
+          "digest": {
+            "pool": "78793fb4c38ec051404ee5391d195daf8a680b8ccfb27caad78f82ee7c7ded45",
+            "final": "3ecfb42c211165307a68339c537998d1f9272d52353b969d2fbade01a1f2ee1a",
+            "reader": "3ecfb42c211165307a68339c537998d1f9272d52353b969d2fbade01a1f2ee1a"
+          },
+          "prompt_sha": "f04d1f04bc0fd58d1af2dfdb7c649b22e177d71c6c103e62bd184f245a16e9d9",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": true
+          }
+        },
+        "504a069ccda21580ccbf18c34f5eefc0088fa105": {
+          "digest": {
+            "pool": "40d617d073b9da07036c074bf13b640bec3f6aaa4ce3274b0cb14a74f40fa07a",
+            "final": "7d8864aef7d9713bdcef38a3a579cf54de8611e3b94f68a1903cd643f291c726",
+            "reader": "7d8864aef7d9713bdcef38a3a579cf54de8611e3b94f68a1903cd643f291c726"
+          },
+          "prompt_sha": "cb1f6cbd2b6f62152d023633e519d792f64253253670003d019d75b9de0283ec",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": true
+          }
+        },
+        "557d1874f736d9d487eb823fe8f6dab4b17c3c42": {
+          "digest": {
+            "pool": "67a22d5687eead45c9b87b97f6bc158783a2be38665e5f93c1461896cde226de",
+            "final": "ad8256c9d3552afa720e03fa4c3bcf0cd8f11e396d286e3483295a926e7c77da",
+            "reader": "ad8256c9d3552afa720e03fa4c3bcf0cd8f11e396d286e3483295a926e7c77da"
+          },
+          "prompt_sha": "069464c460a394fc6bc93d32b2e0d7c86379bb7025a35b4e6a05b0dcd717f82b",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          }
+        },
+        "9e2e5918608a2911b341d4887f58a4595d7d1429": {
+          "digest": {
+            "pool": "1dc2f80737efe7f56bbaa6897dc5bd87800a09fbe788ca7d785d2207f2b43691",
+            "final": "67ace956bc279e8ad77316ec1e1acf5a0e9d34f848e2fd8189ac157e66045c7b",
+            "reader": "67ace956bc279e8ad77316ec1e1acf5a0e9d34f848e2fd8189ac157e66045c7b"
+          },
+          "prompt_sha": "8d3c056cf34fe7f3380f9ebfb3a085b6eb33a0e105f9e38a0d5d52fd45952446",
+          "candidate": {},
+          "reader": {}
+        },
+        "51d03f0741b72ae242c380266acd2321baf43444": {
+          "digest": {
+            "pool": "71c7d94c309f771971880b35a642f906c242fb1cf8b3e9866dde2c1426437608",
+            "final": "036ca914a6552aa10e9546bae720e4f229f1257d376ec8175f9c63c31f10fa01",
+            "reader": "036ca914a6552aa10e9546bae720e4f229f1257d376ec8175f9c63c31f10fa01"
+          },
+          "prompt_sha": "6a0afe5e14d3b10fcce88583b1030dac74e32d88c06cc3468950a434e464d405",
+          "candidate": {},
+          "reader": {}
+        },
+        "21656039994cab07f79e89553cbecc31ba9853d4": {
+          "digest": {
+            "pool": "cb2a36c08d3a02524113371f79c12921be6107c9a3e7158df04353c48cb366dd",
+            "final": "e3d96834e7218422f97c979b460ec3609de87d3db4a1cc91d71205ed4030cbae",
+            "reader": "e3d96834e7218422f97c979b460ec3609de87d3db4a1cc91d71205ed4030cbae"
+          },
+          "prompt_sha": "579be94fc858b4dc8a962cdcf1e563aa4f91b677f07eddebfdef771b8f47f392",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          }
+        },
+        "d8cecea477dfc5163dca6e2078a2fe6bc94ce09f": {
+          "digest": {
+            "pool": "c61c2f2729a738c44999f63559dd667ef4fc423b94c9a692c7cf8ee67e4ed033",
+            "final": "aa9c26020be5c6ff2995dd4b1f82b0ede4dc355390a62a1b2bd2b57b8747b060",
+            "reader": "aa9c26020be5c6ff2995dd4b1f82b0ede4dc355390a62a1b2bd2b57b8747b060"
+          },
+          "prompt_sha": "7497cfdd5fb73c8f1efba3d2840fbdaccc913a92c0eb051fe51835a54a0515f5",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": false
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": false
+          }
+        },
+        "73cd785d474bae7af974802715ef7ba5468d9139": {
+          "digest": {
+            "pool": "a6adaf448f410bffd72b28abc8e79226de8d723d8a25e88e4f28a4efed4fa097",
+            "final": "4bd66c0b73f4e08fe85c7c3babf017e04c05f78a58ca99531bdf925ce7355383",
+            "reader": "4bd66c0b73f4e08fe85c7c3babf017e04c05f78a58ca99531bdf925ce7355383"
+          },
+          "prompt_sha": "6472e888f75f1aca1a711d2fe2ad9cbbdd727b9efafa6aa13c9545933f78d4a0",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          }
+        },
+        "e93b4a15b54d139b768d5913fb5fd1aed8ab25da": {
+          "digest": {
+            "pool": "f67f75794ba7295d309dec59eec54432b50d811ef4b80936119da3f6e0197602",
+            "final": "1755643d27d94904f4095f137cd37bb5813a29a2ecf8af94ef7f66ebdf4a26a5",
+            "reader": "1755643d27d94904f4095f137cd37bb5813a29a2ecf8af94ef7f66ebdf4a26a5"
+          },
+          "prompt_sha": "b5fe47663e1c3433701d47913a15506c616005054a9e8cfac7547926de6371ce",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          }
+        },
+        "f74eaee72cbd727a6dffa1600cdf1208672d713e": {
+          "digest": {
+            "pool": "77745b10ccb2debccdceaefa24bb0e563b06cf0abdbf3a85a22417fe517bf54b",
+            "final": "c18040c85d72790126543dbe08012b5480ebe1fda03577ded6b21d9c71c828c4",
+            "reader": "c18040c85d72790126543dbe08012b5480ebe1fda03577ded6b21d9c71c828c4"
+          },
+          "prompt_sha": "68168dc53cab41b4c929339dbc7d05e7ab7515681530c2b10387ea535d46cdcb",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": true
+          }
+        },
+        "fb427239c8d44f524a6c1bf1ce5c3383d5c33e52": {
+          "digest": {
+            "pool": "e6eb8589c3fbfe5e4f7ae5ab5fe6cf0274ae771ae1a1c8a3852b19a7dc12bd34",
+            "final": "d053b5d87d9aab2ed24dce63f8bd61a96b3c572311182f5b3ec17532ef10ef96",
+            "reader": "d053b5d87d9aab2ed24dce63f8bd61a96b3c572311182f5b3ec17532ef10ef96"
+          },
+          "prompt_sha": "e38424cd3f9eaa56b4c9f295568115dfab0559888fa61c6ddf06b1425424f63c",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": true
+          }
+        },
+        "7a70fb11cb3449749f0c2c06101965bf5d02c54a": {
+          "digest": {
+            "pool": "acf5f348a9665a2f2f0c63b7f81cb9ba397941ae6684f0291f4b981a38211330",
+            "final": "e2be30ed97f994edc9f2f24cf8e1434ea99befc0f03f3d09db055697dc29c142",
+            "reader": "e2be30ed97f994edc9f2f24cf8e1434ea99befc0f03f3d09db055697dc29c142"
+          },
+          "prompt_sha": "52b19da437cdfa4d846c8784874ab6718d257e9c666a672f97d4c2d833becf53",
+          "candidate": {},
+          "reader": {}
+        },
+        "fdd9dea06550a2fd0df7a1e6a5109facf3601d76": {
+          "digest": {
+            "pool": "d579888356dbf5c82e3c9478ab47639bf51b5f3fe604b9afdb52f8dc4077b7bf",
+            "final": "28b5bb74b78b1eb17629ace7be7f19e9c74fd44b161ae1b9cdc6441c17ee3669",
+            "reader": "28b5bb74b78b1eb17629ace7be7f19e9c74fd44b161ae1b9cdc6441c17ee3669"
+          },
+          "prompt_sha": "78416c131ed1bf6c968e4fdc0bd3ca91dd6bbf7ec31a243ec55ff72798a11300",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          }
+        },
+        "3b40799f25dbd98bba5b526e0a1d0d0bb51173e0": {
+          "digest": {
+            "pool": "33704980a4f2609604693c4d6760d0ad8ef59d2dd5e2b9917db9041998e76c47",
+            "final": "5d8014606642faf8da9ec45a7cce488fda21e2c416022aedc477a58b19cdc53d",
+            "reader": "5d8014606642faf8da9ec45a7cce488fda21e2c416022aedc477a58b19cdc53d"
+          },
+          "prompt_sha": "a0da6dfc918539bd5474da13515222487313b6ef8835804c938986e1a3849a3a",
+          "candidate": {},
+          "reader": {}
+        },
+        "2a950ede24b26a45613169348d5db9176fda4f82": {
+          "digest": {
+            "pool": "c71abfe6499856985bcc7a81dde0e82f8a1356bfbb6f822bec6bc0f7b0ab080e",
+            "final": "5fdfd61baf913bef86ba25482bd71c28eb70468cb9cec9e095ca5e52d797cce9",
+            "reader": "5fdfd61baf913bef86ba25482bd71c28eb70468cb9cec9e095ca5e52d797cce9"
+          },
+          "prompt_sha": "4f778a9a7142cf053bb04612297ca58bf58f01ff7a6c3c28361405f9f503211f",
+          "candidate": {},
+          "reader": {}
+        },
+        "526ae24fa861d52536b66bcc2d2ddfce483511d6": {
+          "digest": {
+            "pool": "f40b48cc90fac77f75b14e3698acf739b0d5409d9f2a895c552a5a08e76d3097",
+            "final": "85863c32c9521a609d7a08b54e9fb5d9c8d0b6c5b31ae1ecbfd93f203b626055",
+            "reader": "85863c32c9521a609d7a08b54e9fb5d9c8d0b6c5b31ae1ecbfd93f203b626055"
+          },
+          "prompt_sha": "9246ef9a29d595daf5ec494637a2d2c9f02c4a205da70d389bafd0d39771de3a",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          }
+        },
+        "e78a47aec37d9a3bec5a18706b0a462c148c118b": {
+          "digest": {
+            "pool": "5ec483cb46990c1b518ccffeef7c07dc275a3e58171aa5407a4c891f7f165fb6",
+            "final": "55b8c5ed327a1360b94e2323cf6bc067508632497acd30c452bf37fd2b755436",
+            "reader": "55b8c5ed327a1360b94e2323cf6bc067508632497acd30c452bf37fd2b755436"
+          },
+          "prompt_sha": "8f01f80fdf7ed7c3514308b4605929344000fdd224637156440d119725c20336",
+          "candidate": {},
+          "reader": {}
+        },
+        "55c840a2f1f663ab2bff984ae71501b17429d0c0": {
+          "digest": {
+            "pool": "49e31254e69635e7b2755357be88a3e4151224e2aef51d2fa8f66a3751cb40e3",
+            "final": "030d946968db0117aa879a062232e6b2e743a6f9065f988533ef625d4726bbd8",
+            "reader": "030d946968db0117aa879a062232e6b2e743a6f9065f988533ef625d4726bbd8"
+          },
+          "prompt_sha": "a518c39fd542c2a14aa79dd593c2af203686d0a50b5e80541ae78b300407b604",
+          "candidate": {},
+          "reader": {}
+        },
+        "326e08a0f5753b90622902bd4a9c94849a24b773": {
+          "digest": {
+            "pool": "d9b171df36c395dc9e287b495a3bed005ff7ed17d7caaa6a5e475e9187aa95f7",
+            "final": "c0475a4473dbaf7cf9b9c1f34658baa6e8208d3ece65e82077e3312cc70a79d2",
+            "reader": "c0475a4473dbaf7cf9b9c1f34658baa6e8208d3ece65e82077e3312cc70a79d2"
+          },
+          "prompt_sha": "6e8af70e48fc40cfff9bb7945f1f6fe580dee3d39baee49a227d7bc38cd525a2",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": true
+          }
+        },
+        "dee7383a92c78ea49859a2d5ff2a9d0a794c1f0f": {
+          "digest": {
+            "pool": "a9e0e9e4e42637bc221443cba436dc53fffeacc0e1a1dc32c652bae4cdfd1dd2",
+            "final": "bd8d472bdd8c249e7854581bd2816ef14415f7c2594bb640cd7cedf4694351ca",
+            "reader": "bd8d472bdd8c249e7854581bd2816ef14415f7c2594bb640cd7cedf4694351ca"
+          },
+          "prompt_sha": "b3d4b4ce19bf0027e2965d79984208c05fca5b9673b65e6d8635a5fde0437c51",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          }
+        },
+        "69ca609e86888c7e4e2e3d33435a0a36f77601b5": {
+          "digest": {
+            "pool": "698d00df0527507c679379da9c9dc2fe51f5dfd69f951ebf836261c1ab67176c",
+            "final": "4949493ed02d6d3bbf9814e444819175018fbed23d0c18c51cb27a878a68153e",
+            "reader": "4949493ed02d6d3bbf9814e444819175018fbed23d0c18c51cb27a878a68153e"
+          },
+          "prompt_sha": "4828a305f8992698955815f43bd68bac64a9c31796494ca6904dd41da1a0994c",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          }
+        },
+        "4ecb6674bcb4162bf71aea8d8b82759255875df3": {
+          "digest": {
+            "pool": "2d90412b6083baecedb0467b8fd8d7925ba66aada81c5e1eab2dc54bb191ed2f",
+            "final": "a0c6214d866d63b922a49b011e0e7c2e1262458eb8f6794d353f170c5e2d6bea",
+            "reader": "a0c6214d866d63b922a49b011e0e7c2e1262458eb8f6794d353f170c5e2d6bea"
+          },
+          "prompt_sha": "89df065efee29fe62fe51c472fb2dfd5e830b65205af9979667710baad5a83c7",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          }
+        },
+        "221e9189a9d2431902d8ea833f486a38a76cbd8e": {
+          "digest": {
+            "pool": "7fac30ae23684aeaea0497566c8353164ef0102a746aaf8921ffe0ab2f7a6b00",
+            "final": "a38fa218b189436390356a9278d7b5643da4de0bb5861956508911468172cfe8",
+            "reader": "a38fa218b189436390356a9278d7b5643da4de0bb5861956508911468172cfe8"
+          },
+          "prompt_sha": "8d3873791c239050ebd3ef7f26a14fbbf4010502c348b7f9a64124dadd634646",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          }
+        },
+        "e574f0f733fb98ecef3c64044004aa7a320439be": {
+          "digest": {
+            "pool": "b6bf448f859898a86cbd2c037891b9233358ebb86c1a5d447790f8c9bf19a623",
+            "final": "3a079898f43c7867e4c95a1c581ef72c27e0c4b74710add6c4fcc09ea89c73d4",
+            "reader": "3a079898f43c7867e4c95a1c581ef72c27e0c4b74710add6c4fcc09ea89c73d4"
+          },
+          "prompt_sha": "69caa9bc6707046158647a35be1c8688a8a6523b17af217132d0743f297f0461",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": false
+          }
+        },
+        "19cdce39e8265e7806212eeee2fd55f8ef2f3d47": {
+          "digest": {
+            "pool": "22b06280e42dd84bcbeb4ca8b2fc86b0a8e48e2c0f2e6fff13a5bd17b593dbe3",
+            "final": "6a4da43d2143f054e53af9d99b6fc0a7d617f086386891c8d77848258c0475cc",
+            "reader": "6a4da43d2143f054e53af9d99b6fc0a7d617f086386891c8d77848258c0475cc"
+          },
+          "prompt_sha": "0bc7701e2a5ff8ae957f0ec294a363cd84c80212e4dbbb9f9fdbd895488462f1",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": true
+          }
+        },
+        "b974523a6cbd3cdc1fa924243ccc9711bbc7070d": {
+          "digest": {
+            "pool": "953765db185da050a2a3eebd5df4ca7acea07a5af306fd55aaefceb6fbdbefb9",
+            "final": "20b245e28a4f893bdf3dc668f89d804416a9fe7e437d84d5ea2401bf01b76fca",
+            "reader": "20b245e28a4f893bdf3dc668f89d804416a9fe7e437d84d5ea2401bf01b76fca"
+          },
+          "prompt_sha": "01bd2bf7f27ed40d12f1b9fde2b8d08d31c259b54a036e1a14e2df17b3b41a18",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          }
+        },
+        "163a21c0701d5cda15be2d0eb4981a686e54a842": {
+          "digest": {
+            "pool": "ef6c10b4d6e93b81ccee7be5c4db3e292a4cec3de71d9476d80e97260f65152a",
+            "final": "e0ad4ec01a00d3b1ad31dd622d094e956110dcc731d50674c2aff69610783011",
+            "reader": "e0ad4ec01a00d3b1ad31dd622d094e956110dcc731d50674c2aff69610783011"
+          },
+          "prompt_sha": "6ba02c7354eb2ee0b0d5e7a1b3f4c6c7b13922b1e2c280c0eed6058615c6511d",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          }
+        },
+        "5787ac3e80840fe4cf7bfae7e8983fa6644d6220": {
+          "digest": {
+            "pool": "f6d0c8bf17eb836c1739d1e7ca7378e694ba9e05d345f8c509d2f730f3de9b8e",
+            "final": "21e4cfcee2eda7526bf1350c4b5150677f6b6a3b0c3e6884a69e656073b971a9",
+            "reader": "21e4cfcee2eda7526bf1350c4b5150677f6b6a3b0c3e6884a69e656073b971a9"
+          },
+          "prompt_sha": "d7e658c978a7f261757f7af90264af8c529598f1ca416f49a1d227508e339aae",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          }
+        },
+        "24d06808fa3b903140659ee5a471fdfa86279980": {
+          "digest": {
+            "pool": "d6d2bd3e3f5239a01f08bf34014cece7cd8ee26ab58ec8cfc6bfc3535e80719b",
+            "final": "e3e0962d63a7e78de233af1b48cbbe9f40ecf4626cf9d6de135ca634c6c0e595",
+            "reader": "e3e0962d63a7e78de233af1b48cbbe9f40ecf4626cf9d6de135ca634c6c0e595"
+          },
+          "prompt_sha": "3800e6c333984d48f263088551fd4e2549116beb49f5a5d84d778c624427b613",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": false
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": false
+          }
+        }
+      }
+    },
+    "retrieval": {
+      "A": {
+        "gold_paragraph": {
+          "candidate_at_20": {
+            "hits": 18,
+            "total": 30,
+            "percent": 60.0
+          },
+          "reader_at_6": {
+            "hits": 16,
+            "total": 30,
+            "percent": 53.33
+          },
+          "retention_given_candidate_hit": {
+            "hits": 16,
+            "total": 18,
+            "percent": 88.89
+          }
+        },
+        "answer_span": {
+          "candidate_at_20": {
+            "hits": 27,
+            "total": 30,
+            "percent": 90.0
+          },
+          "reader_at_6": {
+            "hits": 23,
+            "total": 30,
+            "percent": 76.67
+          },
+          "retention_given_candidate_hit": {
+            "hits": 23,
+            "total": 27,
+            "percent": 85.19
+          }
+        },
+        "gold_source": {
+          "candidate_at_20": {
+            "hits": 30,
+            "total": 30,
+            "percent": 100.0
+          },
+          "reader_at_6": {
+            "hits": 30,
+            "total": 30,
+            "percent": 100.0
+          },
+          "retention_given_candidate_hit": {
+            "hits": 30,
+            "total": 30,
+            "percent": 100.0
+          }
+        }
+      },
+      "B": {
+        "gold_paragraph": {
+          "candidate_at_20": {
+            "hits": 18,
+            "total": 30,
+            "percent": 60.0
+          },
+          "reader_at_6": {
+            "hits": 17,
+            "total": 30,
+            "percent": 56.67
+          },
+          "retention_given_candidate_hit": {
+            "hits": 17,
+            "total": 18,
+            "percent": 94.44
+          }
+        },
+        "answer_span": {
+          "candidate_at_20": {
+            "hits": 27,
+            "total": 30,
+            "percent": 90.0
+          },
+          "reader_at_6": {
+            "hits": 25,
+            "total": 30,
+            "percent": 83.33
+          },
+          "retention_given_candidate_hit": {
+            "hits": 25,
+            "total": 27,
+            "percent": 92.59
+          }
+        },
+        "gold_source": {
+          "candidate_at_20": {
+            "hits": 30,
+            "total": 30,
+            "percent": 100.0
+          },
+          "reader_at_6": {
+            "hits": 30,
+            "total": 30,
+            "percent": 100.0
+          },
+          "retention_given_candidate_hit": {
+            "hits": 30,
+            "total": 30,
+            "percent": 100.0
+          }
+        }
+      }
+    },
+    "complete_paragraph_pairs": {
+      "gained": [
+        "4146e1d8f79902c0bc034695998b724515b6ac81",
+        "73cd785d474bae7af974802715ef7ba5468d9139"
+      ],
+      "lost": [
+        "61aac406b648865f007a400dcd69f28e44efc636"
+      ],
+      "retained": [
+        "537b2d7799124d633892a1ef1a485b3b071b303d",
+        "0460019eb2186aef835f7852fc445b037bd43bb7",
+        "6a31bd676054222faf46229fc1d283322478a020",
+        "557d1874f736d9d487eb823fe8f6dab4b17c3c42",
+        "21656039994cab07f79e89553cbecc31ba9853d4",
+        "e93b4a15b54d139b768d5913fb5fd1aed8ab25da",
+        "fdd9dea06550a2fd0df7a1e6a5109facf3601d76",
+        "526ae24fa861d52536b66bcc2d2ddfce483511d6",
+        "dee7383a92c78ea49859a2d5ff2a9d0a794c1f0f",
+        "69ca609e86888c7e4e2e3d33435a0a36f77601b5",
+        "4ecb6674bcb4162bf71aea8d8b82759255875df3",
+        "221e9189a9d2431902d8ea833f486a38a76cbd8e",
+        "b974523a6cbd3cdc1fa924243ccc9711bbc7070d",
+        "163a21c0701d5cda15be2d0eb4981a686e54a842",
+        "5787ac3e80840fe4cf7bfae7e8983fa6644d6220"
+      ],
+      "neither": [
+        "0c29d08f766b06ceb2421aa402e71a2d65a5a381",
+        "cee29acec4da1b247795daa4e2e82ef8a7b25a64",
+        "dc28ac845602904c2522f5349374153f378c42d3",
+        "0fa81adf00662694e1dc74475ae2b9283c50748c",
+        "504a069ccda21580ccbf18c34f5eefc0088fa105",
+        "d8cecea477dfc5163dca6e2078a2fe6bc94ce09f",
+        "f74eaee72cbd727a6dffa1600cdf1208672d713e",
+        "fb427239c8d44f524a6c1bf1ce5c3383d5c33e52",
+        "326e08a0f5753b90622902bd4a9c94849a24b773",
+        "e574f0f733fb98ecef3c64044004aa7a320439be",
+        "19cdce39e8265e7806212eeee2fd55f8ef2f3d47",
+        "24d06808fa3b903140659ee5a471fdfa86279980"
+      ]
+    },
+    "paragraph_change": {
+      "paired_delta_percentage_points": 3.33,
+      "exact_two_sided_p": 1.0
+    },
+    "gold_paragraph_spans_chunk_boundary": [
+      "0c29d08f766b06ceb2421aa402e71a2d65a5a381",
+      "cee29acec4da1b247795daa4e2e82ef8a7b25a64",
+      "dc28ac845602904c2522f5349374153f378c42d3",
+      "0fa81adf00662694e1dc74475ae2b9283c50748c",
+      "504a069ccda21580ccbf18c34f5eefc0088fa105",
+      "d8cecea477dfc5163dca6e2078a2fe6bc94ce09f",
+      "f74eaee72cbd727a6dffa1600cdf1208672d713e",
+      "fb427239c8d44f524a6c1bf1ce5c3383d5c33e52",
+      "326e08a0f5753b90622902bd4a9c94849a24b773",
+      "19cdce39e8265e7806212eeee2fd55f8ef2f3d47"
+    ],
+    "representable_gold_paragraph_missing_from_candidates": [
+      "e574f0f733fb98ecef3c64044004aa7a320439be",
+      "24d06808fa3b903140659ee5a471fdfa86279980"
+    ],
+    "reader_changed": 47,
+    "reader_set_changed": 39,
+    "mean_shared_chunks_out_of_six": 4.667,
+    "first_arm_counts": {
+      "A": 24,
+      "B": 24
+    }
+  },
+  "historical": {
+    "rows": {
+      "A": {
+        "c78f18606524539e4c573481e5bf1e0a242cc33c": {
+          "digest": {
+            "pool": "f1695733ea57a17c78fd594f022a6c729517e643fd850835de1f894d2e6a23aa",
+            "final": "8c078842bd316454a5cf6edaa4302d8c015f31afec1fc536c0a217816c55f97c",
+            "reader": "8c078842bd316454a5cf6edaa4302d8c015f31afec1fc536c0a217816c55f97c"
+          },
+          "prompt_sha": "fbd9442921c9a22f7fa158b61cbe80c15e66f723ceea1f8a646b508782fd4978",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": false,
+            "answer_span": false
+          }
+        },
+        "891cab2e41d6ba962778bda297592c916b432226": {
+          "digest": {
+            "pool": "2224f3f3823a6c502aaa74c24d6eb9e27c33039b1470c322347d2f04364c6941",
+            "final": "8c359d1fd6b3014ef0548116093346460400a0dd219a6c3c3c9b37b1affdd4cd",
+            "reader": "8c359d1fd6b3014ef0548116093346460400a0dd219a6c3c3c9b37b1affdd4cd"
+          },
+          "prompt_sha": "d8083e2b863a19b411f4fa70bd94257385f937660f746db03eadbe7f235f383e",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          }
+        }
+      },
+      "B": {
+        "c78f18606524539e4c573481e5bf1e0a242cc33c": {
+          "digest": {
+            "pool": "f1695733ea57a17c78fd594f022a6c729517e643fd850835de1f894d2e6a23aa",
+            "final": "0913190ae33e53eb178c9bd97caf69bbb93fb89fb45f61face49d6311896db07",
+            "reader": "0913190ae33e53eb178c9bd97caf69bbb93fb89fb45f61face49d6311896db07"
+          },
+          "prompt_sha": "79db7eb1770b6dfe168c082b278b347e72b898d655ed8ccdcf33843f9a0b2484",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          }
+        },
+        "891cab2e41d6ba962778bda297592c916b432226": {
+          "digest": {
+            "pool": "2224f3f3823a6c502aaa74c24d6eb9e27c33039b1470c322347d2f04364c6941",
+            "final": "e2ccf2587565728d9cad965e83666d103330467adac76dedd40971c58bceec47",
+            "reader": "e2ccf2587565728d9cad965e83666d103330467adac76dedd40971c58bceec47"
+          },
+          "prompt_sha": "c28080271ae2d8ec7213b0715f836390f311760bbca421100c96ce452e1a40a0",
+          "candidate": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          },
+          "reader": {
+            "gold_source": true,
+            "gold_paragraph": true,
+            "answer_span": true
+          }
+        }
+      }
+    },
+    "retrieval": {
+      "A": {
+        "gold_paragraph": {
+          "candidate_at_20": {
+            "hits": 2,
+            "total": 2,
+            "percent": 100.0
+          },
+          "reader_at_6": {
+            "hits": 1,
+            "total": 2,
+            "percent": 50.0
+          },
+          "retention_given_candidate_hit": {
+            "hits": 1,
+            "total": 2,
+            "percent": 50.0
+          }
+        },
+        "answer_span": {
+          "candidate_at_20": {
+            "hits": 2,
+            "total": 2,
+            "percent": 100.0
+          },
+          "reader_at_6": {
+            "hits": 1,
+            "total": 2,
+            "percent": 50.0
+          },
+          "retention_given_candidate_hit": {
+            "hits": 1,
+            "total": 2,
+            "percent": 50.0
+          }
+        },
+        "gold_source": {
+          "candidate_at_20": {
+            "hits": 2,
+            "total": 2,
+            "percent": 100.0
+          },
+          "reader_at_6": {
+            "hits": 2,
+            "total": 2,
+            "percent": 100.0
+          },
+          "retention_given_candidate_hit": {
+            "hits": 2,
+            "total": 2,
+            "percent": 100.0
+          }
+        }
+      },
+      "B": {
+        "gold_paragraph": {
+          "candidate_at_20": {
+            "hits": 2,
+            "total": 2,
+            "percent": 100.0
+          },
+          "reader_at_6": {
+            "hits": 2,
+            "total": 2,
+            "percent": 100.0
+          },
+          "retention_given_candidate_hit": {
+            "hits": 2,
+            "total": 2,
+            "percent": 100.0
+          }
+        },
+        "answer_span": {
+          "candidate_at_20": {
+            "hits": 2,
+            "total": 2,
+            "percent": 100.0
+          },
+          "reader_at_6": {
+            "hits": 2,
+            "total": 2,
+            "percent": 100.0
+          },
+          "retention_given_candidate_hit": {
+            "hits": 2,
+            "total": 2,
+            "percent": 100.0
+          }
+        },
+        "gold_source": {
+          "candidate_at_20": {
+            "hits": 2,
+            "total": 2,
+            "percent": 100.0
+          },
+          "reader_at_6": {
+            "hits": 2,
+            "total": 2,
+            "percent": 100.0
+          },
+          "retention_given_candidate_hit": {
+            "hits": 2,
+            "total": 2,
+            "percent": 100.0
+          }
+        }
+      }
+    },
+    "complete_paragraph_pairs": {
+      "gained": [
+        "c78f18606524539e4c573481e5bf1e0a242cc33c"
+      ],
+      "lost": [],
+      "retained": [
+        "891cab2e41d6ba962778bda297592c916b432226"
+      ],
+      "neither": []
+    },
+    "paragraph_change": {
+      "paired_delta_percentage_points": 50.0,
+      "exact_two_sided_p": 1.0
+    },
+    "gold_paragraph_spans_chunk_boundary": [],
+    "representable_gold_paragraph_missing_from_candidates": [],
+    "reader_changed": 2,
+    "reader_set_changed": 1,
+    "mean_shared_chunks_out_of_six": 4.5,
+    "first_arm_counts": {
+      "A": 1,
+      "B": 1
+    }
+  }
+}

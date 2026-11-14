@@ -1,0 +1,1838 @@
+{
+  "judging": "Arm-masked semantic assessment of unique actual answers with their public returned excerpts and official annotations. Identical packet contents share one final judgment. Each supporting citation grounds at least one substantive claim attached to it. Exact paired p values are descriptive for this selected TRAIN cohort.",
+  "unique_masked_answers": 100,
+  "first_http_receipts": 100,
+  "scopes": {
+    "independent": {
+      "n": 48,
+      "metrics": {
+        "first_http_200": {
+          "baseline": {
+            "numerator": 47,
+            "denominator": 48,
+            "percent": 97.917
+          },
+          "candidate": {
+            "numerator": 48,
+            "denominator": 48,
+            "percent": 100.0
+          },
+          "change_percentage_points": 2.083,
+          "retained": [
+            "0460019eb2186aef835f7852fc445b037bd43bb7",
+            "0c29d08f766b06ceb2421aa402e71a2d65a5a381",
+            "0fa81adf00662694e1dc74475ae2b9283c50748c",
+            "163a21c0701d5cda15be2d0eb4981a686e54a842",
+            "19cdce39e8265e7806212eeee2fd55f8ef2f3d47",
+            "21656039994cab07f79e89553cbecc31ba9853d4",
+            "221e9189a9d2431902d8ea833f486a38a76cbd8e",
+            "24d06808fa3b903140659ee5a471fdfa86279980",
+            "2a950ede24b26a45613169348d5db9176fda4f82",
+            "326e08a0f5753b90622902bd4a9c94849a24b773",
+            "38e2f07ba965b676a99be06e8872dade7c04722a",
+            "3b40799f25dbd98bba5b526e0a1d0d0bb51173e0",
+            "3d99bc8ab2f36d4742e408f211bec154bc6696f7",
+            "4146e1d8f79902c0bc034695998b724515b6ac81",
+            "4ecb6674bcb4162bf71aea8d8b82759255875df3",
+            "4fcc668eb3a042f60c4ce2e7d008e7923b25b4fc",
+            "504a069ccda21580ccbf18c34f5eefc0088fa105",
+            "51d03f0741b72ae242c380266acd2321baf43444",
+            "526ae24fa861d52536b66bcc2d2ddfce483511d6",
+            "537b2d7799124d633892a1ef1a485b3b071b303d",
+            "557d1874f736d9d487eb823fe8f6dab4b17c3c42",
+            "55c840a2f1f663ab2bff984ae71501b17429d0c0",
+            "5787ac3e80840fe4cf7bfae7e8983fa6644d6220",
+            "61aac406b648865f007a400dcd69f28e44efc636",
+            "62048ea0aab61abe21fb30d70c4a1bc5fb946137",
+            "6959e87cf2668a03854da3f042c87e6fdb2ade8a",
+            "69ca609e86888c7e4e2e3d33435a0a36f77601b5",
+            "6a31bd676054222faf46229fc1d283322478a020",
+            "6adde6bc3e27a32eac5daa57d30ab373f77690be",
+            "7a70fb11cb3449749f0c2c06101965bf5d02c54a",
+            "81686454f215e28987c7ad00ddce5ffe84b37195",
+            "891c4af5bb77d6b8635ec4109572de3401b60631",
+            "9e2e5918608a2911b341d4887f58a4595d7d1429",
+            "a8f1029f6766bffee38a627477f61457b2d6ed5c",
+            "b974523a6cbd3cdc1fa924243ccc9711bbc7070d",
+            "bc1bc92920a757d5ec38007a27d0f49cb2dde0d1",
+            "cee29acec4da1b247795daa4e2e82ef8a7b25a64",
+            "d8cecea477dfc5163dca6e2078a2fe6bc94ce09f",
+            "dc28ac845602904c2522f5349374153f378c42d3",
+            "dee7383a92c78ea49859a2d5ff2a9d0a794c1f0f",
+            "e574f0f733fb98ecef3c64044004aa7a320439be",
+            "e78a47aec37d9a3bec5a18706b0a462c148c118b",
+            "e79a5e435fcf5587535f06c9215d19a66caadaff",
+            "e93b4a15b54d139b768d5913fb5fd1aed8ab25da",
+            "f74eaee72cbd727a6dffa1600cdf1208672d713e",
+            "fb427239c8d44f524a6c1bf1ce5c3383d5c33e52",
+            "fdd9dea06550a2fd0df7a1e6a5109facf3601d76"
+          ],
+          "gained": [
+            "73cd785d474bae7af974802715ef7ba5468d9139"
+          ],
+          "lost": [],
+          "neither_count": 0,
+          "retention_of_baseline_hits": {
+            "numerator": 47,
+            "denominator": 47,
+            "percent": 100.0
+          },
+          "two_sided_exact_p": 1
+        },
+        "first_answer_correct": {
+          "baseline": {
+            "numerator": 34,
+            "denominator": 48,
+            "percent": 70.833
+          },
+          "candidate": {
+            "numerator": 37,
+            "denominator": 48,
+            "percent": 77.083
+          },
+          "change_percentage_points": 6.25,
+          "retained": [
+            "0460019eb2186aef835f7852fc445b037bd43bb7",
+            "0c29d08f766b06ceb2421aa402e71a2d65a5a381",
+            "0fa81adf00662694e1dc74475ae2b9283c50748c",
+            "163a21c0701d5cda15be2d0eb4981a686e54a842",
+            "19cdce39e8265e7806212eeee2fd55f8ef2f3d47",
+            "21656039994cab07f79e89553cbecc31ba9853d4",
+            "221e9189a9d2431902d8ea833f486a38a76cbd8e",
+            "2a950ede24b26a45613169348d5db9176fda4f82",
+            "326e08a0f5753b90622902bd4a9c94849a24b773",
+            "3b40799f25dbd98bba5b526e0a1d0d0bb51173e0",
+            "3d99bc8ab2f36d4742e408f211bec154bc6696f7",
+            "4ecb6674bcb4162bf71aea8d8b82759255875df3",
+            "504a069ccda21580ccbf18c34f5eefc0088fa105",
+            "51d03f0741b72ae242c380266acd2321baf43444",
+            "526ae24fa861d52536b66bcc2d2ddfce483511d6",
+            "537b2d7799124d633892a1ef1a485b3b071b303d",
+            "557d1874f736d9d487eb823fe8f6dab4b17c3c42",
+            "55c840a2f1f663ab2bff984ae71501b17429d0c0",
+            "5787ac3e80840fe4cf7bfae7e8983fa6644d6220",
+            "61aac406b648865f007a400dcd69f28e44efc636",
+            "62048ea0aab61abe21fb30d70c4a1bc5fb946137",
+            "6959e87cf2668a03854da3f042c87e6fdb2ade8a",
+            "69ca609e86888c7e4e2e3d33435a0a36f77601b5",
+            "6a31bd676054222faf46229fc1d283322478a020",
+            "b974523a6cbd3cdc1fa924243ccc9711bbc7070d",
+            "cee29acec4da1b247795daa4e2e82ef8a7b25a64",
+            "dc28ac845602904c2522f5349374153f378c42d3",
+            "dee7383a92c78ea49859a2d5ff2a9d0a794c1f0f",
+            "e79a5e435fcf5587535f06c9215d19a66caadaff",
+            "e93b4a15b54d139b768d5913fb5fd1aed8ab25da",
+            "f74eaee72cbd727a6dffa1600cdf1208672d713e",
+            "fb427239c8d44f524a6c1bf1ce5c3383d5c33e52",
+            "fdd9dea06550a2fd0df7a1e6a5109facf3601d76"
+          ],
+          "gained": [
+            "38e2f07ba965b676a99be06e8872dade7c04722a",
+            "4146e1d8f79902c0bc034695998b724515b6ac81",
+            "73cd785d474bae7af974802715ef7ba5468d9139",
+            "bc1bc92920a757d5ec38007a27d0f49cb2dde0d1"
+          ],
+          "lost": [
+            "891c4af5bb77d6b8635ec4109572de3401b60631"
+          ],
+          "neither_count": 10,
+          "retention_of_baseline_hits": {
+            "numerator": 33,
+            "denominator": 34,
+            "percent": 97.059
+          },
+          "two_sided_exact_p": 0.375
+        },
+        "fully_supported_positive": {
+          "baseline": {
+            "numerator": 25,
+            "denominator": 30,
+            "percent": 83.333
+          },
+          "candidate": {
+            "numerator": 27,
+            "denominator": 30,
+            "percent": 90.0
+          },
+          "change_percentage_points": 6.667,
+          "retained": [
+            "0460019eb2186aef835f7852fc445b037bd43bb7",
+            "0c29d08f766b06ceb2421aa402e71a2d65a5a381",
+            "0fa81adf00662694e1dc74475ae2b9283c50748c",
+            "163a21c0701d5cda15be2d0eb4981a686e54a842",
+            "19cdce39e8265e7806212eeee2fd55f8ef2f3d47",
+            "21656039994cab07f79e89553cbecc31ba9853d4",
+            "221e9189a9d2431902d8ea833f486a38a76cbd8e",
+            "326e08a0f5753b90622902bd4a9c94849a24b773",
+            "4ecb6674bcb4162bf71aea8d8b82759255875df3",
+            "504a069ccda21580ccbf18c34f5eefc0088fa105",
+            "526ae24fa861d52536b66bcc2d2ddfce483511d6",
+            "537b2d7799124d633892a1ef1a485b3b071b303d",
+            "557d1874f736d9d487eb823fe8f6dab4b17c3c42",
+            "5787ac3e80840fe4cf7bfae7e8983fa6644d6220",
+            "61aac406b648865f007a400dcd69f28e44efc636",
+            "69ca609e86888c7e4e2e3d33435a0a36f77601b5",
+            "6a31bd676054222faf46229fc1d283322478a020",
+            "b974523a6cbd3cdc1fa924243ccc9711bbc7070d",
+            "cee29acec4da1b247795daa4e2e82ef8a7b25a64",
+            "dc28ac845602904c2522f5349374153f378c42d3",
+            "dee7383a92c78ea49859a2d5ff2a9d0a794c1f0f",
+            "e93b4a15b54d139b768d5913fb5fd1aed8ab25da",
+            "f74eaee72cbd727a6dffa1600cdf1208672d713e",
+            "fb427239c8d44f524a6c1bf1ce5c3383d5c33e52",
+            "fdd9dea06550a2fd0df7a1e6a5109facf3601d76"
+          ],
+          "gained": [
+            "4146e1d8f79902c0bc034695998b724515b6ac81",
+            "73cd785d474bae7af974802715ef7ba5468d9139"
+          ],
+          "lost": [],
+          "neither_count": 3,
+          "retention_of_baseline_hits": {
+            "numerator": 25,
+            "denominator": 25,
+            "percent": 100.0
+          },
+          "two_sided_exact_p": 0.5
+        },
+        "correct_refusal": {
+          "baseline": {
+            "numerator": 9,
+            "denominator": 18,
+            "percent": 50.0
+          },
+          "candidate": {
+            "numerator": 10,
+            "denominator": 18,
+            "percent": 55.556
+          },
+          "change_percentage_points": 5.556,
+          "retained": [
+            "2a950ede24b26a45613169348d5db9176fda4f82",
+            "3b40799f25dbd98bba5b526e0a1d0d0bb51173e0",
+            "3d99bc8ab2f36d4742e408f211bec154bc6696f7",
+            "51d03f0741b72ae242c380266acd2321baf43444",
+            "55c840a2f1f663ab2bff984ae71501b17429d0c0",
+            "62048ea0aab61abe21fb30d70c4a1bc5fb946137",
+            "6959e87cf2668a03854da3f042c87e6fdb2ade8a",
+            "e79a5e435fcf5587535f06c9215d19a66caadaff"
+          ],
+          "gained": [
+            "38e2f07ba965b676a99be06e8872dade7c04722a",
+            "bc1bc92920a757d5ec38007a27d0f49cb2dde0d1"
+          ],
+          "lost": [
+            "891c4af5bb77d6b8635ec4109572de3401b60631"
+          ],
+          "neither_count": 7,
+          "retention_of_baseline_hits": {
+            "numerator": 8,
+            "denominator": 9,
+            "percent": 88.889
+          },
+          "two_sided_exact_p": 1
+        },
+        "wrong_positive": {
+          "baseline": {
+            "numerator": 9,
+            "denominator": 48,
+            "percent": 18.75
+          },
+          "candidate": {
+            "numerator": 8,
+            "denominator": 48,
+            "percent": 16.667
+          },
+          "change_percentage_points": -2.083,
+          "retained": [
+            "4fcc668eb3a042f60c4ce2e7d008e7923b25b4fc",
+            "6adde6bc3e27a32eac5daa57d30ab373f77690be",
+            "7a70fb11cb3449749f0c2c06101965bf5d02c54a",
+            "81686454f215e28987c7ad00ddce5ffe84b37195",
+            "9e2e5918608a2911b341d4887f58a4595d7d1429",
+            "a8f1029f6766bffee38a627477f61457b2d6ed5c",
+            "e78a47aec37d9a3bec5a18706b0a462c148c118b"
+          ],
+          "gained": [
+            "891c4af5bb77d6b8635ec4109572de3401b60631"
+          ],
+          "lost": [
+            "38e2f07ba965b676a99be06e8872dade7c04722a",
+            "bc1bc92920a757d5ec38007a27d0f49cb2dde0d1"
+          ],
+          "neither_count": 38,
+          "retention_of_baseline_hits": {
+            "numerator": 7,
+            "denominator": 9,
+            "percent": 77.778
+          },
+          "two_sided_exact_p": 1
+        },
+        "official_negative_answered": {
+          "baseline": {
+            "numerator": 9,
+            "denominator": 18,
+            "percent": 50.0
+          },
+          "candidate": {
+            "numerator": 8,
+            "denominator": 18,
+            "percent": 44.444
+          },
+          "change_percentage_points": -5.556,
+          "retained": [
+            "4fcc668eb3a042f60c4ce2e7d008e7923b25b4fc",
+            "6adde6bc3e27a32eac5daa57d30ab373f77690be",
+            "7a70fb11cb3449749f0c2c06101965bf5d02c54a",
+            "81686454f215e28987c7ad00ddce5ffe84b37195",
+            "9e2e5918608a2911b341d4887f58a4595d7d1429",
+            "a8f1029f6766bffee38a627477f61457b2d6ed5c",
+            "e78a47aec37d9a3bec5a18706b0a462c148c118b"
+          ],
+          "gained": [
+            "891c4af5bb77d6b8635ec4109572de3401b60631"
+          ],
+          "lost": [
+            "38e2f07ba965b676a99be06e8872dade7c04722a",
+            "bc1bc92920a757d5ec38007a27d0f49cb2dde0d1"
+          ],
+          "neither_count": 8,
+          "retention_of_baseline_hits": {
+            "numerator": 7,
+            "denominator": 9,
+            "percent": 77.778
+          },
+          "two_sided_exact_p": 1
+        },
+        "citation_precision": {
+          "baseline": {
+            "numerator": 77,
+            "denominator": 77,
+            "percent": 100.0
+          },
+          "candidate": {
+            "numerator": 75,
+            "denominator": 75,
+            "percent": 100.0
+          },
+          "change_percentage_points": 0.0
+        }
+      },
+      "outcomes": {
+        "baseline": {
+          "http_status": {
+            "200": 47,
+            "502": 1
+          },
+          "answerable": {
+            "failure": 1,
+            "full": 25,
+            "partial": 2,
+            "refusal": 2
+          },
+          "official_negative": {
+            "full": 3,
+            "partial": 3,
+            "refusal": 9,
+            "wrong": 3
+          },
+          "official_negative_full_answer_ids": [
+            "4fcc668eb3a042f60c4ce2e7d008e7923b25b4fc",
+            "7a70fb11cb3449749f0c2c06101965bf5d02c54a",
+            "81686454f215e28987c7ad00ddce5ffe84b37195"
+          ],
+          "official_negative_partial_answer_ids": [
+            "38e2f07ba965b676a99be06e8872dade7c04722a",
+            "9e2e5918608a2911b341d4887f58a4595d7d1429",
+            "bc1bc92920a757d5ec38007a27d0f49cb2dde0d1"
+          ]
+        },
+        "candidate": {
+          "http_status": {
+            "200": 48
+          },
+          "answerable": {
+            "full": 27,
+            "partial": 2,
+            "refusal": 1
+          },
+          "official_negative": {
+            "full": 4,
+            "partial": 3,
+            "refusal": 10,
+            "wrong": 1
+          },
+          "official_negative_full_answer_ids": [
+            "4fcc668eb3a042f60c4ce2e7d008e7923b25b4fc",
+            "6adde6bc3e27a32eac5daa57d30ab373f77690be",
+            "7a70fb11cb3449749f0c2c06101965bf5d02c54a",
+            "81686454f215e28987c7ad00ddce5ffe84b37195"
+          ],
+          "official_negative_partial_answer_ids": [
+            "891c4af5bb77d6b8635ec4109572de3401b60631",
+            "9e2e5918608a2911b341d4887f58a4595d7d1429",
+            "a8f1029f6766bffee38a627477f61457b2d6ed5c"
+          ]
+        }
+      }
+    },
+    "historical": {
+      "n": 2,
+      "metrics": {
+        "first_http_200": {
+          "baseline": {
+            "numerator": 2,
+            "denominator": 2,
+            "percent": 100.0
+          },
+          "candidate": {
+            "numerator": 2,
+            "denominator": 2,
+            "percent": 100.0
+          },
+          "change_percentage_points": 0.0,
+          "retained": [
+            "891cab2e41d6ba962778bda297592c916b432226",
+            "c78f18606524539e4c573481e5bf1e0a242cc33c"
+          ],
+          "gained": [],
+          "lost": [],
+          "neither_count": 0,
+          "retention_of_baseline_hits": {
+            "numerator": 2,
+            "denominator": 2,
+            "percent": 100.0
+          },
+          "two_sided_exact_p": 1
+        },
+        "first_answer_correct": {
+          "baseline": {
+            "numerator": 1,
+            "denominator": 2,
+            "percent": 50.0
+          },
+          "candidate": {
+            "numerator": 2,
+            "denominator": 2,
+            "percent": 100.0
+          },
+          "change_percentage_points": 50.0,
+          "retained": [
+            "891cab2e41d6ba962778bda297592c916b432226"
+          ],
+          "gained": [
+            "c78f18606524539e4c573481e5bf1e0a242cc33c"
+          ],
+          "lost": [],
+          "neither_count": 0,
+          "retention_of_baseline_hits": {
+            "numerator": 1,
+            "denominator": 1,
+            "percent": 100.0
+          },
+          "two_sided_exact_p": 1
+        },
+        "fully_supported_positive": {
+          "baseline": {
+            "numerator": 1,
+            "denominator": 2,
+            "percent": 50.0
+          },
+          "candidate": {
+            "numerator": 2,
+            "denominator": 2,
+            "percent": 100.0
+          },
+          "change_percentage_points": 50.0,
+          "retained": [
+            "891cab2e41d6ba962778bda297592c916b432226"
+          ],
+          "gained": [
+            "c78f18606524539e4c573481e5bf1e0a242cc33c"
+          ],
+          "lost": [],
+          "neither_count": 0,
+          "retention_of_baseline_hits": {
+            "numerator": 1,
+            "denominator": 1,
+            "percent": 100.0
+          },
+          "two_sided_exact_p": 1
+        },
+        "correct_refusal": {
+          "baseline": {
+            "numerator": 0,
+            "denominator": 0,
+            "percent": null
+          },
+          "candidate": {
+            "numerator": 0,
+            "denominator": 0,
+            "percent": null
+          },
+          "change_percentage_points": null,
+          "retained": [],
+          "gained": [],
+          "lost": [],
+          "neither_count": 0,
+          "retention_of_baseline_hits": {
+            "numerator": 0,
+            "denominator": 0,
+            "percent": null
+          },
+          "two_sided_exact_p": null
+        },
+        "wrong_positive": {
+          "baseline": {
+            "numerator": 0,
+            "denominator": 2,
+            "percent": 0.0
+          },
+          "candidate": {
+            "numerator": 0,
+            "denominator": 2,
+            "percent": 0.0
+          },
+          "change_percentage_points": 0.0,
+          "retained": [],
+          "gained": [],
+          "lost": [],
+          "neither_count": 2,
+          "retention_of_baseline_hits": {
+            "numerator": 0,
+            "denominator": 0,
+            "percent": null
+          },
+          "two_sided_exact_p": 1
+        },
+        "official_negative_answered": {
+          "baseline": {
+            "numerator": 0,
+            "denominator": 0,
+            "percent": null
+          },
+          "candidate": {
+            "numerator": 0,
+            "denominator": 0,
+            "percent": null
+          },
+          "change_percentage_points": null,
+          "retained": [],
+          "gained": [],
+          "lost": [],
+          "neither_count": 0,
+          "retention_of_baseline_hits": {
+            "numerator": 0,
+            "denominator": 0,
+            "percent": null
+          },
+          "two_sided_exact_p": null
+        },
+        "citation_precision": {
+          "baseline": {
+            "numerator": 2,
+            "denominator": 2,
+            "percent": 100.0
+          },
+          "candidate": {
+            "numerator": 3,
+            "denominator": 3,
+            "percent": 100.0
+          },
+          "change_percentage_points": 0.0
+        }
+      },
+      "outcomes": {
+        "baseline": {
+          "http_status": {
+            "200": 2
+          },
+          "answerable": {
+            "full": 1,
+            "refusal": 1
+          },
+          "official_negative": {},
+          "official_negative_full_answer_ids": [],
+          "official_negative_partial_answer_ids": []
+        },
+        "candidate": {
+          "http_status": {
+            "200": 2
+          },
+          "answerable": {
+            "full": 2
+          },
+          "official_negative": {},
+          "official_negative_full_answer_ids": [],
+          "official_negative_partial_answer_ids": []
+        }
+      }
+    }
+  },
+  "independent_semantic_gate": {
+    "first_answer_correctness_non_decreasing": true,
+    "all_baseline_full_positives_retained": true,
+    "all_baseline_correct_refusals_retained": false,
+    "no_new_wrong_positive": false,
+    "citation_precision_non_decreasing": true
+  },
+  "rows": {
+    "0c29d08f766b06ceb2421aa402e71a2d65a5a381": {
+      "baseline": {
+        "masked_id": "3203bc94ca11ff1c8740",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2,
+          5
+        ],
+        "reason": "[5] identifies the CNN with bilingual embeddings; [1] describes monolingual representations and [2] the cross-lingual CNN.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "328ef32cfa3be7bb19a3",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          3
+        ],
+        "reason": "[3] identifies the CNN trained on cross-lingual representations; [1] confirms the monolingual neural setting.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "6adde6bc3e27a32eac5daa57d30ab373f77690be": {
+      "baseline": {
+        "masked_id": "28a83a8517e958303e86",
+        "verdict": "wrong",
+        "supporting_citations": [
+          1,
+          2,
+          3,
+          5
+        ],
+        "reason": "The opening extends the comparison to previous context-aware models as a group. The excerpts compare actual/random context, a likelihood-only baseline and some previous work. Each citation supports the narrower attached subclaim, while the initial generalization lacks an adequate comparison.",
+        "returned_citations": 4,
+        "http": 200,
+        "negative": true
+      },
+      "candidate": {
+        "masked_id": "ed3012b98f021ada7563",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          3,
+          4
+        ],
+        "reason": "The answer limits the comparison to some previous work as [3] and [4] do. [1] confirms the increased context sensitivity. The official negative conflicts with this bounded answer.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": true
+      }
+    },
+    "cee29acec4da1b247795daa4e2e82ef8a7b25a64": {
+      "baseline": {
+        "masked_id": "44208a516168661c6281",
+        "verdict": "full",
+        "supporting_citations": [
+          2
+        ],
+        "reason": "[2] explicitly identifies DL-61 as the 2018 winner.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "4694ee9f9eddc410f726",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2
+        ],
+        "reason": "Both excerpts identify DL-61 as the 2018 winner.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "62048ea0aab61abe21fb30d70c4a1bc5fb946137": {
+      "baseline": {
+        "masked_id": "4dc3de6998996a9bb529",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "The response leaves the model size unspecified, marks evidence insufficient, and returns no citations.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true
+      },
+      "candidate": {
+        "masked_id": "1bd02cecdfb8e54cf12a",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "The response leaves the model size unspecified, marks evidence insufficient, and returns no citations.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true
+      }
+    },
+    "3d99bc8ab2f36d4742e408f211bec154bc6696f7": {
+      "baseline": {
+        "masked_id": "d973e15a88a23921650e",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "The response leaves the parameter count unspecified and returns a structured refusal without a citation.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true
+      },
+      "candidate": {
+        "masked_id": "89a7a1da9e7312234f77",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "The response leaves the parameter count unspecified and returns a structured refusal without a citation.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true
+      }
+    },
+    "81686454f215e28987c7ad00ddce5ffe84b37195": {
+      "baseline": {
+        "masked_id": "9820adfdb61a065ec6ee",
+        "verdict": "full",
+        "supporting_citations": [
+          4
+        ],
+        "reason": "[4] directly states that binary and CRF token classification were examined and effective, answering the question despite its official negative.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": true
+      },
+      "candidate": {
+        "masked_id": "a23087eb3a14c12ccf7e",
+        "verdict": "full",
+        "supporting_citations": [
+          2
+        ],
+        "reason": "[2] explicitly identifies binary and CRF classification in the study, answering the question despite its official negative.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": true
+      }
+    },
+    "537b2d7799124d633892a1ef1a485b3b071b303d": {
+      "baseline": {
+        "masked_id": "b628cb5cfd4c90dad4c1",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2
+        ],
+        "reason": "[1] names and describes the WNLaMPro cloze task, and [2] names the probing task.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "7858b3e1199997394890",
+        "verdict": "full",
+        "supporting_citations": [
+          2,
+          3,
+          4
+        ],
+        "reason": "[2] names WNLaMPro and cloze phrases; [3] verifies the frequency splits and which were used; [4] explicitly names the probing task.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "0460019eb2186aef835f7852fc445b037bd43bb7": {
+      "baseline": {
+        "masked_id": "78626b930fc68fdb2b1a",
+        "verdict": "full",
+        "supporting_citations": [
+          3
+        ],
+        "reason": "[3] states there are two top-level categories, identifies both and distinguishes the 30 task-oriented subcategories.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "d6702b89191a8cd11a57",
+        "verdict": "full",
+        "supporting_citations": [
+          2
+        ],
+        "reason": "[2] explicitly distinguishes the two top-level intents from 30 subcategories and names the top categories.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "e79a5e435fcf5587535f06c9215d19a66caadaff": {
+      "baseline": {
+        "masked_id": "8233953534fb929d7eff",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "The response explicitly lacks a definition of Task 8 and returns a structured refusal without a citation.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true
+      },
+      "candidate": {
+        "masked_id": "7183b73b4d6aa85fa96e",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "The response explicitly lacks a definition of Task 8 and returns a structured refusal without a citation.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true
+      }
+    },
+    "6959e87cf2668a03854da3f042c87e6fdb2ade8a": {
+      "baseline": {
+        "masked_id": "eb01d4431d2e3388c3f5",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "The structured refusal says the FigureQA and DVQA sizes are unavailable and returns no citations.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true
+      },
+      "candidate": {
+        "masked_id": "1bcafa64483ec0e801b6",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "The structured refusal says the FigureQA and DVQA sizes are unavailable and returns no citations.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true
+      }
+    },
+    "6a31bd676054222faf46229fc1d283322478a020": {
+      "baseline": {
+        "masked_id": "c967bbaf19e19d7fd96b",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2
+        ],
+        "reason": "[2] identifies error types and error/correction pairs; [1] identifies the annotated spelling corpus and its source.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "649ae40c0aa9d7fba8ca",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2
+        ],
+        "reason": "[2] specifies error/correction pairs, error types, both counts and the edit-history algorithm. [1] names Polish Wikipedia as the source.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "a8f1029f6766bffee38a627477f61457b2d6ed5c": {
+      "baseline": {
+        "masked_id": "94baa86ac37a0e229acf",
+        "verdict": "wrong",
+        "supporting_citations": [
+          1,
+          4,
+          5,
+          6
+        ],
+        "reason": "Calling simulation a way the intuitions were obtained conflates metric validation with the origins of the human expectations. [1], [5], [6] support the simulation setup or validation; [4] supports the reported trends.",
+        "returned_citations": 4,
+        "http": 200,
+        "negative": true
+      },
+      "candidate": {
+        "masked_id": "6ec9bbf13f8bba54890c",
+        "verdict": "partial",
+        "supporting_citations": [
+          1,
+          2,
+          4,
+          5
+        ],
+        "reason": "Explicitly leaves the human elicitation method unresolved and explains a supported related procedure: [1] tests alignment with intuitions via simulations; [2], [4] and [5] specify trends. The response is a positive at the API.",
+        "returned_citations": 4,
+        "http": 200,
+        "negative": true
+      }
+    },
+    "38e2f07ba965b676a99be06e8872dade7c04722a": {
+      "baseline": {
+        "masked_id": "3c37d278f6765e01145b",
+        "verdict": "partial",
+        "supporting_citations": [
+          5,
+          6
+        ],
+        "reason": "[5] supports the chip power, input and speed; [6] supports the performance observations and suggested improvements. The answer explicitly leaves the effect of the implementation unresolved; it is returned as a positive answer.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": true
+      },
+      "candidate": {
+        "masked_id": "ea13b57de9cf0c8ced30",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "Returns a structured refusal on the effect of CNN-DSA on performance.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true
+      }
+    },
+    "61aac406b648865f007a400dcd69f28e44efc636": {
+      "baseline": {
+        "masked_id": "38bba7d4f52a56d2170d",
+        "verdict": "full",
+        "supporting_citations": [
+          4,
+          6
+        ],
+        "reason": "[4] explicitly proposes fraud/anomaly detection and medical applications, and [6] confirms task independence given an attention layer. The source supports applicability as a proposal.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "5516b94278027ffa82fc",
+        "verdict": "full",
+        "supporting_citations": [
+          2,
+          3
+        ],
+        "reason": "[3] explicitly suggests other sequential tasks and names the examples. [2] verifies the technique is external and handles ambiguous attention without changing the model.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "4fcc668eb3a042f60c4ce2e7d008e7923b25b4fc": {
+      "baseline": {
+        "masked_id": "f1a8439872ec8a34dbf7",
+        "verdict": "full",
+        "supporting_citations": [
+          2,
+          5,
+          6
+        ],
+        "reason": "[2] identifies Google N-grams for the applications, [5] verifies the historical interval and examples, and [6] describes the 10,000 nouns and unnamed bibliographic source. These support the reported limits on provenance.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": true
+      },
+      "candidate": {
+        "masked_id": "5c2da595e62d76b23a6d",
+        "verdict": "full",
+        "supporting_citations": [
+          5
+        ],
+        "reason": "[5] identifies the Google N-grams corpus as the source of embeddings used in the applications and explains its selection. This supplies a named source despite the official negative.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": true
+      }
+    },
+    "4146e1d8f79902c0bc034695998b724515b6ac81": {
+      "baseline": {
+        "masked_id": "95281cbde5fab00c84d9",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "Structured refusal on a positive whose official annotation names the CoNLL-2012 shared-task corpus.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "c0c94f3221a2f6e04ffd",
+        "verdict": "full",
+        "supporting_citations": [
+          4
+        ],
+        "reason": "[4] expressly identifies the CoNLL-2012 evaluation corpus and OntoNotes 5.0.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "dc28ac845602904c2522f5349374153f378c42d3": {
+      "baseline": {
+        "masked_id": "61319f3b565dbc97d47f",
+        "verdict": "full",
+        "supporting_citations": [
+          1
+        ],
+        "reason": "[1] gives the manually labeled subset size and identifies the annotators.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "4e2fccded04e238cae88",
+        "verdict": "full",
+        "supporting_citations": [
+          1
+        ],
+        "reason": "[1] specifies 44,000 tweets and finance students as annotators.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "bc1bc92920a757d5ec38007a27d0f49cb2dde0d1": {
+      "baseline": {
+        "masked_id": "ab5c984a32956ab382c9",
+        "verdict": "partial",
+        "supporting_citations": [
+          1,
+          2
+        ],
+        "reason": "[1] and [2] support the characterizations of the handcrafted, feature-rich comparator and the performance comparison. The answer expressly leaves its identifying name unresolved.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": true
+      },
+      "candidate": {
+        "masked_id": "ff25c9bd8b3c146388a6",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "Returns a structured refusal and leaves the identity of the strong feature-based method unresolved.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true
+      }
+    },
+    "891c4af5bb77d6b8635ec4109572de3401b60631": {
+      "baseline": {
+        "masked_id": "5c31cb11c11ff5da5e05",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "Returns a structured refusal because the social-media platform is unidentified.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true
+      },
+      "candidate": {
+        "masked_id": "b4466e2b91851f1ca4ef",
+        "verdict": "partial",
+        "supporting_citations": [
+          3,
+          5
+        ],
+        "reason": "[3] identifies the shared-task comments and posts, and [5] corroborates the organizers as data provider. The platform itself remains unidentified and the API marks this answer as positive.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": true
+      }
+    },
+    "0fa81adf00662694e1dc74475ae2b9283c50748c": {
+      "baseline": {
+        "masked_id": "7d348aea152884cbe899",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          4,
+          5
+        ],
+        "reason": "[1] identifies parameter sharing. [4] describes the common attention-based sequence model with pointer-softmax; [5] explains the two target/conditioning directions and alternating minibatches.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "da73c85b6d0f16c75fd5",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          3,
+          4
+        ],
+        "reason": "[4] explicitly identifies parameter sharing. [1] describes attention, pointer-softmax and the shared sequence formulation; [3] explains alternating training and the two task directions.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "504a069ccda21580ccbf18c34f5eefc0088fa105": {
+      "baseline": {
+        "masked_id": "cb4d4d44574961cf7906",
+        "verdict": "full",
+        "supporting_citations": [
+          1
+        ],
+        "reason": "[1] directly reports the proprietary fine-tuning corpus and its approximate size in agreements.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "001d54aa02081910d7dc",
+        "verdict": "full",
+        "supporting_citations": [
+          1
+        ],
+        "reason": "[1] explicitly says the fine-tuning corpus consisted of hundreds of thousands of proprietary legal agreements.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "557d1874f736d9d487eb823fe8f6dab4b17c3c42": {
+      "baseline": {
+        "masked_id": "ea63d384fc0cb166dc70",
+        "verdict": "full",
+        "supporting_citations": [
+          1
+        ],
+        "reason": "[1] directly identifies the family and classification as Bantu C25.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "1f51a3aef753c6203e5c",
+        "verdict": "full",
+        "supporting_citations": [
+          1
+        ],
+        "reason": "The source explicitly describes Mboshi as Bantu C25.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "9e2e5918608a2911b341d4887f58a4595d7d1429": {
+      "baseline": {
+        "masked_id": "64e36f2666af3e5407c1",
+        "verdict": "partial",
+        "supporting_citations": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "reason": "[1] and [2] report about 160 hours available per language. [3] and [4] report a 1,059-hour pooled experiment. Those are observed training amounts; the minimum needed is unestablished.",
+        "returned_citations": 4,
+        "http": 200,
+        "negative": true
+      },
+      "candidate": {
+        "masked_id": "af92165c25cb1914f376",
+        "verdict": "partial",
+        "supporting_citations": [
+          1,
+          2
+        ],
+        "reason": "[1] and [2] identify the roughly 160 hours actually used per language. That is an observed configuration, not a measured requirement.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": true
+      }
+    },
+    "51d03f0741b72ae242c380266acd2321baf43444": {
+      "baseline": {
+        "masked_id": "57d7623703070d6042ed",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "The structured refusal specifies that a direct comparison with simple interpolation is missing.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true
+      },
+      "candidate": {
+        "masked_id": "6199e7ab02335fcd0254",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "The response leaves the interpolation comparison unresolved, returns no citation and marks evidence insufficient.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true
+      }
+    },
+    "21656039994cab07f79e89553cbecc31ba9853d4": {
+      "baseline": {
+        "masked_id": "87a45c39a638eeb472b4",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2
+        ],
+        "reason": "The two blocks identify document-level SQuAD and [2] explicitly specifies the 5 and 20 percent fine subsets and paired coarse data.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "7d2c1c03357bad94d07c",
+        "verdict": "full",
+        "supporting_citations": [
+          2,
+          5,
+          6
+        ],
+        "reason": "[2] and [5] identify document-level SQuAD, [5] describes 5 and 20 percent fine-labeled sets paired with separate coarse sets, and [6] names D20fine and D70coarse.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "d8cecea477dfc5163dca6e2078a2fe6bc94ce09f": {
+      "baseline": {
+        "masked_id": "b854a588504d3de3b54a",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "The positive annotation identifies accuracy, but the endpoint returns a citation-free structured refusal.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "9f40d32f160154533cb9",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "The positive annotation identifies accuracy, but the endpoint returns a citation-free structured refusal.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "73cd785d474bae7af974802715ef7ba5468d9139": {
+      "baseline": {
+        "masked_id": "4725b6e97e199e0de936",
+        "verdict": "failure",
+        "supporting_citations": [],
+        "reason": "The first HTTP response was 502 and supplied neither an answer nor a structured refusal.",
+        "returned_citations": 0,
+        "http": 502,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "919d0257d9b248b40873",
+        "verdict": "full",
+        "supporting_citations": [
+          2,
+          4,
+          6
+        ],
+        "reason": "[2] states that manual and automatic evaluations were made, [4] explains the entity-sequence criterion, and [6] gives the 148-sample audit, categories, baselines and BLEU limitation.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "e93b4a15b54d139b768d5913fb5fd1aed8ab25da": {
+      "baseline": {
+        "masked_id": "21624a9d04b696a8a452",
+        "verdict": "full",
+        "supporting_citations": [
+          2,
+          3,
+          4
+        ],
+        "reason": "[4] gives the three-stage MTurk filtering and rewriting, worker selection, instructions and bias control. [2] and [3] confirm thorough/manual cleaning and the quality goal.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "31a860c32dd48a78208d",
+        "verdict": "full",
+        "supporting_citations": [
+          2,
+          5,
+          6
+        ],
+        "reason": "[2] confirms cleaning, [5] states the heuristics and error categories, and [6] specifies the regex and meaning-representation fixes.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "f74eaee72cbd727a6dffa1600cdf1208672d713e": {
+      "baseline": {
+        "masked_id": "2fe30e8ba58d1112b5d2",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          3,
+          5
+        ],
+        "reason": "[1] and [3] describe the actual coverage evaluation using expert/PropBank reference recall; [5] gives the counts and prior comparison. The old corpora in the official excerpt use a different per-predicate summary.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "9d3de375a556654b65e9",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2,
+          3
+        ],
+        "reason": "[1] covers multiple annotators, consolidation and role gains; [3] gives predicate-macro recall and annotation counts; [2] confirms increased coverage over Dense. The paper explicitly evaluates its own coverage this way.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "fb427239c8d44f524a6c1bf1ce5c3383d5c33e52": {
+      "baseline": {
+        "masked_id": "3c54488959f651b87a61",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          3
+        ],
+        "reason": "Both cited blocks give the 836-million total.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "00ef0e520fecb496a365",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2
+        ],
+        "reason": "Both blocks give roughly 836 million parameters and [2] completes the 66 thousand byte-embedding detail.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "7a70fb11cb3449749f0c2c06101965bf5d02c54a": {
+      "baseline": {
+        "masked_id": "41bb83196575392b128b",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2,
+          3
+        ],
+        "reason": "[1] and [3] explicitly define the study of learned and engineered text representations; [2] confirms combination and rapid evaluation. This directly answers the officially negative question.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": true
+      },
+      "candidate": {
+        "masked_id": "e048a9ee5e0615bdd012",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2,
+          3
+        ],
+        "reason": "[1] states the two feature approaches and their combination, [3] describes learning, engineering and evaluation, and [2] supports flexible evaluation across tasks. The official negative conflicts with the passage.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": true
+      }
+    },
+    "fdd9dea06550a2fd0df7a1e6a5109facf3601d76": {
+      "baseline": {
+        "masked_id": "78badc2a5ddbf9284f4d",
+        "verdict": "full",
+        "supporting_citations": [
+          2
+        ],
+        "reason": "All three numerical details are directly stated in [2].",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "6b55a269a2d5c16de1d1",
+        "verdict": "full",
+        "supporting_citations": [
+          1
+        ],
+        "reason": "[1] states 75 meetings, about 70 hours of audio and six speakers per meeting on average.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "3b40799f25dbd98bba5b526e0a1d0d0bb51173e0": {
+      "baseline": {
+        "masked_id": "0d25df5f5ce46be8c720",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "Returns a citation-free structured refusal because vocabulary size is unavailable.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true
+      },
+      "candidate": {
+        "masked_id": "14b0f39e93e8deb064b2",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "Returns a citation-free structured refusal because vocabulary size is unavailable.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true
+      }
+    },
+    "2a950ede24b26a45613169348d5db9176fda4f82": {
+      "baseline": {
+        "masked_id": "57b83715c44e013d4270",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "Returns a citation-free structured refusal for the reasoning-chain count.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true
+      },
+      "candidate": {
+        "masked_id": "e8342149859256b6f740",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "Returns a citation-free structured refusal for the reasoning-chain count.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true
+      }
+    },
+    "526ae24fa861d52536b66bcc2d2ddfce483511d6": {
+      "baseline": {
+        "masked_id": "cbf4c61b0623510dcae1",
+        "verdict": "full",
+        "supporting_citations": [
+          3
+        ],
+        "reason": "[3] supports the 10 percent relative WER improvement, unit and speaker-open qualification, and JNAS/WSJ comparison. It gives no separate speaker-closed improvement amount.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "7fad7fe26e2c601ace20",
+        "verdict": "full",
+        "supporting_citations": [
+          6
+        ],
+        "reason": "[6] directly reports a relative 10 percent WER improvement for multilingual training under the speaker-open setting.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "e78a47aec37d9a3bec5a18706b0a462c148c118b": {
+      "baseline": {
+        "masked_id": "dc3782966bb76e7835c0",
+        "verdict": "wrong",
+        "supporting_citations": [
+          1
+        ],
+        "reason": "[1] supports 53 translation targets for seed terms. The answer gives the count for a different population from languages actually observed in tweets, without explicitly identifying that requested count as unresolved.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": true
+      },
+      "candidate": {
+        "masked_id": "421be73d5609b8dd071e",
+        "verdict": "wrong",
+        "supporting_citations": [
+          1
+        ],
+        "reason": "[1] supports 53 translation targets for seed terms. The answer gives the count for a different population from languages actually observed in tweets, without explicitly identifying that requested count as unresolved.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": true
+      }
+    },
+    "55c840a2f1f663ab2bff984ae71501b17429d0c0": {
+      "baseline": {
+        "masked_id": "3dc5d07dae132d924409",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "Makes a structured refusal on normalization of incomplete intermediate hypotheses and returns no citations.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true
+      },
+      "candidate": {
+        "masked_id": "87857d7e12be5bc93f33",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "Returns a citation-free structured refusal and distinguishes intermediate hypothesis normalization from normalization of features.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true
+      }
+    },
+    "326e08a0f5753b90622902bd4a9c94849a24b773": {
+      "baseline": {
+        "masked_id": "11f6fea08f9b75e24029",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2
+        ],
+        "reason": "The original report source, 17,833 sentences, 826,987 characters and 2,714 pairs are in [1] and [2]. [2] also gives the exact train/test counts.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "f895df361e8431a64c64",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2
+        ],
+        "reason": "[1] states all three totals, and [2] states both partition sizes and the corresponding numbers of sentences.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "dee7383a92c78ea49859a2d5ff2a9d0a794c1f0f": {
+      "baseline": {
+        "masked_id": "432bd36fc95c919939c4",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2,
+          3,
+          6
+        ],
+        "reason": "[1] names the Gal/Ghahramani baseline, [2] and [3] explain its RNN and Bayesian setting, and [6] gives the priors, row-wise mixture and dropout interpretation.",
+        "returned_citations": 4,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "64ff29a224e38f0fc0b6",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2,
+          6
+        ],
+        "reason": "[1] identifies the Gal/Ghahramani VBD baseline, [2] the recurrent motivation, and [6] provides the Bayesian prior, mixture posterior and row-sampling details.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "69ca609e86888c7e4e2e3d33435a0a36f77601b5": {
+      "baseline": {
+        "masked_id": "469e4228a0dd6ef62b1e",
+        "verdict": "full",
+        "supporting_citations": [
+          2,
+          3
+        ],
+        "reason": "Both excerpts explicitly name the standard beam-search decoder with straightforward performance optimizations.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "5c29af32ee8890aaf824",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2
+        ],
+        "reason": "The supplied blocks identify the baseline as standard beam search with the described performance optimizations.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "4ecb6674bcb4162bf71aea8d8b82759255875df3": {
+      "baseline": {
+        "masked_id": "4448d8daa69613c237eb",
+        "verdict": "full",
+        "supporting_citations": [
+          1
+        ],
+        "reason": "[1] directly identifies the OpenAI pretrained transformer, twelve blocks and the BookCorpus-trained language-modeling branch. A more specific name is absent in that excerpt.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "6257c4067b967f3d9d72",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2
+        ],
+        "reason": "[1] identifies the OpenAI release, twelve blocks and BookCorpus. [2] independently confirms that their entailment system uses the transformer with pretrained weights.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "221e9189a9d2431902d8ea833f486a38a76cbd8e": {
+      "baseline": {
+        "masked_id": "a7c547ad860202e10e93",
+        "verdict": "full",
+        "supporting_citations": [
+          1
+        ],
+        "reason": "[1] explicitly reports about 23 utterances per dialogue.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "9e2b36c26a715c9695f8",
+        "verdict": "full",
+        "supporting_citations": [
+          1
+        ],
+        "reason": "[1] gives about 23 utterances per dialogue and connects this with context-rich language behavior.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "e574f0f733fb98ecef3c64044004aa7a320439be": {
+      "baseline": {
+        "masked_id": "3c5bfebae5c5ea96a8aa",
+        "verdict": "partial",
+        "supporting_citations": [
+          2,
+          4,
+          5
+        ],
+        "reason": "[2] shows the equation placeholder; [4] gives the conditional-label goal and [5] the target proportions, summation and batched approximation. The response explicitly lacks the requested formula.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "2253783e8d1071631827",
+        "verdict": "partial",
+        "supporting_citations": [
+          2,
+          3,
+          5
+        ],
+        "reason": "The response accurately explains conditional label expectations and label regularization from [2] and [3]. It correctly flags the missing equation in [5], leaving the requested algebraic definition unresolved.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "19cdce39e8265e7806212eeee2fd55f8ef2f3d47": {
+      "baseline": {
+        "masked_id": "79905a1ff807fb4e76aa",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2
+        ],
+        "reason": "[2] explicitly supplies the count as more than 3,934,610 Arabic tweets, despite the conflicting extra “million” in the official passage. [1] supports the Arabic COVID-19 corpus description; its numeral ends mid-count.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "7928e95ff8e949e64ed0",
+        "verdict": "full",
+        "supporting_citations": [
+          3,
+          4
+        ],
+        "reason": "[3] explicitly says more than 3,934,610 Arabic tweets; the same excerpt later repeats the count with an inconsistent extra “million.” It also confirms the date range and Tweepy. [4] supports the corpus scope and keyword tracking.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "b974523a6cbd3cdc1fa924243ccc9711bbc7070d": {
+      "baseline": {
+        "masked_id": "e93c1acc22ffcd071a70",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2
+        ],
+        "reason": "[1] and [2] directly support a daily cadence for collecting new words and retrieving newspaper articles.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "2192db427f01556c6c74",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2
+        ],
+        "reason": "[1] directly describes daily newspaper browsing and [2] daily French RSS retrieval. The answer reports that daily cadence.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "163a21c0701d5cda15be2d0eb4981a686e54a842": {
+      "baseline": {
+        "masked_id": "b6d25f8a5a8030b62ba9",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2,
+          3
+        ],
+        "reason": "[2] names the two difficult minority genres. [1] and [3] describe MPB as most confused. The answer maintains the distinction between the two descriptions.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "342dc863da43be0cbefe",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2,
+          3
+        ],
+        "reason": "[2] names bossa-nova and jovem-guarda among the most difficult; [1] reports poor pop classification and [3] describes MPB as most confused and the proposed reason.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "5787ac3e80840fe4cf7bfae7e8983fa6644d6220": {
+      "baseline": {
+        "masked_id": "fd30d6181011945b3587",
+        "verdict": "full",
+        "supporting_citations": [
+          1
+        ],
+        "reason": "[1] states the poem and vernacular sources, sizes, genres, their lack of alignment and the training/validation split.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "246da4713626df096efd",
+        "verdict": "full",
+        "supporting_citations": [
+          2
+        ],
+        "reason": "[2] gives both unaligned corpora, their online sources, 163K quatrains and 337K paragraphs from 281 books, and the training/validation split.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "24d06808fa3b903140659ee5a471fdfa86279980": {
+      "baseline": {
+        "masked_id": "30dabf7b0b5617bff42a",
+        "verdict": "partial",
+        "supporting_citations": [
+          2,
+          4,
+          5
+        ],
+        "reason": "[5] identifies the fine-tuned adaptation comparator; [2] and [4] support the discussion of phrase-based and SMT work. The answer expressly leaves the main comparison unresolved and misses the standard Transformer Base baseline.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "8f6a26e19f988eaaf7d7",
+        "verdict": "partial",
+        "supporting_citations": [
+          3,
+          6
+        ],
+        "reason": "[3] accurately gives the adaptation-specific fine-tuned comparator and [6] the evaluation corpora. The response scopes its details to adaptation and does not identify the main Transformer Base system requested by the annotation.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "c78f18606524539e4c573481e5bf1e0a242cc33c": {
+      "baseline": {
+        "masked_id": "a8d4b1bd92678dcfa1d8",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "The structured refusal leaves the count unresolved on the answerable 1,001-responses question.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "3c04691b8e193f08b1f0",
+        "verdict": "full",
+        "supporting_citations": [
+          3
+        ],
+        "reason": "The cited collection paragraph explicitly records 1,001 completed tasks, with 496 control and 505 AUI responses.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "891cab2e41d6ba962778bda297592c916b432226": {
+      "baseline": {
+        "masked_id": "c61c8d73008d917f2792",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2
+        ],
+        "reason": "[1] says the target data are Python code; [2] identifies Python as the primary target of the framework.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "21d465d88afe2371b875",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          3
+        ],
+        "reason": "[1] directly identifies the parallel target text as Python code and [3] independently states the project primarily targets Python.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      }
+    }
+  },
+  "independent_review_agreement": {
+    "unique_masked_packets": 100,
+    "verdict_agreement": {
+      "numerator": 97,
+      "denominator": 100,
+      "percent": 97.0
+    },
+    "citation_set_agreement": {
+      "numerator": 100,
+      "denominator": 100,
+      "percent": 100.0
+    },
+    "both_agree": {
+      "numerator": 97,
+      "denominator": 100,
+      "percent": 97.0
+    },
+    "adjudicated_masked_ids": [
+      "28a83a8517e958303e86",
+      "421be73d5609b8dd071e",
+      "dc3782966bb76e7835c0"
+    ]
+  },
+  "protocol_sha256_lf": "a99676109f90544c99cc3b69395ef4a0f49be2d4769a9a023c46448ad39ffaea"
+}

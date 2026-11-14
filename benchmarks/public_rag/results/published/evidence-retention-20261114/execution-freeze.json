@@ -1,0 +1,101 @@
+{
+  "protocol_sha256": "a99676109f90544c99cc3b69395ef4a0f49be2d4769a9a023c46448ad39ffaea",
+  "source": {
+    "packages/knowledge/citation_qa.py": "301297dd7c337a4bf5f008667ffc5309a6bd6c4b3d96f0aebed4a4a09378e56b",
+    "apps/api/routes/citation_qa.py": "27bda2b0201fe43be464fc0c4763f5c84e64009b4badf447cf2da07604c8de9e",
+    "apps/api/schemas/citation_qa.py": "aca3d1971e9c481c4a5ba0e5c8b682bb83b9c13ff861d48cc408063bf5545c10",
+    "packages/model_gateway/adapters/litellm/adapter.py": "e768ea18574984723642b03f59e2385f12eeca09091f8485254dda46b0c6d6af",
+    "packages/model_gateway/gateway.py": "c6d02969e16ef7f825644b247c79e23905e39a2740ba936587f5401b696e9d92",
+    "packages/model_gateway/contracts.py": "6c6507db40e667883706e59c130cabba97827482a92fd6802fe489339475cda1",
+    "packages/model_gateway/errors.py": "600b6c85e4f50b353a7a5bba456df8d4fca63c3bbc8ead8c92478023b3a23349",
+    "packages/knowledge/retrieval.py": "83b29728707cac0f26b0a8edaf7d2e0e3a9ea33467f6975b17eae3a3233a88e7",
+    "packages/knowledge/adapters/reranker.py": "76cab68df3cab27983719c53d0e5daf124d3fec00ddf9affb491bb3431bd9d1d",
+    "packages/knowledge/adapters/embeddings.py": "2a2dac86a87b862674de933c4572a1b15899e291d3906abf9a6dcf2a3aeb7752",
+    "packages/model_gateway/adapters/litellm/provider_http.py": "0a7d1a0c836950633edc933bb5f516e284a0adaf0a9b427cf148022fcc1cb3a1",
+    "packages/knowledge/structural_chunking.py": "cf98a9cd219d6a490dc452414d99c64aead835d584537d943ca2a60939e764a5",
+    "packages/knowledge/chunking.py": "09b569d3408dd98c157dad0ab4db4276f6430c324ae63c82903b86da29b51345",
+    "benchmarks/public_rag/evidence_sentence.py": "079962e1fe172a3e66b524ddf0a24c247cee07d4609521b95e45f75883494901",
+    "benchmarks/public_rag/evidence_retention_trace.py": "198850eed35508e5a002bf5ae7d6ea80af9533e7277d2041ff433dbbea46fdba",
+    "benchmarks/public_rag/evidence_retention_live.py": "a27c369889d6270bd82b73896ac3c220865ce7d1ecd4fce1e62d0d888a1979c5",
+    "benchmarks/public_rag/qa_first_response_trace.py": "a4ae473bfb7dde3faaadf1954ad2df462219204d904b21ddd61401b4625a47b3",
+    "benchmarks/public_rag/qa_first_response_live.py": "a685d951e374fb137df84e43c130a1d97b6dd893f7acba43106c8375da724fc4",
+    "scripts/citation_qa_profile.py": "6bc5f48c38dbd36190733fe8fb6866fb8a0a979da26122a813f8864f497b02c2"
+  },
+  "source_sha256_lf": {
+    "packages/knowledge/citation_qa.py": "49810477c78dbe3a0c1a6063b410b13eff0c62c15220a61957238f312cbc8e2c",
+    "apps/api/routes/citation_qa.py": "0c04319536d5372eeab15eec3da3082cbe89da157a965973d75600cb4b614320",
+    "apps/api/schemas/citation_qa.py": "6ed6e0ada117e4b7dd6b0640fd21acabfed51426b46b8fc807f672fe25a16a66",
+    "packages/model_gateway/adapters/litellm/adapter.py": "713416fe7c7552043844fb21d297dd765e2f5d8c96cd2ae0759c3afa7243d13f",
+    "packages/model_gateway/gateway.py": "08363e1e19f052dc964908937e658d722b25f37f95758f206d32174f161acb16",
+    "packages/model_gateway/contracts.py": "4115783734ebf776892af996a720205fbced5ddc51086d74fd1fb40c7b72f362",
+    "packages/model_gateway/errors.py": "a67f6259efb1f7be312489db73a717543fceb7feda98c8039825d06a958b1c60",
+    "packages/knowledge/retrieval.py": "14b58e01121dc46f328b11c6139f2c8a097ffd9fd57bfdcbef76864cbaa6f756",
+    "packages/knowledge/adapters/reranker.py": "25be0de9fc75f91b9335763a2aa0e73d493ab80e0600a88be21cca686d3ce98d",
+    "packages/knowledge/adapters/embeddings.py": "b8817fe55123067d4277978a43d97fd0e0b54557449b8c317a72feaf1a21fc74",
+    "packages/model_gateway/adapters/litellm/provider_http.py": "2a62d36248926042361afd374065d56997b6ff645ce210c302495fab7b088496",
+    "packages/knowledge/structural_chunking.py": "2dc1f3662cc4f5d45c048791d4e3d04488d32dec476b99f4999d5e297ef24dfe",
+    "packages/knowledge/chunking.py": "bfc8578d45a9ce42fb3ff00e64befdbc12bcd45f0e896b0564b77365fddf9897",
+    "benchmarks/public_rag/evidence_sentence.py": "079962e1fe172a3e66b524ddf0a24c247cee07d4609521b95e45f75883494901",
+    "benchmarks/public_rag/evidence_retention_trace.py": "198850eed35508e5a002bf5ae7d6ea80af9533e7277d2041ff433dbbea46fdba",
+    "benchmarks/public_rag/evidence_retention_live.py": "a27c369889d6270bd82b73896ac3c220865ce7d1ecd4fce1e62d0d888a1979c5",
+    "benchmarks/public_rag/qa_first_response_trace.py": "a4ae473bfb7dde3faaadf1954ad2df462219204d904b21ddd61401b4625a47b3",
+    "benchmarks/public_rag/qa_first_response_live.py": "a685d951e374fb137df84e43c130a1d97b6dd893f7acba43106c8375da724fc4",
+    "scripts/citation_qa_profile.py": "e75ffce66a9e84cf526f626589e06cc74a2d4223f564fa9b2ed8729cbb73f33a"
+  },
+  "source_commit": "2e752d32820f1f0f59e77034af8c8db05c901fd6",
+  "reader_system_prompt_sha256": "9921923abe84909a433d1333667a6cb16f7ba0928080ec0b21136d1b12238499",
+  "profile": "e9065baf-83d3-4054-8502-8b894fb8a5a0",
+  "model": "deepseek-v4.1-flash-1017",
+  "timeout_seconds": 60,
+  "max_tokens": 2048,
+  "temperature": 0,
+  "request_mode": "provider_default",
+  "retrieval_profile": {
+    "dense_top_k": 30,
+    "sparse_top_k": 30,
+    "candidate_top_k": 20,
+    "final_top_k": 6
+  },
+  "evidence_chars_setting": 16000,
+  "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU",
+  "torch": "2.14.0+cu130",
+  "cuda_runtime": "13.0",
+  "python": "3.12.10",
+  "models": {
+    "BAAI/bge-m3": "5617a9f61b028005a4858fdac845db406aefb181",
+    "BAAI/bge-reranker-v2-m3": "953dc6f6f85a1b2dbfca4c34a2796e7dde08d41e"
+  },
+  "device": "cuda",
+  "reranker_precision": "float16",
+  "reranker_max_input_tokens": 8192,
+  "packages": {
+    "transformers": "4.57.6",
+    "sentence-transformers": "5.7.0",
+    "qdrant-client": "1.13.3",
+    "litellm": "1.101.0",
+    "openai": "2.54.0"
+  },
+  "scope_snapshots": {
+    "historical": {
+      "workspace": "96ee3584-fc63-4964-88c6-2d81a0fa7c5e",
+      "kb": "d167012d-263d-4f7e-8771-058a65431545",
+      "collection": "sentence_retention_historical",
+      "snapshot": "9edd33ac-febc-41ac-b413-264c6a7407f4",
+      "snapshot_sha256": "c619dc7a7a77300d0be300b3c6f451435c351ab0f05ab67b1a0f288311106181",
+      "count": 16,
+      "chunks": 338,
+      "embedding_device": "cuda"
+    },
+    "independent": {
+      "workspace": "96ee3584-fc63-4964-88c6-2d81a0fa7c5e",
+      "kb": "89627523-22d7-43b3-bd6c-59cabf51efef",
+      "collection": "sentence_retention_independent",
+      "snapshot": "c531f096-3f12-4f91-9e4c-1617d7318ff8",
+      "snapshot_sha256": "5e842ca014657c9ff6a78afe52a893c467d6220af0d064a789f3730c77b8e980",
+      "count": 48,
+      "chunks": 984,
+      "embedding_device": "cuda"
+    }
+  },
+  "frozen_before_retrieval": true
+}

@@ -1,0 +1,413 @@
+{
+  "cohorts": {
+    "retrieval": {
+      "independent": {
+        "A": {
+          "first_http": 48,
+          "http_status": {
+            "200": 48
+          },
+          "error_codes": {},
+          "physical_model_posts": 0,
+          "model_http_status": {},
+          "model_transport_errors": {},
+          "model_adapter_errors": {},
+          "model_responses_with_usage": 0,
+          "model_input_tokens": 0,
+          "model_output_tokens": 0,
+          "finish_reasons": {},
+          "requests_with_internal_citation_correction": [],
+          "latency_seconds": {
+            "median": 0.371,
+            "p95_nearest_rank": 0.448
+          },
+          "rerank_ms": {
+            "median": 271.138,
+            "p95_nearest_rank": 341.368
+          }
+        },
+        "B": {
+          "first_http": 48,
+          "http_status": {
+            "200": 48
+          },
+          "error_codes": {},
+          "physical_model_posts": 0,
+          "model_http_status": {},
+          "model_transport_errors": {},
+          "model_adapter_errors": {},
+          "model_responses_with_usage": 0,
+          "model_input_tokens": 0,
+          "model_output_tokens": 0,
+          "finish_reasons": {},
+          "requests_with_internal_citation_correction": [],
+          "latency_seconds": {
+            "median": 1.061,
+            "p95_nearest_rank": 1.21
+          },
+          "rerank_ms": {
+            "median": 949.678,
+            "p95_nearest_rank": 1083.761
+          }
+        }
+      },
+      "historical": {
+        "A": {
+          "first_http": 2,
+          "http_status": {
+            "200": 2
+          },
+          "error_codes": {},
+          "physical_model_posts": 0,
+          "model_http_status": {},
+          "model_transport_errors": {},
+          "model_adapter_errors": {},
+          "model_responses_with_usage": 0,
+          "model_input_tokens": 0,
+          "model_output_tokens": 0,
+          "finish_reasons": {},
+          "requests_with_internal_citation_correction": [],
+          "latency_seconds": {
+            "median": 11.54,
+            "p95_nearest_rank": 22.763
+          },
+          "rerank_ms": {
+            "median": 3051.526,
+            "p95_nearest_rank": 5878.528
+          }
+        },
+        "B": {
+          "first_http": 2,
+          "http_status": {
+            "200": 2
+          },
+          "error_codes": {},
+          "physical_model_posts": 0,
+          "model_http_status": {},
+          "model_transport_errors": {},
+          "model_adapter_errors": {},
+          "model_responses_with_usage": 0,
+          "model_input_tokens": 0,
+          "model_output_tokens": 0,
+          "finish_reasons": {},
+          "requests_with_internal_citation_correction": [],
+          "latency_seconds": {
+            "median": 1.011,
+            "p95_nearest_rank": 1.018
+          },
+          "rerank_ms": {
+            "median": 918.114,
+            "p95_nearest_rank": 926.02
+          }
+        }
+      }
+    },
+    "live": {
+      "independent": {
+        "A": {
+          "first_http": 48,
+          "http_status": {
+            "200": 47,
+            "502": 1
+          },
+          "error_codes": {
+            "CITATION_QA_INVALID_MODEL_OUTPUT": 1
+          },
+          "physical_model_posts": 55,
+          "model_http_status": {
+            "200": 55
+          },
+          "model_transport_errors": {},
+          "model_adapter_errors": {},
+          "model_responses_with_usage": 55,
+          "model_input_tokens": 127530,
+          "model_output_tokens": 16465,
+          "finish_reasons": {
+            "stop": 55
+          },
+          "requests_with_internal_citation_correction": [
+            "62048ea0aab61abe21fb30d70c4a1bc5fb946137",
+            "3d99bc8ab2f36d4742e408f211bec154bc6696f7",
+            "6959e87cf2668a03854da3f042c87e6fdb2ade8a",
+            "4146e1d8f79902c0bc034695998b724515b6ac81",
+            "51d03f0741b72ae242c380266acd2321baf43444",
+            "3b40799f25dbd98bba5b526e0a1d0d0bb51173e0",
+            "2a950ede24b26a45613169348d5db9176fda4f82"
+          ],
+          "latency_seconds": {
+            "median": 3.522,
+            "p95_nearest_rank": 7.816
+          },
+          "rerank_ms": {
+            "median": 467.732,
+            "p95_nearest_rank": 546.832
+          }
+        },
+        "B": {
+          "first_http": 48,
+          "http_status": {
+            "200": 48
+          },
+          "error_codes": {},
+          "physical_model_posts": 53,
+          "model_http_status": {
+            "200": 53
+          },
+          "model_transport_errors": {},
+          "model_adapter_errors": {},
+          "model_responses_with_usage": 53,
+          "model_input_tokens": 122827,
+          "model_output_tokens": 16603,
+          "finish_reasons": {
+            "stop": 53
+          },
+          "requests_with_internal_citation_correction": [
+            "62048ea0aab61abe21fb30d70c4a1bc5fb946137",
+            "e79a5e435fcf5587535f06c9215d19a66caadaff",
+            "6959e87cf2668a03854da3f042c87e6fdb2ade8a",
+            "3b40799f25dbd98bba5b526e0a1d0d0bb51173e0",
+            "2a950ede24b26a45613169348d5db9176fda4f82"
+          ],
+          "latency_seconds": {
+            "median": 3.963,
+            "p95_nearest_rank": 6.367
+          },
+          "rerank_ms": {
+            "median": 1128.174,
+            "p95_nearest_rank": 1333.94
+          }
+        }
+      },
+      "historical": {
+        "A": {
+          "first_http": 2,
+          "http_status": {
+            "200": 2
+          },
+          "error_codes": {},
+          "physical_model_posts": 2,
+          "model_http_status": {
+            "200": 2
+          },
+          "model_transport_errors": {},
+          "model_adapter_errors": {},
+          "model_responses_with_usage": 2,
+          "model_input_tokens": 4499,
+          "model_output_tokens": 746,
+          "finish_reasons": {
+            "stop": 2
+          },
+          "requests_with_internal_citation_correction": [],
+          "latency_seconds": {
+            "median": 15.219,
+            "p95_nearest_rank": 28.288
+          },
+          "rerank_ms": {
+            "median": 2541.549,
+            "p95_nearest_rank": 4667.757
+          }
+        },
+        "B": {
+          "first_http": 2,
+          "http_status": {
+            "200": 2
+          },
+          "error_codes": {},
+          "physical_model_posts": 2,
+          "model_http_status": {
+            "200": 2
+          },
+          "model_transport_errors": {},
+          "model_adapter_errors": {},
+          "model_responses_with_usage": 2,
+          "model_input_tokens": 4556,
+          "model_output_tokens": 281,
+          "finish_reasons": {
+            "stop": 2
+          },
+          "requests_with_internal_citation_correction": [],
+          "latency_seconds": {
+            "median": 2.747,
+            "p95_nearest_rank": 2.792
+          },
+          "rerank_ms": {
+            "median": 1023.759,
+            "p95_nearest_rank": 1158.404
+          }
+        }
+      }
+    }
+  },
+  "source_freeze_sha256": "eb3ff638e6894285e25ed01915bc95905c5ad6887bcf0162e8c05eff0f621e84",
+  "retrieval": {
+    "first_http": 100,
+    "http_status": {
+      "200": 100
+    },
+    "error_codes": {},
+    "physical_model_posts": 0,
+    "model_http_status": {},
+    "model_transport_errors": {},
+    "model_adapter_errors": {},
+    "model_responses_with_usage": 0,
+    "model_input_tokens": 0,
+    "model_output_tokens": 0,
+    "finish_reasons": {},
+    "requests_with_internal_citation_correction": [],
+    "latency_seconds": {
+      "median": 0.958,
+      "p95_nearest_rank": 1.177
+    },
+    "rerank_ms": {
+      "median": 860.468,
+      "p95_nearest_rank": 1077.648
+    }
+  },
+  "live": {
+    "first_http": 100,
+    "http_status": {
+      "200": 99,
+      "502": 1
+    },
+    "error_codes": {
+      "CITATION_QA_INVALID_MODEL_OUTPUT": 1
+    },
+    "physical_model_posts": 112,
+    "model_http_status": {
+      "200": 112
+    },
+    "model_transport_errors": {},
+    "model_adapter_errors": {},
+    "model_responses_with_usage": 112,
+    "model_input_tokens": 259412,
+    "model_output_tokens": 34095,
+    "finish_reasons": {
+      "stop": 112
+    },
+    "requests_with_internal_citation_correction": [
+      "62048ea0aab61abe21fb30d70c4a1bc5fb946137",
+      "3d99bc8ab2f36d4742e408f211bec154bc6696f7",
+      "6959e87cf2668a03854da3f042c87e6fdb2ade8a",
+      "4146e1d8f79902c0bc034695998b724515b6ac81",
+      "51d03f0741b72ae242c380266acd2321baf43444",
+      "3b40799f25dbd98bba5b526e0a1d0d0bb51173e0",
+      "2a950ede24b26a45613169348d5db9176fda4f82",
+      "62048ea0aab61abe21fb30d70c4a1bc5fb946137",
+      "e79a5e435fcf5587535f06c9215d19a66caadaff",
+      "6959e87cf2668a03854da3f042c87e6fdb2ade8a",
+      "3b40799f25dbd98bba5b526e0a1d0d0bb51173e0",
+      "2a950ede24b26a45613169348d5db9176fda4f82"
+    ],
+    "latency_seconds": {
+      "median": 3.656,
+      "p95_nearest_rank": 7.188
+    },
+    "rerank_ms": {
+      "median": 880.642,
+      "p95_nearest_rank": 1284.846
+    }
+  },
+  "public_capture_sha256": {
+    "retrieval/A-independent.json": "eed93fa47d75203ac30084ad48ee715434be5c79999c38a97b965b8c0a733857",
+    "retrieval/B-independent.json": "244c7825b6fa6a47f23507779fc33faf9d40e807bf587d7b882cf174bddda1f7",
+    "retrieval/A-historical.json": "b0184c48f0519deecade6082d3e377671927f70e9df9b25e5a4d7b0f6f852485",
+    "retrieval/B-historical.json": "dd5c099849f6b242ec55403137f7aa3421471e60d2b467ccb9a60e6179294825",
+    "live/A-independent.json": "f09c81ac4661c8f57c92c88a71961861c8354b25208bfaa383d8d761a5c023e4",
+    "live/B-independent.json": "1f43ce4f544184e9f114a63cc3d2d5fb91fbe12e849b2ba6fdffb560ed7a966c",
+    "live/A-historical.json": "879fa13960b82f7ccacf59f19028b14d28c2fd7857b20b99a77e50c812dfb9c7",
+    "live/B-historical.json": "ecc9909621893b9725413ef0296e8a11f80d763346980265281ec2eab1e119d1"
+  },
+  "schedule_verified": true,
+  "per_arm_user_payload_snapshot_profile_equality_verified": true,
+  "relogin_before_each_request": true,
+  "first_http_retries": 0,
+  "jobs": {
+    "provision": {
+      "state": "completed",
+      "exit_code": 0,
+      "started_at": "2026-11-14T05:25:34.434956+00:00",
+      "finished_at": "2026-11-14T05:25:42.011206+00:00",
+      "elapsed_seconds": 7.578
+    },
+    "ingest-independent": {
+      "state": "completed",
+      "exit_code": 0,
+      "started_at": "2026-11-14T05:33:13.699908+00:00",
+      "finished_at": "2026-11-14T05:34:47.130237+00:00",
+      "elapsed_seconds": 93.421
+    },
+    "ingest-historical": {
+      "state": "completed",
+      "exit_code": 0,
+      "started_at": "2026-11-14T05:25:50.271355+00:00",
+      "finished_at": "2026-11-14T05:26:33.796371+00:00",
+      "elapsed_seconds": 43.531
+    },
+    "historical-parity": {
+      "state": "completed",
+      "exit_code": 0,
+      "started_at": "2026-11-14T05:32:15.593989+00:00",
+      "finished_at": "2026-11-14T05:33:10.246129+00:00",
+      "elapsed_seconds": 54.656
+    },
+    "retrieval": {
+      "state": "completed",
+      "exit_code": 0,
+      "started_at": "2026-11-14T05:36:52.839863+00:00",
+      "finished_at": "2026-11-14T05:39:15.512148+00:00",
+      "elapsed_seconds": 142.672
+    },
+    "live": {
+      "state": "completed",
+      "exit_code": 0,
+      "started_at": "2026-11-14T05:40:39.051162+00:00",
+      "finished_at": "2026-11-14T05:48:23.250000+00:00",
+      "elapsed_seconds": 464.203
+    },
+    "retire": {
+      "state": "completed",
+      "exit_code": 0,
+      "started_at": "2026-11-14T05:48:45.142526+00:00",
+      "finished_at": "2026-11-14T05:48:52.731712+00:00",
+      "elapsed_seconds": 7.594
+    }
+  },
+  "credential_retirement": {
+    "credential_id": "1dc4a11f-4130-42c9-9d3a-56b9b96a3ba9",
+    "disable": {
+      "confirmed": true,
+      "failures": []
+    },
+    "rotate": {
+      "confirmed": true,
+      "failures": []
+    }
+  },
+  "cleanup": {
+    "project": "agenthubrecall7d570c8902",
+    "removed_containers": 3,
+    "removed_mounted_volumes": 2,
+    "removed_networks": 1,
+    "remaining_containers": 0,
+    "remaining_mounted_volumes": 0,
+    "remaining_labeled_volumes": 0,
+    "remaining_networks": 0,
+    "unchanged_nonproject_container_ids": 19,
+    "other_running_containers_after_project_cleanup": 0,
+    "private_env_file_and_ports_removed": true,
+    "verified_task_private_files_absent": [
+      "private.env.json",
+      "private-login.json",
+      "ports.json",
+      "private-login.json.tmp"
+    ],
+    "docker_desktop": {
+      "initial": "stopped",
+      "started_by_benchmark": true,
+      "stop_exit_code": 0,
+      "final": "stopped",
+      "engine_named_pipe_absent_before_and_after": true,
+      "docker_desktop_and_backend_processes_absent_after": true
+    }
+  }
+}
