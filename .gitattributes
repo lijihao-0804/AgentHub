@@ -1,5 +1,9 @@
 *.bat text eol=crlf
 
+benchmarks/public_rag/evidence_retention*.py text eol=lf
+benchmarks/public_rag/evidence_sentence*.py text eol=lf
+benchmarks/public_rag/results/published/evidence-retention-20261114/**/*.json text eol=lf
+
 # These public retrieval protocols bind model inputs and benchmark code by file SHA-256.
 benchmarks/public_rag/candidate_recall_*.py text eol=lf
 benchmarks/public_rag/results/published/candidate-recall-20261114/**/*.json text eol=lf
