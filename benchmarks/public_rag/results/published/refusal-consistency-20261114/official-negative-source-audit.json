@@ -1,0 +1,315 @@
+{
+  "reviewed_at_utc": "2026-11-14T07:45:41.652059+00:00",
+  "protocol_sha256_lf": "0435e704f9631b57929b58c360c7e4dbef27ecdd9e76c47cd2082a888a017d55",
+  "method": "Searched all 20 independent official-negative target papers for the requested information, then checked the full original paragraphs. This source-only analysis was recorded before trial answers were viewed. One reviewer's conservative list of straightforward conflicts, independent of retrieval, generated answers and their citation support; other rows are unresolved here. The official labels, request ordering and all primary denominators are unchanged.",
+  "official_negative_denominator": 20,
+  "clear_conflicts": 7,
+  "rows": [
+    {
+      "id": "9a94dcee17cdb9a39d39977191e643adece58dfc",
+      "paper": "1802.05574",
+      "query": "In the paper “Open Information Extraction on Scientific Text: An Evaluation”, Were the OpenIE systems more accurate on some scientific disciplines than others?",
+      "official_unanswerable": true,
+      "assessment": "no_clear_conflict_recorded",
+      "answer_supported_by_full_source": null,
+      "source_witnesses": []
+    },
+    {
+      "id": "0428e06f0550e1063a64d181210795053a8e6436",
+      "paper": "1905.11037",
+      "query": "In the paper “Harry Potter and the Action Prediction Challenge from Natural Language”, How well does a simple bag-of-words baseline do?",
+      "official_unanswerable": true,
+      "assessment": "no_clear_conflict_recorded",
+      "answer_supported_by_full_source": null,
+      "source_witnesses": []
+    },
+    {
+      "id": "b6a4ab009e6f213f011320155a7ce96e713c11cf",
+      "paper": "1909.00542",
+      "query": "In the paper “Classification Betters Regression in Query-based Multi-document Summarisation Techniques for Question Answering: Macquarie University at BioASQ7b”, How did the author's work rank among other submissions on the challenge?",
+      "official_unanswerable": true,
+      "assessment": "no_clear_conflict_recorded",
+      "answer_supported_by_full_source": null,
+      "source_witnesses": []
+    },
+    {
+      "id": "b546f14feaa639e43aa64c799dc61b8ef480fb3d",
+      "paper": "1912.02761",
+      "query": "In the paper “Measuring Social Bias in Knowledge Graph Embeddings”, How are these biases found?",
+      "official_unanswerable": true,
+      "assessment": "clear_conflict",
+      "answer_supported_by_full_source": "Perturb each human embedding toward one sensitive attribute and away from the other, then average the change in predicted profession scores.",
+      "source_witnesses": [
+        {
+          "rendered_paragraph_index": 18,
+          "start": 6607,
+          "end": 7504,
+          "sha256": "1f944a9d588168ca053b1f8c3e9f86def391262ed54c5ab90c5894e55a3d452c",
+          "text": "In light of this, we present an alternative metric based on the score function. We define the sensitive attribute we are interested in, denoted $S$, and two alternative values of this attribute, denoted $A$ and $B$. For the purposes of this example we use gender as the sensitive attribute $S$, and male and female as the alternative values $A$ and $B$. We take a trained embedding of a human entity, $j$, denoted $E_j$ and calculate an update to this embedding which increases the score that they have attribute $A$ (male), and decreases the score that they have attribute $B$ (female). In other words, we finetune the embedding to make the person “more male\" according to the model's encoding of masculinity. This is visualized in Figure FIGREF9, where we shift person1's embedding so that the transformation between person1 and the relation has_gender moves closer to male and away from female."
+        },
+        {
+          "rendered_paragraph_index": 21,
+          "start": 8237,
+          "end": 8480,
+          "sha256": "af1528b20c7d9f622ab7ae97341afa21724b6b83a53465aa10927bac0dfd0269",
+          "text": "We then analyse the change in the scores for all professions. That is, we calculate whether, according to the model's score function, making an entity more male increases or decreases the likelihood that they have a particular profession, $p$:"
+        },
+        {
+          "rendered_paragraph_index": 24,
+          "start": 9045,
+          "end": 9181,
+          "sha256": "5964e33dc836863954cd68bb408b8c635d579d679b591e60e1838eb865b73c28",
+          "text": "We can then repeat the process for all humans in the KG and calculate the average changes, giving a bias score $B_p$ for profession $p$:"
+        }
+      ]
+    },
+    {
+      "id": "ed4fb6bce855ca932548689e45fde21f26a71035",
+      "paper": "1901.00603",
+      "query": "In the paper “Coarse-grain Fine-grain Coattention Network for Multi-evidence Question Answering”, What is coattention?",
+      "official_unanswerable": true,
+      "assessment": "clear_conflict",
+      "answer_supported_by_full_source": "Coattention makes a codependent representation of a query and evidence using their affinity and the resulting summaries.",
+      "source_witnesses": [
+        {
+          "rendered_paragraph_index": 8,
+          "start": 3498,
+          "end": 4362,
+          "sha256": "b1ffbba9d03c1596687c893b8d568d2c1a67a923ed01aac41ab4b9a4b96c27e1",
+          "text": "The coarse-grain module and fine-grain module of the correspond to and strategies. The coarse-grain module summarizes support documents without knowing the candidates: it builds codependent representations of support documents and the query using coattention, then produces a coarse-grain summary using self-attention. In contrast, the fine-grain module retrieves specific contexts in which each candidate occurs: it identifies coreferent mentions of the candidate, then uses coattention to build codependent representations between these mentions and the query. While low-level encodings of the inputs are shared between modules, we show that this division of labour allows the attention hierarchies in each module to focus on different parts of the input. This enables the model to more effectively represent a large number of potentially long support documents."
+        },
+        {
+          "rendered_paragraph_index": 13,
+          "start": 5241,
+          "end": 5694,
+          "sha256": "92df1c3df9a442f72e7766b302c4ca970a03ca5dcd77e233e7d4c4b186afe8dd",
+          "text": "The coarse-grain module of the , shown in Figure 2 , builds codependent representations of support documents $$ and the query $$ using coattention, and then summarizes the coattention context using self-attention to compare it to the candidate $$ . Coattention and similar techniques are crucial to single-document question answering models BIBREF9 , BIBREF10 , BIBREF11 . We start by computing the affinity matrix between the document and the query as "
+        },
+        {
+          "rendered_paragraph_index": 19,
+          "start": 6053,
+          "end": 6180,
+          "sha256": "b0992520a8af629cfee16a86b6fd0b5158584b1f2d92249391ae30aee3e16845",
+          "text": "The coattention context is then the feature-wise concatenation of the document context $$ and the document summary vector $$ . "
+        },
+        {
+          "rendered_paragraph_index": 23,
+          "start": 6422,
+          "end": 6867,
+          "sha256": "95c7cea60a5c8b8344a385b05c000fef6149bdcd3a41cc4d553ee63ca3d52ca2",
+          "text": "Next, we summarize the coattention context — a codependent encoding of the supporting document and the query — using hierarchical self-attention. First, we use self-attention to create a fixed-length summary vector of the coattention context. We compute a score for each position of the coattention context using a two-layer multi-layer perceptron (MLP). This score is normalized and used to compute a weighted sum over the coattention context. "
+        }
+      ]
+    },
+    {
+      "id": "a61732774faf30bab15bf944b2360ec4710870c1",
+      "paper": "1911.03270",
+      "query": "In the paper “Char-RNN and Active Learning for Hashtag Segmentation”, What are the predefined morpho-syntactic patterns used to filter the training data?",
+      "official_unanswerable": true,
+      "assessment": "no_clear_conflict_recorded",
+      "answer_supported_by_full_source": null,
+      "source_witnesses": []
+    },
+    {
+      "id": "7befb7a8354fca9d2a94e3fd4364625c98067ebb",
+      "paper": "2002.00317",
+      "query": "In the paper “Citation Text Generation”, How was the evaluation corpus collected?",
+      "official_unanswerable": true,
+      "assessment": "clear_conflict",
+      "answer_supported_by_full_source": "Select English computer-science articles in S2-GORC, extract linked citing sentences and hold out validation and test examples.",
+      "source_witnesses": [
+        {
+          "rendered_paragraph_index": 15,
+          "start": 6804,
+          "end": 7316,
+          "sha256": "43a67413b2442dc4c24b5cc327cbaf8f579ca489aef61fcac16ea6fdd8e85fd9",
+          "text": "For source and cited documents, we use English-language computer science articles and annotation from the S2-GORC dataset BIBREF7. S2-GORC is a large citation graph dataset which includes full texts of 8.1 million scientific documents. We select a subset of 154K computer science articles as our corpus. From these, we extract 622K citing sentences that link back to other documents in our corpus. We hold 2500 examples for each of the validation and test sets. Detailed statistics can be found in Table TABREF4."
+        }
+      ]
+    },
+    {
+      "id": "f6e5febf2ea53ec80135bbd532d6bb769d843dd8",
+      "paper": "2003.08132",
+      "query": "In the paper “Gender Representation in Open Source Speech Resources”, What natural languages are represented in the speech resources studied?",
+      "official_unanswerable": true,
+      "assessment": "no_clear_conflict_recorded",
+      "answer_supported_by_full_source": null,
+      "source_witnesses": []
+    },
+    {
+      "id": "03502826f4919e251edba1525f84dd42f21b0253",
+      "paper": "1905.01976",
+      "query": "In the paper “TextKD-GAN: Text Generation using KnowledgeDistillation and Generative Adversarial Networks”, How much better in terms of JSD measure did their model perform?",
+      "official_unanswerable": true,
+      "assessment": "no_clear_conflict_recorded",
+      "answer_supported_by_full_source": null,
+      "source_witnesses": []
+    },
+    {
+      "id": "f197e0f61f7980c64a76a3a9657762f1f0edb65b",
+      "paper": "1905.12516",
+      "query": "In the paper “Racial Bias in Hate Speech and Abusive Language Detection Datasets”, Any other bias may be detected?",
+      "official_unanswerable": true,
+      "assessment": "no_clear_conflict_recorded",
+      "answer_supported_by_full_source": null,
+      "source_witnesses": []
+    },
+    {
+      "id": "13f7d50b3b8b0b97d90401eeb0a4e97c9eab3a76",
+      "paper": "1909.03544",
+      "query": "In the paper “Czech Text Processing with Contextual Embeddings: POS Tagging, Lemmatization, Parsing and NER”, What data is the Prague Dependency Treebank built on?",
+      "official_unanswerable": true,
+      "assessment": "no_clear_conflict_recorded",
+      "answer_supported_by_full_source": null,
+      "source_witnesses": []
+    },
+    {
+      "id": "7ac0cec79c8c2b1909b0a1cc0d4646fce09884ee",
+      "paper": "1911.03584",
+      "query": "In the paper “On the Relationship between Self-Attention and Convolutional Layers”, Is there a way of converting existing convolution layers into self-attention to perform very same convolution?",
+      "official_unanswerable": true,
+      "assessment": "clear_conflict",
+      "answer_supported_by_full_source": "Yes. Sufficient attention heads with relative positional encodings can be reparameterized to express a convolutional layer; the paper gives a constructive result.",
+      "source_witnesses": [
+        {
+          "rendered_paragraph_index": 9,
+          "start": 3779,
+          "end": 4074,
+          "sha256": "1e7bbd3e27ef663e85a27dd27c023c96ec1f7d35876e370c25822efdedd501e2",
+          "text": "Specifically, we show that a single multi-head self-attention layer using relative positional encoding can be re-parametrized to express any convolutional layer. Our insights lead to a relative positional encoding, that we refer to as quadratic encoding, that is very efficient in terms of size."
+        },
+        {
+          "rendered_paragraph_index": 30,
+          "start": 10202,
+          "end": 10514,
+          "sha256": "05e111ab68b459d7576539815d65088406594ae49c18100517432244a925d9f2",
+          "text": "Theorem 1 A multi-head self-attention layer with $N_h$ heads of dimension $D_h$, output dimension $D_{\\textit {out}}$ and a relative positional encoding of dimension $D_p \\ge 3$ can express any convolutional layer of kernel size $\\sqrt{N_h} \\times \\sqrt{N_h}$ and $\\min (D_h, D_{\\textit {out}})$ output channels."
+        },
+        {
+          "rendered_paragraph_index": 39,
+          "start": 13428,
+          "end": 13729,
+          "sha256": "724382dd31e0593f48b95c2ae5a9d4981671056962766b78079c1a6fe73797bd",
+          "text": "0 otherwise. . Then, for any convolutional layer with a $K \\times K$ kernel and $D_{\\textit {out}}$ output channels, there exists $\\lbrace _{\\!\\textit {val}}^{(h)}\\rbrace _{h \\in [N_h]}$ such that $ \\operatorname{MHSA}() = \\operatorname{Conv}() $ for every $\\in ^{W \\times H \\times D_{\\textit {in}}}$."
+        }
+      ]
+    },
+    {
+      "id": "61404466cf86a21f0c1783ce535eb39a01528ce8",
+      "paper": "2001.05493",
+      "query": "In the paper “A Unified System for Aggression Identification in English Code-Mixed and Uni-Lingual Texts”, What are the key differences in communication styles between Twitter and Facebook?",
+      "official_unanswerable": true,
+      "assessment": "no_clear_conflict_recorded",
+      "answer_supported_by_full_source": null,
+      "source_witnesses": []
+    },
+    {
+      "id": "20be7a776dfda0d3c9dc10270699061cb9bc8297",
+      "paper": "1912.07025",
+      "query": "In the paper “Indiscapes: Instance Segmentation Networks for Layout Parsing of Historical Indic Manuscripts”, What language(s) are the manuscripts written in?",
+      "official_unanswerable": true,
+      "assessment": "no_clear_conflict_recorded",
+      "answer_supported_by_full_source": null,
+      "source_witnesses": []
+    },
+    {
+      "id": "676c874266ee0388fe5b9a75e1006796c68c3c13",
+      "paper": "1706.01723",
+      "query": "In the paper “A General-Purpose Tagger with Convolutional Neural Networks”, How many parameters does their CNN have?",
+      "official_unanswerable": true,
+      "assessment": "no_clear_conflict_recorded",
+      "answer_supported_by_full_source": null,
+      "source_witnesses": []
+    },
+    {
+      "id": "536e4a39b654b78228bf55fd09d1b433e0dae447",
+      "paper": "1805.07966",
+      "query": "In the paper “Aff2Vec: Affect--Enriched Distributional Word Representations”, Is the affect of a word affected by context?",
+      "official_unanswerable": true,
+      "assessment": "no_clear_conflict_recorded",
+      "answer_supported_by_full_source": null,
+      "source_witnesses": []
+    },
+    {
+      "id": "4fa2faa08eeabc09d78d89aaf0ea86bb36328172",
+      "paper": "1709.00387",
+      "query": "In the paper “MIT-QCRI Arabic Dialect Identification System for the 2017 Multi-Genre Broadcast Challenge”, How do they explore dialect variability?",
+      "official_unanswerable": true,
+      "assessment": "clear_conflict",
+      "answer_supported_by_full_source": "The authors learn dialect similarities and differences with a Siamese network and use i-vector processing for the training/test domain mismatch.",
+      "source_witnesses": [
+        {
+          "rendered_paragraph_index": 1,
+          "start": 92,
+          "end": 1092,
+          "sha256": "b9166e4f77a8bb456ec5b84e507c82e15351bd5f93a3ec4e153fb60c877e4f20",
+          "text": "In order to successfully annotate the Arabic speech con- tent found in open-domain media broadcasts, it is essential to be able to process a diverse set of Arabic dialects. For the 2017 Multi-Genre Broadcast challenge (MGB-3) there were two possible tasks: Arabic speech recognition, and Arabic Dialect Identification (ADI). In this paper, we describe our efforts to create an ADI system for the MGB-3 challenge, with the goal of distinguishing amongst four major Arabic dialects, as well as Modern Standard Arabic. Our research fo- cused on dialect variability and domain mismatches between the training and test domain. In order to achieve a robust ADI system, we explored both Siamese neural network models to learn similarity and dissimilarities among Arabic dialects, as well as i-vector post-processing to adapt domain mismatches. Both Acoustic and linguistic features were used for the final MGB-3 submissions, with the best primary system achieving 75% accuracy on the official 10hr test set."
+        },
+        {
+          "rendered_paragraph_index": 41,
+          "start": 17760,
+          "end": 18582,
+          "sha256": "1b7715dbccf7bf522cad8d5ca365d9ddec22988d6b226dc40538b64b6a9c8c83",
+          "text": "In this paper, we describe the MIT-QCRI ADI system using both audio and linguistic features for the MGB-3 challenge. We studied several approaches to address dialect variability and domain mismatches between the training and test sets. Without knowledge of the test domain where the system will be applied, i-vector dimensionality reduction using a Siamese network was found to be useful, while an interpolated i-vector dialect model showed effectiveness with relatively small amounts of test domain information from the development data. On both conditions, fusion of audio and linguistic feature guarantees substantial improvements on dialect identification. As these approaches are not limited to dialect identification, we plan to explore their utility on other speaker and language recognition problems in the future."
+        }
+      ]
+    },
+    {
+      "id": "c80669cb444a6ec6249b971213b0226f59940a82",
+      "paper": "1909.08090",
+      "query": "In the paper “Dover: A Method for Combining Diarization Outputs”, On average, by how much do they reduce the diarization error?",
+      "official_unanswerable": true,
+      "assessment": "no_clear_conflict_recorded",
+      "answer_supported_by_full_source": null,
+      "source_witnesses": []
+    },
+    {
+      "id": "e1f559da7fa501d3190073bca9ce4d4a12149e80",
+      "paper": "1907.11499",
+      "query": "In the paper “Weakly Supervised Domain Detection”, What is the performance of their model?",
+      "official_unanswerable": true,
+      "assessment": "clear_conflict",
+      "answer_supported_by_full_source": "The paper reports relative results: DetNet variants performed best on the evaluated sentence-level tasks and the hierarchical variants were among the best on word-level tasks.",
+      "source_witnesses": [
+        {
+          "rendered_paragraph_index": 38,
+          "start": 13301,
+          "end": 14395,
+          "sha256": "e5faf4ba14202fdc935f16c2f3948bb27eda512a31345d547246770a3a292de2",
+          "text": "We show model performance against AMT domain labels in Table TABREF42 . Consistent with the automatic evaluation results, DetNet variants are the best performing models on the sentence-level task. On the Wikipedia datasets, DetNet INLINEFORM0 or DetNet INLINEFORM1 outperform all baselines and DetNet INLINEFORM2 by a large margin, showing that word-level signals can indeed help detect sentence domains. Although statistical models are typically less accurate when they are applied to data that has a different distribution from the training data, DetNet INLINEFORM3 works surprisingly well on NYT, substantially outperforming all other systems. We also notice that prior information is useful in making domain predictions for NYT sentences: since our models are trained on Wikipedia, prior domain definitions largely alleviate the genre shift to non-Wikipedia sentences. Table TABREF43 provides a breakdown of the performance of DetNet INLINEFORM4 across domains. Overall, the model performs worst on LIF and GEN domains (which are very broad) and best on BUS and MIL (which are very narrow)."
+        },
+        {
+          "rendered_paragraph_index": 39,
+          "start": 14397,
+          "end": 15672,
+          "sha256": "908d27aba437059de5804de828400adbb57fcd6b0adad8396a4961a085400913",
+          "text": "With regard to word-level evaluation, DetNet INLINEFORM0 and DetNet INLINEFORM1 are the best systems and are significantly better against all comparison models by a wide margin, except L-LDA. The latter is a strong domain detection system at the word-level since it is able to directly associate words with domain labels (see Equation ( EQREF34 )) without resorting to document- or sentence-level predictions. However, our two-level hierarchical model is superior considering all-around performance across sentences and documents. The results here accord with our intuition from previous experiments: hierarchical models outperform simpler variants (including MilNet) since they are able to capture and exploit fine-grained domain signals relatively accurately. Interestingly, prior information does not seem to have an effect on the Wikipedia datasets, but is useful when transferring to NYT. We also observe that models trained on the Chinese datasets perform consistently better than English. Analysis of the annotations provided by crowdworkers revealed that the ratio of domain words in Chinese is higher compared to English (27.47 INLINEFORM2 vs. 13.86 INLINEFORM3 in Wikipedia and 16.42 INLINEFORM4 in NYT), possibly rendering word retrieval in Chinese an easier task."
+        }
+      ]
+    },
+    {
+      "id": "8ca31caa34cc5b65dc1d01d0d1f36bf8c4928805",
+      "paper": "1807.00868",
+      "query": "In the paper “Exploring End-to-End Techniques for Low-Resource Speech Recognition”, What kind of spontaneous speech is used?",
+      "official_unanswerable": true,
+      "assessment": "clear_conflict",
+      "answer_supported_by_full_source": "The experiments used conversational Turkish speech from the IARPA Babel Turkish Language Pack.",
+      "source_witnesses": [
+        {
+          "rendered_paragraph_index": 1,
+          "start": 69,
+          "end": 732,
+          "sha256": "eb90bfa08d2c7612e74f240005fe96a2dfda964528f52a217be4ca5998aa1d95",
+          "text": "In this work we present simple grapheme-based system for low-resource speech recognition using Babel data for Turkish spontaneous speech (80 hours). We have investigated different neural network architectures performance, including fully-convolutional, recurrent and ResNet with GRU. Different features and normalization techniques are compared as well. We also proposed CTC-loss modification using segmentation during training, which leads to improvement while decoding with small beam size. Our best model achieved word error rate of 45.8%, which is the best reported result for end-to-end systems using in-domain data for this task, according to our knowledge."
+        },
+        {
+          "rendered_paragraph_index": 24,
+          "start": 11227,
+          "end": 11629,
+          "sha256": "6cf83a269d70584876f3d0aa0788de256fc7c9f8592f90372e5a68aaae2cbd03",
+          "text": "For all experiments we used conversational speech from IARPA Babel Turkish Language Pack (LDC2016S10). This corpus contains about 80 hours of transcribed speech for training and 10 hours for development. The dataset is rather small compared to widely used benchmarks for conversational speech: English Switchboard corpus (300 hours, LDC97S62) and Fisher dataset (2000 hours, LDC2004S13 and LDC2005S13)."
+        }
+      ]
+    }
+  ]
+}

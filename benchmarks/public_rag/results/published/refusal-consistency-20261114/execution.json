@@ -1,0 +1,167 @@
+{
+  "public_evidence_file_sha256": {
+    "execution-freeze.json": "7ca41e6b2027a41bfb92aa766dca84043c5b36888b279763bf9bda280c6973b9",
+    "protocol.json": "0435e704f9631b57929b58c360c7e4dbef27ecdd9e76c47cd2082a888a017d55",
+    "live/A-historical.json": "cb7143db685105afc84f31dd4b6a99b5758a4537f3806dde430d7ead3ea99ddc",
+    "live/A-historical_vietnam.json": "c67029809bf19ad8f0952dce4c9146d3adffadd5ddba643f88f7c8eff28cf96b",
+    "live/A-independent.json": "0bf1194fbd4e962c574ecf91d8fa1fd80714c8b20b73bd60b89b1595f760a55d",
+    "live/B-historical.json": "02d1f2946b25c55f5d8250da7ce7ba3ea25e9abeed70cdf6fb47d6ff26d2287f",
+    "live/B-historical_vietnam.json": "b49bca0c46a63ee97e7650876dbc24fea02edf49afe854d10a03022e155f50fe",
+    "live/B-independent.json": "51ed6f2c37165b2bf0fad67d25b5365b4cacdef7b02114561daa468b91d3d6ab",
+    "snapshots/historical.json": "6dcd2e83275434c7347eb92d9e1fb0f60a086eaca37ae7848df1d3b01215650e",
+    "snapshots/historical_vietnam.json": "637540b8003a52ba64d29077af6e1710a4e25d2f080fb535bcefb7730a1a6bb3",
+    "snapshots/independent.json": "e3ac740be3c20468725ca50be2de51ffbedd0812145bbcc784557a0c6a7356d8",
+    "provider-calls.json": "940fe97757b578fa91988853917c5a0064e1b0712ce3943fc26b86a4d330e06b",
+    "matched-inputs.json": "2422505eee8dfa9889b36efd356011bcd06c101e4c479c7c0c30a23d24298595",
+    "operator.zip": "b4e8058b61d9141adc4d535167cee50ae0a8ef83c917d4fec38bc7cd147ccbc9"
+  },
+  "public_evidence_file_sha256_lf": {
+    "execution-freeze.json": "38b42e5f185ec223f38f4b874a085870db666a897479c3d009ba5bfe966bc644",
+    "protocol.json": "0435e704f9631b57929b58c360c7e4dbef27ecdd9e76c47cd2082a888a017d55",
+    "live/A-historical.json": "87905dbe4eb476b28d6c3c062f17fe16d6f1c2dd93c7c783af41d73443a393cc",
+    "live/A-historical_vietnam.json": "35ecc46ae236f2e9a8cc301ec3a03f3d2e420bfea4bbe43a5309b4d41e6265ab",
+    "live/A-independent.json": "26a50be7ef4a8ec504028bb07ad7f3b029e2116721c8b8af6bb6300003ffc491",
+    "live/B-historical.json": "476b6a310f7863e6cca65bae2b98245755b1fcf92adb594a6d62685431814762",
+    "live/B-historical_vietnam.json": "586a1792a69644e4b4cbeb4e9e561f663730472f4a14720f15a4ef53dbfdafa6",
+    "live/B-independent.json": "ec7ac92c914e9e4c12824a75bb3f35d6f48c10214969f99abd9452878e201074",
+    "snapshots/historical.json": "f831e112d454d8f6a87b40e18868f85b582ea1804efd5e1f944e6af7783cb828",
+    "snapshots/historical_vietnam.json": "76c4d86a8e919fee697298894235bb26cdca604771d65cae9075c6996e23e2b6",
+    "snapshots/independent.json": "d6484f3becac053f6d0098f11c34534dfcdeb6e1e2aab5d4cf071caf4b1644d4",
+    "provider-calls.json": "8b1ed46512a9acfa9d55e508f9dc8c8750802030020a29772732f431f0ced2a7",
+    "matched-inputs.json": "fb2989323b717f2e869a06272d8ee4b35b4e516d6a555f4ce3d19f9ee3606ff0"
+  },
+  "jobs": {
+    "docker-up": {
+      "state": "completed",
+      "exit_code": 0,
+      "started_at": "2026-11-14T07:31:26.964923+00:00",
+      "finished_at": "2026-11-14T07:32:44.031990+00:00",
+      "elapsed_seconds": 77.063
+    },
+    "migrate": {
+      "state": "completed",
+      "exit_code": 0,
+      "started_at": "2026-11-14T07:33:58.690290+00:00",
+      "finished_at": "2026-11-14T07:34:05.377725+00:00",
+      "elapsed_seconds": 6.687
+    },
+    "provision": {
+      "state": "failed",
+      "exit_code": 1,
+      "started_at": "2026-11-14T07:35:38.823133+00:00",
+      "finished_at": "2026-11-14T07:35:43.621350+00:00",
+      "elapsed_seconds": 4.796,
+      "reason": "Baseline archive initially lacked a top-level API dependency",
+      "stage": "Import before login, workspace creation or cloud requests",
+      "recovery": "Loaded tracked apps supporting modules, provision-complete succeeded"
+    },
+    "provision-complete": {
+      "state": "completed",
+      "exit_code": 0,
+      "started_at": "2026-11-14T07:37:33.531658+00:00",
+      "finished_at": "2026-11-14T07:37:42.662099+00:00",
+      "elapsed_seconds": 9.125
+    },
+    "ingest-historical": {
+      "state": "completed",
+      "exit_code": 0,
+      "started_at": "2026-11-14T07:38:47.439062+00:00",
+      "finished_at": "2026-11-14T07:41:02.045426+00:00",
+      "elapsed_seconds": 134.609
+    },
+    "ingest-independent": {
+      "state": "completed",
+      "exit_code": 0,
+      "started_at": "2026-11-14T07:41:59.199665+00:00",
+      "finished_at": "2026-11-14T07:43:20.682315+00:00",
+      "elapsed_seconds": 81.484
+    },
+    "ingest-vietnam": {
+      "state": "completed",
+      "exit_code": 0,
+      "started_at": "2026-11-14T07:44:19.374222+00:00",
+      "finished_at": "2026-11-14T07:45:39.418855+00:00",
+      "elapsed_seconds": 80.047
+    },
+    "validate-sources": {
+      "state": "completed",
+      "exit_code": 0,
+      "started_at": "2026-11-14T07:41:14.929721+00:00",
+      "finished_at": "2026-11-14T07:41:21.085429+00:00",
+      "elapsed_seconds": 6.157
+    },
+    "execution-freeze": {
+      "state": "completed",
+      "exit_code": 0,
+      "started_at": "2026-11-14T07:46:29.812527+00:00",
+      "finished_at": "2026-11-14T07:46:38.382997+00:00",
+      "elapsed_seconds": 8.562
+    },
+    "live": {
+      "state": "completed",
+      "exit_code": 0,
+      "started_at": "2026-11-14T07:47:15.583682+00:00",
+      "finished_at": "2026-11-14T07:58:52.080834+00:00",
+      "elapsed_seconds": 696.5
+    },
+    "retire": {
+      "state": "completed",
+      "exit_code": 0,
+      "started_at": "2026-11-14T07:58:59.521299+00:00",
+      "finished_at": "2026-11-14T07:59:08.074149+00:00",
+      "elapsed_seconds": 8.563
+    },
+    "docker-down": {
+      "state": "completed",
+      "exit_code": 0,
+      "started_at": "2026-11-14T07:59:30.607518+00:00",
+      "finished_at": "2026-11-14T07:59:35.070838+00:00",
+      "elapsed_seconds": 4.453
+    }
+  },
+  "credential_retirement": {
+    "credential_id": "1d6b5b27-9251-4bce-af4d-160265858ba3",
+    "disable": {
+      "confirmed": true,
+      "failures": []
+    },
+    "rotate": {
+      "confirmed": true,
+      "failures": []
+    }
+  },
+  "cleanup": {
+    "project": "agenthubrefusalcbdb2cc811",
+    "removed_containers": 3,
+    "removed_mounted_volumes": 2,
+    "removed_networks": 1,
+    "remaining_containers": 0,
+    "remaining_mounted_volumes": 0,
+    "remaining_labeled_volumes": 0,
+    "remaining_networks": 0,
+    "unchanged_nonproject_container_ids": 19,
+    "other_running_containers_after_project_cleanup": 0,
+    "private_env_file_and_ports_removed": true,
+    "verified_absent": [
+      "private.env.json",
+      "private-login.json",
+      "private-login.json.tmp",
+      "ports.json"
+    ],
+    "docker_desktop": {
+      "initial": "stopped",
+      "initial_engine_probe": "The Linux Docker Engine named pipe did not exist.",
+      "started_by_benchmark": true,
+      "start_command_exit_code": 0,
+      "stop_command_exit_code": 0,
+      "final": "stopped",
+      "final_status_probe_exit_code": 1,
+      "final_status_probe": "Docker Desktop reported that it could not retrieve status and suggested starting Desktop.",
+      "final_engine_named_pipe_absent": true,
+      "final_desktop_and_backend_processes_absent": true
+    }
+  },
+  "independent_first_http": 100,
+  "historical_first_http": 6,
+  "provider_observations": "provider-calls.json"
+}

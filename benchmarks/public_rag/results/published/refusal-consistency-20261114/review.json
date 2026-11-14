@@ -1,0 +1,2538 @@
+{
+  "protocol_sha256_lf": "0435e704f9631b57929b58c360c7e4dbef27ecdd9e76c47cd2082a888a017d55",
+  "rubric_sha256_lf": "ab4c2fe49ca3dbd444dbb07d057a9f99cdfeabec5d260c2663df5acd6876ea55",
+  "unique_masked_answers": 104,
+  "independent_first_http_responses": 100,
+  "historical_first_http_responses": 6,
+  "independent_review_agreement": {
+    "unique_masked_packets": 104,
+    "verdict_agreement": {
+      "numerator": 101,
+      "denominator": 104,
+      "percent": 97.115
+    },
+    "citation_set_agreement": {
+      "numerator": 104,
+      "denominator": 104,
+      "percent": 100.0
+    },
+    "whole_answer_support_agreement": {
+      "numerator": 103,
+      "denominator": 104,
+      "percent": 99.038
+    },
+    "all_fields_agree": {
+      "numerator": 101,
+      "denominator": 104,
+      "percent": 97.115
+    },
+    "adjudicated_masked_ids": [
+      "21185abea16d82315490",
+      "3647eb703adad33a3c4c",
+      "f4c24405356faea62edb"
+    ]
+  },
+  "scopes": {
+    "independent": {
+      "n": 50,
+      "metrics": {
+        "first_http_200": {
+          "baseline": {
+            "numerator": 50,
+            "denominator": 50,
+            "percent": 100.0
+          },
+          "candidate": {
+            "numerator": 48,
+            "denominator": 50,
+            "percent": 96.0
+          },
+          "change_percentage_points": -4.0,
+          "retained": [
+            "03502826f4919e251edba1525f84dd42f21b0253",
+            "0428e06f0550e1063a64d181210795053a8e6436",
+            "0cfaca6f3f33ebdb338c5f991f6a7a33ff33844d",
+            "13f7d50b3b8b0b97d90401eeb0a4e97c9eab3a76",
+            "1a06b7a2097ebbad0afc787ea0756db6af3dadf4",
+            "20be7a776dfda0d3c9dc10270699061cb9bc8297",
+            "2efdcebebeb970021233553104553205ce5d6567",
+            "39492338e27cb90bf1763e4337c2f697cf5082ba",
+            "3c16d4cf5dc23223980d9c0f924cb9e4e6943f13",
+            "3f85cc5be84479ba668db6d9f614fedbff6d77f1",
+            "4319a13a6c4a9494ccb465509c9d4265f63dc9b5",
+            "441886f0497dc84f46ed8c32e8fa32983b5db42e",
+            "4f12b41bd3bb2610abf7d7835291496aa69fb78c",
+            "4fa2faa08eeabc09d78d89aaf0ea86bb36328172",
+            "536e4a39b654b78228bf55fd09d1b433e0dae447",
+            "5f0bb32d70ee8e4c4c59dc5c193bc0735fd751cc",
+            "61404466cf86a21f0c1783ce535eb39a01528ce8",
+            "65e2f97f2fe8eb5c2fa41cb95c02b577e8d6e5ee",
+            "676c874266ee0388fe5b9a75e1006796c68c3c13",
+            "6adfa9eee76b96953a76c03356bf41d8a9378851",
+            "7486c9d9e6c407c0c3bc012405d689dbee072327",
+            "7ac0cec79c8c2b1909b0a1cc0d4646fce09884ee",
+            "7befb7a8354fca9d2a94e3fd4364625c98067ebb",
+            "827b5bd215599623a3125afe331b56b89b42bf09",
+            "8ca31caa34cc5b65dc1d01d0d1f36bf8c4928805",
+            "95bb3ea4ebc3f2174846e8d422abc076e1407d6a",
+            "9653c89a93ac5c717a0a26cf80e9aa98a5ccf910",
+            "98daaa9eaa1e1e574be336b8933b861bfd242e5e",
+            "9a94dcee17cdb9a39d39977191e643adece58dfc",
+            "9d9f6cc0f026f7168fcea461baff4b8a925a185f",
+            "9f3444c9fb2e144465d63abf58520cddd4165a01",
+            "a48cc6d3d322a7b159ff40ec162a541bf74321eb",
+            "a61732774faf30bab15bf944b2360ec4710870c1",
+            "a9def7958eac7b9a780403d4f136927f756bab83",
+            "b42323d60827ecf0d9e478c9a31f90940cfae975",
+            "b546f14feaa639e43aa64c799dc61b8ef480fb3d",
+            "b69ffec1c607bfe5aa4d39254e0770a3433a191b",
+            "b6a4ab009e6f213f011320155a7ce96e713c11cf",
+            "c80669cb444a6ec6249b971213b0226f59940a82",
+            "d5105a6a6d5d1931b0729dcf15ca862d6eac770f",
+            "e12674f0466f8c0da109b6076d9939b30952c7da",
+            "e1f559da7fa501d3190073bca9ce4d4a12149e80",
+            "e24fbcc8be922c43f6b6037cdf2bfd4c0a926c08",
+            "ed4fb6bce855ca932548689e45fde21f26a71035",
+            "ef07ec34433221d4da79d5923fb00d8ac446b92c",
+            "f197e0f61f7980c64a76a3a9657762f1f0edb65b",
+            "f33a21c6a9c75f0479ffdbb006c40e0739134716",
+            "f6e5febf2ea53ec80135bbd532d6bb769d843dd8"
+          ],
+          "gained": [],
+          "lost": [
+            "0d6d5b6c00551dd0d2519f117ea81d1e9e8785ec",
+            "6cdd61ebf84aa742155f4554456cc3233b6ae2bf"
+          ],
+          "neither_count": 0,
+          "retention_of_baseline_hits": {
+            "numerator": 48,
+            "denominator": 50,
+            "percent": 96.0
+          },
+          "two_sided_exact_p": 0.5
+        },
+        "first_answer_correct": {
+          "baseline": {
+            "numerator": 29,
+            "denominator": 50,
+            "percent": 58.0
+          },
+          "candidate": {
+            "numerator": 29,
+            "denominator": 50,
+            "percent": 58.0
+          },
+          "change_percentage_points": 0.0,
+          "retained": [
+            "03502826f4919e251edba1525f84dd42f21b0253",
+            "0428e06f0550e1063a64d181210795053a8e6436",
+            "0cfaca6f3f33ebdb338c5f991f6a7a33ff33844d",
+            "39492338e27cb90bf1763e4337c2f697cf5082ba",
+            "3c16d4cf5dc23223980d9c0f924cb9e4e6943f13",
+            "3f85cc5be84479ba668db6d9f614fedbff6d77f1",
+            "4319a13a6c4a9494ccb465509c9d4265f63dc9b5",
+            "441886f0497dc84f46ed8c32e8fa32983b5db42e",
+            "4f12b41bd3bb2610abf7d7835291496aa69fb78c",
+            "61404466cf86a21f0c1783ce535eb39a01528ce8",
+            "65e2f97f2fe8eb5c2fa41cb95c02b577e8d6e5ee",
+            "676c874266ee0388fe5b9a75e1006796c68c3c13",
+            "6adfa9eee76b96953a76c03356bf41d8a9378851",
+            "827b5bd215599623a3125afe331b56b89b42bf09",
+            "95bb3ea4ebc3f2174846e8d422abc076e1407d6a",
+            "9653c89a93ac5c717a0a26cf80e9aa98a5ccf910",
+            "9a94dcee17cdb9a39d39977191e643adece58dfc",
+            "9d9f6cc0f026f7168fcea461baff4b8a925a185f",
+            "9f3444c9fb2e144465d63abf58520cddd4165a01",
+            "a48cc6d3d322a7b159ff40ec162a541bf74321eb",
+            "a61732774faf30bab15bf944b2360ec4710870c1",
+            "a9def7958eac7b9a780403d4f136927f756bab83",
+            "b69ffec1c607bfe5aa4d39254e0770a3433a191b",
+            "b6a4ab009e6f213f011320155a7ce96e713c11cf",
+            "d5105a6a6d5d1931b0729dcf15ca862d6eac770f",
+            "e24fbcc8be922c43f6b6037cdf2bfd4c0a926c08",
+            "ef07ec34433221d4da79d5923fb00d8ac446b92c",
+            "f33a21c6a9c75f0479ffdbb006c40e0739134716"
+          ],
+          "gained": [
+            "13f7d50b3b8b0b97d90401eeb0a4e97c9eab3a76"
+          ],
+          "lost": [
+            "c80669cb444a6ec6249b971213b0226f59940a82"
+          ],
+          "neither_count": 20,
+          "retention_of_baseline_hits": {
+            "numerator": 28,
+            "denominator": 29,
+            "percent": 96.552
+          },
+          "two_sided_exact_p": 1
+        },
+        "fully_supported_positive": {
+          "baseline": {
+            "numerator": 21,
+            "denominator": 30,
+            "percent": 70.0
+          },
+          "candidate": {
+            "numerator": 21,
+            "denominator": 30,
+            "percent": 70.0
+          },
+          "change_percentage_points": 0.0,
+          "retained": [
+            "0cfaca6f3f33ebdb338c5f991f6a7a33ff33844d",
+            "39492338e27cb90bf1763e4337c2f697cf5082ba",
+            "3c16d4cf5dc23223980d9c0f924cb9e4e6943f13",
+            "3f85cc5be84479ba668db6d9f614fedbff6d77f1",
+            "4319a13a6c4a9494ccb465509c9d4265f63dc9b5",
+            "441886f0497dc84f46ed8c32e8fa32983b5db42e",
+            "4f12b41bd3bb2610abf7d7835291496aa69fb78c",
+            "65e2f97f2fe8eb5c2fa41cb95c02b577e8d6e5ee",
+            "6adfa9eee76b96953a76c03356bf41d8a9378851",
+            "827b5bd215599623a3125afe331b56b89b42bf09",
+            "95bb3ea4ebc3f2174846e8d422abc076e1407d6a",
+            "9653c89a93ac5c717a0a26cf80e9aa98a5ccf910",
+            "9d9f6cc0f026f7168fcea461baff4b8a925a185f",
+            "9f3444c9fb2e144465d63abf58520cddd4165a01",
+            "a48cc6d3d322a7b159ff40ec162a541bf74321eb",
+            "a9def7958eac7b9a780403d4f136927f756bab83",
+            "b69ffec1c607bfe5aa4d39254e0770a3433a191b",
+            "d5105a6a6d5d1931b0729dcf15ca862d6eac770f",
+            "e24fbcc8be922c43f6b6037cdf2bfd4c0a926c08",
+            "ef07ec34433221d4da79d5923fb00d8ac446b92c",
+            "f33a21c6a9c75f0479ffdbb006c40e0739134716"
+          ],
+          "gained": [],
+          "lost": [],
+          "neither_count": 9,
+          "retention_of_baseline_hits": {
+            "numerator": 21,
+            "denominator": 21,
+            "percent": 100.0
+          },
+          "two_sided_exact_p": 1
+        },
+        "correct_refusal": {
+          "baseline": {
+            "numerator": 8,
+            "denominator": 20,
+            "percent": 40.0
+          },
+          "candidate": {
+            "numerator": 8,
+            "denominator": 20,
+            "percent": 40.0
+          },
+          "change_percentage_points": 0.0,
+          "retained": [
+            "03502826f4919e251edba1525f84dd42f21b0253",
+            "0428e06f0550e1063a64d181210795053a8e6436",
+            "61404466cf86a21f0c1783ce535eb39a01528ce8",
+            "676c874266ee0388fe5b9a75e1006796c68c3c13",
+            "9a94dcee17cdb9a39d39977191e643adece58dfc",
+            "a61732774faf30bab15bf944b2360ec4710870c1",
+            "b6a4ab009e6f213f011320155a7ce96e713c11cf"
+          ],
+          "gained": [
+            "13f7d50b3b8b0b97d90401eeb0a4e97c9eab3a76"
+          ],
+          "lost": [
+            "c80669cb444a6ec6249b971213b0226f59940a82"
+          ],
+          "neither_count": 11,
+          "retention_of_baseline_hits": {
+            "numerator": 7,
+            "denominator": 8,
+            "percent": 87.5
+          },
+          "two_sided_exact_p": 1
+        },
+        "wrong_positive": {
+          "baseline": {
+            "numerator": 13,
+            "denominator": 50,
+            "percent": 26.0
+          },
+          "candidate": {
+            "numerator": 13,
+            "denominator": 50,
+            "percent": 26.0
+          },
+          "change_percentage_points": 0.0,
+          "retained": [
+            "20be7a776dfda0d3c9dc10270699061cb9bc8297",
+            "4fa2faa08eeabc09d78d89aaf0ea86bb36328172",
+            "536e4a39b654b78228bf55fd09d1b433e0dae447",
+            "7ac0cec79c8c2b1909b0a1cc0d4646fce09884ee",
+            "7befb7a8354fca9d2a94e3fd4364625c98067ebb",
+            "8ca31caa34cc5b65dc1d01d0d1f36bf8c4928805",
+            "b546f14feaa639e43aa64c799dc61b8ef480fb3d",
+            "e1f559da7fa501d3190073bca9ce4d4a12149e80",
+            "ed4fb6bce855ca932548689e45fde21f26a71035",
+            "f197e0f61f7980c64a76a3a9657762f1f0edb65b",
+            "f6e5febf2ea53ec80135bbd532d6bb769d843dd8"
+          ],
+          "gained": [
+            "1a06b7a2097ebbad0afc787ea0756db6af3dadf4",
+            "c80669cb444a6ec6249b971213b0226f59940a82"
+          ],
+          "lost": [
+            "13f7d50b3b8b0b97d90401eeb0a4e97c9eab3a76",
+            "6cdd61ebf84aa742155f4554456cc3233b6ae2bf"
+          ],
+          "neither_count": 35,
+          "retention_of_baseline_hits": {
+            "numerator": 11,
+            "denominator": 13,
+            "percent": 84.615
+          },
+          "two_sided_exact_p": 1
+        },
+        "official_negative_answered": {
+          "baseline": {
+            "numerator": 12,
+            "denominator": 20,
+            "percent": 60.0
+          },
+          "candidate": {
+            "numerator": 12,
+            "denominator": 20,
+            "percent": 60.0
+          },
+          "change_percentage_points": 0.0,
+          "retained": [
+            "20be7a776dfda0d3c9dc10270699061cb9bc8297",
+            "4fa2faa08eeabc09d78d89aaf0ea86bb36328172",
+            "536e4a39b654b78228bf55fd09d1b433e0dae447",
+            "7ac0cec79c8c2b1909b0a1cc0d4646fce09884ee",
+            "7befb7a8354fca9d2a94e3fd4364625c98067ebb",
+            "8ca31caa34cc5b65dc1d01d0d1f36bf8c4928805",
+            "b546f14feaa639e43aa64c799dc61b8ef480fb3d",
+            "e1f559da7fa501d3190073bca9ce4d4a12149e80",
+            "ed4fb6bce855ca932548689e45fde21f26a71035",
+            "f197e0f61f7980c64a76a3a9657762f1f0edb65b",
+            "f6e5febf2ea53ec80135bbd532d6bb769d843dd8"
+          ],
+          "gained": [
+            "c80669cb444a6ec6249b971213b0226f59940a82"
+          ],
+          "lost": [
+            "13f7d50b3b8b0b97d90401eeb0a4e97c9eab3a76"
+          ],
+          "neither_count": 7,
+          "retention_of_baseline_hits": {
+            "numerator": 11,
+            "denominator": 12,
+            "percent": 91.667
+          },
+          "two_sided_exact_p": 1
+        },
+        "citation_precision": {
+          "baseline": {
+            "numerator": 96,
+            "denominator": 96,
+            "percent": 100.0
+          },
+          "candidate": {
+            "numerator": 88,
+            "denominator": 88,
+            "percent": 100.0
+          },
+          "change_percentage_points": 0.0
+        },
+        "false_refusal_on_answerable": {
+          "baseline": {
+            "numerator": 5,
+            "denominator": 30,
+            "percent": 16.667
+          },
+          "candidate": {
+            "numerator": 5,
+            "denominator": 30,
+            "percent": 16.667
+          },
+          "change_percentage_points": 0.0,
+          "retained": [
+            "2efdcebebeb970021233553104553205ce5d6567",
+            "7486c9d9e6c407c0c3bc012405d689dbee072327",
+            "98daaa9eaa1e1e574be336b8933b861bfd242e5e",
+            "b42323d60827ecf0d9e478c9a31f90940cfae975",
+            "e12674f0466f8c0da109b6076d9939b30952c7da"
+          ],
+          "gained": [],
+          "lost": [],
+          "neither_count": 25,
+          "retention_of_baseline_hits": {
+            "numerator": 5,
+            "denominator": 5,
+            "percent": 100.0
+          },
+          "two_sided_exact_p": 1
+        },
+        "first_http_error": {
+          "baseline": {
+            "numerator": 0,
+            "denominator": 50,
+            "percent": 0.0
+          },
+          "candidate": {
+            "numerator": 2,
+            "denominator": 50,
+            "percent": 4.0
+          },
+          "change_percentage_points": 4.0,
+          "retained": [],
+          "gained": [
+            "0d6d5b6c00551dd0d2519f117ea81d1e9e8785ec",
+            "6cdd61ebf84aa742155f4554456cc3233b6ae2bf"
+          ],
+          "lost": [],
+          "neither_count": 48,
+          "retention_of_baseline_hits": {
+            "numerator": 0,
+            "denominator": 0,
+            "percent": null
+          },
+          "two_sided_exact_p": 0.5
+        },
+        "all_claims_supported_per_substantive_response": {
+          "baseline": {
+            "numerator": 35,
+            "denominator": 37,
+            "percent": 94.595
+          },
+          "candidate": {
+            "numerator": 33,
+            "denominator": 35,
+            "percent": 94.286
+          },
+          "change_percentage_points": -0.309
+        }
+      },
+      "outcomes": {
+        "baseline": {
+          "http_status": {
+            "200": 50
+          },
+          "answerable": {
+            "full": 21,
+            "partial": 3,
+            "refusal": 5,
+            "wrong": 1
+          },
+          "official_negative": {
+            "full": 9,
+            "partial": 1,
+            "refusal": 8,
+            "wrong": 2
+          },
+          "official_negative_full_answer_ids": [
+            "4fa2faa08eeabc09d78d89aaf0ea86bb36328172",
+            "536e4a39b654b78228bf55fd09d1b433e0dae447",
+            "7ac0cec79c8c2b1909b0a1cc0d4646fce09884ee",
+            "7befb7a8354fca9d2a94e3fd4364625c98067ebb",
+            "8ca31caa34cc5b65dc1d01d0d1f36bf8c4928805",
+            "b546f14feaa639e43aa64c799dc61b8ef480fb3d",
+            "e1f559da7fa501d3190073bca9ce4d4a12149e80",
+            "ed4fb6bce855ca932548689e45fde21f26a71035",
+            "f197e0f61f7980c64a76a3a9657762f1f0edb65b"
+          ],
+          "official_negative_partial_answer_ids": [
+            "20be7a776dfda0d3c9dc10270699061cb9bc8297"
+          ]
+        },
+        "candidate": {
+          "http_status": {
+            "200": 48,
+            "502": 2
+          },
+          "answerable": {
+            "failure": 2,
+            "full": 21,
+            "partial": 1,
+            "refusal": 5,
+            "wrong": 1
+          },
+          "official_negative": {
+            "full": 8,
+            "partial": 2,
+            "refusal": 8,
+            "wrong": 2
+          },
+          "official_negative_full_answer_ids": [
+            "4fa2faa08eeabc09d78d89aaf0ea86bb36328172",
+            "536e4a39b654b78228bf55fd09d1b433e0dae447",
+            "7ac0cec79c8c2b1909b0a1cc0d4646fce09884ee",
+            "7befb7a8354fca9d2a94e3fd4364625c98067ebb",
+            "8ca31caa34cc5b65dc1d01d0d1f36bf8c4928805",
+            "b546f14feaa639e43aa64c799dc61b8ef480fb3d",
+            "ed4fb6bce855ca932548689e45fde21f26a71035",
+            "f197e0f61f7980c64a76a3a9657762f1f0edb65b"
+          ],
+          "official_negative_partial_answer_ids": [
+            "20be7a776dfda0d3c9dc10270699061cb9bc8297",
+            "f6e5febf2ea53ec80135bbd532d6bb769d843dd8"
+          ]
+        }
+      }
+    },
+    "historical": {
+      "n": 2,
+      "metrics": {
+        "first_http_200": {
+          "baseline": {
+            "numerator": 2,
+            "denominator": 2,
+            "percent": 100.0
+          },
+          "candidate": {
+            "numerator": 2,
+            "denominator": 2,
+            "percent": 100.0
+          },
+          "change_percentage_points": 0.0,
+          "retained": [
+            "891cab2e41d6ba962778bda297592c916b432226",
+            "c78f18606524539e4c573481e5bf1e0a242cc33c"
+          ],
+          "gained": [],
+          "lost": [],
+          "neither_count": 0,
+          "retention_of_baseline_hits": {
+            "numerator": 2,
+            "denominator": 2,
+            "percent": 100.0
+          },
+          "two_sided_exact_p": 1
+        },
+        "first_answer_correct": {
+          "baseline": {
+            "numerator": 2,
+            "denominator": 2,
+            "percent": 100.0
+          },
+          "candidate": {
+            "numerator": 2,
+            "denominator": 2,
+            "percent": 100.0
+          },
+          "change_percentage_points": 0.0,
+          "retained": [
+            "891cab2e41d6ba962778bda297592c916b432226",
+            "c78f18606524539e4c573481e5bf1e0a242cc33c"
+          ],
+          "gained": [],
+          "lost": [],
+          "neither_count": 0,
+          "retention_of_baseline_hits": {
+            "numerator": 2,
+            "denominator": 2,
+            "percent": 100.0
+          },
+          "two_sided_exact_p": 1
+        },
+        "fully_supported_positive": {
+          "baseline": {
+            "numerator": 2,
+            "denominator": 2,
+            "percent": 100.0
+          },
+          "candidate": {
+            "numerator": 2,
+            "denominator": 2,
+            "percent": 100.0
+          },
+          "change_percentage_points": 0.0,
+          "retained": [
+            "891cab2e41d6ba962778bda297592c916b432226",
+            "c78f18606524539e4c573481e5bf1e0a242cc33c"
+          ],
+          "gained": [],
+          "lost": [],
+          "neither_count": 0,
+          "retention_of_baseline_hits": {
+            "numerator": 2,
+            "denominator": 2,
+            "percent": 100.0
+          },
+          "two_sided_exact_p": 1
+        },
+        "correct_refusal": {
+          "baseline": {
+            "numerator": 0,
+            "denominator": 0,
+            "percent": null
+          },
+          "candidate": {
+            "numerator": 0,
+            "denominator": 0,
+            "percent": null
+          },
+          "change_percentage_points": null,
+          "retained": [],
+          "gained": [],
+          "lost": [],
+          "neither_count": 0,
+          "retention_of_baseline_hits": {
+            "numerator": 0,
+            "denominator": 0,
+            "percent": null
+          },
+          "two_sided_exact_p": null
+        },
+        "wrong_positive": {
+          "baseline": {
+            "numerator": 0,
+            "denominator": 2,
+            "percent": 0.0
+          },
+          "candidate": {
+            "numerator": 0,
+            "denominator": 2,
+            "percent": 0.0
+          },
+          "change_percentage_points": 0.0,
+          "retained": [],
+          "gained": [],
+          "lost": [],
+          "neither_count": 2,
+          "retention_of_baseline_hits": {
+            "numerator": 0,
+            "denominator": 0,
+            "percent": null
+          },
+          "two_sided_exact_p": 1
+        },
+        "official_negative_answered": {
+          "baseline": {
+            "numerator": 0,
+            "denominator": 0,
+            "percent": null
+          },
+          "candidate": {
+            "numerator": 0,
+            "denominator": 0,
+            "percent": null
+          },
+          "change_percentage_points": null,
+          "retained": [],
+          "gained": [],
+          "lost": [],
+          "neither_count": 0,
+          "retention_of_baseline_hits": {
+            "numerator": 0,
+            "denominator": 0,
+            "percent": null
+          },
+          "two_sided_exact_p": null
+        },
+        "citation_precision": {
+          "baseline": {
+            "numerator": 3,
+            "denominator": 3,
+            "percent": 100.0
+          },
+          "candidate": {
+            "numerator": 3,
+            "denominator": 3,
+            "percent": 100.0
+          },
+          "change_percentage_points": 0.0
+        },
+        "false_refusal_on_answerable": {
+          "baseline": {
+            "numerator": 0,
+            "denominator": 2,
+            "percent": 0.0
+          },
+          "candidate": {
+            "numerator": 0,
+            "denominator": 2,
+            "percent": 0.0
+          },
+          "change_percentage_points": 0.0,
+          "retained": [],
+          "gained": [],
+          "lost": [],
+          "neither_count": 2,
+          "retention_of_baseline_hits": {
+            "numerator": 0,
+            "denominator": 0,
+            "percent": null
+          },
+          "two_sided_exact_p": 1
+        },
+        "first_http_error": {
+          "baseline": {
+            "numerator": 0,
+            "denominator": 2,
+            "percent": 0.0
+          },
+          "candidate": {
+            "numerator": 0,
+            "denominator": 2,
+            "percent": 0.0
+          },
+          "change_percentage_points": 0.0,
+          "retained": [],
+          "gained": [],
+          "lost": [],
+          "neither_count": 2,
+          "retention_of_baseline_hits": {
+            "numerator": 0,
+            "denominator": 0,
+            "percent": null
+          },
+          "two_sided_exact_p": 1
+        },
+        "all_claims_supported_per_substantive_response": {
+          "baseline": {
+            "numerator": 2,
+            "denominator": 2,
+            "percent": 100.0
+          },
+          "candidate": {
+            "numerator": 2,
+            "denominator": 2,
+            "percent": 100.0
+          },
+          "change_percentage_points": 0.0
+        }
+      },
+      "outcomes": {
+        "baseline": {
+          "http_status": {
+            "200": 2
+          },
+          "answerable": {
+            "full": 2
+          },
+          "official_negative": {},
+          "official_negative_full_answer_ids": [],
+          "official_negative_partial_answer_ids": []
+        },
+        "candidate": {
+          "http_status": {
+            "200": 2
+          },
+          "answerable": {
+            "full": 2
+          },
+          "official_negative": {},
+          "official_negative_full_answer_ids": [],
+          "official_negative_partial_answer_ids": []
+        }
+      }
+    },
+    "historical_vietnam": {
+      "n": 1,
+      "metrics": {
+        "first_http_200": {
+          "baseline": {
+            "numerator": 1,
+            "denominator": 1,
+            "percent": 100.0
+          },
+          "candidate": {
+            "numerator": 1,
+            "denominator": 1,
+            "percent": 100.0
+          },
+          "change_percentage_points": 0.0,
+          "retained": [
+            "891c4af5bb77d6b8635ec4109572de3401b60631"
+          ],
+          "gained": [],
+          "lost": [],
+          "neither_count": 0,
+          "retention_of_baseline_hits": {
+            "numerator": 1,
+            "denominator": 1,
+            "percent": 100.0
+          },
+          "two_sided_exact_p": 1
+        },
+        "first_answer_correct": {
+          "baseline": {
+            "numerator": 1,
+            "denominator": 1,
+            "percent": 100.0
+          },
+          "candidate": {
+            "numerator": 1,
+            "denominator": 1,
+            "percent": 100.0
+          },
+          "change_percentage_points": 0.0,
+          "retained": [
+            "891c4af5bb77d6b8635ec4109572de3401b60631"
+          ],
+          "gained": [],
+          "lost": [],
+          "neither_count": 0,
+          "retention_of_baseline_hits": {
+            "numerator": 1,
+            "denominator": 1,
+            "percent": 100.0
+          },
+          "two_sided_exact_p": 1
+        },
+        "fully_supported_positive": {
+          "baseline": {
+            "numerator": 0,
+            "denominator": 0,
+            "percent": null
+          },
+          "candidate": {
+            "numerator": 0,
+            "denominator": 0,
+            "percent": null
+          },
+          "change_percentage_points": null,
+          "retained": [],
+          "gained": [],
+          "lost": [],
+          "neither_count": 0,
+          "retention_of_baseline_hits": {
+            "numerator": 0,
+            "denominator": 0,
+            "percent": null
+          },
+          "two_sided_exact_p": null
+        },
+        "correct_refusal": {
+          "baseline": {
+            "numerator": 1,
+            "denominator": 1,
+            "percent": 100.0
+          },
+          "candidate": {
+            "numerator": 1,
+            "denominator": 1,
+            "percent": 100.0
+          },
+          "change_percentage_points": 0.0,
+          "retained": [
+            "891c4af5bb77d6b8635ec4109572de3401b60631"
+          ],
+          "gained": [],
+          "lost": [],
+          "neither_count": 0,
+          "retention_of_baseline_hits": {
+            "numerator": 1,
+            "denominator": 1,
+            "percent": 100.0
+          },
+          "two_sided_exact_p": 1
+        },
+        "wrong_positive": {
+          "baseline": {
+            "numerator": 0,
+            "denominator": 1,
+            "percent": 0.0
+          },
+          "candidate": {
+            "numerator": 0,
+            "denominator": 1,
+            "percent": 0.0
+          },
+          "change_percentage_points": 0.0,
+          "retained": [],
+          "gained": [],
+          "lost": [],
+          "neither_count": 1,
+          "retention_of_baseline_hits": {
+            "numerator": 0,
+            "denominator": 0,
+            "percent": null
+          },
+          "two_sided_exact_p": 1
+        },
+        "official_negative_answered": {
+          "baseline": {
+            "numerator": 0,
+            "denominator": 1,
+            "percent": 0.0
+          },
+          "candidate": {
+            "numerator": 0,
+            "denominator": 1,
+            "percent": 0.0
+          },
+          "change_percentage_points": 0.0,
+          "retained": [],
+          "gained": [],
+          "lost": [],
+          "neither_count": 1,
+          "retention_of_baseline_hits": {
+            "numerator": 0,
+            "denominator": 0,
+            "percent": null
+          },
+          "two_sided_exact_p": 1
+        },
+        "citation_precision": {
+          "baseline": {
+            "numerator": 0,
+            "denominator": 0,
+            "percent": null
+          },
+          "candidate": {
+            "numerator": 0,
+            "denominator": 0,
+            "percent": null
+          },
+          "change_percentage_points": null
+        },
+        "false_refusal_on_answerable": {
+          "baseline": {
+            "numerator": 0,
+            "denominator": 0,
+            "percent": null
+          },
+          "candidate": {
+            "numerator": 0,
+            "denominator": 0,
+            "percent": null
+          },
+          "change_percentage_points": null,
+          "retained": [],
+          "gained": [],
+          "lost": [],
+          "neither_count": 0,
+          "retention_of_baseline_hits": {
+            "numerator": 0,
+            "denominator": 0,
+            "percent": null
+          },
+          "two_sided_exact_p": null
+        },
+        "first_http_error": {
+          "baseline": {
+            "numerator": 0,
+            "denominator": 1,
+            "percent": 0.0
+          },
+          "candidate": {
+            "numerator": 0,
+            "denominator": 1,
+            "percent": 0.0
+          },
+          "change_percentage_points": 0.0,
+          "retained": [],
+          "gained": [],
+          "lost": [],
+          "neither_count": 1,
+          "retention_of_baseline_hits": {
+            "numerator": 0,
+            "denominator": 0,
+            "percent": null
+          },
+          "two_sided_exact_p": 1
+        },
+        "all_claims_supported_per_substantive_response": {
+          "baseline": {
+            "numerator": 0,
+            "denominator": 0,
+            "percent": null
+          },
+          "candidate": {
+            "numerator": 0,
+            "denominator": 0,
+            "percent": null
+          },
+          "change_percentage_points": null
+        }
+      },
+      "outcomes": {
+        "baseline": {
+          "http_status": {
+            "200": 1
+          },
+          "answerable": {},
+          "official_negative": {
+            "refusal": 1
+          },
+          "official_negative_full_answer_ids": [],
+          "official_negative_partial_answer_ids": []
+        },
+        "candidate": {
+          "http_status": {
+            "200": 1
+          },
+          "answerable": {},
+          "official_negative": {
+            "refusal": 1
+          },
+          "official_negative_full_answer_ids": [],
+          "official_negative_partial_answer_ids": []
+        }
+      }
+    }
+  },
+  "semantic_checks": {
+    "independent": {
+      "correctness_or_correct_refusal_improved": false,
+      "first_answer_correctness_non_decreasing": true,
+      "correct_refusal_non_decreasing": true,
+      "whole_answer_support_non_decreasing": false,
+      "citation_precision_non_decreasing": true,
+      "all_baseline_correct_retained": false
+    },
+    "historical_controls_correct": {
+      "c78f18606524539e4c573481e5bf1e0a242cc33c": {
+        "baseline": true,
+        "candidate": true
+      },
+      "891cab2e41d6ba962778bda297592c916b432226": {
+        "baseline": true,
+        "candidate": true
+      },
+      "891c4af5bb77d6b8635ec4109572de3401b60631": {
+        "baseline": true,
+        "candidate": true
+      }
+    }
+  },
+  "same_terminal_output_diagnostics": [],
+  "rows": {
+    "e12674f0466f8c0da109b6076d9939b30952c7da": {
+      "scope": "independent",
+      "query": "In the paper “Important Attribute Identification in Knowledge Graph”, What do you use to calculate word/sub-word embeddings",
+      "baseline": {
+        "masked_id": "5d16937ba250cf624f4b",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "all_claims_supported": null,
+        "reason": "Structured insufficient-evidence response with no citations on an answerable question with an annotated passage.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "f56b02ce4274d235cccf",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "all_claims_supported": null,
+        "reason": "Structured insufficient-evidence response with no citations on an answerable question with an annotated passage.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "9a94dcee17cdb9a39d39977191e643adece58dfc": {
+      "scope": "independent",
+      "query": "In the paper “Open Information Extraction on Scientific Text: An Evaluation”, Were the OpenIE systems more accurate on some scientific disciplines than others?",
+      "baseline": {
+        "masked_id": "2d0ca7d12dc909cc1049",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "all_claims_supported": null,
+        "reason": "Structured insufficient-evidence response with no citations on an official unanswerable question.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true
+      },
+      "candidate": {
+        "masked_id": "1c488b1c563c1d86c4bc",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "all_claims_supported": null,
+        "reason": "Structured insufficient-evidence response with no citations on an official unanswerable question.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true
+      }
+    },
+    "0428e06f0550e1063a64d181210795053a8e6436": {
+      "scope": "independent",
+      "query": "In the paper “Harry Potter and the Action Prediction Challenge from Natural Language”, How well does a simple bag-of-words baseline do?",
+      "baseline": {
+        "masked_id": "0f3f7ba40e95d31c859a",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "all_claims_supported": null,
+        "reason": "Structured insufficient-evidence response with no citations on an official unanswerable question.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true
+      },
+      "candidate": {
+        "masked_id": "03719e9622d890c91228",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "all_claims_supported": null,
+        "reason": "Structured insufficient-evidence response with no citations on an official unanswerable question.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true
+      }
+    },
+    "5f0bb32d70ee8e4c4c59dc5c193bc0735fd751cc": {
+      "scope": "independent",
+      "query": "In the paper “Schema-Guided Dialogue State Tracking Task at DSTC8”, Where is the dataset from?",
+      "baseline": {
+        "masked_id": "3647eb703adad33a3c4c",
+        "verdict": "partial",
+        "supporting_citations": [
+          1,
+          2,
+          3
+        ],
+        "all_claims_supported": true,
+        "reason": "Identifies the corpus as newly created by the task authors, answering one aspect of provenance. It omits the dialogue simulator that generated the examples. Each of the three source, size and authorship claims has its attached support.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "f4c24405356faea62edb",
+        "verdict": "partial",
+        "supporting_citations": [
+          1,
+          2,
+          3
+        ],
+        "all_claims_supported": true,
+        "reason": "For this broad provenance question [2] and [3] identify who created the new corpus, but the answer omits the source of the dialogues, the simulator. [1] supports the attributed description and [2] and [3] support the corpus details.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "b6a4ab009e6f213f011320155a7ce96e713c11cf": {
+      "scope": "independent",
+      "query": "In the paper “Classification Betters Regression in Query-based Multi-document Summarisation Techniques for Question Answering: Macquarie University at BioASQ7b”, How did the author's work rank among other submissions on the challenge?",
+      "baseline": {
+        "masked_id": "3e543b71de68ddb9e042",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "all_claims_supported": null,
+        "reason": "Structured insufficient-evidence response with no citations on an official unanswerable question.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true
+      },
+      "candidate": {
+        "masked_id": "18017f5955b8c8b9cd67",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "all_claims_supported": null,
+        "reason": "Structured insufficient-evidence response with no citations on an official unanswerable question.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true
+      }
+    },
+    "b546f14feaa639e43aa64c799dc61b8ef480fb3d": {
+      "scope": "independent",
+      "query": "In the paper “Measuring Social Bias in Knowledge Graph Embeddings”, How are these biases found?",
+      "baseline": {
+        "masked_id": "853d6e2e26b5812d9131",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "reason": "The sources describe finetuning KG embeddings, comparison of sensitive attributes, and measurement of profession associations. Each background finding and limitation is supported by the attached passages, despite the official negative.",
+        "returned_citations": 4,
+        "http": 200,
+        "negative": true
+      },
+      "candidate": {
+        "masked_id": "ae79913f48a2d6ff7828",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "reason": "The stated fine-tuning approach and pairwise comparisons identify how biases are detected. The cited texts also support the raw-count correlation, ComplEx test, and examples from both knowledge graphs.",
+        "returned_citations": 4,
+        "http": 200,
+        "negative": true
+      }
+    },
+    "4f12b41bd3bb2610abf7d7835291496aa69fb78c": {
+      "scope": "independent",
+      "query": "In the paper “An Empirical Comparison of Simple Domain Adaptation Methods for Neural Machine Translation”, How did they use the domain tags?",
+      "baseline": {
+        "masked_id": "f51f50c7b26455c88e0c",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "reason": "The tag appended to source sentences, its decoder purpose, default tagging, no-tags variant, corpora and reported benefit all appear in the attached passages.",
+        "returned_citations": 4,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "df154bcd5c0ac0483c87",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          1,
+          2,
+          3,
+          5
+        ],
+        "reason": "[3] gives the appended source tag and decoder purpose. [5] supports corpus tagging, [2] the with/without setting and [1] the empirical helpfulness.",
+        "returned_citations": 4,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "b69ffec1c607bfe5aa4d39254e0770a3433a191b": {
+      "scope": "independent",
+      "query": "In the paper “Unsupervised Machine Commenting with Neural Variational Topic Model”, What news comment dataset was used?",
+      "baseline": {
+        "masked_id": "968ebcaec941c8073532",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          1,
+          2,
+          4
+        ],
+        "reason": "[4] gives the Tencent source, content, totals, test annotation, and split. [1] and [2] identify Qin et al. as the dataset origin.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "25a4aefd43e616d0f534",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          1,
+          2,
+          4
+        ],
+        "reason": "[4] names Tencent News and supports the exact dataset and split sizes. [1] and [2] identify the article-comment dataset introduced by Qin et al.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "ed4fb6bce855ca932548689e45fde21f26a71035": {
+      "scope": "independent",
+      "query": "In the paper “Coarse-grain Fine-grain Coattention Network for Multi-evidence Question Answering”, What is coattention?",
+      "baseline": {
+        "masked_id": "43af452ab9ad0533836b",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          1,
+          2,
+          3
+        ],
+        "reason": "The query/document encodings and concatenated context appear in [1]. [2] grounds the affinity matrix and [3] the corresponding mention/query operation. This supplies an answer despite the negative annotation.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": true
+      },
+      "candidate": {
+        "masked_id": "040e83ad4955279188f0",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          1,
+          2,
+          3
+        ],
+        "reason": "[1] defines the document/query co-dependent context and concatenation; [2] and [3] describe the respective coarse and mention-level operations. The paper answers this official negative.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": true
+      }
+    },
+    "9d9f6cc0f026f7168fcea461baff4b8a925a185f": {
+      "scope": "independent",
+      "query": "In the paper “Developing a Fine-Grained Corpus for a Less-resourced Language: the case of Kurdish”, How is the corpus normalized?",
+      "baseline": {
+        "masked_id": "30cc9d9ed8bd7a1c4f42",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          2,
+          3
+        ],
+        "reason": "[3] directly describes Unicode conversion, ZWNJ replacement, and orthography checking. [2] supplies the regional standard and preservation of punctuation and special characters.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "a1b96a21821974e5c2af",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          2,
+          3
+        ],
+        "reason": "Both original normalization operations, Unicode conversion, the Kurdistan reference standard, and retaining characters for text integrity appear in [2] and [3].",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "a61732774faf30bab15bf944b2360ec4710870c1": {
+      "scope": "independent",
+      "query": "In the paper “Char-RNN and Active Learning for Hashtag Segmentation”, What are the predefined morpho-syntactic patterns used to filter the training data?",
+      "baseline": {
+        "masked_id": "f7e5ae87531833f90bf3",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "all_claims_supported": null,
+        "reason": "Structured insufficient-evidence response with no citations on an official unanswerable question.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true
+      },
+      "candidate": {
+        "masked_id": "e588a5cad86b8dae10ea",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "all_claims_supported": null,
+        "reason": "Structured insufficient-evidence response with no citations on an official unanswerable question.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true
+      }
+    },
+    "6adfa9eee76b96953a76c03356bf41d8a9378851": {
+      "scope": "independent",
+      "query": "In the paper “Multilingual Speech Recognition with Corpus Relatedness Sampling”, By how much do they, on average, outperform the baseline multilingual model on 16 low-resource tasks?",
+      "baseline": {
+        "masked_id": "1f2d1a06700119e7dfc1",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          1,
+          4
+        ],
+        "reason": "Both snippets give a 1.6 average phone-error-rate improvement against fine-tuned multilingual models, including the 16 corpora and percent notation.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "d70e15ca332d87520bc2",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          1,
+          4
+        ],
+        "reason": "The 1.6 average for the 16 corpora is explicit; [4] also supplies both before/after examples for Amharic and Bengali.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "4319a13a6c4a9494ccb465509c9d4265f63dc9b5": {
+      "scope": "independent",
+      "query": "In the paper “Variational Cross-domain Natural Language Generation for Spoken Dialogue Systems”, How is some information lost in the RNN-based generation models?",
+      "baseline": {
+        "masked_id": "1e4601b1ce91bc56977f",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          1,
+          2
+        ],
+        "reason": "[1] describes losing desired information during RNN generation and [2] identifies the missing attributes in generated utterances. The explicit limit on mechanistic detail is properly scoped.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "995c4e25b58262bd5990",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          1,
+          2
+        ],
+        "reason": "[1] supports diversity with information loss, and [2] specifically says the RNN's utterances missed desired attributes.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "7befb7a8354fca9d2a94e3fd4364625c98067ebb": {
+      "scope": "independent",
+      "query": "In the paper “Citation Text Generation”, How was the evaluation corpus collected?",
+      "baseline": {
+        "masked_id": "5b5d41abb727c599019b",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          3,
+          4
+        ],
+        "reason": "[4] identifies the S2-GORC full-text subcorpus and linked citing sentences. [3] supports extraction totals and 2,500 held out for each evaluation split. This answers an officially unanswerable item.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": true
+      },
+      "candidate": {
+        "masked_id": "77f1b6f5c430fdd97e8c",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          3,
+          4
+        ],
+        "reason": "Together [3] and [4] establish the S2-GORC source, language, subject, numbers of articles and extracted links, and the two held-out split sizes.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": true
+      }
+    },
+    "a9def7958eac7b9a780403d4f136927f756bab83": {
+      "scope": "independent",
+      "query": "In the paper “Tag-based Multi-Span Extraction in Reading Comprehension”, What is the previous model that attempted to tackle multi-span questions as a part of its design?",
+      "baseline": {
+        "masked_id": "cb3ca610e0648e933c07",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          2,
+          3
+        ],
+        "reason": "[2] establishes unique deliberate treatment of multiple spans, and [3] explicitly names MTMSN and its DROP design.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "d917cb371d6c17af4fcc",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          3
+        ],
+        "reason": "[3] directly names MTMSN as the first and only model to specifically tackle DROP multi-span questions.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "f6e5febf2ea53ec80135bbd532d6bb769d843dd8": {
+      "scope": "independent",
+      "query": "In the paper “Gender Representation in Open Source Speech Resources”, What natural languages are represented in the speech resources studied?",
+      "baseline": {
+        "masked_id": "d2eb7b6d12962717b857",
+        "verdict": "wrong",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          5
+        ],
+        "reason": "[5] provides the counts of corpora, languages and varieties. The answer names none of the requested languages and still presents a formal positive reply.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": true
+      },
+      "candidate": {
+        "masked_id": "db6ee3acb0c8ef746b85",
+        "verdict": "partial",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          5
+        ],
+        "reason": "[5] supports the 33-language count and identifies English in the UK/Ireland resource. This gives one relevant language and explicitly acknowledges the remaining unavailable names.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": true
+      }
+    },
+    "1a06b7a2097ebbad0afc787ea0756db6af3dadf4": {
+      "scope": "independent",
+      "query": "In the paper “ASR-free CNN-DTW keyword spotting using multilingual bottleneck features for almost zero-resource languages”, What languages are considered?",
+      "baseline": {
+        "masked_id": "a8e0da8ef63328f9ea2b",
+        "verdict": "partial",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          1,
+          2,
+          3
+        ],
+        "reason": "It supplies the target variety and at least Dutch for a training set, while honestly identifying the truncated next name and the lack of the requested full list. [1]-[3] ground these limited details.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "bd544b8f6d558c8abf1d",
+        "verdict": "wrong",
+        "all_claims_supported": false,
+        "supporting_citations": [
+          1,
+          2,
+          3
+        ],
+        "reason": "[3] ends with the literal text 'Dutch and Fr'. French is a probable completion but unverified in the returned citations; the answer positively claims it is specified. The three citations still support the target and training configurations.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "2efdcebebeb970021233553104553205ce5d6567": {
+      "scope": "independent",
+      "query": "In the paper “Interpreting Recurrent and Attention-Based Neural Models: a Case Study on Natural Language Inference”, How many layers are there in their model?",
+      "baseline": {
+        "masked_id": "efe9557c2a1eb86ade5f",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "all_claims_supported": null,
+        "reason": "Structured insufficient-evidence response with no citations on an answerable question with an annotated passage.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "9a4c1e9cabc481f6476f",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "all_claims_supported": null,
+        "reason": "Structured insufficient-evidence response with no citations on an answerable question with an annotated passage.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "03502826f4919e251edba1525f84dd42f21b0253": {
+      "scope": "independent",
+      "query": "In the paper “TextKD-GAN: Text Generation using KnowledgeDistillation and Generative Adversarial Networks”, How much better in terms of JSD measure did their model perform?",
+      "baseline": {
+        "masked_id": "eb6c213da9f0aa443e56",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "all_claims_supported": null,
+        "reason": "Structured insufficient-evidence response with no citations on an official unanswerable question.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true
+      },
+      "candidate": {
+        "masked_id": "f4933e99b6cbe61177c8",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "all_claims_supported": null,
+        "reason": "Structured insufficient-evidence response with no citations on an official unanswerable question.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true
+      }
+    },
+    "f197e0f61f7980c64a76a3a9657762f1f0edb65b": {
+      "scope": "independent",
+      "query": "In the paper “Racial Bias in Hate Speech and Abusive Language Detection Datasets”, Any other bias may be detected?",
+      "baseline": {
+        "masked_id": "8ca9361cdb7458be6095",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          2,
+          3,
+          4,
+          6
+        ],
+        "reason": "The yes is qualified as a discussion of prior research; [2] identifies the paper's own racial audit, [4]/[6] report gender bias, and [3]/[6] support the cited false-positive examples.",
+        "returned_citations": 4,
+        "http": 200,
+        "negative": true
+      },
+      "candidate": {
+        "masked_id": "458c5f9fd6b2fd550347",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          2,
+          3,
+          4,
+          6
+        ],
+        "reason": "The answer distinguishes the target study's racial audit from prior gender and false-positive bias findings. The citations ground the associations with identity terms and the proper attribution.",
+        "returned_citations": 4,
+        "http": 200,
+        "negative": true
+      }
+    },
+    "7486c9d9e6c407c0c3bc012405d689dbee072327": {
+      "scope": "independent",
+      "query": "In the paper “Measuring the Reliability of Hate Speech Annotations: The Case of the European Refugee Crisis”, What languages are were included in the dataset of hateful content?",
+      "baseline": {
+        "masked_id": "17d9d959d6629a25cdfe",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "all_claims_supported": null,
+        "reason": "Structured insufficient-evidence response with no citations on an answerable question with an annotated passage.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "07926bfbd6cc6627c339",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "all_claims_supported": null,
+        "reason": "Structured insufficient-evidence response with no citations on an answerable question with an annotated passage.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "3f85cc5be84479ba668db6d9f614fedbff6d77f1": {
+      "scope": "independent",
+      "query": "In the paper “Semantic Document Distance Measures and Unsupervised Document Revision Detection”, How large is the Wikipedia revision dump dataset?",
+      "baseline": {
+        "masked_id": "6e527a27e055d6a1c108",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          2
+        ],
+        "reason": "[2] supplies both the original eight GB compressed and the exact preprocessed document/revision figures.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "3c68cec9c524b8caeff6",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          1,
+          2
+        ],
+        "reason": "Both excerpts give eight GB compressed. [2] directly records the JWPL preprocessing and the two reported counts.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "ef07ec34433221d4da79d5923fb00d8ac446b92c": {
+      "scope": "independent",
+      "query": "In the paper “Adversarial Learning with Contextual Embeddings for Zero-resource Cross-lingual Classification and NER”, How do they quantify alignment between the embeddings of a document and its translation?",
+      "baseline": {
+        "masked_id": "56a347e7042078c4e277",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          1,
+          2
+        ],
+        "reason": "[2] gives Amazon Translate, the example languages and mean-pooling. [1] explicitly specifies paired cosine similarity, the median, and the increase after adversarial training.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "be3823e6a8fb438ed1e1",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          1
+        ],
+        "reason": "[1] gives the MLDoc-finetuned BERT representation, document mean-pooling, the English/translation cosine similarity, and the median increase.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "b42323d60827ecf0d9e478c9a31f90940cfae975": {
+      "scope": "independent",
+      "query": "In the paper “Drug-drug Interaction Extraction via Recurrent Neural Network with Multiple Attention Layers”, How big is the evaluated dataset?",
+      "baseline": {
+        "masked_id": "eb87ceca82e056556d63",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "all_claims_supported": null,
+        "reason": "Structured insufficient-evidence response with no citations on an answerable question with an annotated passage.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "b1a0ebb330afad57b748",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "all_claims_supported": null,
+        "reason": "Structured insufficient-evidence response with no citations on an answerable question with an annotated passage.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "13f7d50b3b8b0b97d90401eeb0a4e97c9eab3a76": {
+      "scope": "independent",
+      "query": "In the paper “Czech Text Processing with Contextual Embeddings: POS Tagging, Lemmatization, Parsing and NER”, What data is the Prague Dependency Treebank built on?",
+      "baseline": {
+        "masked_id": "06db813dc91818b02358",
+        "verdict": "wrong",
+        "all_claims_supported": false,
+        "supporting_citations": [
+          2,
+          5
+        ],
+        "reason": "[2] and [5] support the prior-version texts, annotation layers, and splits, a limited part of the provenance. The last sentence asserts absence in the entire article; the cited passages only show what these excerpts report.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": true
+      },
+      "candidate": {
+        "masked_id": "5aa40acbd9bbab1944d5",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "all_claims_supported": null,
+        "reason": "Structured insufficient-evidence response with no citations on an official unanswerable question.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true
+      }
+    },
+    "d5105a6a6d5d1931b0729dcf15ca862d6eac770f": {
+      "scope": "independent",
+      "query": "In the paper “Community Question Answering Platforms vs. Twitter for Predicting Characteristics of Urban Neighbourhoods”, How many demographic attributes they try to predict?",
+      "baseline": {
+        "masked_id": "8a66f8c5e016ffa4da97",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          1,
+          2
+        ],
+        "reason": "Both excerpts identify 62 as the number of London neighbourhood demographic attributes the authors study.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "8a66f8c5e016ffa4da97",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          1,
+          2
+        ],
+        "reason": "Both excerpts identify 62 as the number of London neighbourhood demographic attributes the authors study.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "7ac0cec79c8c2b1909b0a1cc0d4646fce09884ee": {
+      "scope": "independent",
+      "query": "In the paper “On the Relationship between Self-Attention and Convolutional Layers”, Is there a way of converting existing convolution layers into self-attention to perform very same convolution?",
+      "baseline": {
+        "masked_id": "f7b7a36c1ae30ed1c1c6",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          2,
+          3,
+          6
+        ],
+        "reason": "[2] establishes the capacity result; [3] gives its precise sufficient conditions and construction; [6] explicitly gives a one-layer relative-position reparameterization.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": true
+      },
+      "candidate": {
+        "masked_id": "dbd61954214b5b81d31c",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          3,
+          6
+        ],
+        "reason": "[3] explicitly states the constructive theorem with its positional dimension, kernel and channels. [6] supports reparameterizing a single layer; the paper directly answers this negative.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": true
+      }
+    },
+    "61404466cf86a21f0c1783ce535eb39a01528ce8": {
+      "scope": "independent",
+      "query": "In the paper “A Unified System for Aggression Identification in English Code-Mixed and Uni-Lingual Texts”, What are the key differences in communication styles between Twitter and Facebook?",
+      "baseline": {
+        "masked_id": "1873b4034559c4909bdd",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "all_claims_supported": null,
+        "reason": "Structured insufficient-evidence response with no citations on an official unanswerable question.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true
+      },
+      "candidate": {
+        "masked_id": "7befd8055443428febe8",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "all_claims_supported": null,
+        "reason": "Structured insufficient-evidence response with no citations on an official unanswerable question.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true
+      }
+    },
+    "827b5bd215599623a3125afe331b56b89b42bf09": {
+      "scope": "independent",
+      "query": "In the paper “Excitation-based Voice Quality Analysis and Modification”, What large corpus is used for experiments?",
+      "baseline": {
+        "masked_id": "cf653ff3a15692ff1a50",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          1,
+          3
+        ],
+        "reason": "[3] identifies De7, designer, expressive-speech purpose, speaker, quantities and qualities; [1] confirms the large single-speaker three-quality corpus.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "52503a3328852d7f7ca0",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          3
+        ],
+        "reason": "[3] names De7, identifies the speaker and three voice qualities, and gives the approximately 50-minute duration per quality.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "a48cc6d3d322a7b159ff40ec162a541bf74321eb": {
+      "scope": "independent",
+      "query": "In the paper “An Unsupervised Word Sense Disambiguation System for Under-Resourced Languages”, What evaluation is conducted?",
+      "baseline": {
+        "masked_id": "563df183ceb356a65846",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6
+        ],
+        "reason": "[3] identifies SemEval sense induction/disambiguation and gold clustering. [1]/[2] ground the Russian evaluation, [4]/[5] its specific metric, baselines and subsets, and [6] the Section 4 description.",
+        "returned_citations": 6,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "93d0b53c14136989520a",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "reason": "The Russian resources, word-sense clustering and SemEval methodology are given by [1]-[3]. [4]/[5] support ARI, baselines, corpus subset counts, the Watlink inventory and the dense versus sparse finding.",
+        "returned_citations": 5,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "65e2f97f2fe8eb5c2fa41cb95c02b577e8d6e5ee": {
+      "scope": "independent",
+      "query": "In the paper “Towards Personalized Dialog Policies for Conversational Skill Discovery”, How did they measure effectiveness?",
+      "baseline": {
+        "masked_id": "4d34921c59e47d3ce0ca",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          1,
+          3,
+          4,
+          5,
+          6
+        ],
+        "reason": "[4]/[5] ground the skill-launch metric and [4] its simulation. [3] supplies the randomized user A/B test; [1]/[6] support the dialog-length and success findings.",
+        "returned_citations": 5,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "15a9fb6d7348de7bee6a",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          1,
+          3,
+          4,
+          5,
+          6
+        ],
+        "reason": "[4] defines the proportion of skill-launching dialogs; [3] and [5] support its use and [1]/[6] give the shorter dialogs, success improvement, and live comparison.",
+        "returned_citations": 5,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "20be7a776dfda0d3c9dc10270699061cb9bc8297": {
+      "scope": "independent",
+      "query": "In the paper “Indiscapes: Instance Segmentation Networks for Layout Parsing of Historical Indic Manuscripts”, What language(s) are the manuscripts written in?",
+      "baseline": {
+        "masked_id": "f04a4c61ed4d059dfc4f",
+        "verdict": "partial",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          1,
+          3
+        ],
+        "reason": "The excerpts support the broad Indic characterization and writing-system diversity. The reply correctly limits the available specificity and names no individual language.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": true
+      },
+      "candidate": {
+        "masked_id": "ceffc18c4cff13da2084",
+        "verdict": "partial",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          1,
+          3,
+          6
+        ],
+        "reason": "[1] and [3] identify a range of Indic languages and script variation. [6] supports the diversity criterion. This narrows the language family/region while explicitly leaving every individual language unnamed.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": true
+      }
+    },
+    "676c874266ee0388fe5b9a75e1006796c68c3c13": {
+      "scope": "independent",
+      "query": "In the paper “A General-Purpose Tagger with Convolutional Neural Networks”, How many parameters does their CNN have?",
+      "baseline": {
+        "masked_id": "cbc96fd25cbdbeba1707",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "all_claims_supported": null,
+        "reason": "Structured insufficient-evidence response with no citations on an official unanswerable question.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true
+      },
+      "candidate": {
+        "masked_id": "c912e270cfb1dd87f0b1",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "all_claims_supported": null,
+        "reason": "Structured insufficient-evidence response with no citations on an official unanswerable question.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true
+      }
+    },
+    "536e4a39b654b78228bf55fd09d1b433e0dae447": {
+      "scope": "independent",
+      "query": "In the paper “Aff2Vec: Affect--Enriched Distributional Word Representations”, Is the affect of a word affected by context?",
+      "baseline": {
+        "masked_id": "a0354356b988478c74b2",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          1,
+          2
+        ],
+        "reason": "[2] supports context-dependent interpretation with the cited book-review examples, and [1] gives the separate previous study of contextually similar words with opposite affect.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": true
+      },
+      "candidate": {
+        "masked_id": "7750e8b535afa60fd4ea",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          2
+        ],
+        "reason": "The passage supports contextual sentiment incongruity, the damping method, book-review examples and the distinction between previous results and Aff2Vec. It supports the qualified affirmative despite the annotation.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": true
+      }
+    },
+    "3c16d4cf5dc23223980d9c0f924cb9e4e6943f13": {
+      "scope": "independent",
+      "query": "In the paper “Align, Mask and Select: A Simple Method for Incorporating Commonsense Knowledge into Language Representation Models”, How do they select answer candidates for their QA task?",
+      "baseline": {
+        "masked_id": "6d6b72eff122182b4e74",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          1,
+          3
+        ],
+        "reason": "[3] gives entity/concept candidates selected from knowledge graphs, and [1] names AMS and the CommonsenseQA-like format. The limitation is scoped to the excerpts.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "ffd573a4a73503366600",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          1,
+          3
+        ],
+        "reason": "[3] grounds the align-mask-select steps including knowledge-graph entities as choices. [1] confirms the multiple-choice form. It accurately qualifies the missing details.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "441886f0497dc84f46ed8c32e8fa32983b5db42e": {
+      "scope": "independent",
+      "query": "In the paper “DpgMedia2019: A Dutch News Dataset for Partisanship Detection”, What examples of applications are mentioned?",
+      "baseline": {
+        "masked_id": "bc53729dd04305efaa06",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          3,
+          4
+        ],
+        "reason": "The paper proposes a partisan news detector in [4], and [3] describes the alternatives for training, evaluation and designing new article-level labels.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "120641f4a24a81188cec",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          3,
+          4
+        ],
+        "reason": "[4] names the partisan detector and label-level application. [3] gives the remaining semi-supervised and article-only choices and the purpose of releasing survey data.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "4fa2faa08eeabc09d78d89aaf0ea86bb36328172": {
+      "scope": "independent",
+      "query": "In the paper “MIT-QCRI Arabic Dialect Identification System for the 2017 Multi-Genre Broadcast Challenge”, How do they explore dialect variability?",
+      "baseline": {
+        "masked_id": "58cb80fb16418b5d517c",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          1,
+          2
+        ],
+        "reason": "Both cited passages describe how the system investigated dialect variability and domain mismatch. They support the feature types, Siamese network, i-vectors and stated finding.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": true
+      },
+      "candidate": {
+        "masked_id": "564f22f8011a6c171f94",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          1,
+          2
+        ],
+        "reason": "[1] specifically reports dialect similarity learning by a Siamese network, i-vector adaptation and both feature types. [2] confirms dimensionality reduction for an unknown test domain.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": true
+      }
+    },
+    "39492338e27cb90bf1763e4337c2f697cf5082ba": {
+      "scope": "independent",
+      "query": "In the paper “BB_twtr at SemEval-2017 Task 4: Twitter Sentiment Analysis with CNNs and LSTMs”, How many CNNs and LSTMs were ensembled?",
+      "baseline": {
+        "masked_id": "1bd15292614228912848",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          1,
+          2
+        ],
+        "reason": "Both original excerpts directly list the counts for the two model types.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "0509be0397c0125eff6d",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          1,
+          2
+        ],
+        "reason": "Both excerpts say the final ensemble comprised 10 CNNs and 10 LSTMs with varying hyperparameters and pretraining.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "0cfaca6f3f33ebdb338c5f991f6a7a33ff33844d": {
+      "scope": "independent",
+      "query": "In the paper “Brundlefly at SemEval-2016 Task 12: Recurrent Neural Networks vs. Joint Inference for Clinical Temporal Information Extraction”, Which structured prediction approach do they adopt for temporal entity extraction?",
+      "baseline": {
+        "masked_id": "20c85c1a1d543e2a92a4",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          1,
+          2,
+          3
+        ],
+        "reason": "[1] ties structured joint inference to temporal entity extraction. [2]/[3] identify Stanford's DeepDive as the implementation.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "f7b5f2e1fd3a4d58cf90",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "reason": "[1]-[3] associate DeepDive-based structured joint inference with temporal extraction. [4] explicitly describes the probabilistic graphical model for domain knowledge and sequence structure.",
+        "returned_citations": 4,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "9653c89a93ac5c717a0a26cf80e9aa98a5ccf910": {
+      "scope": "independent",
+      "query": "In the paper “A Comparative Evaluation of Visual and Natural Language Question Answering Over Linked Data”, Which four QA systems do they use?",
+      "baseline": {
+        "masked_id": "5ebe1045d732c0f50048",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          4
+        ],
+        "reason": "[4] explicitly enumerates WDAqua, QAKiS, gAnswer and Platypus.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "5ebe1045d732c0f50048",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          4
+        ],
+        "reason": "[4] explicitly enumerates WDAqua, QAKiS, gAnswer and Platypus.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "c80669cb444a6ec6249b971213b0226f59940a82": {
+      "scope": "independent",
+      "query": "In the paper “Dover: A Method for Combining Diarization Outputs”, On average, by how much do they reduce the diarization error?",
+      "baseline": {
+        "masked_id": "32163304b0aa969031a8",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "all_claims_supported": null,
+        "reason": "Structured insufficient-evidence response with no citations on an official unanswerable question.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true
+      },
+      "candidate": {
+        "masked_id": "00c57968fadabeede3e2",
+        "verdict": "wrong",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          1,
+          3,
+          4
+        ],
+        "reason": "All three excerpts support only the direction of performance against the average or oracle channel. The positive API response supplies no numerical amount and properly limits the absence claim to the excerpts.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": true
+      }
+    },
+    "f33a21c6a9c75f0479ffdbb006c40e0739134716": {
+      "scope": "independent",
+      "query": "In the paper “Semantic Role Labeling for Learner Chinese: the Importance of Syntactic Parsing and L2-L1 Parallel Data”, Do the authors suggest why syntactic parsing is so important for semantic role labelling for interlanguages?",
+      "baseline": {
+        "masked_id": "73a964f20e930938a675",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          2,
+          3
+        ],
+        "reason": "The authors' account of correct partial parses, transfer, and the relation of parser quality to L2 performance appears in [3]. [2] confirms the smaller L1-to-L2 drop.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "4efc6d1ada2ab45e6897",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          2,
+          3,
+          6
+        ],
+        "reason": "[3] gives the correct partial grammatical fragments mechanism and generalization claim. [2] and [6] supply the comparative performance drop.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "e1f559da7fa501d3190073bca9ce4d4a12149e80": {
+      "scope": "independent",
+      "query": "In the paper “Weakly Supervised Domain Detection”, What is the performance of their model?",
+      "baseline": {
+        "masked_id": "f443863ed8f43b11116d",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          1,
+          2,
+          3,
+          4,
+          6
+        ],
+        "reason": "The answer preserves the qualitative performance comparisons in [1]-[4], including domains and the L-LDA exception, and [6] supports the human judgments of summary informativeness and coherence.",
+        "returned_citations": 5,
+        "http": 200,
+        "negative": true
+      },
+      "candidate": {
+        "masked_id": "0cf0e56243f68e81a23d",
+        "verdict": "wrong",
+        "all_claims_supported": false,
+        "supporting_citations": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "reason": "[1]-[4] support the overall, word, domain and sentence-level comparisons. The passages give INLINEFORM placeholders, not actual variant names or models called DetNet0/1/3. The answer presents those placeholder indices as real identifiers.",
+        "returned_citations": 4,
+        "http": 200,
+        "negative": true
+      }
+    },
+    "6cdd61ebf84aa742155f4554456cc3233b6ae2bf": {
+      "scope": "independent",
+      "query": "In the paper “The Role of Pragmatic and Discourse Context in Determining Argument Impact”, What models that rely only on claim-specific linguistic features are used as baselines?",
+      "baseline": {
+        "masked_id": "ba7ecdc1d1f90a833401",
+        "verdict": "wrong",
+        "all_claims_supported": false,
+        "supporting_citations": [
+          3,
+          4,
+          5
+        ],
+        "reason": "The cited excerpts call FastText and the attention BiLSTM baselines but do not establish both use only claim-specific inputs. [5] explicitly identifies the SVM's available feature families; the answer overstates the exclusivity inference.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "07c9302355926771c591",
+        "verdict": "failure",
+        "supporting_citations": [],
+        "all_claims_supported": null,
+        "reason": "The first request returned HTTP 502 with no answer or citations.",
+        "returned_citations": 0,
+        "http": 502,
+        "negative": false
+      }
+    },
+    "0d6d5b6c00551dd0d2519f117ea81d1e9e8785ec": {
+      "scope": "independent",
+      "query": "In the paper “Filling Gender&Number Gaps in Neural Machine Translation with Black-box Context Injection”, Which neural machine translation system is used?",
+      "baseline": {
+        "masked_id": "0325f7b8bf29d1e00d16",
+        "verdict": "partial",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          1,
+          2
+        ],
+        "reason": "Google Translate is the right candidate. [1] describes an unnamed system and [2] only names Google in an example. The answer openly identifies its inability to establish the experimental assignment.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "aab8248300517d91540a",
+        "verdict": "failure",
+        "supporting_citations": [],
+        "all_claims_supported": null,
+        "reason": "The first request returned HTTP 502 with no answer or citations.",
+        "returned_citations": 0,
+        "http": 502,
+        "negative": false
+      }
+    },
+    "8ca31caa34cc5b65dc1d01d0d1f36bf8c4928805": {
+      "scope": "independent",
+      "query": "In the paper “Exploring End-to-End Techniques for Low-Resource Speech Recognition”, What kind of spontaneous speech is used?",
+      "baseline": {
+        "masked_id": "d29d0a2f743a44112775",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          1,
+          5
+        ],
+        "reason": "[1] supplies the Turkish speech and 80 hours, and [5] identifies the IARPA Babel Turkish collection.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": true
+      },
+      "candidate": {
+        "masked_id": "0f2ffca9c4f76a12a391",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          1
+        ],
+        "reason": "[1] explicitly identifies 80 hours of Turkish spontaneous speech from Babel, providing both the variety and corpus.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": true
+      }
+    },
+    "98daaa9eaa1e1e574be336b8933b861bfd242e5e": {
+      "scope": "independent",
+      "query": "In the paper “Hate Speech in Pixels: Detection of Offensive Memes towards Automatic Moderation”, How is each instance of the dataset annotated?",
+      "baseline": {
+        "masked_id": "e0463da3f5ab5d3d4d9f",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "all_claims_supported": null,
+        "reason": "Structured insufficient-evidence response with no citations on an answerable question with an annotated passage.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "b57597d98c4180e5e951",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "all_claims_supported": null,
+        "reason": "Structured insufficient-evidence response with no citations on an answerable question with an annotated passage.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "95bb3ea4ebc3f2174846e8d422abc076e1407d6a": {
+      "scope": "independent",
+      "query": "In the paper “The Wiki Music dataset: A tool for computational analysis of popular music”, Which decades did they look at?",
+      "baseline": {
+        "masked_id": "8045f6850a4512d2213f",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          2,
+          5
+        ],
+        "reason": "The supplied dates bracket the decades unambiguously from the 1900s through the 2010s. [2] gives the split and [5] gives the decade indexing, with no claim every decade was separately listed.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "fa2a94aa07884b37a39f",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          2,
+          5
+        ],
+        "reason": "[5] grounds the decade-wise musical dataset and [2] the 1900-2010 training and 2011-2018 prediction period, giving the requested decade span.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "e24fbcc8be922c43f6b6037cdf2bfd4c0a926c08": {
+      "scope": "independent",
+      "query": "In the paper “Small and Practical BERT Models for Sequence Labeling”, What is the multilingual baseline?",
+      "baseline": {
+        "masked_id": "c3ef1878aa45bd40ccac",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          1,
+          2,
+          6
+        ],
+        "reason": "[1] identifies the baseline and shared-task result. [6] explains the multilingual comparison and [2] supports its weaker low-resource performance.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "bf139eb5d1f8ad5a9b6d",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          1,
+          2,
+          6
+        ],
+        "reason": "[1] names the strong Meta-LSTM baseline and CoNLL performance, [2] explicitly calls mMeta-LSTM the multilingual baseline, and [6] gives the mMiniBERT comparison.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "9f3444c9fb2e144465d63abf58520cddd4165a01": {
+      "scope": "independent",
+      "query": "In the paper “Revisiting Low-Resource Neural Machine Translation: A Case Study”, what are the methods they compare with in the korean-english dataset?",
+      "baseline": {
+        "masked_id": "c341ddf4ed7a83a1283b",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          2,
+          4,
+          5
+        ],
+        "reason": "[4]/[5] establish the paper's compared systems and [2] separately identifies the Korean comparison with Gu and the two BLEU scores; the main answer matches the official target.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "21185abea16d82315490",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2,
+          5
+        ],
+        "all_claims_supported": true,
+        "reason": "The reply explicitly names Gu et al., the external Korean-English comparator, and separately lists internal configurations 1, 2 and 8. [2] supports both distinctions and scores. [5] supports the hyperparameter transfer, and [1] scopes the more detailed PBSMT comparison to German-English.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "c78f18606524539e4c573481e5bf1e0a242cc33c": {
+      "scope": "historical",
+      "query": "In the paper “Autocompletion interfaces make crowd workers slower, but their use promotes response diversity”, How many responses did they obtain?",
+      "baseline": {
+        "masked_id": "a9ae0cfa4f14b0bd2864",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          3
+        ],
+        "reason": "[3] states that the workers completed 1,001 tasks, 496 Control and 505 AUI, accounting for the collected responses.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "06a4df2fc62312e4a89e",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          3
+        ],
+        "reason": "The cited data-collection passage explicitly gives 1,001 tasks and the Control/AUI counts of 496/505, separating them from 4,300 later ratings.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "891cab2e41d6ba962778bda297592c916b432226": {
+      "scope": "historical",
+      "query": "In the paper “Machine Translation from Natural Language to Code using Long-Short Term Memory”, What programming language is target language?",
+      "baseline": {
+        "masked_id": "99e67281f00fcecdcee8",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          1,
+          3
+        ],
+        "reason": "The Python target appears in [1]'s training-data description and [3]'s conclusion about the framework's aim.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "3cd9cede90a0b3895130",
+        "verdict": "full",
+        "all_claims_supported": true,
+        "supporting_citations": [
+          1,
+          3
+        ],
+        "reason": "[1] identifies the target parallel-corpus code as Python. [3] explicitly identifies Python as the primary general-purpose target.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "891c4af5bb77d6b8635ec4109572de3401b60631": {
+      "scope": "historical_vietnam",
+      "query": "In the paper “Hate Speech Detection on Vietnamese Social Media Text using the Bidirectional-LSTM Model”, What social media platform does the data come from?",
+      "baseline": {
+        "masked_id": "0b69dcff14080151298d",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "all_claims_supported": null,
+        "reason": "Structured insufficient-evidence response with no citations on an official unanswerable question.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true
+      },
+      "candidate": {
+        "masked_id": "c4cb7ff533056baf29c8",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "all_claims_supported": null,
+        "reason": "Structured insufficient-evidence response with no citations on an official unanswerable question.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true
+      }
+    }
+  }
+}

@@ -1,0 +1,887 @@
+{
+  "00c57968fadabeede3e2": {
+    "verdict": "wrong",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      1,
+      3,
+      4
+    ],
+    "reason": "All three excerpts support only the direction of performance against the average or oracle channel. The positive API response supplies no numerical amount and properly limits the absence claim to the excerpts."
+  },
+  "0325f7b8bf29d1e00d16": {
+    "verdict": "partial",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      1,
+      2
+    ],
+    "reason": "Google Translate is the right candidate. [1] describes an unnamed system and [2] only names Google in an example. The answer openly identifies its inability to establish the experimental assignment."
+  },
+  "03719e9622d890c91228": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "all_claims_supported": null,
+    "reason": "Structured insufficient-evidence response with no citations on an official unanswerable question."
+  },
+  "040e83ad4955279188f0": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      1,
+      2,
+      3
+    ],
+    "reason": "[1] defines the document/query co-dependent context and concatenation; [2] and [3] describe the respective coarse and mention-level operations. The paper answers this official negative."
+  },
+  "0509be0397c0125eff6d": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      1,
+      2
+    ],
+    "reason": "Both excerpts say the final ensemble comprised 10 CNNs and 10 LSTMs with varying hyperparameters and pretraining."
+  },
+  "06a4df2fc62312e4a89e": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      3
+    ],
+    "reason": "The cited data-collection passage explicitly gives 1,001 tasks and the Control/AUI counts of 496/505, separating them from 4,300 later ratings."
+  },
+  "06db813dc91818b02358": {
+    "verdict": "wrong",
+    "all_claims_supported": false,
+    "supporting_citations": [
+      2,
+      5
+    ],
+    "reason": "[2] and [5] support the prior-version texts, annotation layers, and splits, a limited part of the provenance. The last sentence asserts absence in the entire article; the cited passages only show what these excerpts report."
+  },
+  "07926bfbd6cc6627c339": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "all_claims_supported": null,
+    "reason": "Structured insufficient-evidence response with no citations on an answerable question with an annotated passage."
+  },
+  "07c9302355926771c591": {
+    "verdict": "failure",
+    "supporting_citations": [],
+    "all_claims_supported": null,
+    "reason": "The first request returned HTTP 502 with no answer or citations."
+  },
+  "0b69dcff14080151298d": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "all_claims_supported": null,
+    "reason": "Structured insufficient-evidence response with no citations on an official unanswerable question."
+  },
+  "0cf0e56243f68e81a23d": {
+    "verdict": "wrong",
+    "all_claims_supported": false,
+    "supporting_citations": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "reason": "[1]-[4] support the overall, word, domain and sentence-level comparisons. The passages give INLINEFORM placeholders, not actual variant names or models called DetNet0/1/3. The answer presents those placeholder indices as real identifiers."
+  },
+  "0f2ffca9c4f76a12a391": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      1
+    ],
+    "reason": "[1] explicitly identifies 80 hours of Turkish spontaneous speech from Babel, providing both the variety and corpus."
+  },
+  "0f3f7ba40e95d31c859a": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "all_claims_supported": null,
+    "reason": "Structured insufficient-evidence response with no citations on an official unanswerable question."
+  },
+  "120641f4a24a81188cec": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      3,
+      4
+    ],
+    "reason": "[4] names the partisan detector and label-level application. [3] gives the remaining semi-supervised and article-only choices and the purpose of releasing survey data."
+  },
+  "15a9fb6d7348de7bee6a": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      1,
+      3,
+      4,
+      5,
+      6
+    ],
+    "reason": "[4] defines the proportion of skill-launching dialogs; [3] and [5] support its use and [1]/[6] give the shorter dialogs, success improvement, and live comparison."
+  },
+  "17d9d959d6629a25cdfe": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "all_claims_supported": null,
+    "reason": "Structured insufficient-evidence response with no citations on an answerable question with an annotated passage."
+  },
+  "18017f5955b8c8b9cd67": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "all_claims_supported": null,
+    "reason": "Structured insufficient-evidence response with no citations on an official unanswerable question."
+  },
+  "1873b4034559c4909bdd": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "all_claims_supported": null,
+    "reason": "Structured insufficient-evidence response with no citations on an official unanswerable question."
+  },
+  "1bd15292614228912848": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      1,
+      2
+    ],
+    "reason": "Both original excerpts directly list the counts for the two model types."
+  },
+  "1c488b1c563c1d86c4bc": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "all_claims_supported": null,
+    "reason": "Structured insufficient-evidence response with no citations on an official unanswerable question."
+  },
+  "1e4601b1ce91bc56977f": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      1,
+      2
+    ],
+    "reason": "[1] describes losing desired information during RNN generation and [2] identifies the missing attributes in generated utterances. The explicit limit on mechanistic detail is properly scoped."
+  },
+  "1f2d1a06700119e7dfc1": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      1,
+      4
+    ],
+    "reason": "Both snippets give a 1.6 average phone-error-rate improvement against fine-tuned multilingual models, including the 16 corpora and percent notation."
+  },
+  "20c85c1a1d543e2a92a4": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      1,
+      2,
+      3
+    ],
+    "reason": "[1] ties structured joint inference to temporal entity extraction. [2]/[3] identify Stanford's DeepDive as the implementation."
+  },
+  "21185abea16d82315490": {
+    "verdict": "wrong",
+    "all_claims_supported": false,
+    "supporting_citations": [
+      1,
+      2,
+      5
+    ],
+    "reason": "[2] supports the Gu reference, scores and common configurations; [1]/[5] support the fuller German comparison and transfer of hyperparameters. Claiming Gu is the only explicit Korean comparison overlooks [2]'s explicitly shared configurations 1, 2 and 8."
+  },
+  "25a4aefd43e616d0f534": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      1,
+      2,
+      4
+    ],
+    "reason": "[4] names Tencent News and supports the exact dataset and split sizes. [1] and [2] identify the article-comment dataset introduced by Qin et al."
+  },
+  "2d0ca7d12dc909cc1049": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "all_claims_supported": null,
+    "reason": "Structured insufficient-evidence response with no citations on an official unanswerable question."
+  },
+  "30cc9d9ed8bd7a1c4f42": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      2,
+      3
+    ],
+    "reason": "[3] directly describes Unicode conversion, ZWNJ replacement, and orthography checking. [2] supplies the regional standard and preservation of punctuation and special characters."
+  },
+  "32163304b0aa969031a8": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "all_claims_supported": null,
+    "reason": "Structured insufficient-evidence response with no citations on an official unanswerable question."
+  },
+  "3647eb703adad33a3c4c": {
+    "verdict": "wrong",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      1,
+      2,
+      3
+    ],
+    "reason": "The citations establish the dataset name, its new construction, size, and scope. The reply never identifies the dialogue simulator or paraphrasing that supplied its examples."
+  },
+  "3c68cec9c524b8caeff6": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      1,
+      2
+    ],
+    "reason": "Both excerpts give eight GB compressed. [2] directly records the JWPL preprocessing and the two reported counts."
+  },
+  "3cd9cede90a0b3895130": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      1,
+      3
+    ],
+    "reason": "[1] identifies the target parallel-corpus code as Python. [3] explicitly identifies Python as the primary general-purpose target."
+  },
+  "3e543b71de68ddb9e042": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "all_claims_supported": null,
+    "reason": "Structured insufficient-evidence response with no citations on an official unanswerable question."
+  },
+  "43af452ab9ad0533836b": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      1,
+      2,
+      3
+    ],
+    "reason": "The query/document encodings and concatenated context appear in [1]. [2] grounds the affinity matrix and [3] the corresponding mention/query operation. This supplies an answer despite the negative annotation."
+  },
+  "458c5f9fd6b2fd550347": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      2,
+      3,
+      4,
+      6
+    ],
+    "reason": "The answer distinguishes the target study's racial audit from prior gender and false-positive bias findings. The citations ground the associations with identity terms and the proper attribution."
+  },
+  "4d34921c59e47d3ce0ca": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      1,
+      3,
+      4,
+      5,
+      6
+    ],
+    "reason": "[4]/[5] ground the skill-launch metric and [4] its simulation. [3] supplies the randomized user A/B test; [1]/[6] support the dialog-length and success findings."
+  },
+  "4efc6d1ada2ab45e6897": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      2,
+      3,
+      6
+    ],
+    "reason": "[3] gives the correct partial grammatical fragments mechanism and generalization claim. [2] and [6] supply the comparative performance drop."
+  },
+  "52503a3328852d7f7ca0": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      3
+    ],
+    "reason": "[3] names De7, identifies the speaker and three voice qualities, and gives the approximately 50-minute duration per quality."
+  },
+  "563df183ceb356a65846": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "reason": "[3] identifies SemEval sense induction/disambiguation and gold clustering. [1]/[2] ground the Russian evaluation, [4]/[5] its specific metric, baselines and subsets, and [6] the Section 4 description."
+  },
+  "564f22f8011a6c171f94": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      1,
+      2
+    ],
+    "reason": "[1] specifically reports dialect similarity learning by a Siamese network, i-vector adaptation and both feature types. [2] confirms dimensionality reduction for an unknown test domain."
+  },
+  "56a347e7042078c4e277": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      1,
+      2
+    ],
+    "reason": "[2] gives Amazon Translate, the example languages and mean-pooling. [1] explicitly specifies paired cosine similarity, the median, and the increase after adversarial training."
+  },
+  "58cb80fb16418b5d517c": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      1,
+      2
+    ],
+    "reason": "Both cited passages describe how the system investigated dialect variability and domain mismatch. They support the feature types, Siamese network, i-vectors and stated finding."
+  },
+  "5aa40acbd9bbab1944d5": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "all_claims_supported": null,
+    "reason": "Structured insufficient-evidence response with no citations on an official unanswerable question."
+  },
+  "5b5d41abb727c599019b": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      3,
+      4
+    ],
+    "reason": "[4] identifies the S2-GORC full-text subcorpus and linked citing sentences. [3] supports extraction totals and 2,500 held out for each evaluation split. This answers an officially unanswerable item."
+  },
+  "5d16937ba250cf624f4b": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "all_claims_supported": null,
+    "reason": "Structured insufficient-evidence response with no citations on an answerable question with an annotated passage."
+  },
+  "5ebe1045d732c0f50048": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      4
+    ],
+    "reason": "[4] explicitly enumerates WDAqua, QAKiS, gAnswer and Platypus."
+  },
+  "6d6b72eff122182b4e74": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      1,
+      3
+    ],
+    "reason": "[3] gives entity/concept candidates selected from knowledge graphs, and [1] names AMS and the CommonsenseQA-like format. The limitation is scoped to the excerpts."
+  },
+  "6e527a27e055d6a1c108": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      2
+    ],
+    "reason": "[2] supplies both the original eight GB compressed and the exact preprocessed document/revision figures."
+  },
+  "73a964f20e930938a675": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      2,
+      3
+    ],
+    "reason": "The authors' account of correct partial parses, transfer, and the relation of parser quality to L2 performance appears in [3]. [2] confirms the smaller L1-to-L2 drop."
+  },
+  "7750e8b535afa60fd4ea": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      2
+    ],
+    "reason": "The passage supports contextual sentiment incongruity, the damping method, book-review examples and the distinction between previous results and Aff2Vec. It supports the qualified affirmative despite the annotation."
+  },
+  "77f1b6f5c430fdd97e8c": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      3,
+      4
+    ],
+    "reason": "Together [3] and [4] establish the S2-GORC source, language, subject, numbers of articles and extracted links, and the two held-out split sizes."
+  },
+  "7befd8055443428febe8": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "all_claims_supported": null,
+    "reason": "Structured insufficient-evidence response with no citations on an official unanswerable question."
+  },
+  "8045f6850a4512d2213f": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      2,
+      5
+    ],
+    "reason": "The supplied dates bracket the decades unambiguously from the 1900s through the 2010s. [2] gives the split and [5] gives the decade indexing, with no claim every decade was separately listed."
+  },
+  "853d6e2e26b5812d9131": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "reason": "The sources describe finetuning KG embeddings, comparison of sensitive attributes, and measurement of profession associations. Each background finding and limitation is supported by the attached passages, despite the official negative."
+  },
+  "8a66f8c5e016ffa4da97": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      1,
+      2
+    ],
+    "reason": "Both excerpts identify 62 as the number of London neighbourhood demographic attributes the authors study."
+  },
+  "8ca9361cdb7458be6095": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      2,
+      3,
+      4,
+      6
+    ],
+    "reason": "The yes is qualified as a discussion of prior research; [2] identifies the paper's own racial audit, [4]/[6] report gender bias, and [3]/[6] support the cited false-positive examples."
+  },
+  "93d0b53c14136989520a": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "reason": "The Russian resources, word-sense clustering and SemEval methodology are given by [1]-[3]. [4]/[5] support ARI, baselines, corpus subset counts, the Watlink inventory and the dense versus sparse finding."
+  },
+  "968ebcaec941c8073532": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      1,
+      2,
+      4
+    ],
+    "reason": "[4] gives the Tencent source, content, totals, test annotation, and split. [1] and [2] identify Qin et al. as the dataset origin."
+  },
+  "995c4e25b58262bd5990": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      1,
+      2
+    ],
+    "reason": "[1] supports diversity with information loss, and [2] specifically says the RNN's utterances missed desired attributes."
+  },
+  "99e67281f00fcecdcee8": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      1,
+      3
+    ],
+    "reason": "The Python target appears in [1]'s training-data description and [3]'s conclusion about the framework's aim."
+  },
+  "9a4c1e9cabc481f6476f": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "all_claims_supported": null,
+    "reason": "Structured insufficient-evidence response with no citations on an answerable question with an annotated passage."
+  },
+  "a0354356b988478c74b2": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      1,
+      2
+    ],
+    "reason": "[2] supports context-dependent interpretation with the cited book-review examples, and [1] gives the separate previous study of contextually similar words with opposite affect."
+  },
+  "a1b96a21821974e5c2af": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      2,
+      3
+    ],
+    "reason": "Both original normalization operations, Unicode conversion, the Kurdistan reference standard, and retaining characters for text integrity appear in [2] and [3]."
+  },
+  "a8e0da8ef63328f9ea2b": {
+    "verdict": "partial",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      1,
+      2,
+      3
+    ],
+    "reason": "It supplies the target variety and at least Dutch for a training set, while honestly identifying the truncated next name and the lack of the requested full list. [1]-[3] ground these limited details."
+  },
+  "a9ae0cfa4f14b0bd2864": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      3
+    ],
+    "reason": "[3] states that the workers completed 1,001 tasks, 496 Control and 505 AUI, accounting for the collected responses."
+  },
+  "aab8248300517d91540a": {
+    "verdict": "failure",
+    "supporting_citations": [],
+    "all_claims_supported": null,
+    "reason": "The first request returned HTTP 502 with no answer or citations."
+  },
+  "ae79913f48a2d6ff7828": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "reason": "The stated fine-tuning approach and pairwise comparisons identify how biases are detected. The cited texts also support the raw-count correlation, ComplEx test, and examples from both knowledge graphs."
+  },
+  "b1a0ebb330afad57b748": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "all_claims_supported": null,
+    "reason": "Structured insufficient-evidence response with no citations on an answerable question with an annotated passage."
+  },
+  "b57597d98c4180e5e951": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "all_claims_supported": null,
+    "reason": "Structured insufficient-evidence response with no citations on an answerable question with an annotated passage."
+  },
+  "ba7ecdc1d1f90a833401": {
+    "verdict": "wrong",
+    "all_claims_supported": false,
+    "supporting_citations": [
+      3,
+      4,
+      5
+    ],
+    "reason": "The cited excerpts call FastText and the attention BiLSTM baselines but do not establish both use only claim-specific inputs. [5] explicitly identifies the SVM's available feature families; the answer overstates the exclusivity inference."
+  },
+  "bc53729dd04305efaa06": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      3,
+      4
+    ],
+    "reason": "The paper proposes a partisan news detector in [4], and [3] describes the alternatives for training, evaluation and designing new article-level labels."
+  },
+  "bd544b8f6d558c8abf1d": {
+    "verdict": "wrong",
+    "all_claims_supported": false,
+    "supporting_citations": [
+      1,
+      2,
+      3
+    ],
+    "reason": "[3] ends with the literal text 'Dutch and Fr'. French is a probable completion but unverified in the returned citations; the answer positively claims it is specified. The three citations still support the target and training configurations."
+  },
+  "be3823e6a8fb438ed1e1": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      1
+    ],
+    "reason": "[1] gives the MLDoc-finetuned BERT representation, document mean-pooling, the English/translation cosine similarity, and the median increase."
+  },
+  "bf139eb5d1f8ad5a9b6d": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      1,
+      2,
+      6
+    ],
+    "reason": "[1] names the strong Meta-LSTM baseline and CoNLL performance, [2] explicitly calls mMeta-LSTM the multilingual baseline, and [6] gives the mMiniBERT comparison."
+  },
+  "c341ddf4ed7a83a1283b": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      2,
+      4,
+      5
+    ],
+    "reason": "[4]/[5] establish the paper's compared systems and [2] separately identifies the Korean comparison with Gu and the two BLEU scores; the main answer matches the official target."
+  },
+  "c3ef1878aa45bd40ccac": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      1,
+      2,
+      6
+    ],
+    "reason": "[1] identifies the baseline and shared-task result. [6] explains the multilingual comparison and [2] supports its weaker low-resource performance."
+  },
+  "c4cb7ff533056baf29c8": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "all_claims_supported": null,
+    "reason": "Structured insufficient-evidence response with no citations on an official unanswerable question."
+  },
+  "c912e270cfb1dd87f0b1": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "all_claims_supported": null,
+    "reason": "Structured insufficient-evidence response with no citations on an official unanswerable question."
+  },
+  "cb3ca610e0648e933c07": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      2,
+      3
+    ],
+    "reason": "[2] establishes unique deliberate treatment of multiple spans, and [3] explicitly names MTMSN and its DROP design."
+  },
+  "cbc96fd25cbdbeba1707": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "all_claims_supported": null,
+    "reason": "Structured insufficient-evidence response with no citations on an official unanswerable question."
+  },
+  "ceffc18c4cff13da2084": {
+    "verdict": "partial",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      1,
+      3,
+      6
+    ],
+    "reason": "[1] and [3] identify a range of Indic languages and script variation. [6] supports the diversity criterion. This narrows the language family/region while explicitly leaving every individual language unnamed."
+  },
+  "cf653ff3a15692ff1a50": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      1,
+      3
+    ],
+    "reason": "[3] identifies De7, designer, expressive-speech purpose, speaker, quantities and qualities; [1] confirms the large single-speaker three-quality corpus."
+  },
+  "d29d0a2f743a44112775": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      1,
+      5
+    ],
+    "reason": "[1] supplies the Turkish speech and 80 hours, and [5] identifies the IARPA Babel Turkish collection."
+  },
+  "d2eb7b6d12962717b857": {
+    "verdict": "wrong",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      5
+    ],
+    "reason": "[5] provides the counts of corpora, languages and varieties. The answer names none of the requested languages and still presents a formal positive reply."
+  },
+  "d70e15ca332d87520bc2": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      1,
+      4
+    ],
+    "reason": "The 1.6 average for the 16 corpora is explicit; [4] also supplies both before/after examples for Amharic and Bengali."
+  },
+  "d917cb371d6c17af4fcc": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      3
+    ],
+    "reason": "[3] directly names MTMSN as the first and only model to specifically tackle DROP multi-span questions."
+  },
+  "db6ee3acb0c8ef746b85": {
+    "verdict": "partial",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      5
+    ],
+    "reason": "[5] supports the 33-language count and identifies English in the UK/Ireland resource. This gives one relevant language and explicitly acknowledges the remaining unavailable names."
+  },
+  "dbd61954214b5b81d31c": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      3,
+      6
+    ],
+    "reason": "[3] explicitly states the constructive theorem with its positional dimension, kernel and channels. [6] supports reparameterizing a single layer; the paper directly answers this negative."
+  },
+  "df154bcd5c0ac0483c87": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      1,
+      2,
+      3,
+      5
+    ],
+    "reason": "[3] gives the appended source tag and decoder purpose. [5] supports corpus tagging, [2] the with/without setting and [1] the empirical helpfulness."
+  },
+  "e0463da3f5ab5d3d4d9f": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "all_claims_supported": null,
+    "reason": "Structured insufficient-evidence response with no citations on an answerable question with an annotated passage."
+  },
+  "e588a5cad86b8dae10ea": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "all_claims_supported": null,
+    "reason": "Structured insufficient-evidence response with no citations on an official unanswerable question."
+  },
+  "eb6c213da9f0aa443e56": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "all_claims_supported": null,
+    "reason": "Structured insufficient-evidence response with no citations on an official unanswerable question."
+  },
+  "eb87ceca82e056556d63": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "all_claims_supported": null,
+    "reason": "Structured insufficient-evidence response with no citations on an answerable question with an annotated passage."
+  },
+  "efe9557c2a1eb86ade5f": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "all_claims_supported": null,
+    "reason": "Structured insufficient-evidence response with no citations on an answerable question with an annotated passage."
+  },
+  "f04a4c61ed4d059dfc4f": {
+    "verdict": "partial",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      1,
+      3
+    ],
+    "reason": "The excerpts support the broad Indic characterization and writing-system diversity. The reply correctly limits the available specificity and names no individual language."
+  },
+  "f443863ed8f43b11116d": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      1,
+      2,
+      3,
+      4,
+      6
+    ],
+    "reason": "The answer preserves the qualitative performance comparisons in [1]-[4], including domains and the L-LDA exception, and [6] supports the human judgments of summary informativeness and coherence."
+  },
+  "f4933e99b6cbe61177c8": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "all_claims_supported": null,
+    "reason": "Structured insufficient-evidence response with no citations on an official unanswerable question."
+  },
+  "f4c24405356faea62edb": {
+    "verdict": "wrong",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      1,
+      2,
+      3
+    ],
+    "reason": "[1]-[3] support the task, dataset name, size, domains, and APIs. These details omit how the dialogues originated in simulator outlines and paraphrases."
+  },
+  "f51f50c7b26455c88e0c": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "reason": "The tag appended to source sentences, its decoder purpose, default tagging, no-tags variant, corpora and reported benefit all appear in the attached passages."
+  },
+  "f56b02ce4274d235cccf": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "all_claims_supported": null,
+    "reason": "Structured insufficient-evidence response with no citations on an answerable question with an annotated passage."
+  },
+  "f7b5f2e1fd3a4d58cf90": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "reason": "[1]-[3] associate DeepDive-based structured joint inference with temporal extraction. [4] explicitly describes the probabilistic graphical model for domain knowledge and sequence structure."
+  },
+  "f7b7a36c1ae30ed1c1c6": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      2,
+      3,
+      6
+    ],
+    "reason": "[2] establishes the capacity result; [3] gives its precise sufficient conditions and construction; [6] explicitly gives a one-layer relative-position reparameterization."
+  },
+  "f7e5ae87531833f90bf3": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "all_claims_supported": null,
+    "reason": "Structured insufficient-evidence response with no citations on an official unanswerable question."
+  },
+  "fa2a94aa07884b37a39f": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      2,
+      5
+    ],
+    "reason": "[5] grounds the decade-wise musical dataset and [2] the 1900-2010 training and 2011-2018 prediction period, giving the requested decade span."
+  },
+  "ffd573a4a73503366600": {
+    "verdict": "full",
+    "all_claims_supported": true,
+    "supporting_citations": [
+      1,
+      3
+    ],
+    "reason": "[3] grounds the align-mask-select steps including knowledge-graph entities as choices. [1] confirms the multiple-choice form. It accurately qualifies the missing details."
+  }
+}

@@ -1,0 +1,124 @@
+{
+  "workspace": "27b0707a-b67d-45bb-96c3-8da6e91188bd",
+  "kb": "fb73160f-eccc-4b41-88b2-17700ce7ffe1",
+  "snapshot": "595207f6-eff5-45d0-92e0-f096d1972364",
+  "snapshot_sha256": "4e6eb31da7485b7e21420becc2a66b2d9d7e9b8fb00cd2d54b0c5f90cfebd334",
+  "count": 16,
+  "chunks": 338,
+  "collection": "refusal_historical_16",
+  "embedding_device": "cuda",
+  "documents": {
+    "1707.06939": {
+      "document_id": "6350eaa0-7fea-40f2-b403-9d376452e628",
+      "revision": "ecad8a26-aa4f-4bf9-a800-7a9221eed450",
+      "chunks": 20,
+      "paper_text_sha256": "308d4192f7926ed24975401c6e65989f93d2fdbc8a7bf0fa6d391c031bf40e00",
+      "normalized_sha256": "308d4192f7926ed24975401c6e65989f93d2fdbc8a7bf0fa6d391c031bf40e00"
+    },
+    "1812.07023": {
+      "document_id": "d2c6b11a-e0d8-4f98-8adc-71bdea03c97b",
+      "revision": "0f603042-1a61-4630-b338-7f0b945e0bf6",
+      "chunks": 22,
+      "paper_text_sha256": "d5c998c8202ceda75ce8a72bbc0162eb70ecb280afc26f06a1c629314b319788",
+      "normalized_sha256": "d5c998c8202ceda75ce8a72bbc0162eb70ecb280afc26f06a1c629314b319788"
+    },
+    "2002.00750": {
+      "document_id": "12b8cc58-8ae6-428c-9d04-ced34542987e",
+      "revision": "4cdd614d-612e-4f4b-860e-09b0fddf6cbd",
+      "chunks": 19,
+      "paper_text_sha256": "20b1396edb55eca9213f6246b7b41859f6b02873ce09a080e7e060ab317f6609",
+      "normalized_sha256": "20b1396edb55eca9213f6246b7b41859f6b02873ce09a080e7e060ab317f6609"
+    },
+    "1905.01715": {
+      "document_id": "cc65f597-8789-4868-a5a2-3ff37258dc69",
+      "revision": "adcb77a3-6520-4a88-92d1-8660e7fb3172",
+      "chunks": 13,
+      "paper_text_sha256": "88efb3f98220541521126ac93aea3b7e006297e509fac1cd24af462b89ff4e76",
+      "normalized_sha256": "88efb3f98220541521126ac93aea3b7e006297e509fac1cd24af462b89ff4e76"
+    },
+    "1910.11471": {
+      "document_id": "b3f5a75c-e099-4b72-9dde-6f6594d9ceb1",
+      "revision": "1904eb40-ed9e-42de-94ce-b4381c5ce583",
+      "chunks": 14,
+      "paper_text_sha256": "a16f7585636a1a9caf47e60303e495e13fc142bb55ed7ff6360df735814a841b",
+      "normalized_sha256": "a16f7585636a1a9caf47e60303e495e13fc142bb55ed7ff6360df735814a841b"
+    },
+    "2004.02451": {
+      "document_id": "f5805323-8017-4fc3-8cff-a81cf803a42c",
+      "revision": "e5951fd2-4862-4e43-831c-3cc24b191456",
+      "chunks": 30,
+      "paper_text_sha256": "2de30f5a2809665737cef2f7884be3a18b91a78d06944c5ec0bba1e542452295",
+      "normalized_sha256": "2de30f5a2809665737cef2f7884be3a18b91a78d06944c5ec0bba1e542452295"
+    },
+    "1904.02357": {
+      "document_id": "9976d5aa-c68a-4aee-9fef-4526a566314b",
+      "revision": "57599462-16e5-413a-83d3-7b1f4f66e4a2",
+      "chunks": 14,
+      "paper_text_sha256": "0e4aa204a149ce4ae1a407f0bfa3151d11c85f463e41e3a1c414b986c13b4e5b",
+      "normalized_sha256": "0e4aa204a149ce4ae1a407f0bfa3151d11c85f463e41e3a1c414b986c13b4e5b"
+    },
+    "1911.13066": {
+      "document_id": "0fb77373-1daa-46ef-b745-4fccb3ba4fa0",
+      "revision": "95f6b990-6e73-41b3-9630-f8989efe68b5",
+      "chunks": 22,
+      "paper_text_sha256": "4d70f13f3cc46322eb5ded194d77222ea2446fa3d894635ea14f1c4565e24ceb",
+      "normalized_sha256": "4d70f13f3cc46322eb5ded194d77222ea2446fa3d894635ea14f1c4565e24ceb"
+    },
+    "1707.00995": {
+      "document_id": "680f6aae-0ea0-4e3a-9f8e-94b118e11465",
+      "revision": "d70ea1ac-da6c-437e-9f8d-b3fc828ba3c8",
+      "chunks": 25,
+      "paper_text_sha256": "a07610edb10079679458fc5725b49d35edac9939cf820391bdbb2a1c53a2ec6a",
+      "normalized_sha256": "a07610edb10079679458fc5725b49d35edac9939cf820391bdbb2a1c53a2ec6a"
+    },
+    "2003.06044": {
+      "document_id": "200f01de-4828-40b3-ab61-4b4e6686150f",
+      "revision": "df20053d-2400-4ae4-98e1-2b2bb614fc6c",
+      "chunks": 27,
+      "paper_text_sha256": "3bb47651017e1cae63ac3355b4d246ad94680ec93a3cf0b2c4dae47f74c0d3c0",
+      "normalized_sha256": "3bb47651017e1cae63ac3355b4d246ad94680ec93a3cf0b2c4dae47f74c0d3c0"
+    },
+    "1810.01570": {
+      "document_id": "ff46c220-ffdb-4c66-9f8d-78c3d6afcc98",
+      "revision": "4e151278-3765-4664-aa5d-ca7370a5ae63",
+      "chunks": 30,
+      "paper_text_sha256": "128a7588de5ef6187fa40f78638cd9c136be7eb9a270ef1c0355feda3000f402",
+      "normalized_sha256": "128a7588de5ef6187fa40f78638cd9c136be7eb9a270ef1c0355feda3000f402"
+    },
+    "1612.09113": {
+      "document_id": "13879f01-e8b7-482d-a9ad-ea0df43bff6d",
+      "revision": "b6c6f828-8ff7-406b-b0af-db8574bf53b0",
+      "chunks": 11,
+      "paper_text_sha256": "e4689123ef9d6fc677f01dc9dc20019c5c96502599634b026dd2360b75bf5ac2",
+      "normalized_sha256": "e4689123ef9d6fc677f01dc9dc20019c5c96502599634b026dd2360b75bf5ac2"
+    },
+    "1909.07512": {
+      "document_id": "70641f38-54da-4de5-a326-9b97f014a6a8",
+      "revision": "ea473d95-0c78-4a0a-b3d9-bd4d48e63f14",
+      "chunks": 16,
+      "paper_text_sha256": "5500bf499d0566e39e45da5fab79ef9cdbcdaffdd32dbb64b9131cf546317401",
+      "normalized_sha256": "5500bf499d0566e39e45da5fab79ef9cdbcdaffdd32dbb64b9131cf546317401"
+    },
+    "1910.01363": {
+      "document_id": "8d946cc0-e5c8-4a3d-a5f4-5103cd1cc825",
+      "revision": "9d03837a-3c7c-447e-9306-bd1076736824",
+      "chunks": 28,
+      "paper_text_sha256": "934886b4e6226878d40c22f1dca25ea47739a140bbb5f098114e0088ed1db196",
+      "normalized_sha256": "934886b4e6226878d40c22f1dca25ea47739a140bbb5f098114e0088ed1db196"
+    },
+    "1910.04601": {
+      "document_id": "49550dc6-4d70-4342-a858-13b5e5b82710",
+      "revision": "9c4d2f75-cf1b-4b98-8ca1-3f71dcf2fe72",
+      "chunks": 27,
+      "paper_text_sha256": "1be4a5e49b5234d93bba5587b396048fee1ca6edda0cc631c49a16d66c46b62a",
+      "normalized_sha256": "1be4a5e49b5234d93bba5587b396048fee1ca6edda0cc631c49a16d66c46b62a"
+    },
+    "1606.04631": {
+      "document_id": "72bfa19f-9520-4b19-ac12-90a285d984a4",
+      "revision": "5a5b3f97-cb5e-4a84-9b52-ffedcacc0d43",
+      "chunks": 20,
+      "paper_text_sha256": "20b68bf37c5ba3d5368c29983e073e30d28361c9fd75d0b1317f358492bf37b5",
+      "normalized_sha256": "20b68bf37c5ba3d5368c29983e073e30d28361c9fd75d0b1317f358492bf37b5"
+    }
+  }
+}

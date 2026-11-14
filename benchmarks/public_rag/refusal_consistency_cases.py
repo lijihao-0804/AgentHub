@@ -26,7 +26,7 @@ def exposure(raw):
     # The previous study's pattern files contain a deliberately complete TRAIN
     # dictionary. Its published results, scripts and all question reservations
     # remain eligible witnesses. The prior study's inaccessible tempfile is
-    # outside the local scan; its known records are covered by the published ledger.
+    # outside the scan; the exclusion is kept explicitly in the new ledger.
     globs = (
         "!**/refusal-consistency*",
         "!**/*refusal_consistency*",
@@ -232,6 +232,9 @@ def verify(directory=OUT):
         group = [c for c in fresh if c["negative"] is negative]
         if len(group) != count or sum(c["arm_order"][0] == "baseline" for c in group) != count // 2:
             raise ValueError("Paired order or stratum size differs")
+    audit_path = directory / "official-negative-source-audit.json"
+    if audit_path.exists():
+        check_negative_sources(read(audit_path), fresh, raw, lf_sha(protocol_path))
     return {
         "protocol_sha256_lf": lf_sha(protocol_path),
         "excluded_papers": len(ledger["excluded_papers"]),
@@ -240,6 +243,39 @@ def verify(directory=OUT):
         "independent_first_http_dispatches": 2 * len(fresh),
         "historical_first_http_dispatches": 2 * (len(cases) - len(fresh)),
     }
+
+
+def check_negative_sources(audit, cases, papers, protocol_sha):
+    negatives = {c["id"]: c for c in cases if c["negative"]}
+    if not (
+        audit["protocol_sha256_lf"] == protocol_sha
+        and audit["official_negative_denominator"] == len(audit["rows"]) == len(negatives)
+        and {r["id"] for r in audit["rows"]} == set(negatives)
+        and sum(r["assessment"] == "clear_conflict" for r in audit["rows"])
+        == audit["clear_conflicts"]
+    ):
+        raise ValueError("Official-negative source audit differs from the frozen cohort")
+    for row in audit["rows"]:
+        case = negatives[row["id"]]
+        conflict = row["assessment"] == "clear_conflict"
+        if not (
+            row["paper"] == case["gold_documents"][0]
+            and row["query"] == case["query"]
+            and row["official_unanswerable"] is True
+            and row["assessment"] in {"clear_conflict", "no_clear_conflict_recorded"}
+            and conflict == bool(row["answer_supported_by_full_source"])
+            and conflict == bool(row["source_witnesses"])
+        ):
+            raise ValueError(f"Invalid official-negative source-review row {case['id']}")
+        body = paper_text(papers[row["paper"]])
+        blocks = body.split("\n\n")
+        for w in row["source_witnesses"]:
+            passage = body[w["start"] : w["end"]]
+            if not (
+                passage == w["text"] == blocks[w["rendered_paragraph_index"]]
+                and prior.digest(passage.encode()) == w["sha256"]
+            ):
+                raise ValueError(f"Official-negative source witness differs for {case['id']}")
 
 
 if __name__ == "__main__":

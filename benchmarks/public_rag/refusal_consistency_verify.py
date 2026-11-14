@@ -12,6 +12,7 @@ from benchmarks.public_rag.evidence_retention_verify import check_receipt, reten
 from benchmarks.public_rag.qa_first_response_cases import TRAIN, paper_text
 from benchmarks.public_rag.qa_first_response_review import index, load, save
 from benchmarks.public_rag.qa_first_response_verify import canon, events_of, require, sha, summarize
+from benchmarks.public_rag.refusal_consistency_live_results import PRIOR, historical_evidence
 from packages.knowledge.citation_qa import _CitationQaModelOutput, _validate_model_output
 from packages.knowledge.refusal_consistency import explicit_abstention
 
@@ -72,12 +73,24 @@ def collected_receipts(live):
     return rows
 
 
+def historical_parity(cases, receipts):
+    controls = {}
+    for cid, case in cases.items():
+        if case["scope"] == "independent":
+            continue
+        result = historical_evidence(case, receipts["B"][cid][1], PRIOR)
+        controls[cid] = {name: value for name, value in result.items() if name.startswith("same_")}
+    return controls
+
+
 def audit(root, train):
     protocol_path = root / "protocol.json"
     protocol = load(protocol_path)
+    freeze = load(root / "execution-freeze.json")
     dataset_sha = hashlib.sha256(train.read_bytes()).hexdigest()
     require(dataset_sha == protocol["train_sha256"], "Training corpus identity")
     protocol_sha = sha(protocol_path.read_text("utf-8"))
+    require(freeze["protocol_sha256"] == protocol_sha, "Execution freeze protocol mismatch")
     docs = {key: paper_text(paper) for key, paper in load(train).items()}
     cases = index(protocol["cases"])
     snapshots = {s["snapshot"]: s for f in (root / "snapshots").glob("*.json") if (s := load(f))}
@@ -126,6 +139,15 @@ def audit(root, train):
             f"{cid}: retrieval universe differs from frozen scope",
         )
         for arm, (meta, row) in (("A", (meta_a, row_a)), ("B", (meta_b, row_b))):
+            (variant,) = events_of(row, "qa_variant")
+            require(
+                variant["qa_source_sha256_lf"] == freeze["qa_source_sha256_lf"][arm]
+                and meta["source"] == freeze["source"]
+                and meta["snapshot"] == freeze["scope_snapshots"][case["scope"]]["snapshot"]
+                and meta["profile"] == freeze["profile"]
+                and meta["model"] == freeze["model"],
+                f"{cid}/{arm}: execution freeze identity",
+            )
             checks = check_receipt(
                 {**meta, "rows": [row]},
                 {cid: case},
@@ -140,7 +162,16 @@ def audit(root, train):
                 row["request_id"] and row["request_id"] not in request_ids, "Duplicate request ID"
             )
             request_ids.add(row["request_id"])
-            first_wire = events_of(row, "http_wire")[0]
+            first_wire, *corrections = events_of(row, "http_wire")
+            model_outputs = events_of(row, "model_output")
+            require(len(model_outputs) >= len(corrections), f"{cid}: missing corrected output")
+            for prior, correction in zip(
+                model_outputs[: len(corrections)], corrections, strict=True
+            ):
+                require(
+                    correction["content_sha256"][2] == prior["content_sha256"],
+                    f"{cid}/{arm}: the correction did not quote the previous model output",
+                )
             checks["wire_initial_content_sha256"] = first_wire["content_sha256"]
             checks["matched_output"] = apply_both_to_terminal(case, row, arm)
             pair[arm] = checks
@@ -168,6 +199,7 @@ def audit(root, train):
         "protocol_sha256_lf": protocol_sha,
         "independent": scope_result(fresh),
         "controls": scope_result([cid for cid in cases if cid not in fresh]),
+        "historical_sentence_reranker_parity": historical_parity(cases, receipts),
         "identical_pool_six_passages_and_initial_prompt": len(details),
         "independent_evidence": retention([details[cid]["A"] for cid in fresh]),
         "matched_independent_changes": {
@@ -187,8 +219,15 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=RESULTS)
     parser.add_argument("--train", type=Path, default=TRAIN)
+    parser.add_argument("--check", action="store_true", help="Compare with the published audit")
     args = parser.parse_args()
-    save(args.root / "receipt-audit.json", audit(args.root, args.train))
+    path = args.root / "receipt-audit.json"
+    result = audit(args.root, args.train)
+    if args.check:
+        require(canon(load(path)) == canon(result), "Published audit differs from the receipts")
+    else:
+        save(path, result)
+    print(f"{result['identical_pool_six_passages_and_initial_prompt']} verified pairs")
 
 
 if __name__ == "__main__":

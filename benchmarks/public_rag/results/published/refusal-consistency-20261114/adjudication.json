@@ -1,0 +1,32 @@
+{
+  "21185abea16d82315490": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      2,
+      5
+    ],
+    "all_claims_supported": true,
+    "reason": "The reply explicitly names Gu et al., the external Korean-English comparator, and separately lists internal configurations 1, 2 and 8. [2] supports both distinctions and scores. [5] supports the hyperparameter transfer, and [1] scopes the more detailed PBSMT comparison to German-English."
+  },
+  "3647eb703adad33a3c4c": {
+    "verdict": "partial",
+    "supporting_citations": [
+      1,
+      2,
+      3
+    ],
+    "all_claims_supported": true,
+    "reason": "Identifies the corpus as newly created by the task authors, answering one aspect of provenance. It omits the dialogue simulator that generated the examples. Each of the three source, size and authorship claims has its attached support."
+  },
+  "f4c24405356faea62edb": {
+    "verdict": "partial",
+    "supporting_citations": [
+      1,
+      2,
+      3
+    ],
+    "all_claims_supported": true,
+    "reason": "For this broad provenance question [2] and [3] identify who created the new corpus, but the answer omits the source of the dialogues, the simulator. [1] supports the attributed description and [2] and [3] support the corpus details."
+  }
+}

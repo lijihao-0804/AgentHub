@@ -1,0 +1,2926 @@
+{
+  "arm": "B",
+  "source": {
+    "packages/knowledge/citation_qa.py": "301297dd7c337a4bf5f008667ffc5309a6bd6c4b3d96f0aebed4a4a09378e56b",
+    "apps/api/routes/citation_qa.py": "27bda2b0201fe43be464fc0c4763f5c84e64009b4badf447cf2da07604c8de9e",
+    "apps/api/schemas/citation_qa.py": "aca3d1971e9c481c4a5ba0e5c8b682bb83b9c13ff861d48cc408063bf5545c10",
+    "packages/model_gateway/adapters/litellm/adapter.py": "e768ea18574984723642b03f59e2385f12eeca09091f8485254dda46b0c6d6af",
+    "packages/model_gateway/gateway.py": "c6d02969e16ef7f825644b247c79e23905e39a2740ba936587f5401b696e9d92",
+    "packages/model_gateway/contracts.py": "6c6507db40e667883706e59c130cabba97827482a92fd6802fe489339475cda1",
+    "packages/model_gateway/errors.py": "600b6c85e4f50b353a7a5bba456df8d4fca63c3bbc8ead8c92478023b3a23349",
+    "packages/knowledge/retrieval.py": "83b29728707cac0f26b0a8edaf7d2e0e3a9ea33467f6975b17eae3a3233a88e7",
+    "packages/knowledge/adapters/reranker.py": "76cab68df3cab27983719c53d0e5daf124d3fec00ddf9affb491bb3431bd9d1d",
+    "packages/knowledge/adapters/embeddings.py": "2a2dac86a87b862674de933c4572a1b15899e291d3906abf9a6dcf2a3aeb7752",
+    "packages/model_gateway/adapters/litellm/provider_http.py": "0a7d1a0c836950633edc933bb5f516e284a0adaf0a9b427cf148022fcc1cb3a1",
+    "packages/knowledge/structural_chunking.py": "cf98a9cd219d6a490dc452414d99c64aead835d584537d943ca2a60939e764a5",
+    "packages/knowledge/chunking.py": "09b569d3408dd98c157dad0ab4db4276f6430c324ae63c82903b86da29b51345",
+    "benchmarks/public_rag/evidence_sentence.py": "079962e1fe172a3e66b524ddf0a24c247cee07d4609521b95e45f75883494901",
+    "benchmarks/public_rag/evidence_retention_trace.py": "198850eed35508e5a002bf5ae7d6ea80af9533e7277d2041ff433dbbea46fdba",
+    "benchmarks/public_rag/evidence_retention_live.py": "89cba855822623247ad06d3d4989523a8c829aa80f8c47b885f061befe92ef30",
+    "benchmarks/public_rag/qa_first_response_trace.py": "a4ae473bfb7dde3faaadf1954ad2df462219204d904b21ddd61401b4625a47b3",
+    "benchmarks/public_rag/qa_first_response_live.py": "a685d951e374fb137df84e43c130a1d97b6dd893f7acba43106c8375da724fc4",
+    "scripts/citation_qa_profile.py": "6bc5f48c38dbd36190733fe8fb6866fb8a0a979da26122a813f8864f497b02c2",
+    "benchmarks/public_rag/refusal_consistency_live.py": "aa6b529f5a171f1dbf2d4686b7d225e118bdd8f146fb812626527277ae7d23d0",
+    "benchmarks/public_rag/refusal_consistency_live_trace.py": "09adff1219d889c7bd387eac0737e7e2d90d236e8fd22e85ef311a2e1e77926d",
+    "packages/knowledge/refusal_consistency.py": "4844051e09952eeeed804175da11e91e2e91532a3c2546994a68153cb1f6d3fa",
+    "packages/knowledge/adapters/sparse.py": "392b4c264dc2a06d85b3faa5d728ea03c729af8fb901e136fc7fcb9eefbaaadf",
+    "apps/api/knowledge_dependencies.py": "f13315442cda5f24db4d85dbabd3a73fcbb8bd9d9c9d5515d785aa3634394321",
+    "benchmarks/public_rag/qa_first_response_budget.py": "582e57a81ddd0162569d126f20a7cff5c1c1ec480583eded32049e574fab5387"
+  },
+  "model": "deepseek-v4.1-flash-1017",
+  "profile": "7a1d2018-2edc-492b-97f8-1a9aee256246",
+  "snapshot": "595207f6-eff5-45d0-92e0-f096d1972364",
+  "snapshot_hash": "4e6eb31da7485b7e21420becc2a66b2d9d7e9b8fb00cd2d54b0c5f90cfebd334",
+  "documents": 16,
+  "chunks": 338,
+  "protocol_sha256": "0435e704f9631b57929b58c360c7e4dbef27ecdd9e76c47cd2082a888a017d55",
+  "endpoint": "POST /api/v1/knowledge/query",
+  "knowledge_base": "fb73160f-eccc-4b41-88b2-17700ce7ffe1",
+  "workspace": "27b0707a-b67d-45bb-96c3-8da6e91188bd",
+  "request_mode": "provider_default",
+  "output_mode": "PROMPT_JSON",
+  "retrieval_profile": {
+    "dense_top_k": 30,
+    "sparse_top_k": 30,
+    "candidate_top_k": 20,
+    "final_top_k": 6
+  },
+  "rows": [
+    {
+      "id": "c78f18606524539e4c573481e5bf1e0a242cc33c",
+      "state": "returned",
+      "utc": "2026-11-14T07:57:50.622066+00:00",
+      "http": 200,
+      "elapsed_s": 3.69,
+      "answer": "They obtained 1001 responses/tasks: 496 in the Control group and 505 in the AUI group [3].",
+      "insufficient": false,
+      "citations": [
+        {
+          "number": 3,
+          "source": "1707.06939",
+          "ordinal": 7,
+          "chunk_id": "c11418f15647f74d81b9bde30f9dd2040a25e838bc5a1408e48ee294ee259f2b",
+          "revision": "ecad8a26-aa4f-4bf9-a800-7a9221eed450",
+          "excerpt": "studied and its input data, worker recruitment, the design of our experimental treatment and control, the “instrumentation” we used to measure the speeds of workers as they performed our task, and our procedures to post-process and rate the worker responses to our task prior to subsequent analysis.\n\nData collection\n\nWe recruited 176 AMT workers to participate in our conceptualization task. Of these workers, 90 were randomly assigned to the Control group and 86 to the AUI group. These workers completed 1001 tasks: 496 tasks in the control and 505 in the AUI. All responses were gathered within a single 24-hour period during April, 2017.\n\nAfter Control and AUI workers were finished responding, we initiated our non-experimental quality ratings task. Whenever multiple workers provided the same response to a given question, we only sought ratings for that single unique question and response. Each unique question-response pair ( INLINEFORM0 ) was rated at least 8–10 times (a few pairs were rated more often; we retained those extra ratings). We recruited 119 AMT workers (who were not members of the Control or AUI groups) who provided 4300 total ratings.\n\nDifferences in response time\n\nWe fo",
+          "chunk_text_sha256": "204bbacf22d4d4b491a0484d15c91a323c6d721854becf0480c5647d872b9f63",
+          "excerpt_sha256": "204bbacf22d4d4b491a0484d15c91a323c6d721854becf0480c5647d872b9f63",
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1200,
+          "locator": {
+            "type": "text_range",
+            "char_end": 8200,
+            "char_start": 7000
+          },
+          "document_id": "6350eaa0-7fea-40f2-b403-9d376452e628",
+          "citation_source": "document:6350eaa0-7fea-40f2-b403-9d376452e628/revision:ecad8a26-aa4f-4bf9-a800-7a9221eed450"
+        }
+      ],
+      "events": [
+        {
+          "kind": "qa_variant",
+          "arm": "B",
+          "qa_source_sha256_lf": "e0ee46e9a70be9222d841483f3edf9d00b0ea5f4d27076953a9e0a440a5c4571",
+          "verify_refusal_consistency": true
+        },
+        {
+          "kind": "rerank_scores",
+          "arm": "B",
+          "input_scores": [
+            {
+              "chunk_id": "611625fa7e96e2d3faee13ea4dce05569e0369f3abf8000d7bf729ec3abcf431",
+              "whole_score": -0.96142578125,
+              "score": -3.568603515625,
+              "windows": [
+                {
+                  "start": 0,
+                  "end": 94,
+                  "score": -10.75
+                },
+                {
+                  "start": 96,
+                  "end": 406,
+                  "score": -11.0078125
+                },
+                {
+                  "start": 288,
+                  "end": 560,
+                  "score": -9.40625
+                },
+                {
+                  "start": 407,
+                  "end": 607,
+                  "score": -10.3046875
+                },
+                {
+                  "start": 561,
+                  "end": 739,
+                  "score": -6.8828125
+                },
+                {
+                  "start": 608,
+                  "end": 891,
+                  "score": -7.05078125
+                },
+                {
+                  "start": 740,
+                  "end": 1106,
+                  "score": -6.17578125
+                },
+                {
+                  "start": 892,
+                  "end": 1199,
+                  "score": -6.6328125
+                }
+              ]
+            },
+            {
+              "chunk_id": "711aa6a74a171e1dde4d9b52834e859844f0b2fc47c11eb5908e2f325978c104",
+              "whole_score": -0.271240234375,
+              "score": -2.5086669921875,
+              "windows": [
+                {
+                  "start": 0,
+                  "end": 86,
+                  "score": -11.0234375
+                },
+                {
+                  "start": 88,
+                  "end": 429,
+                  "score": -5.50390625
+                },
+                {
+                  "start": 253,
+                  "end": 615,
+                  "score": -4.74609375
+                },
+                {
+                  "start": 430,
+                  "end": 768,
+                  "score": -6.12109375
+                },
+                {
+                  "start": 616,
+                  "end": 905,
+                  "score": -5.9375
+                },
+                {
+                  "start": 907,
+                  "end": 919,
+                  "score": -10.8046875
+                },
+                {
+                  "start": 921,
+                  "end": 1197,
+                  "score": -10.8671875
+                },
+                {
+                  "start": 1042,
+                  "end": 1200,
+                  "score": -10.8828125
+                }
+              ]
+            },
+            {
+              "chunk_id": "737c614e8e29e086f72adf60347faf51f710ce7a074a5b8ba955dbd8df9f063b",
+              "whole_score": -0.430908203125,
+              "score": -3.1431884765625,
+              "windows": [
+                {
+                  "start": 0,
+                  "end": 113,
+                  "score": -6.734375
+                },
+                {
+                  "start": 14,
+                  "end": 126,
+                  "score": -6.8671875
+                },
+                {
+                  "start": 114,
+                  "end": 201,
+                  "score": -6.890625
+                },
+                {
+                  "start": 203,
+                  "end": 213,
+                  "score": -9.0703125
+                },
+                {
+                  "start": 215,
+                  "end": 490,
+                  "score": -5.85546875
+                },
+                {
+                  "start": 354,
+                  "end": 616,
+                  "score": -6.66796875
+                },
+                {
+                  "start": 618,
+                  "end": 792,
+                  "score": -7.42578125
+                },
+                {
+                  "start": 708,
+                  "end": 818,
+                  "score": -11.0390625
+                },
+                {
+                  "start": 793,
+                  "end": 843,
+                  "score": -11.0390625
+                },
+                {
+                  "start": 819,
+                  "end": 872,
+                  "score": -11.0390625
+                },
+                {
+                  "start": 844,
+                  "end": 895,
+                  "score": -11.0234375
+                },
+                {
+                  "start": 873,
+                  "end": 1066,
+                  "score": -8.90625
+                },
+                {
+                  "start": 896,
+                  "end": 1191,
+                  "score": -6.68359375
+                },
+                {
+                  "start": 1067,
+                  "end": 1200,
+                  "score": -6.55078125
+                }
+              ]
+            },
+            {
+              "chunk_id": "92e9390f1fcb789f3fbac4d726709bea181f266dc32a2fd7c7133358bebd9562",
+              "whole_score": -1.9462890625,
+              "score": -5.04345703125,
+              "windows": [
+                {
+                  "start": 0,
+                  "end": 6,
+                  "score": -11.0234375
+                },
+                {
+                  "start": 8,
+                  "end": 313,
+                  "score": -11.015625
+                },
+                {
+                  "start": 128,
+                  "end": 455,
+                  "score": -8.140625
+                },
+                {
+                  "start": 457,
+                  "end": 753,
+                  "score": -10.9453125
+                },
+                {
+                  "start": 585,
+                  "end": 937,
+                  "score": -10.7109375
+                },
+                {
+                  "start": 754,
+                  "end": 1086,
+                  "score": -10.96875
+                },
+                {
+                  "start": 1088,
+                  "end": 1200,
+                  "score": -10.3828125
+                }
+              ]
+            },
+            {
+              "chunk_id": "5894ea0256a72b3af8ca2a25b285f6ecb33bfb521a0931ba1dca9ce2c508453b",
+              "whole_score": -1.01171875,
+              "score": -5.607421875,
+              "windows": [
+                {
+                  "start": 0,
+                  "end": 271,
+                  "score": -10.515625
+                },
+                {
+                  "start": 116,
+                  "end": 518,
+                  "score": -10.3515625
+                },
+                {
+                  "start": 272,
+                  "end": 667,
+                  "score": -10.6953125
+                },
+                {
+                  "start": 669,
+                  "end": 684,
+                  "score": -10.4921875
+                },
+                {
+                  "start": 686,
+                  "end": 711,
+                  "score": -10.984375
+                },
+                {
+                  "start": 698,
+                  "end": 829,
+                  "score": -10.8671875
+                },
+                {
+                  "start": 712,
+                  "end": 923,
+                  "score": -10.6015625
+                },
+                {
+                  "start": 830,
+                  "end": 936,
+                  "score": -10.203125
+                }
+              ]
+            },
+            {
+              "chunk_id": "e7f5ca1c4a5ae0a68cb13184f2ed416d7f275fa441f00e30fdf70cf1936c5353",
+              "whole_score": -1.7138671875,
+              "score": -3.54638671875,
+              "windows": [
+                {
+                  "start": 0,
+                  "end": 215,
+                  "score": -5.37890625
+                },
+                {
+                  "start": 107,
+                  "end": 443,
+                  "score": -7.42578125
+                },
+                {
+                  "start": 445,
+                  "end": 457,
+                  "score": -10.75
+                },
+                {
+                  "start": 459,
+                  "end": 815,
+                  "score": -10.8359375
+                },
+                {
+                  "start": 713,
+                  "end": 1006,
+                  "score": -11.0
+                },
+                {
+                  "start": 1008,
+                  "end": 1200,
+                  "score": -11.0390625
+                }
+              ]
+            },
+            {
+              "chunk_id": "352b1321e19342bf509c16247ebd34a7831b9382ae18750ff8dcb66f1d98c50b",
+              "whole_score": -1.9404296875,
+              "score": -1.295654296875,
+              "windows": [
+                {
+                  "start": 0,
+                  "end": 137,
+                  "score": -10.8984375
+                },
+                {
+                  "start": 3,
+                  "end": 315,
+                  "score": -7.05078125
+                },
+                {
+                  "start": 138,
+                  "end": 440,
+                  "score": -6.9140625
+                },
+                {
+                  "start": 442,
+                  "end": 648,
+                  "score": -3.802734375
+                },
+                {
+                  "start": 531,
+                  "end": 765,
+                  "score": -2.92578125
+                },
+                {
+                  "start": 649,
+                  "end": 830,
+                  "score": -3.732421875
+                },
+                {
+                  "start": 832,
+                  "end": 1065,
+                  "score": -2.26171875
+                },
+                {
+                  "start": 933,
+                  "end": 1100,
+                  "score": -0.65087890625
+                },
+                {
+                  "start": 1066,
+                  "end": 1200,
+                  "score": -6.19921875
+                }
+              ]
+            },
+            {
+              "chunk_id": "4113a692fb8911193452a18de63d23f7e796f829c12f50b956bc8d7e7c8c5af2",
+              "whole_score": -2.6875,
+              "score": -6.61328125,
+              "windows": [
+                {
+                  "start": 0,
+                  "end": 341,
+                  "score": -10.9140625
+                },
+                {
+                  "start": 343,
+                  "end": 611,
+                  "score": -11.0078125
+                },
+                {
+                  "start": 422,
+                  "end": 764,
+                  "score": -11.03125
+                },
+                {
+                  "start": 766,
+                  "end": 1020,
+                  "score": -10.5859375
+                },
+                {
+                  "start": 850,
+                  "end": 1151,
+                  "score": -10.5390625
+                },
+                {
+                  "start": 1021,
+                  "end": 1200,
+                  "score": -10.671875
+                }
+              ]
+            },
+            {
+              "chunk_id": "2a85f242c73a53b42a80a36c92d5b97aa55f18c2f633dfe79c891f701820e40f",
+              "whole_score": -2.330078125,
+              "score": -3.9873046875,
+              "windows": [
+                {
+                  "start": 0,
+                  "end": 151,
+                  "score": -10.3125
+                },
+                {
+                  "start": 21,
+                  "end": 357,
+                  "score": -9.359375
+                },
+                {
+                  "start": 152,
+                  "end": 498,
+                  "score": -8.7421875
+                },
+                {
+                  "start": 358,
+                  "end": 700,
+                  "score": -6.61328125
+                },
+                {
+                  "start": 499,
+                  "end": 948,
+                  "score": -5.64453125
+                },
+                {
+                  "start": 950,
+                  "end": 969,
+                  "score": -11.0234375
+                },
+                {
+                  "start": 971,
+                  "end": 1200,
+                  "score": -10.8359375
+                }
+              ]
+            },
+            {
+              "chunk_id": "a11416cd4137a6fbad71d57d4610b9f56156c5cfb9238471987ad69003467539",
+              "whole_score": 0.273193359375,
+              "score": -1.8350830078125,
+              "windows": [
+                {
+                  "start": 0,
+                  "end": 364,
+                  "score": -3.943359375
+                },
+                {
+                  "start": 214,
+                  "end": 481,
+                  "score": -5.11328125
+                },
+                {
+                  "start": 365,
+                  "end": 595,
+                  "score": -5.13671875
+                },
+                {
+                  "start": 482,
+                  "end": 703,
+                  "score": -5.2109375
+                },
+                {
+                  "start": 705,
+                  "end": 738,
+                  "score": -10.46875
+                },
+                {
+                  "start": 740,
+                  "end": 1002,
+                  "score": -5.8515625
+                },
+                {
+                  "start": 868,
+                  "end": 1137,
+                  "score": -6.890625
+                },
+                {
+                  "start": 1003,
+                  "end": 1200,
+                  "score": -11.0078125
+                }
+              ]
+            },
+            {
+              "chunk_id": "1377d1703533251d3b7cd90ddf5ae79c96eb2c0240cc6a3f25ef7a02f0dbbbd6",
+              "whole_score": -3.37890625,
+              "score": -6.384765625,
+              "windows": [
+                {
+                  "start": 0,
+                  "end": 197,
+                  "score": -10.8828125
+                },
+                {
+                  "start": 42,
+                  "end": 327,
+                  "score": -10.53125
+                },
+                {
+                  "start": 329,
+                  "end": 643,
+                  "score": -11.015625
+                },
+                {
+                  "start": 432,
+                  "end": 1200,
+                  "score": -9.390625
+                }
+              ]
+            },
+            {
+              "chunk_id": "b214661bae05022927bdb0d20b98922fa120f02eaebba7a2bf76a442b73b5b65",
+              "whole_score": -1.4208984375,
+              "score": -1.088623046875,
+              "windows": [
+                {
+                  "start": 0,
+                  "end": 204,
+                  "score": -6.18359375
+                },
+                {
+                  "start": 123,
+                  "end": 331,
+                  "score": -4.80859375
+                },
+                {
+                  "start": 205,
+                  "end": 344,
+                  "score": -5.91796875
+                },
+                {
+                  "start": 332,
+                  "end": 477,
+                  "score": -1.8232421875
+                },
+                {
+                  "start": 345,
+                  "end": 808,
+                  "score": -0.75634765625
+                },
+                {
+                  "start": 810,
+                  "end": 1115,
+                  "score": -10.9296875
+                },
+                {
+                  "start": 974,
+                  "end": 1200,
+                  "score": -10.9609375
+                }
+              ]
+            },
+            {
+              "chunk_id": "a781e162b5744e2e4ec9a2a9cdc7ca5b31854ff9688eb351f78631d0ddd5527a",
+              "whole_score": 0.053619384765625,
+              "score": -2.5962371826171875,
+              "windows": [
+                {
+                  "start": 0,
+                  "end": 191,
+                  "score": -6.1875
+                },
+                {
+                  "start": 67,
+                  "end": 478,
+                  "score": -6.68359375
+                },
+                {
+                  "start": 480,
+                  "end": 703,
+                  "score": -10.0546875
+                },
+                {
+                  "start": 615,
+                  "end": 715,
+                  "score": -11.0390625
+                },
+                {
+                  "start": 704,
+                  "end": 821,
+                  "score": -11.03125
+                },
+                {
+                  "start": 716,
+                  "end": 959,
+                  "score": -11.03125
+                },
+                {
+                  "start": 822,
+                  "end": 1089,
+                  "score": -5.25390625
+                },
+                {
+                  "start": 960,
+                  "end": 1200,
+                  "score": -5.24609375
+                }
+              ]
+            },
+            {
+              "chunk_id": "7353e434c1f95b8e57c4fcf812890832d837a88a5d9f32c3e8de41ef5f51e18a",
+              "whole_score": 0.48486328125,
+              "score": -1.531982421875,
+              "windows": [
+                {
+                  "start": 0,
+                  "end": 22,
+                  "score": -9.4921875
+                },
+                {
+                  "start": 6,
+                  "end": 83,
+                  "score": -10.6484375
+                },
+                {
+                  "start": 85,
+                  "end": 272,
+                  "score": -9.953125
+                },
+                {
+                  "start": 158,
+                  "end": 451,
+                  "score": -7.37109375
+                },
+                {
+                  "start": 453,
+                  "end": 739,
+                  "score": -3.666015625
+                },
+                {
+                  "start": 728,
+                  "end": 864,
+                  "score": -6.78125
+                },
+                {
+                  "start": 740,
+                  "end": 1200,
+                  "score": -3.548828125
+                }
+              ]
+            },
+            {
+              "chunk_id": "c11418f15647f74d81b9bde30f9dd2040a25e838bc5a1408e48ee294ee259f2b",
+              "whole_score": -1.62890625,
+              "score": -1.39306640625,
+              "windows": [
+                {
+                  "start": 0,
+                  "end": 299,
+                  "score": -6.55078125
+                },
+                {
+                  "start": 301,
+                  "end": 316,
+                  "score": -10.4921875
+                },
+                {
+                  "start": 318,
+                  "end": 482,
+                  "score": -8.5390625
+                },
+                {
+                  "start": 393,
+                  "end": 563,
+                  "score": -6.22265625
+                },
+                {
+                  "start": 483,
+                  "end": 642,
+                  "score": -1.1572265625
+                },
+                {
+                  "start": 644,
+                  "end": 898,
+                  "score": -4.76171875
+                },
+                {
+                  "start": 756,
+                  "end": 1049,
+                  "score": -1.6279296875
+                },
+                {
+                  "start": 899,
+                  "end": 1163,
+                  "score": -1.767578125
+                },
+                {
+                  "start": 1165,
+                  "end": 1193,
+                  "score": -8.765625
+                },
+                {
+                  "start": 1195,
+                  "end": 1200,
+                  "score": -9.734375
+                }
+              ]
+            },
+            {
+              "chunk_id": "4599e28605258c8eddca406d1ade6cf9557b04d107dc8fb7fdd7739577bff328",
+              "whole_score": -2.162109375,
+              "score": -2.8056640625,
+              "windows": [
+                {
+                  "start": 0,
+                  "end": 265,
+                  "score": -5.7578125
+                },
+                {
+                  "start": 253,
+                  "end": 387,
+                  "score": -8.7421875
+                },
+                {
+                  "start": 389,
+                  "end": 510,
+                  "score": -4.57421875
+                },
+                {
+                  "start": 512,
+                  "end": 545,
+                  "score": -10.546875
+                },
+                {
+                  "start": 547,
+                  "end": 781,
+                  "score": -3.44921875
+                },
+                {
+                  "start": 723,
+                  "end": 814,
+                  "score": -8.2109375
+                },
+                {
+                  "start": 782,
+                  "end": 825,
+                  "score": -10.0703125
+                },
+                {
+                  "start": 815,
+                  "end": 903,
+                  "score": -8.734375
+                },
+                {
+                  "start": 826,
+                  "end": 1013,
+                  "score": -6.203125
+                },
+                {
+                  "start": 904,
+                  "end": 1113,
+                  "score": -6.45703125
+                },
+                {
+                  "start": 1014,
+                  "end": 1126,
+                  "score": -6.8671875
+                },
+                {
+                  "start": 1114,
+                  "end": 1200,
+                  "score": -7.04296875
+                }
+              ]
+            },
+            {
+              "chunk_id": "3ddd69b71cbe9aad57c1d1b5825291a019ffeda7ba30446a2689e7ac431285f2",
+              "whole_score": -1.6640625,
+              "score": -3.18359375,
+              "windows": [
+                {
+                  "start": 0,
+                  "end": 281,
+                  "score": -4.703125
+                },
+                {
+                  "start": 283,
+                  "end": 583,
+                  "score": -8.1328125
+                },
+                {
+                  "start": 417,
+                  "end": 857,
+                  "score": -7.26953125
+                },
+                {
+                  "start": 584,
+                  "end": 1122,
+                  "score": -7.15234375
+                },
+                {
+                  "start": 858,
+                  "end": 1200,
+                  "score": -5.5625
+                }
+              ]
+            },
+            {
+              "chunk_id": "6f8d9ee2a55403048c117db84fef086677b067ee8ae7db68678610fcdf43fc8c",
+              "whole_score": -3.80859375,
+              "score": -6.158203125,
+              "windows": [
+                {
+                  "start": 0,
+                  "end": 113,
+                  "score": -11.0390625
+                },
+                {
+                  "start": 115,
+                  "end": 193,
+                  "score": -9.796875
+                },
+                {
+                  "start": 195,
+                  "end": 400,
+                  "score": -10.75
+                },
+                {
+                  "start": 263,
+                  "end": 504,
+                  "score": -8.5859375
+                },
+                {
+                  "start": 506,
+                  "end": 711,
+                  "score": -10.984375
+                },
+                {
+                  "start": 713,
+                  "end": 840,
+                  "score": -8.5078125
+                },
+                {
+                  "start": 842,
+                  "end": 1020,
+                  "score": -8.828125
+                },
+                {
+                  "start": 992,
+                  "end": 1035,
+                  "score": -10.7734375
+                },
+                {
+                  "start": 1021,
+                  "end": 1168,
+                  "score": -10.1640625
+                },
+                {
+                  "start": 1170,
+                  "end": 1200,
+                  "score": -10.953125
+                }
+              ]
+            },
+            {
+              "chunk_id": "ba96f08ec9b767bfe089acf9d6e19be67aa251fbc38a6448b2b0ae58ea7f6ca8",
+              "whole_score": -2.83203125,
+              "score": -3.271484375,
+              "windows": [
+                {
+                  "start": 0,
+                  "end": 121,
+                  "score": -10.9609375
+                },
+                {
+                  "start": 6,
+                  "end": 194,
+                  "score": -11.0234375
+                },
+                {
+                  "start": 122,
+                  "end": 260,
+                  "score": -3.7109375
+                },
+                {
+                  "start": 262,
+                  "end": 400,
+                  "score": -10.6796875
+                },
+                {
+                  "start": 316,
+                  "end": 540,
+                  "score": -7.7265625
+                },
+                {
+                  "start": 542,
+                  "end": 775,
+                  "score": -11.0
+                },
+                {
+                  "start": 777,
+                  "end": 839,
+                  "score": -10.7578125
+                },
+                {
+                  "start": 841,
+                  "end": 1072,
+                  "score": -6.21484375
+                },
+                {
+                  "start": 947,
+                  "end": 1120,
+                  "score": -5.59765625
+                },
+                {
+                  "start": 1073,
+                  "end": 1189,
+                  "score": -5.4296875
+                },
+                {
+                  "start": 1121,
+                  "end": 1200,
+                  "score": -10.4921875
+                }
+              ]
+            },
+            {
+              "chunk_id": "96e87df94afade0334e16ec31a3f2a6f399efe97db8025a549f29549c6794c33",
+              "whole_score": 0.5908203125,
+              "score": -2.40185546875,
+              "windows": [
+                {
+                  "start": 0,
+                  "end": 163,
+                  "score": -5.39453125
+                },
+                {
+                  "start": 165,
+                  "end": 193,
+                  "score": -8.765625
+                },
+                {
+                  "start": 195,
+                  "end": 279,
+                  "score": -10.96875
+                },
+                {
+                  "start": 272,
+                  "end": 355,
+                  "score": -10.890625
+                },
+                {
+                  "start": 280,
+                  "end": 491,
+                  "score": -8.8125
+                },
+                {
+                  "start": 356,
+                  "end": 672,
+                  "score": -8.15625
+                },
+                {
+                  "start": 492,
+                  "end": 680,
+                  "score": -7.10546875
+                },
+                {
+                  "start": 673,
+                  "end": 773,
+                  "score": -7.9375
+                },
+                {
+                  "start": 681,
+                  "end": 1005,
+                  "score": -8.7734375
+                },
+                {
+                  "start": 774,
+                  "end": 1022,
+                  "score": -8.4140625
+                },
+                {
+                  "start": 1006,
+                  "end": 1083,
+                  "score": -10.6484375
+                },
+                {
+                  "start": 1085,
+                  "end": 1199,
+                  "score": -11.03125
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "retrieval",
+          "snapshot": "595207f6-eff5-45d0-92e0-f096d1972364",
+          "candidate": [
+            {
+              "source": "1707.06939",
+              "ordinal": 0,
+              "chunk_id": "611625fa7e96e2d3faee13ea4dce05569e0369f3abf8000d7bf729ec3abcf431"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 3,
+              "chunk_id": "711aa6a74a171e1dde4d9b52834e859844f0b2fc47c11eb5908e2f325978c104"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 15,
+              "chunk_id": "737c614e8e29e086f72adf60347faf51f710ce7a074a5b8ba955dbd8df9f063b"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 2,
+              "chunk_id": "92e9390f1fcb789f3fbac4d726709bea181f266dc32a2fd7c7133358bebd9562"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 19,
+              "chunk_id": "5894ea0256a72b3af8ca2a25b285f6ecb33bfb521a0931ba1dca9ce2c508453b"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 1,
+              "chunk_id": "e7f5ca1c4a5ae0a68cb13184f2ed416d7f275fa441f00e30fdf70cf1936c5353"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 11,
+              "chunk_id": "352b1321e19342bf509c16247ebd34a7831b9382ae18750ff8dcb66f1d98c50b"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 5,
+              "chunk_id": "4113a692fb8911193452a18de63d23f7e796f829c12f50b956bc8d7e7c8c5af2"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 6,
+              "chunk_id": "2a85f242c73a53b42a80a36c92d5b97aa55f18c2f633dfe79c891f701820e40f"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 10,
+              "chunk_id": "a11416cd4137a6fbad71d57d4610b9f56156c5cfb9238471987ad69003467539"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 4,
+              "chunk_id": "1377d1703533251d3b7cd90ddf5ae79c96eb2c0240cc6a3f25ef7a02f0dbbbd6"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 18,
+              "chunk_id": "b214661bae05022927bdb0d20b98922fa120f02eaebba7a2bf76a442b73b5b65"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 16,
+              "chunk_id": "a781e162b5744e2e4ec9a2a9cdc7ca5b31854ff9688eb351f78631d0ddd5527a"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 9,
+              "chunk_id": "7353e434c1f95b8e57c4fcf812890832d837a88a5d9f32c3e8de41ef5f51e18a"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 7,
+              "chunk_id": "c11418f15647f74d81b9bde30f9dd2040a25e838bc5a1408e48ee294ee259f2b"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 14,
+              "chunk_id": "4599e28605258c8eddca406d1ade6cf9557b04d107dc8fb7fdd7739577bff328"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 17,
+              "chunk_id": "3ddd69b71cbe9aad57c1d1b5825291a019ffeda7ba30446a2689e7ac431285f2"
+            },
+            {
+              "source": "1910.04601",
+              "ordinal": 7,
+              "chunk_id": "6f8d9ee2a55403048c117db84fef086677b067ee8ae7db68678610fcdf43fc8c"
+            },
+            {
+              "source": "1910.04601",
+              "ordinal": 9,
+              "chunk_id": "ba96f08ec9b767bfe089acf9d6e19be67aa251fbc38a6448b2b0ae58ea7f6ca8"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 8,
+              "chunk_id": "96e87df94afade0334e16ec31a3f2a6f399efe97db8025a549f29549c6794c33"
+            }
+          ],
+          "reranked": [
+            {
+              "source": "1707.06939",
+              "ordinal": 18,
+              "chunk_id": "b214661bae05022927bdb0d20b98922fa120f02eaebba7a2bf76a442b73b5b65"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 11,
+              "chunk_id": "352b1321e19342bf509c16247ebd34a7831b9382ae18750ff8dcb66f1d98c50b"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 7,
+              "chunk_id": "c11418f15647f74d81b9bde30f9dd2040a25e838bc5a1408e48ee294ee259f2b"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 9,
+              "chunk_id": "7353e434c1f95b8e57c4fcf812890832d837a88a5d9f32c3e8de41ef5f51e18a"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 10,
+              "chunk_id": "a11416cd4137a6fbad71d57d4610b9f56156c5cfb9238471987ad69003467539"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 8,
+              "chunk_id": "96e87df94afade0334e16ec31a3f2a6f399efe97db8025a549f29549c6794c33"
+            }
+          ],
+          "times_ms": {
+            "dense": 118.113,
+            "sparse": 33.973,
+            "fusion": 0.127,
+            "rerank": 1097.411
+          },
+          "total_ms": 1268.351
+        },
+        {
+          "kind": "reader",
+          "prompt_sha256": "37b8b1cbfdced4c099853c03a9c2d8433b119a36fcbab3207aac5b49959e7cc1",
+          "chunks": [
+            {
+              "source": "1707.06939",
+              "ordinal": 18,
+              "chunk_id": "b214661bae05022927bdb0d20b98922fa120f02eaebba7a2bf76a442b73b5b65"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 11,
+              "chunk_id": "352b1321e19342bf509c16247ebd34a7831b9382ae18750ff8dcb66f1d98c50b"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 7,
+              "chunk_id": "c11418f15647f74d81b9bde30f9dd2040a25e838bc5a1408e48ee294ee259f2b"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 9,
+              "chunk_id": "7353e434c1f95b8e57c4fcf812890832d837a88a5d9f32c3e8de41ef5f51e18a"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 10,
+              "chunk_id": "a11416cd4137a6fbad71d57d4610b9f56156c5cfb9238471987ad69003467539"
+            },
+            {
+              "source": "1707.06939",
+              "ordinal": 8,
+              "chunk_id": "96e87df94afade0334e16ec31a3f2a6f399efe97db8025a549f29549c6794c33"
+            }
+          ],
+          "entries": [
+            {
+              "number": 1,
+              "chunk_id": "b214661bae05022927bdb0d20b98922fa120f02eaebba7a2bf76a442b73b5b65",
+              "document_id": "6350eaa0-7fea-40f2-b403-9d376452e628",
+              "document_revision_id": "ecad8a26-aa4f-4bf9-a800-7a9221eed450",
+              "source": "document:6350eaa0-7fea-40f2-b403-9d376452e628/revision:ecad8a26-aa4f-4bf9-a800-7a9221eed450",
+              "locator": {
+                "type": "text_range",
+                "char_end": 19200,
+                "char_start": 18000
+              },
+              "lifecycle": {
+                "superseded": false
+              },
+              "text": "potentially type out the entire response even if it also appeared in the AUI (which the worker may not have even noticed). Nevertheless, most AUI workers submitted responses that appeared in the AUI (Fig. FIGREF24 A) and, of those responses, most owere found in the first few (reconstructed) positions near the top of the AUI (Fig. FIGREF24 B). Specifically, we found that 59.3% of responses were found in the first two reconstructed positions, and 91.2% were in the first six. With the caveats of this analysis in mind, which we hope to address in future experiments, these results provide some evidence that the AUI responses were meaningful and that the AUI workers were delayed by the AUI even though most chosen responses came from the top area of the AUI which is most quickly accessible to the worker.\n\nBeyond AUI position effects and the number of options shown in the AUI, there are many aspects of the interplay between workers and the AUI to be further explored. We limited workers to performing no more than ten tasks, but will an AUI eventually lead to efficiency gains beyond that level of experience? It is also an open question if an AUI will lead to efficiency gains when applying mo"
+            },
+            {
+              "number": 2,
+              "chunk_id": "352b1321e19342bf509c16247ebd34a7831b9382ae18750ff8dcb66f1d98c50b",
+              "document_id": "6350eaa0-7fea-40f2-b403-9d376452e628",
+              "document_revision_id": "ecad8a26-aa4f-4bf9-a800-7a9221eed450",
+              "source": "document:6350eaa0-7fea-40f2-b403-9d376452e628/revision:ecad8a26-aa4f-4bf9-a800-7a9221eed450",
+              "locator": {
+                "type": "text_range",
+                "char_end": 12200,
+                "char_start": 11000
+              },
+              "lifecycle": {
+                "superseded": false
+              },
+              "text": "s. We anticipated that the AUI would lead to greater consistency by, among other effects, decreasing the rates of typos and misspellings. At the same time, however, the AUI could lead to more diversity due to cognitive priming: seeing suggested responses from the AUI may prompt the worker to revise their response. Increased diversity may be desirable when a crowdsourcer wants to receive as much information as possible from a given task.\n\nTo study the lexical and semantic diversities of responses, we performed three analyses. First, we aggregated all worker responses to a particular question into a single list corresponding to that question. Across all questions, we found that the number of unique responses was higher for the AUI than for the Control (Fig. FIGREF19 A), implying higher diversity for AUI than for Control.\n\nSecond, we compared the diversity of individual responses between Control and AUI for each question. To measure diversity for a question, we computed the number of responses divided by the number of unique responses to that question. We call this the response density. A set of responses has a response density of 1 when every response is unique but when every respons"
+            },
+            {
+              "number": 3,
+              "chunk_id": "c11418f15647f74d81b9bde30f9dd2040a25e838bc5a1408e48ee294ee259f2b",
+              "document_id": "6350eaa0-7fea-40f2-b403-9d376452e628",
+              "document_revision_id": "ecad8a26-aa4f-4bf9-a800-7a9221eed450",
+              "source": "document:6350eaa0-7fea-40f2-b403-9d376452e628/revision:ecad8a26-aa4f-4bf9-a800-7a9221eed450",
+              "locator": {
+                "type": "text_range",
+                "char_end": 8200,
+                "char_start": 7000
+              },
+              "lifecycle": {
+                "superseded": false
+              },
+              "text": "studied and its input data, worker recruitment, the design of our experimental treatment and control, the “instrumentation” we used to measure the speeds of workers as they performed our task, and our procedures to post-process and rate the worker responses to our task prior to subsequent analysis.\n\nData collection\n\nWe recruited 176 AMT workers to participate in our conceptualization task. Of these workers, 90 were randomly assigned to the Control group and 86 to the AUI group. These workers completed 1001 tasks: 496 tasks in the control and 505 in the AUI. All responses were gathered within a single 24-hour period during April, 2017.\n\nAfter Control and AUI workers were finished responding, we initiated our non-experimental quality ratings task. Whenever multiple workers provided the same response to a given question, we only sought ratings for that single unique question and response. Each unique question-response pair ( INLINEFORM0 ) was rated at least 8–10 times (a few pairs were rated more often; we retained those extra ratings). We recruited 119 AMT workers (who were not members of the Control or AUI groups) who provided 4300 total ratings.\n\nDifferences in response time\n\nWe fo"
+            },
+            {
+              "number": 4,
+              "chunk_id": "7353e434c1f95b8e57c4fcf812890832d837a88a5d9f32c3e8de41ef5f51e18a",
+              "document_id": "6350eaa0-7fea-40f2-b403-9d376452e628",
+              "document_revision_id": "ecad8a26-aa4f-4bf9-a800-7a9221eed450",
+              "source": "document:6350eaa0-7fea-40f2-b403-9d376452e628/revision:ecad8a26-aa4f-4bf9-a800-7a9221eed450",
+              "locator": {
+                "type": "text_range",
+                "char_end": 10200,
+                "char_start": 9000
+              },
+              "lifecycle": {
+                "superseded": false
+              },
+              "text": "l vs. 12.14s for AUI). We conclude that the AUI makes workers significantly slower.\n\nWe anticipated that workers may learn over the course of multiple tasks. For example, the first time a worker sees the AUI will present a very different cognitive load than the 10th time. This learning may eventually lead to improved response times and so an AUI that may not be useful the first time may lead to performance gains as workers become more experienced.\n\nTo investigate learning effects, we recorded for each worker's question-response pair how many questions that worker had already answered, and examined the distributions of typing duration and submission delay conditioned on the number of previously answered questions (Fig. FIGREF17 ). Indeed, learning did occur: the submission delay (but not typing duration) decreased as workers responded to more questions. However, this did not translate to gains in overall performance between Control and AUI workers as learning occurred for both groups: Among AUI workers who answered 10 questions, the median submission delay on the 10th question was 8.02s, whereas for Control workers who answered 10 questions, the median delay on the 10th question was"
+            },
+            {
+              "number": 5,
+              "chunk_id": "a11416cd4137a6fbad71d57d4610b9f56156c5cfb9238471987ad69003467539",
+              "document_id": "6350eaa0-7fea-40f2-b403-9d376452e628",
+              "document_revision_id": "ecad8a26-aa4f-4bf9-a800-7a9221eed450",
+              "source": "document:6350eaa0-7fea-40f2-b403-9d376452e628/revision:ecad8a26-aa4f-4bf9-a800-7a9221eed450",
+              "locator": {
+                "type": "text_range",
+                "char_end": 11200,
+                "char_start": 10000
+              },
+              "lifecycle": {
+                "superseded": false
+              },
+              "text": "mong AUI workers who answered 10 questions, the median submission delay on the 10th question was 8.02s, whereas for Control workers who answered 10 questions, the median delay on the 10th question was only 4.178s. This difference between Control and AUI submission delays was significant (Mann-Whitney test: INLINEFORM0 , INLINEFORM1 , INLINEFORM2 , INLINEFORM3 ). In comparison, AUI (Control) workers answering their first question had a median submission delay of 10.97s (7.00s). This difference was also significant (Mann-Whitney test: INLINEFORM4 , INLINEFORM5 , INLINEFORM6 , INLINEFORM7 ). We conclude that experience with the AUI will not eventually lead to faster responses those of the control.\n\nDifferences in response diversity\n\nWe were also interested in determining whether or not the worker responses were more consistent or more diverse due to the AUI. Response consistency for natural language data is important when a crowdsourcer wishes to pool or aggregate a set of worker responses. We anticipated that the AUI would lead to greater consistency by, among other effects, decreasing the rates of typos and misspellings. At the same time, however, the AUI could lead to more diversit"
+            },
+            {
+              "number": 6,
+              "chunk_id": "96e87df94afade0334e16ec31a3f2a6f399efe97db8025a549f29549c6794c33",
+              "document_id": "6350eaa0-7fea-40f2-b403-9d376452e628",
+              "document_revision_id": "ecad8a26-aa4f-4bf9-a800-7a9221eed450",
+              "source": "document:6350eaa0-7fea-40f2-b403-9d376452e628/revision:ecad8a26-aa4f-4bf9-a800-7a9221eed450",
+              "locator": {
+                "type": "text_range",
+                "char_end": 9200,
+                "char_start": 8000
+              },
+              "lifecycle": {
+                "superseded": false
+              },
+              "text": "ted more often; we retained those extra ratings). We recruited 119 AMT workers (who were not members of the Control or AUI groups) who provided 4300 total ratings.\n\nDifferences in response time\n\nWe found that workers were slower overall with the AUI than without the AUI. In Fig. FIGREF16 we show the distributions of typing duration and submission delay. There was a slight difference in typing duration between Control and AUI (median 1.97s for Control compared with median 2.69s for AUI). However, there was a strong difference in the distributions of submission delay, with AUI workers taking longer to submit than Control workers (median submission delay of 7.27s vs. 4.44s). This is likely due to the time required to mentally process and select from the AUI options. We anticipated that the submission delay may be counter-balanced by the time saved entering text, but the total typing duration plus submission delay was still significantly longer for AUI than control (median 7.64s for Control vs. 12.14s for AUI). We conclude that the AUI makes workers significantly slower.\n\nWe anticipated that workers may learn over the course of multiple tasks. For example, the first time a worker sees"
+            }
+          ]
+        },
+        {
+          "kind": "wire",
+          "max_tokens": 2048,
+          "timeout_seconds": 60.0,
+          "system_prompt_sha256": "9921923abe84909a433d1333667a6cb16f7ba0928080ec0b21136d1b12238499",
+          "temperature": 0.0,
+          "model": "deepseek-v4.1-flash-1017",
+          "retry_limit": 0,
+          "enable_thinking": null,
+          "prompt_sha256": "37b8b1cbfdced4c099853c03a9c2d8433b119a36fcbab3207aac5b49959e7cc1"
+        },
+        {
+          "kind": "http_wire",
+          "method": "POST",
+          "model": "deepseek-v4.1-flash-1017",
+          "max_tokens": 2048,
+          "temperature": 0.0,
+          "thinking_override_present": false,
+          "roles": [
+            "system",
+            "user"
+          ],
+          "content_sha256": [
+            "9921923abe84909a433d1333667a6cb16f7ba0928080ec0b21136d1b12238499",
+            "37b8b1cbfdced4c099853c03a9c2d8433b119a36fcbab3207aac5b49959e7cc1"
+          ],
+          "system_prompt_sha256": "9921923abe84909a433d1333667a6cb16f7ba0928080ec0b21136d1b12238499",
+          "prompt_sha256": "37b8b1cbfdced4c099853c03a9c2d8433b119a36fcbab3207aac5b49959e7cc1"
+        },
+        {
+          "kind": "http_return",
+          "status": 200
+        },
+        {
+          "kind": "response",
+          "elapsed_ms": 2390,
+          "finish_reason": "stop",
+          "content_present": true,
+          "usage": {
+            "input_tokens": 2370,
+            "output_tokens": 274,
+            "total_tokens": 2644
+          }
+        },
+        {
+          "kind": "model_output",
+          "json_status": "schema_valid",
+          "output": {
+            "answer": "They obtained 1001 responses/tasks: 496 in the Control group and 505 in the AUI group [3].",
+            "citation_ids": [
+              3
+            ],
+            "insufficient_evidence": false
+          },
+          "content_sha256": "279fec06fc996fd9c6da5c797d209d4f68508271697f060ff32c323825c52666"
+        }
+      ],
+      "response_sha256": "a8c54a411a3c0861acbc692b900d3af17a7640ccedbeb01319ccb20feb7cd29d",
+      "request_payload_sha256": "99269906584054a1e8b65d7e865f67018692ba4d115007d6639af5cdf7f43e73",
+      "request_id": "2d0ae090-42c6-4628-b4b1-671351b60344",
+      "physical_model_requests": 1
+    },
+    {
+      "id": "891cab2e41d6ba962778bda297592c916b432226",
+      "state": "returned",
+      "utc": "2026-11-14T07:57:54.489650+00:00",
+      "http": 200,
+      "elapsed_s": 2.725,
+      "answer": "The target language is Python. The paper states that in its parallel corpus the target data code is written in the Python programming language [1], and its aim was to make the text-to-code framework work for general purpose programming language, primarily Python [3].",
+      "insufficient": false,
+      "citations": [
+        {
+          "number": 1,
+          "source": "1910.11471",
+          "ordinal": 8,
+          "chunk_id": "9ce3c88093ea8a32ebe4beb8341c055a065a96230c3e2664fafad15f3573ae30",
+          "revision": "1904eb40-ed9e-42de-94ce-b4381c5ce583",
+          "excerpt": "Language Processing (NLP). SMT plays a significant role in translation from one language to another, especially in lexical and grammatical rule extraction. In SMT, bilingual grammatical structures are automatically formed by statistical approaches instead of explicitly providing a grammatical model. This reduces months and years of work which requires significant collaboration between bi-lingual linguistics. Here, a neural network based machine translation model is used to translate regular text into programming code.\n\nProposed Methodology ::: Statistical Machine Translation ::: Data Preparation\n\nSMT techniques require a parallel corpus in thr source and thr target language. A text-code parallel corpus similar to Fig. FIGREF12 is used in training. This parallel corpus has 18805 aligned data in it . In source data, the expression of each line code is written in the English language. In target data, the code is written in Python programming language.\n\nProposed Methodology ::: Statistical Machine Translation ::: Vocabulary Generation\n\nTo train the neural model, the texts should be converted to a computational entity. To do that, two separate vocabulary files are created - one for the",
+          "chunk_text_sha256": "18e739310733fb8e26a7d776553bdca8479f7ee301728fa543a61443a4dc48d0",
+          "excerpt_sha256": "18e739310733fb8e26a7d776553bdca8479f7ee301728fa543a61443a4dc48d0",
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1199,
+          "locator": {
+            "type": "text_range",
+            "char_end": 9200,
+            "char_start": 8000
+          },
+          "document_id": "b3f5a75c-e099-4b72-9dde-6f6594d9ceb1",
+          "citation_source": "document:b3f5a75c-e099-4b72-9dde-6f6594d9ceb1/revision:1904eb40-ed9e-42de-94ce-b4381c5ce583"
+        },
+        {
+          "number": 3,
+          "source": "1910.11471",
+          "ordinal": 12,
+          "chunk_id": "e568d7234556ec4d3088c6b85c0f0034a52cb49f92abbc3a04670392f8d5af41",
+          "revision": "1904eb40-ed9e-42de-94ce-b4381c5ce583",
+          "excerpt": "rally requires a more extensive set of data (100k+ in such scenario) to build a more accurate model. The incoherence can be resolved by incorporating coding syntax tree model in future. For instance–\n\n\"define the method tzname with 2 arguments: self and dt.\"\n\nis translated into–\n\ndef __init__ ( self , regex ) :.\n\nThe translator is successfully generating the whole codeline automatically but missing the noun part (parameter and function name) part of the syntax.\n\nConclusion & Future Works\n\nThe main advantage of translating to a programming language is - it has a concrete and strict lexical and grammatical structure which human languages lack. The aim of this paper was to make the text-to-code framework work for general purpose programming language, primarily Python. In later phase, phrase-based word embedding can be incorporated for improved vocabulary mapping. To get more accurate target code for each line, Abstract Syntax Tree(AST) can be beneficial.\n\nThe contribution of this research is a machine learning model which can turn the human expression into coding expressions. This paper also discusses available methods which convert natural language to programming language successfull",
+          "chunk_text_sha256": "b04ce3b1a06fdddd4fcfdd510050313a144eeba56952710f588b2f4aaa6dc769",
+          "excerpt_sha256": "b04ce3b1a06fdddd4fcfdd510050313a144eeba56952710f588b2f4aaa6dc769",
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1200,
+          "locator": {
+            "type": "text_range",
+            "char_end": 13200,
+            "char_start": 12000
+          },
+          "document_id": "b3f5a75c-e099-4b72-9dde-6f6594d9ceb1",
+          "citation_source": "document:b3f5a75c-e099-4b72-9dde-6f6594d9ceb1/revision:1904eb40-ed9e-42de-94ce-b4381c5ce583"
+        }
+      ],
+      "events": [
+        {
+          "kind": "qa_variant",
+          "arm": "B",
+          "qa_source_sha256_lf": "e0ee46e9a70be9222d841483f3edf9d00b0ea5f4d27076953a9e0a440a5c4571",
+          "verify_refusal_consistency": true
+        },
+        {
+          "kind": "rerank_scores",
+          "arm": "B",
+          "input_scores": [
+            {
+              "chunk_id": "379d157c398baeb92e370a95fa83015a7d8b591294e7bd6a2bcb78459066b7bb",
+              "whole_score": 2.3828125,
+              "score": 1.98779296875,
+              "windows": [
+                {
+                  "start": 0,
+                  "end": 78,
+                  "score": -9.140625
+                },
+                {
+                  "start": 80,
+                  "end": 403,
+                  "score": -3.869140625
+                },
+                {
+                  "start": 187,
+                  "end": 660,
+                  "score": -4.24609375
+                },
+                {
+                  "start": 404,
+                  "end": 817,
+                  "score": 1.5927734375
+                },
+                {
+                  "start": 661,
+                  "end": 875,
+                  "score": 0.30029296875
+                },
+                {
+                  "start": 818,
+                  "end": 984,
+                  "score": -10.6328125
+                },
+                {
+                  "start": 986,
+                  "end": 998,
+                  "score": -8.609375
+                },
+                {
+                  "start": 1000,
+                  "end": 1200,
+                  "score": -7.75390625
+                }
+              ]
+            },
+            {
+              "chunk_id": "9ce3c88093ea8a32ebe4beb8341c055a065a96230c3e2664fafad15f3573ae30",
+              "whole_score": 2.765625,
+              "score": 2.666015625,
+              "windows": [
+                {
+                  "start": 0,
+                  "end": 155,
+                  "score": -6.40625
+                },
+                {
+                  "start": 27,
+                  "end": 300,
+                  "score": -7.4921875
+                },
+                {
+                  "start": 156,
+                  "end": 411,
+                  "score": -10.203125
+                },
+                {
+                  "start": 301,
+                  "end": 523,
+                  "score": -8.0859375
+                },
+                {
+                  "start": 525,
+                  "end": 602,
+                  "score": -10.953125
+                },
+                {
+                  "start": 604,
+                  "end": 727,
+                  "score": -1.96875
+                },
+                {
+                  "start": 684,
+                  "end": 757,
+                  "score": -10.59375
+                },
+                {
+                  "start": 728,
+                  "end": 809,
+                  "score": -9.4140625
+                },
+                {
+                  "start": 758,
+                  "end": 894,
+                  "score": -6.765625
+                },
+                {
+                  "start": 810,
+                  "end": 962,
+                  "score": 2.56640625
+                },
+                {
+                  "start": 964,
+                  "end": 1046,
+                  "score": -10.96875
+                },
+                {
+                  "start": 1048,
+                  "end": 1199,
+                  "score": -10.5390625
+                }
+              ]
+            },
+            {
+              "chunk_id": "4c0412d7d289314836d9d38d6d0141fb904bdc13314255801e02c76afdd3193b",
+              "whole_score": -1.84765625,
+              "score": -3.283203125,
+              "windows": [
+                {
+                  "start": 0,
+                  "end": 13,
+                  "score": -10.2265625
+                },
+                {
+                  "start": 3,
+                  "end": 102,
+                  "score": -9.2890625
+                },
+                {
+                  "start": 14,
+                  "end": 193,
+                  "score": -9.625
+                },
+                {
+                  "start": 103,
+                  "end": 317,
+                  "score": -8.1640625
+                },
+                {
+                  "start": 319,
+                  "end": 339,
+                  "score": -11.015625
+                },
+                {
+                  "start": 341,
+                  "end": 481,
+                  "score": -8.9765625
+                },
+                {
+                  "start": 473,
+                  "end": 587,
+                  "score": -5.2109375
+                },
+                {
+                  "start": 482,
+                  "end": 775,
+                  "score": -4.71875
+                },
+                {
+                  "start": 588,
+                  "end": 899,
+                  "score": -5.734375
+                },
+                {
+                  "start": 901,
+                  "end": 957,
+                  "score": -10.984375
+                },
+                {
+                  "start": 959,
+                  "end": 1156,
+                  "score": -5.84765625
+                },
+                {
+                  "start": 1028,
+                  "end": 1200,
+                  "score": -7.40625
+                }
+              ]
+            },
+            {
+              "chunk_id": "6e039cd3c608fccb18eeb8eb958259ebe358155a966adda80abb2cbf229c099c",
+              "whole_score": -1.9658203125,
+              "score": -1.71435546875,
+              "windows": [
+                {
+                  "start": 0,
+                  "end": 60,
+                  "score": -10.9921875
+                },
+                {
+                  "start": 62,
+                  "end": 95,
+                  "score": -1.462890625
+                },
+                {
+                  "start": 97,
+                  "end": 169,
+                  "score": -11.0390625
+                },
+                {
+                  "start": 171,
+                  "end": 304,
+                  "score": -5.94140625
+                },
+                {
+                  "start": 306,
+                  "end": 451,
+                  "score": -7.46875
+                },
+                {
+                  "start": 453,
+                  "end": 472,
+                  "score": -10.3359375
+                },
+                {
+                  "start": 474,
+                  "end": 632,
+                  "score": -8.1171875
+                },
+                {
+                  "start": 498,
+                  "end": 660,
+                  "score": -8.3203125
+                },
+                {
+                  "start": 633,
+                  "end": 867,
+                  "score": -8.15625
+                },
+                {
+                  "start": 661,
+                  "end": 1008,
+                  "score": -8.421875
+                },
+                {
+                  "start": 1010,
+                  "end": 1064,
+                  "score": -7.54296875
+                },
+                {
+                  "start": 1066,
+                  "end": 1200,
+                  "score": -7.85546875
+                }
+              ]
+            },
+            {
+              "chunk_id": "d3879a62df0a157201a032841a4673f10547860e2f66831c0f0b118aa6351af6",
+              "whole_score": -4.0703125,
+              "score": -2.7666015625,
+              "windows": [
+                {
+                  "start": 0,
+                  "end": 247,
+                  "score": -5.30078125
+                },
+                {
+                  "start": 119,
+                  "end": 289,
+                  "score": -5.875
+                },
+                {
+                  "start": 248,
+                  "end": 548,
+                  "score": -8.296875
+                },
+                {
+                  "start": 290,
+                  "end": 628,
+                  "score": -7.37109375
+                },
+                {
+                  "start": 549,
+                  "end": 716,
+                  "score": -6.4765625
+                },
+                {
+                  "start": 629,
+                  "end": 771,
+                  "score": -7.87109375
+                },
+                {
+                  "start": 717,
+                  "end": 876,
+                  "score": -6.3671875
+                },
+                {
+                  "start": 772,
+                  "end": 977,
+                  "score": -6.08984375
+                },
+                {
+                  "start": 877,
+                  "end": 1060,
+                  "score": -9.484375
+                },
+                {
+                  "start": 1062,
+                  "end": 1095,
+                  "score": -1.462890625
+                },
+                {
+                  "start": 1097,
+                  "end": 1169,
+                  "score": -11.0390625
+                },
+                {
+                  "start": 1171,
+                  "end": 1200,
+                  "score": -8.5546875
+                }
+              ]
+            },
+            {
+              "chunk_id": "e568d7234556ec4d3088c6b85c0f0034a52cb49f92abbc3a04670392f8d5af41",
+              "whole_score": 2.568359375,
+              "score": -0.041015625,
+              "windows": [
+                {
+                  "start": 0,
+                  "end": 185,
+                  "score": -9.9296875
+                },
+                {
+                  "start": 101,
+                  "end": 199,
+                  "score": -10.7890625
+                },
+                {
+                  "start": 201,
+                  "end": 258,
+                  "score": -10.890625
+                },
+                {
+                  "start": 260,
+                  "end": 279,
+                  "score": -10.203125
+                },
+                {
+                  "start": 281,
+                  "end": 313,
+                  "score": -10.6640625
+                },
+                {
+                  "start": 315,
+                  "end": 465,
+                  "score": -10.9140625
+                },
+                {
+                  "start": 467,
+                  "end": 492,
+                  "score": -9.9375
+                },
+                {
+                  "start": 494,
+                  "end": 775,
+                  "score": -3.150390625
+                },
+                {
+                  "start": 650,
+                  "end": 872,
+                  "score": -2.650390625
+                },
+                {
+                  "start": 776,
+                  "end": 965,
+                  "score": -5.2734375
+                },
+                {
+                  "start": 967,
+                  "end": 1200,
+                  "score": -6.74609375
+                }
+              ]
+            },
+            {
+              "chunk_id": "2ace4929a0aa2fad002e4e3870c3dd8c67d13f4829b897a62889f853617a1310",
+              "whole_score": -3.88671875,
+              "score": -5.994140625,
+              "windows": [
+                {
+                  "start": 0,
+                  "end": 80,
+                  "score": -10.828125
+                },
+                {
+                  "start": 82,
+                  "end": 109,
+                  "score": -10.296875
+                },
+                {
+                  "start": 111,
+                  "end": 353,
+                  "score": -8.9921875
+                },
+                {
+                  "start": 219,
+                  "end": 543,
+                  "score": -8.1015625
+                },
+                {
+                  "start": 354,
+                  "end": 660,
+                  "score": -10.3203125
+                },
+                {
+                  "start": 662,
+                  "end": 932,
+                  "score": -8.4453125
+                }
+              ]
+            },
+            {
+              "chunk_id": "8df805dd51fff73261a06f1836cba8134d89fe3066360fceb60c871eaf292b71",
+              "whole_score": -3.439453125,
+              "score": -4.5302734375,
+              "windows": [
+                {
+                  "start": 0,
+                  "end": 249,
+                  "score": -6.3203125
+                },
+                {
+                  "start": 89,
+                  "end": 409,
+                  "score": -5.62109375
+                },
+                {
+                  "start": 411,
+                  "end": 425,
+                  "score": -10.7265625
+                },
+                {
+                  "start": 427,
+                  "end": 633,
+                  "score": -10.2109375
+                },
+                {
+                  "start": 454,
+                  "end": 902,
+                  "score": -8.921875
+                }
+              ]
+            },
+            {
+              "chunk_id": "8a755a62b8175baef2cb5e3fc51b0abbbf3771cfa97e0ceb344985b9359f43aa",
+              "whole_score": -3.09765625,
+              "score": -5.205078125,
+              "windows": [
+                {
+                  "start": 0,
+                  "end": 253,
+                  "score": -7.3125
+                },
+                {
+                  "start": 89,
+                  "end": 426,
+                  "score": -9.421875
+                },
+                {
+                  "start": 254,
+                  "end": 553,
+                  "score": -9.78125
+                },
+                {
+                  "start": 427,
+                  "end": 732,
+                  "score": -10.9609375
+                },
+                {
+                  "start": 554,
+                  "end": 768,
+                  "score": -10.90625
+                },
+                {
+                  "start": 733,
+                  "end": 1021,
+                  "score": -8.8984375
+                },
+                {
+                  "start": 769,
+                  "end": 1055,
+                  "score": -8.4296875
+                },
+                {
+                  "start": 1022,
+                  "end": 1200,
+                  "score": -10.640625
+                }
+              ]
+            },
+            {
+              "chunk_id": "71551070cea666b72b0664a94e3e8a858ce990bc4f7c1a220d1fa19580bf5a3f",
+              "whole_score": -0.240966796875,
+              "score": -0.7601318359375,
+              "windows": [
+                {
+                  "start": 0,
+                  "end": 7,
+                  "score": -10.234375
+                },
+                {
+                  "start": 9,
+                  "end": 63,
+                  "score": -7.54296875
+                },
+                {
+                  "start": 65,
+                  "end": 300,
+                  "score": -6.5390625
+                },
+                {
+                  "start": 215,
+                  "end": 615,
+                  "score": -1.3583984375
+                },
+                {
+                  "start": 301,
+                  "end": 749,
+                  "score": -1.279296875
+                },
+                {
+                  "start": 616,
+                  "end": 759,
+                  "score": -7.390625
+                },
+                {
+                  "start": 750,
+                  "end": 766,
+                  "score": -10.8828125
+                },
+                {
+                  "start": 760,
+                  "end": 826,
+                  "score": -10.1953125
+                },
+                {
+                  "start": 767,
+                  "end": 918,
+                  "score": -3.634765625
+                },
+                {
+                  "start": 827,
+                  "end": 1011,
+                  "score": -4.19921875
+                },
+                {
+                  "start": 1013,
+                  "end": 1058,
+                  "score": -10.328125
+                },
+                {
+                  "start": 1060,
+                  "end": 1199,
+                  "score": -7.08203125
+                }
+              ]
+            },
+            {
+              "chunk_id": "542a53f60de110940b07aee875564e7f67e95a00e09c366c9c3df3552297dc13",
+              "whole_score": -3.912109375,
+              "score": -5.3095703125,
+              "windows": [
+                {
+                  "start": 0,
+                  "end": 47,
+                  "score": -10.953125
+                },
+                {
+                  "start": 49,
+                  "end": 239,
+                  "score": -10.3671875
+                },
+                {
+                  "start": 133,
+                  "end": 295,
+                  "score": -10.1484375
+                },
+                {
+                  "start": 240,
+                  "end": 436,
+                  "score": -9.5078125
+                },
+                {
+                  "start": 438,
+                  "end": 520,
+                  "score": -10.953125
+                },
+                {
+                  "start": 522,
+                  "end": 729,
+                  "score": -7.18359375
+                },
+                {
+                  "start": 678,
+                  "end": 862,
+                  "score": -7.6015625
+                },
+                {
+                  "start": 730,
+                  "end": 903,
+                  "score": -10.5
+                },
+                {
+                  "start": 863,
+                  "end": 950,
+                  "score": -10.8046875
+                },
+                {
+                  "start": 952,
+                  "end": 1016,
+                  "score": -11.03125
+                },
+                {
+                  "start": 960,
+                  "end": 1109,
+                  "score": -6.70703125
+                },
+                {
+                  "start": 1017,
+                  "end": 1191,
+                  "score": -6.94921875
+                },
+                {
+                  "start": 1110,
+                  "end": 1200,
+                  "score": -8.15625
+                }
+              ]
+            },
+            {
+              "chunk_id": "d394a84039fdc50d27bf402ec34115e2d523ce4bbe05aab99b4c6b9d4f6f869b",
+              "whole_score": -4.421875,
+              "score": -6.265625,
+              "windows": [
+                {
+                  "start": 0,
+                  "end": 54,
+                  "score": -8.109375
+                },
+                {
+                  "start": 21,
+                  "end": 217,
+                  "score": -10.234375
+                },
+                {
+                  "start": 55,
+                  "end": 395,
+                  "score": -10.5
+                },
+                {
+                  "start": 218,
+                  "end": 526,
+                  "score": -11.0078125
+                },
+                {
+                  "start": 528,
+                  "end": 855,
+                  "score": -10.4453125
+                },
+                {
+                  "start": 632,
+                  "end": 1010,
+                  "score": -9.0078125
+                },
+                {
+                  "start": 856,
+                  "end": 1199,
+                  "score": -8.96875
+                }
+              ]
+            },
+            {
+              "chunk_id": "20b8244b2078c002c78aa5a35ae36a593a48651ebe3d78e5e66d1ba87e7eb799",
+              "whole_score": -2.05859375,
+              "score": -3.7890625,
+              "windows": [
+                {
+                  "start": 0,
+                  "end": 59,
+                  "score": -10.640625
+                },
+                {
+                  "start": 61,
+                  "end": 379,
+                  "score": -7.78125
+                },
+                {
+                  "start": 197,
+                  "end": 566,
+                  "score": -7.00390625
+                },
+                {
+                  "start": 380,
+                  "end": 699,
+                  "score": -8.890625
+                },
+                {
+                  "start": 567,
+                  "end": 795,
+                  "score": -9.796875
+                },
+                {
+                  "start": 700,
+                  "end": 920,
+                  "score": -9.1875
+                },
+                {
+                  "start": 796,
+                  "end": 1061,
+                  "score": -8.375
+                },
+                {
+                  "start": 1063,
+                  "end": 1200,
+                  "score": -5.51953125
+                }
+              ]
+            },
+            {
+              "chunk_id": "d67899bd839802b94b441e1d63831e39f18d0869415429abd5722ba18b3f0e26",
+              "whole_score": -4.2734375,
+              "score": -5.7578125,
+              "windows": [
+                {
+                  "start": 0,
+                  "end": 121,
+                  "score": -8.765625
+                },
+                {
+                  "start": 123,
+                  "end": 286,
+                  "score": -7.5625
+                },
+                {
+                  "start": 199,
+                  "end": 492,
+                  "score": -7.2421875
+                },
+                {
+                  "start": 287,
+                  "end": 685,
+                  "score": -8.78125
+                },
+                {
+                  "start": 493,
+                  "end": 777,
+                  "score": -9.015625
+                },
+                {
+                  "start": 779,
+                  "end": 1047,
+                  "score": -9.515625
+                },
+                {
+                  "start": 1049,
+                  "end": 1200,
+                  "score": -8.3671875
+                }
+              ]
+            },
+            {
+              "chunk_id": "02a2b5e737979311ac0f5928e8f07248b13e91a7708808463fce5494a25d475a",
+              "whole_score": 0.513671875,
+              "score": -1.388671875,
+              "windows": [
+                {
+                  "start": 0,
+                  "end": 131,
+                  "score": -6.4921875
+                },
+                {
+                  "start": 31,
+                  "end": 151,
+                  "score": -8.2578125
+                },
+                {
+                  "start": 132,
+                  "end": 316,
+                  "score": -5.265625
+                },
+                {
+                  "start": 152,
+                  "end": 464,
+                  "score": -5.9375
+                },
+                {
+                  "start": 317,
+                  "end": 491,
+                  "score": -7.50390625
+                },
+                {
+                  "start": 465,
+                  "end": 498,
+                  "score": -10.75
+                },
+                {
+                  "start": 492,
+                  "end": 575,
+                  "score": -7.79296875
+                },
+                {
+                  "start": 499,
+                  "end": 586,
+                  "score": -7.83984375
+                },
+                {
+                  "start": 576,
+                  "end": 600,
+                  "score": -10.875
+                },
+                {
+                  "start": 587,
+                  "end": 804,
+                  "score": -3.291015625
+                },
+                {
+                  "start": 601,
+                  "end": 980,
+                  "score": -3.404296875
+                },
+                {
+                  "start": 982,
+                  "end": 1013,
+                  "score": -10.75
+                },
+                {
+                  "start": 1003,
+                  "end": 1102,
+                  "score": -9.2890625
+                },
+                {
+                  "start": 1014,
+                  "end": 1193,
+                  "score": -9.625
+                },
+                {
+                  "start": 1103,
+                  "end": 1200,
+                  "score": -10.953125
+                }
+              ]
+            },
+            {
+              "chunk_id": "0b6cc2dc4af80ffbbd867018beb3d6d44ee04226fb39e8c10c3811d7e7690c01",
+              "whole_score": 0.353271484375,
+              "score": -1.6719970703125,
+              "windows": [
+                {
+                  "start": 0,
+                  "end": 165,
+                  "score": -9.5703125
+                },
+                {
+                  "start": 67,
+                  "end": 225,
+                  "score": -10.9765625
+                },
+                {
+                  "start": 166,
+                  "end": 249,
+                  "score": -11.0234375
+                },
+                {
+                  "start": 226,
+                  "end": 279,
+                  "score": -11.03125
+                },
+                {
+                  "start": 281,
+                  "end": 299,
+                  "score": -10.171875
+                },
+                {
+                  "start": 293,
+                  "end": 441,
+                  "score": -6.6328125
+                },
+                {
+                  "start": 300,
+                  "end": 515,
+                  "score": -6.53125
+                },
+                {
+                  "start": 442,
+                  "end": 559,
+                  "score": -10.890625
+                },
+                {
+                  "start": 516,
+                  "end": 620,
+                  "score": -10.9609375
+                },
+                {
+                  "start": 560,
+                  "end": 743,
+                  "score": -5.21484375
+                },
+                {
+                  "start": 621,
+                  "end": 905,
+                  "score": -3.697265625
+                },
+                {
+                  "start": 907,
+                  "end": 947,
+                  "score": -10.0546875
+                },
+                {
+                  "start": 941,
+                  "end": 1029,
+                  "score": -7.39453125
+                },
+                {
+                  "start": 948,
+                  "end": 1130,
+                  "score": -6.66796875
+                },
+                {
+                  "start": 1030,
+                  "end": 1150,
+                  "score": -8.2578125
+                },
+                {
+                  "start": 1131,
+                  "end": 1198,
+                  "score": -6.16015625
+                }
+              ]
+            },
+            {
+              "chunk_id": "2836716e90e5987ca8d58cab2e6216a0a8be297628d8fc82eb40d256d7029bb4",
+              "whole_score": -5.0,
+              "score": -5.40234375,
+              "windows": [
+                {
+                  "start": 0,
+                  "end": 173,
+                  "score": -7.62109375
+                },
+                {
+                  "start": 81,
+                  "end": 330,
+                  "score": -5.8046875
+                },
+                {
+                  "start": 174,
+                  "end": 521,
+                  "score": -6.57421875
+                },
+                {
+                  "start": 523,
+                  "end": 832,
+                  "score": -6.5859375
+                },
+                {
+                  "start": 645,
+                  "end": 928,
+                  "score": -8.0546875
+                },
+                {
+                  "start": 833,
+                  "end": 1057,
+                  "score": -8.4453125
+                },
+                {
+                  "start": 929,
+                  "end": 1132,
+                  "score": -8.578125
+                },
+                {
+                  "start": 1058,
+                  "end": 1192,
+                  "score": -8.484375
+                },
+                {
+                  "start": 1133,
+                  "end": 1198,
+                  "score": -8.734375
+                }
+              ]
+            },
+            {
+              "chunk_id": "67ca92a165b137d7230d714b15c8e67b185f50e2351d998569a2af0dd25714f0",
+              "whole_score": -3.498046875,
+              "score": -4.5732421875,
+              "windows": [
+                {
+                  "start": 0,
+                  "end": 198,
+                  "score": -9.375
+                },
+                {
+                  "start": 90,
+                  "end": 312,
+                  "score": -10.453125
+                },
+                {
+                  "start": 314,
+                  "end": 326,
+                  "score": -8.609375
+                },
+                {
+                  "start": 328,
+                  "end": 481,
+                  "score": -8.1015625
+                },
+                {
+                  "start": 468,
+                  "end": 670,
+                  "score": -7.70703125
+                },
+                {
+                  "start": 482,
+                  "end": 875,
+                  "score": -6.62109375
+                },
+                {
+                  "start": 671,
+                  "end": 1173,
+                  "score": -5.6484375
+                },
+                {
+                  "start": 1175,
+                  "end": 1199,
+                  "score": -11.0390625
+                }
+              ]
+            },
+            {
+              "chunk_id": "22f954f7d7f899560fd7dfde2b1afe3ec28c38613e762b8b2b7e3c8fa2ae6b24",
+              "whole_score": -8.2890625,
+              "score": -7.94140625,
+              "windows": [
+                {
+                  "start": 0,
+                  "end": 71,
+                  "score": -10.3203125
+                },
+                {
+                  "start": 73,
+                  "end": 440,
+                  "score": -8.2890625
+                },
+                {
+                  "start": 256,
+                  "end": 562,
+                  "score": -8.3984375
+                },
+                {
+                  "start": 441,
+                  "end": 819,
+                  "score": -8.1171875
+                },
+                {
+                  "start": 563,
+                  "end": 975,
+                  "score": -7.59375
+                },
+                {
+                  "start": 820,
+                  "end": 1114,
+                  "score": -10.3984375
+                },
+                {
+                  "start": 976,
+                  "end": 1200,
+                  "score": -10.65625
+                }
+              ]
+            },
+            {
+              "chunk_id": "787fc70ed638cfbc82ac60f23f36ad43cb5f5209d70518f6ce1574c08054e008",
+              "whole_score": -4.3359375,
+              "score": -6.056640625,
+              "windows": [
+                {
+                  "start": 0,
+                  "end": 58,
+                  "score": -11.015625
+                },
+                {
+                  "start": 60,
+                  "end": 286,
+                  "score": -10.921875
+                },
+                {
+                  "start": 147,
+                  "end": 483,
+                  "score": -10.7421875
+                },
+                {
+                  "start": 287,
+                  "end": 697,
+                  "score": -10.765625
+                },
+                {
+                  "start": 484,
+                  "end": 801,
+                  "score": -8.9375
+                },
+                {
+                  "start": 698,
+                  "end": 1022,
+                  "score": -8.9453125
+                },
+                {
+                  "start": 802,
+                  "end": 1200,
+                  "score": -7.77734375
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "retrieval",
+          "snapshot": "595207f6-eff5-45d0-92e0-f096d1972364",
+          "candidate": [
+            {
+              "source": "1910.11471",
+              "ordinal": 0,
+              "chunk_id": "379d157c398baeb92e370a95fa83015a7d8b591294e7bd6a2bcb78459066b7bb"
+            },
+            {
+              "source": "1910.11471",
+              "ordinal": 8,
+              "chunk_id": "9ce3c88093ea8a32ebe4beb8341c055a065a96230c3e2664fafad15f3573ae30"
+            },
+            {
+              "source": "1910.11471",
+              "ordinal": 7,
+              "chunk_id": "4c0412d7d289314836d9d38d6d0141fb904bdc13314255801e02c76afdd3193b"
+            },
+            {
+              "source": "1910.11471",
+              "ordinal": 2,
+              "chunk_id": "6e039cd3c608fccb18eeb8eb958259ebe358155a966adda80abb2cbf229c099c"
+            },
+            {
+              "source": "1910.11471",
+              "ordinal": 1,
+              "chunk_id": "d3879a62df0a157201a032841a4673f10547860e2f66831c0f0b118aa6351af6"
+            },
+            {
+              "source": "1910.11471",
+              "ordinal": 12,
+              "chunk_id": "e568d7234556ec4d3088c6b85c0f0034a52cb49f92abbc3a04670392f8d5af41"
+            },
+            {
+              "source": "1606.04631",
+              "ordinal": 19,
+              "chunk_id": "2ace4929a0aa2fad002e4e3870c3dd8c67d13f4829b897a62889f853617a1310"
+            },
+            {
+              "source": "1910.11471",
+              "ordinal": 13,
+              "chunk_id": "8df805dd51fff73261a06f1836cba8134d89fe3066360fceb60c871eaf292b71"
+            },
+            {
+              "source": "1606.04631",
+              "ordinal": 2,
+              "chunk_id": "8a755a62b8175baef2cb5e3fc51b0abbbf3771cfa97e0ceb344985b9359f43aa"
+            },
+            {
+              "source": "1910.11471",
+              "ordinal": 3,
+              "chunk_id": "71551070cea666b72b0664a94e3e8a858ce990bc4f7c1a220d1fa19580bf5a3f"
+            },
+            {
+              "source": "1910.11471",
+              "ordinal": 9,
+              "chunk_id": "542a53f60de110940b07aee875564e7f67e95a00e09c366c9c3df3552297dc13"
+            },
+            {
+              "source": "1606.04631",
+              "ordinal": 3,
+              "chunk_id": "d394a84039fdc50d27bf402ec34115e2d523ce4bbe05aab99b4c6b9d4f6f869b"
+            },
+            {
+              "source": "1911.13066",
+              "ordinal": 4,
+              "chunk_id": "20b8244b2078c002c78aa5a35ae36a593a48651ebe3d78e5e66d1ba87e7eb799"
+            },
+            {
+              "source": "1810.01570",
+              "ordinal": 11,
+              "chunk_id": "d67899bd839802b94b441e1d63831e39f18d0869415429abd5722ba18b3f0e26"
+            },
+            {
+              "source": "1910.11471",
+              "ordinal": 6,
+              "chunk_id": "02a2b5e737979311ac0f5928e8f07248b13e91a7708808463fce5494a25d475a"
+            },
+            {
+              "source": "1910.11471",
+              "ordinal": 5,
+              "chunk_id": "0b6cc2dc4af80ffbbd867018beb3d6d44ee04226fb39e8c10c3811d7e7690c01"
+            },
+            {
+              "source": "1911.13066",
+              "ordinal": 2,
+              "chunk_id": "2836716e90e5987ca8d58cab2e6216a0a8be297628d8fc82eb40d256d7029bb4"
+            },
+            {
+              "source": "1905.01715",
+              "ordinal": 1,
+              "chunk_id": "67ca92a165b137d7230d714b15c8e67b185f50e2351d998569a2af0dd25714f0"
+            },
+            {
+              "source": "2002.00750",
+              "ordinal": 0,
+              "chunk_id": "22f954f7d7f899560fd7dfde2b1afe3ec28c38613e762b8b2b7e3c8fa2ae6b24"
+            },
+            {
+              "source": "1606.04631",
+              "ordinal": 0,
+              "chunk_id": "787fc70ed638cfbc82ac60f23f36ad43cb5f5209d70518f6ce1574c08054e008"
+            }
+          ],
+          "reranked": [
+            {
+              "source": "1910.11471",
+              "ordinal": 8,
+              "chunk_id": "9ce3c88093ea8a32ebe4beb8341c055a065a96230c3e2664fafad15f3573ae30"
+            },
+            {
+              "source": "1910.11471",
+              "ordinal": 0,
+              "chunk_id": "379d157c398baeb92e370a95fa83015a7d8b591294e7bd6a2bcb78459066b7bb"
+            },
+            {
+              "source": "1910.11471",
+              "ordinal": 12,
+              "chunk_id": "e568d7234556ec4d3088c6b85c0f0034a52cb49f92abbc3a04670392f8d5af41"
+            },
+            {
+              "source": "1910.11471",
+              "ordinal": 3,
+              "chunk_id": "71551070cea666b72b0664a94e3e8a858ce990bc4f7c1a220d1fa19580bf5a3f"
+            },
+            {
+              "source": "1910.11471",
+              "ordinal": 6,
+              "chunk_id": "02a2b5e737979311ac0f5928e8f07248b13e91a7708808463fce5494a25d475a"
+            },
+            {
+              "source": "1910.11471",
+              "ordinal": 5,
+              "chunk_id": "0b6cc2dc4af80ffbbd867018beb3d6d44ee04226fb39e8c10c3811d7e7690c01"
+            }
+          ],
+          "times_ms": {
+            "dense": 34.866,
+            "sparse": 50.022,
+            "fusion": 0.229,
+            "rerank": 1214.457
+          },
+          "total_ms": 1326.195
+        },
+        {
+          "kind": "reader",
+          "prompt_sha256": "7fab0e73e674e5d17d5f82f962f0e7da5514b0378badd005c0ea893e8ffd8d11",
+          "chunks": [
+            {
+              "source": "1910.11471",
+              "ordinal": 8,
+              "chunk_id": "9ce3c88093ea8a32ebe4beb8341c055a065a96230c3e2664fafad15f3573ae30"
+            },
+            {
+              "source": "1910.11471",
+              "ordinal": 0,
+              "chunk_id": "379d157c398baeb92e370a95fa83015a7d8b591294e7bd6a2bcb78459066b7bb"
+            },
+            {
+              "source": "1910.11471",
+              "ordinal": 12,
+              "chunk_id": "e568d7234556ec4d3088c6b85c0f0034a52cb49f92abbc3a04670392f8d5af41"
+            },
+            {
+              "source": "1910.11471",
+              "ordinal": 3,
+              "chunk_id": "71551070cea666b72b0664a94e3e8a858ce990bc4f7c1a220d1fa19580bf5a3f"
+            },
+            {
+              "source": "1910.11471",
+              "ordinal": 6,
+              "chunk_id": "02a2b5e737979311ac0f5928e8f07248b13e91a7708808463fce5494a25d475a"
+            },
+            {
+              "source": "1910.11471",
+              "ordinal": 5,
+              "chunk_id": "0b6cc2dc4af80ffbbd867018beb3d6d44ee04226fb39e8c10c3811d7e7690c01"
+            }
+          ],
+          "entries": [
+            {
+              "number": 1,
+              "chunk_id": "9ce3c88093ea8a32ebe4beb8341c055a065a96230c3e2664fafad15f3573ae30",
+              "document_id": "b3f5a75c-e099-4b72-9dde-6f6594d9ceb1",
+              "document_revision_id": "1904eb40-ed9e-42de-94ce-b4381c5ce583",
+              "source": "document:b3f5a75c-e099-4b72-9dde-6f6594d9ceb1/revision:1904eb40-ed9e-42de-94ce-b4381c5ce583",
+              "locator": {
+                "type": "text_range",
+                "char_end": 9200,
+                "char_start": 8000
+              },
+              "lifecycle": {
+                "superseded": false
+              },
+              "text": "Language Processing (NLP). SMT plays a significant role in translation from one language to another, especially in lexical and grammatical rule extraction. In SMT, bilingual grammatical structures are automatically formed by statistical approaches instead of explicitly providing a grammatical model. This reduces months and years of work which requires significant collaboration between bi-lingual linguistics. Here, a neural network based machine translation model is used to translate regular text into programming code.\n\nProposed Methodology ::: Statistical Machine Translation ::: Data Preparation\n\nSMT techniques require a parallel corpus in thr source and thr target language. A text-code parallel corpus similar to Fig. FIGREF12 is used in training. This parallel corpus has 18805 aligned data in it . In source data, the expression of each line code is written in the English language. In target data, the code is written in Python programming language.\n\nProposed Methodology ::: Statistical Machine Translation ::: Vocabulary Generation\n\nTo train the neural model, the texts should be converted to a computational entity. To do that, two separate vocabulary files are created - one for the"
+            },
+            {
+              "number": 2,
+              "chunk_id": "379d157c398baeb92e370a95fa83015a7d8b591294e7bd6a2bcb78459066b7bb",
+              "document_id": "b3f5a75c-e099-4b72-9dde-6f6594d9ceb1",
+              "document_revision_id": "1904eb40-ed9e-42de-94ce-b4381c5ce583",
+              "source": "document:b3f5a75c-e099-4b72-9dde-6f6594d9ceb1/revision:1904eb40-ed9e-42de-94ce-b4381c5ce583",
+              "locator": {
+                "type": "text_range",
+                "char_end": 1200,
+                "char_start": 0
+              },
+              "lifecycle": {
+                "superseded": false
+              },
+              "text": "Machine Translation from Natural Language to Code using Long-Short Term Memory\n\nMaking computer programming language more understandable and easy for the human is a longstanding problem. From assembly language to present day’s object-oriented programming, concepts came to make programming easier so that a programmer can focus on the logic and the architecture rather than the code and language itself. To go a step further in this journey of removing human-computer language barrier, this paper proposes machine learning approach using Recurrent Neural Network (RNN) and Long-Short Term Memory (LSTM) to convert human language into programming language code. The programmer will write expressions for codes in layman’s language, and the machine learning model will translate it to the targeted programming language. The proposed approach yields result with 74.40% accuracy. This can be further improved by incorporating additional techniques, which are also discussed in this paper.\n\nIntroduction\n\nRemoving computer-human language barrier is an inevitable advancement researchers are thriving to achieve for decades. One of the stages of this advancement will be coding through natural human langua"
+            },
+            {
+              "number": 3,
+              "chunk_id": "e568d7234556ec4d3088c6b85c0f0034a52cb49f92abbc3a04670392f8d5af41",
+              "document_id": "b3f5a75c-e099-4b72-9dde-6f6594d9ceb1",
+              "document_revision_id": "1904eb40-ed9e-42de-94ce-b4381c5ce583",
+              "source": "document:b3f5a75c-e099-4b72-9dde-6f6594d9ceb1/revision:1904eb40-ed9e-42de-94ce-b4381c5ce583",
+              "locator": {
+                "type": "text_range",
+                "char_end": 13200,
+                "char_start": 12000
+              },
+              "lifecycle": {
+                "superseded": false
+              },
+              "text": "rally requires a more extensive set of data (100k+ in such scenario) to build a more accurate model. The incoherence can be resolved by incorporating coding syntax tree model in future. For instance–\n\n\"define the method tzname with 2 arguments: self and dt.\"\n\nis translated into–\n\ndef __init__ ( self , regex ) :.\n\nThe translator is successfully generating the whole codeline automatically but missing the noun part (parameter and function name) part of the syntax.\n\nConclusion & Future Works\n\nThe main advantage of translating to a programming language is - it has a concrete and strict lexical and grammatical structure which human languages lack. The aim of this paper was to make the text-to-code framework work for general purpose programming language, primarily Python. In later phase, phrase-based word embedding can be incorporated for improved vocabulary mapping. To get more accurate target code for each line, Abstract Syntax Tree(AST) can be beneficial.\n\nThe contribution of this research is a machine learning model which can turn the human expression into coding expressions. This paper also discusses available methods which convert natural language to programming language successfull"
+            },
+            {
+              "number": 4,
+              "chunk_id": "71551070cea666b72b0664a94e3e8a858ce990bc4f7c1a220d1fa19580bf5a3f",
+              "document_id": "b3f5a75c-e099-4b72-9dde-6f6594d9ceb1",
+              "document_revision_id": "1904eb40-ed9e-42de-94ce-b4381c5ce583",
+              "source": "document:b3f5a75c-e099-4b72-9dde-6f6594d9ceb1/revision:1904eb40-ed9e-42de-94ce-b4381c5ce583",
+              "locator": {
+                "type": "text_range",
+                "char_end": 4200,
+                "char_start": 3000
+              },
+              "lifecycle": {
+                "superseded": false
+              },
+              "text": "solved–\n\nProblem Description ::: Programming Language Diversity\n\nAccording to the sources, there are more than a thousand actively maintained programming languages, which signifies the diversity of these language . These languages were created to achieve different purpose and use different syntaxes. Low-level languages such as assembly languages are easier to express in human language because of the low or no abstraction at all whereas high-level, or Object-Oriented Programing (OOP) languages are more diversified in syntax and expression, which is challenging to bring into a unified human language structure. Nonetheless, portability and transparency between different programming languages also remains a challenge and an open research area. George D. et al. tried to overcome this problem through XML mapping BIBREF2. They tried to convert codes from C++ to Java using XML mapping as an intermediate language. However, the authors encountered challenges to support different features of both languages.\n\nProblem Description ::: Human Language Factor\n\nOne of the motivations behind this paper is - as long as it is about programming, there is a finite and small set of expression which is us"
+            },
+            {
+              "number": 5,
+              "chunk_id": "02a2b5e737979311ac0f5928e8f07248b13e91a7708808463fce5494a25d475a",
+              "document_id": "b3f5a75c-e099-4b72-9dde-6f6594d9ceb1",
+              "document_revision_id": "1904eb40-ed9e-42de-94ce-b4381c5ce583",
+              "source": "document:b3f5a75c-e099-4b72-9dde-6f6594d9ceb1/revision:1904eb40-ed9e-42de-94ce-b4381c5ce583",
+              "locator": {
+                "type": "text_range",
+                "char_end": 7200,
+                "char_start": 6000
+              },
+              "lifecycle": {
+                "superseded": false
+              },
+              "text": "alness of programming BIBREF1. A number of research works have been conducted on text-to-code or code-to-text area in recent years. In 2015, Oda et al. proposed a way to translate each line of Python code into natural language pseudocode using Statistical Machine Learning Technique (SMT) framework BIBREF5 was used. This translation framework was able to - it can successfully translate the code to natural language pseudo coded text in both English and Japanese. In the same year, Chris Q. et al. mapped natural language with simple if-this-then-that logical rules BIBREF6. Tihomir G. and Viktor K. developed an Integrated Development Environment (IDE) integrated code assistant tool anyCode for Java which can search, import and call function just by typing desired functionality through text BIBREF7. They have used model and mapping framework between function signatures and utilized resources like WordNet, Java Corpus, relational mapping to process text online and offline.\n\nRecently in 2017, P. Yin and G. Neubig proposed a semantic parser which generates code through its neural model BIBREF8. They formulated a grammatical model which works as a skeleton for neural network training. The gr"
+            },
+            {
+              "number": 6,
+              "chunk_id": "0b6cc2dc4af80ffbbd867018beb3d6d44ee04226fb39e8c10c3811d7e7690c01",
+              "document_id": "b3f5a75c-e099-4b72-9dde-6f6594d9ceb1",
+              "document_revision_id": "1904eb40-ed9e-42de-94ce-b4381c5ce583",
+              "source": "document:b3f5a75c-e099-4b72-9dde-6f6594d9ceb1/revision:1904eb40-ed9e-42de-94ce-b4381c5ce583",
+              "locator": {
+                "type": "text_range",
+                "char_end": 6200,
+                "char_start": 5000
+              },
+              "lifecycle": {
+                "superseded": false
+              },
+              "text": "to extract information from the statements of the code accurately. Semantic analysis of linguistic expression plays an important role in this information extraction. For instance, in case of a loop, what is the initial value? What is the step value? When will the loop terminate?\n\nMihalcea R. et al. has achieved a variable success rate of 70-80% in producing code just from the problem statement expressed in human natural language BIBREF3. They focused solely on the detection of step and loops in their research. Another research group from MIT, Lei et al. use a semantic learning model for text to detect the inputs. The model produces a parser in C++ which can successfully parse more than 70% of the textual description of input BIBREF4. The test dataset and model was initially tested and targeted against ACM-ICPC participantsínputs which contains diverse and sometimes complex input instructions.\n\nA recent survey from Allamanis M. et al. presented the state-of-the-art on the area of naturalness of programming BIBREF1. A number of research works have been conducted on text-to-code or code-to-text area in recent years. In 2015, Oda et al. proposed a way to translate each line of Python"
+            }
+          ]
+        },
+        {
+          "kind": "wire",
+          "max_tokens": 2048,
+          "timeout_seconds": 60.0,
+          "system_prompt_sha256": "9921923abe84909a433d1333667a6cb16f7ba0928080ec0b21136d1b12238499",
+          "temperature": 0.0,
+          "model": "deepseek-v4.1-flash-1017",
+          "retry_limit": 0,
+          "enable_thinking": null,
+          "prompt_sha256": "7fab0e73e674e5d17d5f82f962f0e7da5514b0378badd005c0ea893e8ffd8d11"
+        },
+        {
+          "kind": "http_wire",
+          "method": "POST",
+          "model": "deepseek-v4.1-flash-1017",
+          "max_tokens": 2048,
+          "temperature": 0.0,
+          "thinking_override_present": false,
+          "roles": [
+            "system",
+            "user"
+          ],
+          "content_sha256": [
+            "9921923abe84909a433d1333667a6cb16f7ba0928080ec0b21136d1b12238499",
+            "7fab0e73e674e5d17d5f82f962f0e7da5514b0378badd005c0ea893e8ffd8d11"
+          ],
+          "system_prompt_sha256": "9921923abe84909a433d1333667a6cb16f7ba0928080ec0b21136d1b12238499",
+          "prompt_sha256": "7fab0e73e674e5d17d5f82f962f0e7da5514b0378badd005c0ea893e8ffd8d11"
+        },
+        {
+          "kind": "http_return",
+          "status": 200
+        },
+        {
+          "kind": "response",
+          "elapsed_ms": 1363,
+          "finish_reason": "stop",
+          "content_present": true,
+          "usage": {
+            "input_tokens": 2222,
+            "output_tokens": 101,
+            "total_tokens": 2323
+          }
+        },
+        {
+          "kind": "model_output",
+          "json_status": "schema_valid",
+          "output": {
+            "answer": "The target language is Python. The paper states that in its parallel corpus the target data code is written in the Python programming language [1], and its aim was to make the text-to-code framework work for general purpose programming language, primarily Python [3].",
+            "citation_ids": [
+              1,
+              3
+            ],
+            "insufficient_evidence": false
+          },
+          "content_sha256": "023eae26b6690ba627da9b6ad74a74a9da01749554696fcdd05120a165652935"
+        }
+      ],
+      "response_sha256": "becdf3582f43212d8bdac24a1c80829747f0905a53bd65b8357fcdd7859d173e",
+      "request_payload_sha256": "59a84dc44d348a7a3df97d62e1e3ddba9ccac37f32459fa94f4281e5d9d96523",
+      "request_id": "95f367c0-ad7e-4190-afe8-4705f547adeb",
+      "physical_model_requests": 1
+    }
+  ]
+}

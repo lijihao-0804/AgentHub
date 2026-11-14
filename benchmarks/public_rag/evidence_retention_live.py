@@ -84,7 +84,20 @@ def bind_response(response, row, mapping):
 
 
 def capture_one(
-    client, *, case, arm, state, dataset, mapping, protocol, source, trace, directory, owner, phase
+    client,
+    *,
+    case,
+    arm,
+    state,
+    dataset,
+    mapping,
+    protocol,
+    source,
+    trace,
+    directory,
+    owner,
+    phase,
+    retrieval_arm=None,
 ):
     if phase not in ("retrieval", "live") or arm not in ("A", "B"):
         raise ValueError("Unrecognized phase or arm")
@@ -92,7 +105,7 @@ def capture_one(
     with exclusive(destination):
         if destination.exists():
             raise ValueError("This first request already has a receipt")
-        client.headers["x-evidence-retention-arm"] = arm
+        client.headers["x-evidence-retention-arm"] = retrieval_arm or arm
         authenticate(client, owner)
         common = identity(state, dataset, mapping, arm, protocol, source, phase)
         if phase == "retrieval":
