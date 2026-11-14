@@ -98,3 +98,19 @@ def test_refund_schedule_single_open_before_first_wire(tmp_path):
     open_paid_schedule(ledger)
     with pytest.raises(IntegrityError):
         open_paid_schedule(ledger)
+
+
+@pytest.mark.parametrize("run_status", ["SUCCEEDED", "FAILED"])
+def test_paid_schedule_distinguishes_settled_run_failure_from_unknown(run_status):
+    from benchmarks.evaluation.experiments.support_refund_rag.product_acceptance import (
+        require_settled_run,
+    )
+
+    settled = {"status": "returned", "input": 10, "output": 3}
+    row = {"run": {"status": run_status}, "physical_attempts": [settled]}
+    require_settled_run(row)
+    for invalid in (settled | {"status": "unsettled"}, settled | {"output": None}):
+        with pytest.raises(ValueError, match="unsettled"):
+            require_settled_run(row | {"physical_attempts": [invalid]})
+    with pytest.raises(ValueError, match="incomplete"):
+        require_settled_run(row | {"run": {"status": "NEEDS_ATTENTION"}})

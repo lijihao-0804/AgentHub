@@ -276,6 +276,17 @@ def open_paid_schedule(path):
         db.execute("INSERT INTO study_opening VALUES ('refund_dev_and_new')")
 
 
+def require_settled_run(record):
+    """A returned model request and a failed business case are independent outcomes."""
+    wires = record["physical_attempts"]
+    if any(w["status"] != "returned" or w["input"] is None or w["output"] is None for w in wires):
+        raise ValueError("unsettled physical request; stop the study")
+    status = record.get("run", {}).get("status")
+    if status == "SUCCEEDED" or (status == "FAILED" and wires):
+        return
+    raise ValueError("incomplete run or missing dispatch evidence; stop the study")
+
+
 async def run(args):
     roots = [
         "apps",
@@ -519,10 +530,8 @@ async def run(args):
                                 }
                             )
                             save(out / "report.json", report)
-                        if paid and record.get("run", {}).get("status") != "SUCCEEDED":
-                            raise ValueError(
-                                "paid run incomplete; inspect the ledger before dispatch"
-                            )
+                        if paid:
+                            require_settled_run(record)
         finally:
             await api(owner, "PATCH", credpath, {"enabled": False})
             await api(
