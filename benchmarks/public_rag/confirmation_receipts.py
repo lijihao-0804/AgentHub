@@ -123,6 +123,140 @@ def technical(events, report, blind_dir):
     return cards
 
 
+def refusal_kind(item):
+    if item["status"] == "citations_on_refusal":
+        return "citations_on_refusal"
+    if item["status"] != "ok":
+        return "other_non_ok"
+    if item["insufficient"]:
+        return "valid_structured_refusal"
+    if item["vote"]["refusal_justified"]:
+        return "justified_text_refusal_flag_false"
+    return "other_valid_answer"
+
+
+def failed_criteria(item, axis):
+    """Explain a zero using the predicates in the frozen quality function."""
+    if item[axis] != 0:
+        return []
+    if item["status"] != "ok":
+        return ["status:" + item["status"]]
+    vote = item["vote"]
+    issues = []
+    if vote["unsupported_assertion"]:
+        issues.append("unsupported_assertion")
+    if item["insufficient"]:
+        if item["labels"][axis] != "unanswerable":
+            issues.append("structured_refusal_on_answerable")
+        if not vote["refusal_justified"]:
+            issues.append("refusal_not_justified")
+        if vote["visible_sufficient"]:
+            issues.append("sufficient_evidence_for_refused_question")
+    else:
+        if item["labels"][axis] != "answerable":
+            issues.append("answer_flag_on_unanswerable")
+        for field in (
+            "visible_sufficient",
+            "correct_content",
+            "conditions_complete",
+            "critical_claims_supported",
+        ):
+            if not vote[field]:
+                issues.append(field + ":false")
+        if vote["condition_omission"]:
+            issues.append("condition_omission")
+        if not vote["citation_support"]:
+            issues.append("no_citations")
+        issues.extend(
+            "unsupported_citation:" + n
+            for n, supported in vote["citation_support"].items()
+            if not supported
+        )
+    if not issues:
+        raise ValueError("Zero score without a failed frozen predicate")
+    return issues
+
+
+def comparisons(report, cards):
+    """Join public receipts to frozen scores; all rates retain their denominators."""
+    rows = report["rows"]
+    receipts = {(c["id"], c["arm"]): c for c in cards}
+    if len(receipts) != len(cards) or set(receipts) != {
+        (r["id"], arm) for r in rows for arm in ("B", "C", "D")
+    }:
+        raise ValueError("Missing, extra or duplicate first-answer receipt")
+    pairs = {}
+    refusal_audit = {}
+    for axis in ("source", "official"):
+        for arm in ("B", "C", "D"):
+            groups = {
+                k: {"denominator": 0, "scored": 0, "kinds": Counter(), "correct_structured": 0}
+                for k in ("all", "answerable", "unanswerable", "ambiguous")
+            }
+            for row in rows:
+                item = row["arms"][arm]
+                card = receipts[row["id"], arm]
+                if (
+                    card["status"] != item["status"]
+                    or card["labels"] != item["labels"]
+                    or card[axis + "_score"] != item[axis]
+                    or card["insufficient"] != item["insufficient"]
+                ):
+                    raise ValueError("First-answer receipt differs from frozen score")
+                kind = refusal_kind(item)
+                for key in ("all", item["labels"][axis]):
+                    group = groups[key]
+                    group["denominator"] += 1
+                    group["scored"] += item[axis] is not None
+                    group["kinds"][kind] += 1
+                    group["correct_structured"] += (
+                        kind == "valid_structured_refusal" and item[axis] == 1
+                    )
+            refusal_audit[f"{arm}/{axis}"] = groups
+        for left, right in (("B", "D"), ("B", "C"), ("C", "D")):
+            entries = []
+            counts = dict.fromkeys(("gain", "loss", "tie", "excluded"), 0)
+            for row in rows:
+                before, after = row["arms"][left], row["arms"][right]
+                a, b = before[axis], after[axis]
+                if a is None or b is None:
+                    change = "excluded"
+                elif a == b:
+                    change = "tie"
+                else:
+                    change = "gain" if b > a else "loss"
+                counts[change] += 1
+                details = {}
+                for arm, item in ((left, before), (right, after)):
+                    details[arm] = {
+                        "score": item[axis],
+                        "status": item["status"],
+                        "refusal_kind": refusal_kind(item),
+                        "failed_criteria": failed_criteria(item, axis),
+                    }
+                entries.append(
+                    {
+                        "id": row["id"],
+                        "question": receipts[row["id"], right]["question"],
+                        "source": row["source"],
+                        "label": after["labels"][axis],
+                        "change": change,
+                        "arms": details,
+                    }
+                )
+            expected = report["paired"][f"{right}-{left}/{axis}"]
+            if [counts[k] for k in ("gain", "loss", "tie")] != [
+                expected[k] for k in ("win", "loss", "tie")
+            ] or len(rows) - counts["excluded"] != expected["n"]:
+                raise ValueError("Pair counts differ from frozen report")
+            pairs[f"{left}->{right}/{axis}"] = {
+                "counts": counts,
+                "paired_denominator": expected["n"],
+                "items": entries,
+            }
+    return {"pairs": pairs, "refusals": refusal_audit}
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--ledger", type=Path, required=True)
@@ -132,7 +266,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
     save(args.output / "billing.json", reconcile(args.ledger))
-    save(
-        args.output / "public-first-answers.json",
-        technical(args.public_run / "events.jsonl", args.blind_dir / "report.json", args.blind_dir),
-    )
+    report_path = args.blind_dir / "report.json"
+    cards = technical(args.public_run / "events.jsonl", report_path, args.blind_dir)
+    save(args.output / "public-first-answers.json", cards)
+    save(args.output / "public-comparisons.json", comparisons(read(report_path), cards))
