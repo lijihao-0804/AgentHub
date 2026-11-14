@@ -86,9 +86,65 @@ async def test_oversize_bad_route_and_insufficient_cap_reject_before_egress(tmp_
     with pytest.raises(ValueError, match="Route"):
         await m.acompletion(**{**request, "api_base": "https://example.test"})
     with pytest.raises(ValueError, match="input"):
-        await m.acompletion(**{**request, "messages": [dict(role="user", content="x" * 35000)]})
+        await m.acompletion(**{**request, "messages": [dict(role="user", content="好 " * 40000)]})
     with pytest.raises(RuntimeError, match="budget"):
         await m.acompletion(**request)
     with pytest.raises(FileExistsError):
         init_ledger(m.path, approval_id="duplicate", cap_microcny=PER_REQUEST)
     wire.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_tool_history_estimate_records_separate_local_and_actual_counts(tmp_path):
+    from benchmarks.public_rag.confirmation_meter import TOOL_TEMPLATE_ALLOWANCE, input_bound
+
+    m = meter(tmp_path)
+    returned = SimpleNamespace(
+        id="simulated",
+        model=MODEL,
+        usage=SimpleNamespace(prompt_tokens=2000, completion_tokens=4, total_tokens=2004),
+    )
+    create = AsyncMock(return_value=returned)
+    request = payload(create)
+    request.update(
+        messages=[
+            {"role": "user", "content": "查看政策"},
+            {
+                "role": "assistant",
+                "tool_calls": [
+                    {
+                        "id": "a",
+                        "type": "function",
+                        "function": {"name": "policy", "arguments": "{}"},
+                    }
+                ],
+            },
+            {
+                "role": "tool",
+                "tool_call_id": "a",
+                "content": "该产品的退款申请必须附上签收单。" * 800,
+            },
+        ],
+        tools=[
+            {
+                "type": "function",
+                "function": {
+                    "name": "policy",
+                    "description": "检索政策",
+                    "parameters": {"type": "object", "properties": {}},
+                },
+            }
+        ],
+    )
+    fields = ("messages", "tools", "max_tokens")
+    full = {k: request[k] for k in fields}
+    estimate = input_bound(full)
+    assert len(request["messages"][-1]["content"].encode()) > 32768
+    assert TOOL_TEMPLATE_ALLOWANCE < estimate < 32768
+    assert estimate > input_bound({**full, "tools": []})
+    await m.acompletion(**request)
+    with closing(sqlite3.connect(m.path)) as db:
+        assert db.execute(
+            "select local_input_estimate,input,output,cost from wires"
+        ).fetchone() == (estimate, 2000, 4, 4032)
+    create.assert_awaited_once()

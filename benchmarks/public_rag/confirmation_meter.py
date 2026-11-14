@@ -19,6 +19,7 @@ INPUT, OUTPUT = 32768, 2048
 INPUT_PRICE, OUTPUT_PRICE = 2, 8
 LIMITS = {"answer": (120, 1), "selector": (40, 1), "refund_dev": (200, 4), "refund_new": (8, 4)}
 PER_REQUEST = INPUT * INPUT_PRICE + OUTPUT * OUTPUT_PRICE
+TOOL_TEMPLATE_ALLOWANCE = 2048
 
 
 @cache
@@ -30,6 +31,14 @@ def text_counter():
 
 
 def input_bound(payload):
+    """Estimate input tokens for admission, never for settlement.
+
+    Plain non-thinking text uses the pinned DeepSeek chat template. Other inputs
+    encode the entire serialized provider payload plus 2,048 template tokens.
+    Provider tool templating is private, so this margin is not a proven upper bound.
+    Each reservation still uses INPUT and OUTPUT at peak prices. Only reported
+    usage settles it; missing or over-limit usage leaves the study locked.
+    """
     messages = payload["messages"]
     if (
         payload.get("extra_body") == {"enable_thinking": False}
@@ -39,7 +48,8 @@ def input_bound(payload):
     ):
         request = ModelRequest(messages=tuple(ModelMessage(**m) for m in messages))
         return text_counter().count(request, thinking=False) + 256
-    return len(json.dumps(payload, ensure_ascii=False).encode()) + 2048
+    wire_text = json.dumps({"model": MODEL, **payload}, ensure_ascii=False, allow_nan=False)
+    return text_counter().count_serialized_text(wire_text) + TOOL_TEMPLATE_ALLOWANCE
 
 
 def init_ledger(path: Path, *, approval_id: str, cap_microcny: int):
@@ -55,7 +65,7 @@ def init_ledger(path: Path, *, approval_id: str, cap_microcny: int):
             CREATE TABLE authorization (reference TEXT NOT NULL, cap INTEGER NOT NULL);
             CREATE TABLE wires (id INTEGER PRIMARY KEY, stage TEXT, task TEXT,
               status TEXT, input INTEGER, output INTEGER, cost INTEGER, provider_id TEXT,
-              failure TEXT, http_status INTEGER);
+              failure TEXT, http_status INTEGER, local_input_estimate INTEGER);
         """)
         conn.execute("INSERT INTO authorization VALUES (?, ?)", (approval_id, cap_microcny))
 
@@ -68,7 +78,7 @@ class AliyunMeter:
             raise ValueError("Unknown stage or missing study authorization")
         self.path, self.stage, self.task_id = path, stage, ""
 
-    def reserve(self):
+    def reserve(self, local_input_estimate=None):
         if not self.task_id:
             raise ValueError("Missing scheduled task identity")
         with closing(sqlite3.connect(self.path)) as db, db:
@@ -85,8 +95,9 @@ class AliyunMeter:
             if stage_n >= limit or task_n >= per_task or all_cost + PER_REQUEST > cap:
                 raise RuntimeError("Study budget or task dispatch limit reached")
             return db.execute(
-                "INSERT INTO wires(stage,task,status,cost) VALUES (?,?,'unsettled',?)",
-                (self.stage, self.task_id, PER_REQUEST),
+                "INSERT INTO wires(stage,task,status,cost,local_input_estimate) "
+                "VALUES (?,?,'unsettled',?,?)",
+                (self.stage, self.task_id, PER_REQUEST, local_input_estimate),
             ).lastrowid
 
     async def acompletion(self, **kwargs):
@@ -107,11 +118,12 @@ class AliyunMeter:
         payload = {k: kwargs[k] for k in fields if k in kwargs}
         if payload.get("extra_body") not in (None, {"enable_thinking": False}):
             raise ValueError("Unfrozen provider options")
-        # Tool templates are provider-owned. Conservative byte bound + envelope allowance,
-        # then verify reported usage. An unexplained excess locks the study for reconciliation.
-        if input_bound(payload) > INPUT:
+        # The provider owns its final template. The local estimate controls admission;
+        # authorization still reserves the full token limits regardless of this estimate.
+        estimate = input_bound(payload)
+        if estimate > INPUT:
             raise ValueError("Serialized input exceeds conservative admission limit")
-        wire = self.reserve()
+        wire = self.reserve(estimate)
         try:
             result = await sdk.chat.completions.create(model=model, **payload)
         except Exception as exc:
