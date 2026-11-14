@@ -136,6 +136,7 @@ _RETRIEVAL_KEYS = frozenset(
         "context_budget_bytes",
         "evidence_projection",
         "evidence_set_selector",
+        "rerank_method",
         "knowledge_binding_mode",
         "knowledge_snapshot_ids",
         "knowledge_snapshots",
@@ -663,6 +664,7 @@ def _frozen_spec_semantic_rejection(
         or spec.wiki_binding is not None
         or any(raw_retrieval.get(key) for key in _RETRIEVAL_BINDING_KEYS)
         or raw_retrieval.get("evidence_set_selector") is not None
+        or raw_retrieval.get("rerank_method") is not None
     ):
         return CaseBudgetAdmissionReason.RETRIEVAL_UNSUPPORTED
     return None

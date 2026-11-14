@@ -24,3 +24,7 @@ C 的 23 个成功请求在原始消息完全一致后，由现有 EvidenceSetSe
 ~~~
 
 [逐题选择](selection-dev.json) · [五题失败链](five-refusals.json) · [归档选择收据](selection-receipts.zip)
+
+### 发布互补选择器
+
+在 Agent 的 retrieval_config 指定 evidence_set_selector 为 complementary_v1，使用固定版本已有的原始记录投影和有界 context_budget_bytes（最多 20 个候选、10 条证据）。每个 PINNED 快照单独选择；同次搜索绑定几个有效快照，最多就可能增加几个选择请求。沿用发布模型的主模型、提供方、工作区凭据和受限出口，仅一次、无备选链，输出至多 256 token。模型读入全部候选须先获 ContextBudgetPolicy 准入。运行成本硬限额没有可用于该步骤的事前报价时不派发。保留时间不足、不允许计费、附加选择输出无效、已知提供方失败等情况沿用当次已授权候选的整块排名。取消向上传播，实际超时维持未知使用量，无自动重试；快照/权限/凭据完整性失败不触发降级。Run 的 EVIDENCE_SELECTION 步骤标明每个快照 selected/fallback、原因及条数。AUXILIARY_MODEL 与检查点 usage_records 记录辅助调用及供应商返回的用量，未提供的用量或费用保持未知。没有将测试用的假网关调用计为云端验证。

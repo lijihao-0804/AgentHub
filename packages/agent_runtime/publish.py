@@ -1149,7 +1149,7 @@ def _validate_retrieval_config(
         raise AgentHubError("INVALID_AGENT_CONFIG", "The reranking method is invalid.", 422)
     selector = result.get("evidence_set_selector")
     if selector is not None and (
-        selector != "onyx_v1"
+        selector not in ("onyx_v1", "complementary_v1")
         or result.get("context_budget_bytes") is None
         or projection is not None
         or result["final_top_k"] > 10

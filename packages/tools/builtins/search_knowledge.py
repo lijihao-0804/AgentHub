@@ -23,6 +23,7 @@ from packages.knowledge.evidence_records import (
     evidence_record,
     evidence_reference,
 )
+from packages.knowledge.evidence_set_retriever import EvidenceSetKnowledgeRetriever
 from packages.knowledge.models import KnowledgeSnapshot
 from packages.knowledge.onyx_retriever import OnyxSelectionKnowledgeRetriever
 from packages.tools.contracts import ToolDefinition, ToolExecutionContext, ToolSessionFactory
@@ -154,16 +155,27 @@ async def search_knowledge(
         # to an error the agent would read as "nothing found".
         retriever = OnyxSelectionKnowledgeRetriever(retriever, section_selector)
 
+    complementary = definition.retrieval_config.get("evidence_set_selector") == "complementary_v1"
+    if complementary:
+        retriever = EvidenceSetKnowledgeRetriever.for_product(
+            retriever, context.selector_binding, context.workspace_context
+        )
     async with session_factory() as session:
         queries = await _snapshot_queries(session, context, definition, text=text, limit=limit)
 
     evidence = []
+    selection_status = []
     for query in queries:
         result = await retriever.retrieve_with_trace(_retrieval_context(context), query)
         if not isinstance(result, RetrievalResult):
             raise ToolHandlerError(
                 "TOOL_EXECUTION_FAILED", "The knowledge search returned an invalid result."
             )
+        if complementary:
+            stage = result.trace.evidence_set
+            if stage is None or stage.metadata is None:
+                raise ToolHandlerError("TOOL_EXECUTION_FAILED", "Missing selection receipt.")
+            selection_status.append({"snapshot_id": query.knowledge_snapshot_id, **stage.metadata})
         for item in result.evidence:
             reference = evidence_reference(
                 item,
@@ -198,7 +210,11 @@ async def search_knowledge(
         ],
         [ref for _, ref in evidence],
     )
-    return {"evidence_refs": references[:limit], "results": records[:limit]}
+    return {
+        "evidence_refs": references[:limit],
+        "results": records[:limit],
+        **({"evidence_selection": selection_status} if complementary else {}),
+    }
 
 
 __all__ = ["search_knowledge"]

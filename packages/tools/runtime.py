@@ -25,6 +25,7 @@ from packages.observability.contracts import TraceSink, TraceSpan
 from packages.observability.timing import timed_span
 from packages.tools.audit import NoopToolAuditSink, ToolAudit, ToolAuditSink, record_tool_audit
 from packages.tools.contracts import (
+    SelectorBinding,
     ToolApprovalPolicy,
     ToolDefinition,
     ToolEffect,
@@ -408,6 +409,7 @@ class ToolRuntime:
         tool_call_id: str,
         effective_snapshot_refs: tuple[Mapping[str, Any], ...] | None = None,
         effective_wiki_publications: tuple[Mapping[str, Any], ...] | None = None,
+        selector_binding: SelectorBinding | None = None,
     ) -> ToolResult:
         if "tool_run" not in context.permissions:
             raise AgentHubError("FORBIDDEN", "You do not have permission.", 403)
@@ -474,6 +476,7 @@ class ToolRuntime:
                                 workspace_context=context,
                                 agent_version_id=version_uuid,
                                 tool_call_id=tool_call_id,
+                                selector_binding=selector_binding,
                             )
                             try:
                                 with execution_deadline(definition.timeout_seconds):

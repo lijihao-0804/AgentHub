@@ -33,7 +33,7 @@ class RetrievalConfigRequest(BaseModel):
     context_budget_bytes: int | None = Field(default=None, ge=2, le=64_000, strict=True)
     evidence_projection: Literal["compact_v1"] | None = None
     rerank_method: Literal["sentence_evidence_v1"] | None = None
-    evidence_set_selector: Literal["onyx_v1"] | None = None
+    evidence_set_selector: Literal["onyx_v1", "complementary_v1"] | None = None
 
 
 class ContextBudgetRequest(BaseModel):
