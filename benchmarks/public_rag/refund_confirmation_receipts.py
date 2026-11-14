@@ -45,7 +45,8 @@ def summarize(directory, reviews_path, ledger):
             thread_id=r.get("thread_id"),
             question=r["expected"]["input"],
             answerability=r["answerability"],
-            answer=r.get("turn", {}).get("final_output"),
+            answer=(r.get("turn") or {}).get("final_output")
+            or (r.get("run") or {}).get("final_output"),
             contract_checks=r.get("contract_checks"),
             coverage=r.get("coverage"),
             candidate_group_complete=any(
@@ -57,7 +58,10 @@ def summarize(directory, reviews_path, ledger):
             review=review,
             approval=(r.get("decision") or {}).get("approval"),
             ticket=r.get("ticket"),
-            tickets_after=r.get("tickets_after", {}).get("total"),
+            tickets_after=(r.get("tickets_after") or {}).get(
+                "total", (r.get("reconciliation") or {}).get("postmortem_ticket_count")
+            ),
+            reconciliation=r.get("reconciliation"),
             wire_ids=[w["id"] for w in wires],
             settled_peak_microcny=sum(w["cost"] for w in wires if w["status"] == "returned"),
             unresolved=sum(w["status"] != "returned" for w in wires),
@@ -80,6 +84,7 @@ def summarize(directory, reviews_path, ledger):
             "labels": dict(label_counts),
             "label_negative_denominator": len(negatives),
             "correct": sum(r["task_pass"] for r in all_rows),
+            "answerable_task_pass": sum(r["task_pass"] for r in positives),
             "contract_pass": sum(
                 bool(r.get("contract_checks")) and all(r["contract_checks"].values()) for r in tried
             ),
@@ -116,6 +121,7 @@ def summarize(directory, reviews_path, ledger):
         }
     return {
         "execution_commit": capture["code_commit"],
+        "execution_segments": capture.get("capture_segments"),
         "workspace_id": capture["workspace_id"],
         "groups": groups,
         "rows": rows,
