@@ -1,0 +1,1589 @@
+{
+  "citation": {
+    "arms": {
+      "baseline": {
+        "planned": 16,
+        "dispatched": 16,
+        "completed": 16,
+        "final_answer": 12,
+        "missing_answer": 4,
+        "contract_failures": 5,
+        "source_citations": 20,
+        "located": 20,
+        "supported": 18,
+        "unsupported_fact": 0,
+        "unsupported_capability": 0,
+        "unsupported_policy": 0,
+        "unwarranted_refusal": 0,
+        "withheld": 10,
+        "should_answer": 6,
+        "unwarranted_on_answerable": 0,
+        "correct": 8,
+        "should_withhold": 10,
+        "correct_withholding": 6,
+        "posts_confirmed": 16,
+        "unsettled": 0,
+        "input_tokens": 5494,
+        "output_tokens": 1037,
+        "peak_microcny": 19284,
+        "uncertain_reserve_microcny": 0
+      },
+      "candidate": {
+        "planned": 16,
+        "dispatched": 16,
+        "completed": 16,
+        "final_answer": 16,
+        "missing_answer": 0,
+        "contract_failures": 6,
+        "source_citations": 20,
+        "located": 20,
+        "supported": 19,
+        "unsupported_fact": 1,
+        "unsupported_capability": 0,
+        "unsupported_policy": 0,
+        "unwarranted_refusal": 1,
+        "withheld": 10,
+        "should_answer": 6,
+        "unwarranted_on_answerable": 0,
+        "correct": 8,
+        "should_withhold": 10,
+        "correct_withholding": 9,
+        "posts_confirmed": 16,
+        "unsettled": 0,
+        "input_tokens": 7462,
+        "output_tokens": 1046,
+        "peak_microcny": 23292,
+        "uncertain_reserve_microcny": 0
+      }
+    },
+    "percentages": {
+      "baseline": {
+        "complete_first_answer": {
+          "numerator": 8,
+          "denominator": 16,
+          "percent": 50.0
+        },
+        "appropriate_withholding": {
+          "numerator": 6,
+          "denominator": 10,
+          "percent": 60.0
+        },
+        "wrong_withholding_on_answerable": {
+          "numerator": 0,
+          "denominator": 6,
+          "percent": 0.0
+        },
+        "citation_location": {
+          "numerator": 20,
+          "denominator": 20,
+          "percent": 100.0
+        },
+        "citation_claim_support": {
+          "numerator": 18,
+          "denominator": 20,
+          "percent": 90.0
+        }
+      },
+      "candidate": {
+        "complete_first_answer": {
+          "numerator": 8,
+          "denominator": 16,
+          "percent": 50.0
+        },
+        "appropriate_withholding": {
+          "numerator": 9,
+          "denominator": 10,
+          "percent": 90.0
+        },
+        "wrong_withholding_on_answerable": {
+          "numerator": 0,
+          "denominator": 6,
+          "percent": 0.0
+        },
+        "citation_location": {
+          "numerator": 20,
+          "denominator": 20,
+          "percent": 100.0
+        },
+        "citation_claim_support": {
+          "numerator": 19,
+          "denominator": 20,
+          "percent": 95.0
+        }
+      }
+    },
+    "regressed_cases": [
+      "QA02",
+      "QA14"
+    ],
+    "p50_p95_seconds": {
+      "baseline": [
+        1.4965791000013269,
+        2.4998623750007027
+      ],
+      "candidate": [
+        1.499798800001372,
+        2.2323165249999875
+      ]
+    },
+    "pairs": [
+      {
+        "id": "QA01",
+        "source": "QA01",
+        "arms": {
+          "baseline": {
+            "quality": 1,
+            "delivery": {
+              "user_context_sha256": "558defcb3d68b1f032a3272a02db98e03afc9b956741d66ac701e55e1e28ea77",
+              "system_tokens": 223,
+              "chunks": [
+                "45c882e1e2cab9c14e1a1e55efa8ada281d99df45829e21c54ecddc821007b25",
+                "f0906019fe6dcc16c053a7107a35694b6bc9e75681c966f7e4701b0455388034"
+              ]
+            }
+          },
+          "candidate": {
+            "quality": 1,
+            "delivery": {
+              "user_context_sha256": "558defcb3d68b1f032a3272a02db98e03afc9b956741d66ac701e55e1e28ea77",
+              "system_tokens": 346,
+              "chunks": [
+                "45c882e1e2cab9c14e1a1e55efa8ada281d99df45829e21c54ecddc821007b25",
+                "f0906019fe6dcc16c053a7107a35694b6bc9e75681c966f7e4701b0455388034"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": "QA02",
+        "source": "QA02",
+        "arms": {
+          "candidate": {
+            "quality": 0,
+            "delivery": {
+              "user_context_sha256": "5b5b58b5303825d98c38cdcf0f2bfd3609ea8ab1232bff03f945701605c62c07",
+              "system_tokens": 346,
+              "chunks": [
+                "17a2443ebd5ddee5b1b134cee70b14ef01aa47e2f46d8a36e91e98ca579a46f2",
+                "4857535ee62686b13e94c8ddbad223c41d2e1e9812cb20e2c39432339f0839c3"
+              ]
+            }
+          },
+          "baseline": {
+            "quality": 1,
+            "delivery": {
+              "user_context_sha256": "5b5b58b5303825d98c38cdcf0f2bfd3609ea8ab1232bff03f945701605c62c07",
+              "system_tokens": 223,
+              "chunks": [
+                "17a2443ebd5ddee5b1b134cee70b14ef01aa47e2f46d8a36e91e98ca579a46f2",
+                "4857535ee62686b13e94c8ddbad223c41d2e1e9812cb20e2c39432339f0839c3"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": "QA03",
+        "source": "QA03",
+        "arms": {
+          "baseline": {
+            "quality": 1,
+            "delivery": {
+              "user_context_sha256": "285403ad91e844b49bd40f7ff4c677d5adbebd3ec772b3263c1d32ab8c28c0b6",
+              "system_tokens": 223,
+              "chunks": [
+                "fd182f2afc7ce777946a3fd15182d42cb0b8e845d483dbfad825aee58f33a149",
+                "11fd30650ab7b3036d9778c5f47caa140d6299c81c1d580ff60b2815329cc151"
+              ]
+            }
+          },
+          "candidate": {
+            "quality": 1,
+            "delivery": {
+              "user_context_sha256": "285403ad91e844b49bd40f7ff4c677d5adbebd3ec772b3263c1d32ab8c28c0b6",
+              "system_tokens": 346,
+              "chunks": [
+                "fd182f2afc7ce777946a3fd15182d42cb0b8e845d483dbfad825aee58f33a149",
+                "11fd30650ab7b3036d9778c5f47caa140d6299c81c1d580ff60b2815329cc151"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": "QA04",
+        "source": "QA04",
+        "arms": {
+          "candidate": {
+            "quality": 1,
+            "delivery": {
+              "user_context_sha256": "f99f3de09810e75eec797926b4c4a7ade96bfa0fea9926cf474125e465eef4e8",
+              "system_tokens": 346,
+              "chunks": [
+                "a956bdae1484733b3edca0d2565384dd86cf00d861f86cdfd53d525edf6a6839"
+              ]
+            }
+          },
+          "baseline": {
+            "quality": 0,
+            "delivery": {
+              "user_context_sha256": "f99f3de09810e75eec797926b4c4a7ade96bfa0fea9926cf474125e465eef4e8",
+              "system_tokens": 223,
+              "chunks": [
+                "a956bdae1484733b3edca0d2565384dd86cf00d861f86cdfd53d525edf6a6839"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": "QA05",
+        "source": "QA05",
+        "arms": {
+          "baseline": {
+            "quality": 1,
+            "delivery": {
+              "user_context_sha256": "31e04fe63e2d87266c8d4d0504506f7110d6eb388dd42f31c59dc624c9866031",
+              "system_tokens": 223,
+              "chunks": [
+                "adf9b247c2f0c01aace694976c2e51a424159a2852e10b62f7ac8fc40a83b074"
+              ]
+            }
+          },
+          "candidate": {
+            "quality": 1,
+            "delivery": {
+              "user_context_sha256": "31e04fe63e2d87266c8d4d0504506f7110d6eb388dd42f31c59dc624c9866031",
+              "system_tokens": 346,
+              "chunks": [
+                "adf9b247c2f0c01aace694976c2e51a424159a2852e10b62f7ac8fc40a83b074"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": "QA06",
+        "source": "QA06",
+        "arms": {
+          "candidate": {
+            "quality": 1,
+            "delivery": {
+              "user_context_sha256": "6a0ab3b135c95ce2f0f7911b3d45eae1f0067cbe52a6545cd2cf5990f661ebae",
+              "system_tokens": 346,
+              "chunks": [
+                "3fe1acc4efc2d594c52f9470bb3c113fcc5470636761a44f30a6f13ac9a0d0fb",
+                "13b80c98d5a3e4ce710840dcc2e1272b0b63f815e9129c0a7cc0dd85cc9db391"
+              ]
+            }
+          },
+          "baseline": {
+            "quality": 1,
+            "delivery": {
+              "user_context_sha256": "6a0ab3b135c95ce2f0f7911b3d45eae1f0067cbe52a6545cd2cf5990f661ebae",
+              "system_tokens": 223,
+              "chunks": [
+                "3fe1acc4efc2d594c52f9470bb3c113fcc5470636761a44f30a6f13ac9a0d0fb",
+                "13b80c98d5a3e4ce710840dcc2e1272b0b63f815e9129c0a7cc0dd85cc9db391"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": "QA07",
+        "source": "QA07",
+        "arms": {
+          "baseline": {
+            "quality": 0,
+            "delivery": {
+              "user_context_sha256": "d0870914ae26f1da46383e4403ba52fce373b5bc56bc4bda8d01844bf3de0f23",
+              "system_tokens": 223,
+              "chunks": [
+                "4d555dc46641c13f39f3244a14703ee9270aa243899cb781ba93d1966dfab3f0"
+              ]
+            }
+          },
+          "candidate": {
+            "quality": 0,
+            "delivery": {
+              "user_context_sha256": "d0870914ae26f1da46383e4403ba52fce373b5bc56bc4bda8d01844bf3de0f23",
+              "system_tokens": 346,
+              "chunks": [
+                "4d555dc46641c13f39f3244a14703ee9270aa243899cb781ba93d1966dfab3f0"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": "QA08",
+        "source": "QA08",
+        "arms": {
+          "candidate": {
+            "quality": 0,
+            "delivery": {
+              "user_context_sha256": "40079dc71fa76eb0b84edfa5aa9b36f418468dee2ea9df67dd9d142b01bacd16",
+              "system_tokens": 346,
+              "chunks": [
+                "71bc873d137b90455214e9fd54ca1d1ef847a3fb91c40296fa23defd8461db47"
+              ]
+            }
+          },
+          "baseline": {
+            "quality": 0,
+            "delivery": {
+              "user_context_sha256": "40079dc71fa76eb0b84edfa5aa9b36f418468dee2ea9df67dd9d142b01bacd16",
+              "system_tokens": 223,
+              "chunks": [
+                "71bc873d137b90455214e9fd54ca1d1ef847a3fb91c40296fa23defd8461db47"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": "QA09",
+        "source": "QA09",
+        "arms": {
+          "baseline": {
+            "quality": 0,
+            "delivery": {
+              "user_context_sha256": "8565e600f2794c7afab3adc85ee8f7f91907accfb9d8fcb149e13d1144c05e62",
+              "system_tokens": 223,
+              "chunks": [
+                "ec6b2ac595fb752d7699d8b239acfbaee6f64a6a500805680cc4d63a400a13d8"
+              ]
+            }
+          },
+          "candidate": {
+            "quality": 0,
+            "delivery": {
+              "user_context_sha256": "8565e600f2794c7afab3adc85ee8f7f91907accfb9d8fcb149e13d1144c05e62",
+              "system_tokens": 346,
+              "chunks": [
+                "ec6b2ac595fb752d7699d8b239acfbaee6f64a6a500805680cc4d63a400a13d8"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": "QA10",
+        "source": "QA10",
+        "arms": {
+          "candidate": {
+            "quality": 0,
+            "delivery": {
+              "user_context_sha256": "093649443ac6a21b97e342ce1f733620d56e478dbaa656e3b7af41f83ec53663",
+              "system_tokens": 346,
+              "chunks": [
+                "fbbfa407383b5de9a273811147d7785c05d0793aee86daa1d56f54569a0e537d"
+              ]
+            }
+          },
+          "baseline": {
+            "quality": 0,
+            "delivery": {
+              "user_context_sha256": "093649443ac6a21b97e342ce1f733620d56e478dbaa656e3b7af41f83ec53663",
+              "system_tokens": 223,
+              "chunks": [
+                "fbbfa407383b5de9a273811147d7785c05d0793aee86daa1d56f54569a0e537d"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": "QA11",
+        "source": "QA11",
+        "arms": {
+          "baseline": {
+            "quality": 0,
+            "delivery": {
+              "user_context_sha256": "3caef486a5a635286afb9c5027a37f6246cc8f9c9cf27a457af92bbf47b9a573",
+              "system_tokens": 223,
+              "chunks": [
+                "bbe5cc62afb23212adc9e826b7f02429fa144d47433e80c8bea1321eba7495d3"
+              ]
+            }
+          },
+          "candidate": {
+            "quality": 0,
+            "delivery": {
+              "user_context_sha256": "3caef486a5a635286afb9c5027a37f6246cc8f9c9cf27a457af92bbf47b9a573",
+              "system_tokens": 346,
+              "chunks": [
+                "bbe5cc62afb23212adc9e826b7f02429fa144d47433e80c8bea1321eba7495d3"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": "QA12",
+        "source": "QA12",
+        "arms": {
+          "candidate": {
+            "quality": 0,
+            "delivery": {
+              "user_context_sha256": "ee1c4141a3b875c3bee28bb7c0e6aef89bac2f5b3593872c7548a571fab245e4",
+              "system_tokens": 346,
+              "chunks": [
+                "814c2977adf60e2020670a0d76b96ff0eee44a78d441d9d1df3cdb1e18523cd3"
+              ]
+            }
+          },
+          "baseline": {
+            "quality": 0,
+            "delivery": {
+              "user_context_sha256": "ee1c4141a3b875c3bee28bb7c0e6aef89bac2f5b3593872c7548a571fab245e4",
+              "system_tokens": 223,
+              "chunks": [
+                "814c2977adf60e2020670a0d76b96ff0eee44a78d441d9d1df3cdb1e18523cd3"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": "QA13",
+        "source": "QA13",
+        "arms": {
+          "baseline": {
+            "quality": 0,
+            "delivery": {
+              "user_context_sha256": "65a248650f22f8b4d564b1e1d6395314518935128cf4139c30342e6ddbb4bf45",
+              "system_tokens": 223,
+              "chunks": [
+                "05676a5f9f5f181ff8aeef93adb6728f33ec0e904d08e6d7329e94ee6eeec157",
+                "b4652c0b558df3ebd593ee35df5791b0e2494f3d81c51a946dd26916688d4686"
+              ]
+            }
+          },
+          "candidate": {
+            "quality": 1,
+            "delivery": {
+              "user_context_sha256": "65a248650f22f8b4d564b1e1d6395314518935128cf4139c30342e6ddbb4bf45",
+              "system_tokens": 346,
+              "chunks": [
+                "05676a5f9f5f181ff8aeef93adb6728f33ec0e904d08e6d7329e94ee6eeec157",
+                "b4652c0b558df3ebd593ee35df5791b0e2494f3d81c51a946dd26916688d4686"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": "QA14",
+        "source": "QA14",
+        "arms": {
+          "candidate": {
+            "quality": 0,
+            "delivery": {
+              "user_context_sha256": "53aba4d9b38179cafbb3da7b6050fb01c80215635136a39021b34ec64e1441c4",
+              "system_tokens": 346,
+              "chunks": [
+                "256966390d3dc755250725d011b3cf3805a3b230e3b9fe5d82837454eebec11e"
+              ]
+            }
+          },
+          "baseline": {
+            "quality": 1,
+            "delivery": {
+              "user_context_sha256": "53aba4d9b38179cafbb3da7b6050fb01c80215635136a39021b34ec64e1441c4",
+              "system_tokens": 223,
+              "chunks": [
+                "256966390d3dc755250725d011b3cf3805a3b230e3b9fe5d82837454eebec11e"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": "QA15",
+        "source": "QA15",
+        "arms": {
+          "baseline": {
+            "quality": 1,
+            "delivery": {
+              "user_context_sha256": "e17c165ffe8b9697b80388835c078bc8170dbc91f4a345de09e8d0275b5e9206",
+              "system_tokens": 223,
+              "chunks": [
+                "26fd856e77f85f5a5873da10243fc1b77d56147dabbd08390a95f0755cb02185"
+              ]
+            }
+          },
+          "candidate": {
+            "quality": 1,
+            "delivery": {
+              "user_context_sha256": "e17c165ffe8b9697b80388835c078bc8170dbc91f4a345de09e8d0275b5e9206",
+              "system_tokens": 346,
+              "chunks": [
+                "26fd856e77f85f5a5873da10243fc1b77d56147dabbd08390a95f0755cb02185"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": "QA16",
+        "source": "QA16",
+        "arms": {
+          "candidate": {
+            "quality": 1,
+            "delivery": {
+              "user_context_sha256": "7d1fe473bf834e85dde27d75e6ab5d1d4f9dce0a5fa7caef1d87c2fa2de1421f",
+              "system_tokens": 346,
+              "chunks": [
+                "08c2bbf8f9ce08978709ca9165b8880409ae5aa4628223dfdb88c37f6f6fa47b",
+                "b4bcf4a08d043cbefde386b5e89c8abd9df56f1226e4691b985bcb6a4d1acf16"
+              ]
+            }
+          },
+          "baseline": {
+            "quality": 1,
+            "delivery": {
+              "user_context_sha256": "7d1fe473bf834e85dde27d75e6ab5d1d4f9dce0a5fa7caef1d87c2fa2de1421f",
+              "system_tokens": 223,
+              "chunks": [
+                "08c2bbf8f9ce08978709ca9165b8880409ae5aa4628223dfdb88c37f6f6fa47b",
+                "b4bcf4a08d043cbefde386b5e89c8abd9df56f1226e4691b985bcb6a4d1acf16"
+              ]
+            }
+          }
+        }
+      }
+    ],
+    "paired": {
+      "n": 16,
+      "sources": 16,
+      "win": 2,
+      "loss": 2,
+      "tie": 12,
+      "delta": 0.0,
+      "paired_source_ci95": [
+        -0.25,
+        0.25
+      ]
+    },
+    "failures": [
+      {
+        "task": "citation/QA02/candidate",
+        "cause": "基础班18时、新手可报名正确；附述进阶班19时和先修要求后仅标第1段，该段支持先修但未列19时，时间见第2段。",
+        "status": "ok"
+      },
+      {
+        "task": "citation/QA04/baseline",
+        "cause": "答出了所问时机：场地不可用时须等两位主持人同意，无需会员投票也有[1]支持。正文只称俱乐部可迁移，遗漏原文指定由协调员实施这一授权主体。",
+        "status": "ok"
+      },
+      {
+        "task": "citation/QA07/baseline",
+        "cause": "备忘只说明归档及时间，合理保留摄影者身份；所引事实均有据，但标为拒答又附引用。",
+        "status": "citations_on_refusal"
+      },
+      {
+        "task": "citation/QA07/candidate",
+        "cause": "备忘只载归档责任，没有摄影者；合理保留但 false 与正文整体保留不一致。",
+        "status": "ok"
+      },
+      {
+        "task": "citation/QA08/candidate",
+        "cause": "引文支持有幕间休息但未给时长。唯一所问无从回答，正文保留与 false 标志不一致。",
+        "status": "ok"
+      },
+      {
+        "task": "citation/QA08/baseline",
+        "cause": "材料仅说两幕之间有间隔，未给时长；引文支持附带说明。但正文对唯一问题保留，false 与正文不符。",
+        "status": "ok"
+      },
+      {
+        "task": "citation/QA09/baseline",
+        "cause": "两首各九票和投票纸收存均见原文，不能推出破平方式。拒答为真又带引用，违反拒答合同。",
+        "status": "citations_on_refusal"
+      },
+      {
+        "task": "citation/QA09/candidate",
+        "cause": "各九票和会议后收存有引文，未猜测破平方法；唯一所问未作肯定判断，false 与正文不符。",
+        "status": "ok"
+      },
+      {
+        "task": "citation/QA10/candidate",
+        "cause": "可见资料只说明一摊一块蓝布与旧布回收，原文给出的夹层布草台并未交付，保留领取地点合理但未答成原文任务。正文另外复述蓝布数量及回收地点，两项均没有引文。",
+        "status": "ok"
+      },
+      {
+        "task": "citation/QA10/baseline",
+        "cause": "领取地点在未交付的原文 QA10-B，正文保留判断与不足标志一致，原文任务仍失分。另明确陈述旧布放出口推车，虽与可见段一致，却没有引出该段。",
+        "status": "ok"
+      },
+      {
+        "task": "citation/QA11/baseline",
+        "cause": "可见单据确有核号签字，不能推归还时间；额外原文要求下次合奏开始前。拒答真却带引用，输出合同失败。",
+        "status": "citations_on_refusal"
+      },
+      {
+        "task": "citation/QA11/candidate",
+        "cause": "借用单只载核号签字，合理保留归还时间，未完成原文任务；拒答正文与 false 标志不符。",
+        "status": "ok"
+      },
+      {
+        "task": "citation/QA12/candidate",
+        "cause": "可见维修说明仅支持长椅上的月牙，合理保留。未答出额外原文的空心菱形，且正文整体保留却标 false。",
+        "status": "ok"
+      },
+      {
+        "task": "citation/QA12/baseline",
+        "cause": "原文答案是空心菱形，可见维修月牙无法支持，合理保留。拒答真却附有引文，合同失败。",
+        "status": "citations_on_refusal"
+      },
+      {
+        "task": "citation/QA13/baseline",
+        "cause": "票根、西廊及主持人未知均答对，部分保留与整体不足标志 false 相容。但[1]是出口说明，[2]才是入口查验说明，两个事实的引文都对调。此卡没有另行提出客服政策主张。",
+        "status": "ok"
+      },
+      {
+        "task": "citation/QA14/candidate",
+        "cause": "[1]支持托盘装十二包，不能推出个人上限。但同段明列植物名与采收月份，正文却把两个所问项目全部判为未知，既误拒可答部分，也与整体不足标志 false 相冲突。",
+        "status": "ok"
+      }
+    ],
+    "unstarted": []
+  },
+  "support": {
+    "arms": {
+      "baseline": {
+        "planned": 16,
+        "dispatched": 16,
+        "completed": 16,
+        "final_answer": 16,
+        "missing_answer": 0,
+        "contract_failures": 0,
+        "source_citations": 17,
+        "located": 16,
+        "supported": 15,
+        "unsupported_fact": 9,
+        "unsupported_capability": 4,
+        "unsupported_policy": 2,
+        "unwarranted_refusal": 0,
+        "withheld": 6,
+        "should_withhold": 6,
+        "correct_withholding": 6,
+        "required_reads_met": 16,
+        "write_ok": 16,
+        "correct": 3,
+        "should_answer": 10,
+        "unwarranted_on_answerable": 0,
+        "posts_confirmed": 46,
+        "unsettled": 0,
+        "input_tokens": 110904,
+        "output_tokens": 17658,
+        "peak_microcny": 363072,
+        "uncertain_reserve_microcny": 0
+      },
+      "candidate": {
+        "planned": 16,
+        "dispatched": 16,
+        "completed": 16,
+        "final_answer": 16,
+        "missing_answer": 0,
+        "contract_failures": 0,
+        "source_citations": 17,
+        "located": 17,
+        "supported": 15,
+        "unsupported_fact": 3,
+        "unsupported_capability": 6,
+        "unsupported_policy": 3,
+        "unwarranted_refusal": 0,
+        "withheld": 6,
+        "should_withhold": 6,
+        "correct_withholding": 6,
+        "required_reads_met": 16,
+        "write_ok": 16,
+        "correct": 7,
+        "should_answer": 10,
+        "unwarranted_on_answerable": 0,
+        "posts_confirmed": 44,
+        "unsettled": 0,
+        "input_tokens": 134199,
+        "output_tokens": 17996,
+        "peak_microcny": 412366,
+        "uncertain_reserve_microcny": 0
+      }
+    },
+    "percentages": {
+      "baseline": {
+        "complete_first_answer": {
+          "numerator": 3,
+          "denominator": 16,
+          "percent": 18.75
+        },
+        "appropriate_withholding": {
+          "numerator": 6,
+          "denominator": 6,
+          "percent": 100.0
+        },
+        "wrong_withholding_on_answerable": {
+          "numerator": 0,
+          "denominator": 10,
+          "percent": 0.0
+        },
+        "citation_location": {
+          "numerator": 16,
+          "denominator": 17,
+          "percent": 94.1176
+        },
+        "citation_claim_support": {
+          "numerator": 15,
+          "denominator": 17,
+          "percent": 88.2353
+        }
+      },
+      "candidate": {
+        "complete_first_answer": {
+          "numerator": 7,
+          "denominator": 16,
+          "percent": 43.75
+        },
+        "appropriate_withholding": {
+          "numerator": 6,
+          "denominator": 6,
+          "percent": 100.0
+        },
+        "wrong_withholding_on_answerable": {
+          "numerator": 0,
+          "denominator": 10,
+          "percent": 0.0
+        },
+        "citation_location": {
+          "numerator": 17,
+          "denominator": 17,
+          "percent": 100.0
+        },
+        "citation_claim_support": {
+          "numerator": 15,
+          "denominator": 17,
+          "percent": 88.2353
+        }
+      }
+    },
+    "regressed_cases": [
+      "SUP14",
+      "SUP16"
+    ],
+    "p50_p95_seconds": {
+      "baseline": [
+        50.710240849999536,
+        62.74284070000067
+      ],
+      "candidate": [
+        49.9818155999983,
+        66.93645674999762
+      ]
+    },
+    "pairs": [
+      {
+        "id": "SUP01",
+        "source": "SUP01",
+        "arms": {
+          "candidate": {
+            "quality": 0,
+            "delivery": {
+              "rounds": 3,
+              "extension_tokens": 1533,
+              "observation_tokens": 159,
+              "final_policy_evidence": [
+                [
+                  "POL-S01-1",
+                  "9234ee3b9d6c2f6d240a3d51f0cbec37883cf325854d3037326f1c9869b2617e"
+                ],
+                [
+                  "POL-S01-1",
+                  "9234ee3b9d6c2f6d240a3d51f0cbec37883cf325854d3037326f1c9869b2617e"
+                ]
+              ]
+            }
+          },
+          "baseline": {
+            "quality": 0,
+            "delivery": {
+              "rounds": 3,
+              "extension_tokens": 0,
+              "observation_tokens": 0,
+              "final_policy_evidence": [
+                [
+                  "POL-S01-1",
+                  "9234ee3b9d6c2f6d240a3d51f0cbec37883cf325854d3037326f1c9869b2617e"
+                ]
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": "SUP02",
+        "source": "SUP02",
+        "arms": {
+          "baseline": {
+            "quality": 0,
+            "delivery": {
+              "rounds": 3,
+              "extension_tokens": 0,
+              "observation_tokens": 0,
+              "final_policy_evidence": [
+                [
+                  "POL-S02-1",
+                  "1d7e35fd235ff4374a59657c65fa6a26f23ceab937174a1e02bf56387db3652b"
+                ],
+                [
+                  "POL-S02-1",
+                  "1d7e35fd235ff4374a59657c65fa6a26f23ceab937174a1e02bf56387db3652b"
+                ]
+              ]
+            }
+          },
+          "candidate": {
+            "quality": 0,
+            "delivery": {
+              "rounds": 2,
+              "extension_tokens": 1022,
+              "observation_tokens": 66,
+              "final_policy_evidence": [
+                [
+                  "POL-S02-1",
+                  "1d7e35fd235ff4374a59657c65fa6a26f23ceab937174a1e02bf56387db3652b"
+                ]
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": "SUP03",
+        "source": "SUP03",
+        "arms": {
+          "candidate": {
+            "quality": 1,
+            "delivery": {
+              "rounds": 3,
+              "extension_tokens": 1533,
+              "observation_tokens": 82,
+              "final_policy_evidence": [
+                [
+                  "POL-S03-1",
+                  "022b88a012bf6a3e712586921427bc4a4ff546c426b4dd09ba43e2f06f87508a"
+                ],
+                [
+                  "POL-S03-1",
+                  "022b88a012bf6a3e712586921427bc4a4ff546c426b4dd09ba43e2f06f87508a"
+                ],
+                [
+                  "POL-S03-1",
+                  "022b88a012bf6a3e712586921427bc4a4ff546c426b4dd09ba43e2f06f87508a"
+                ]
+              ]
+            }
+          },
+          "baseline": {
+            "quality": 0,
+            "delivery": {
+              "rounds": 3,
+              "extension_tokens": 0,
+              "observation_tokens": 0,
+              "final_policy_evidence": [
+                [
+                  "POL-S03-1",
+                  "022b88a012bf6a3e712586921427bc4a4ff546c426b4dd09ba43e2f06f87508a"
+                ],
+                [
+                  "POL-S03-1",
+                  "022b88a012bf6a3e712586921427bc4a4ff546c426b4dd09ba43e2f06f87508a"
+                ],
+                [
+                  "POL-S03-1",
+                  "022b88a012bf6a3e712586921427bc4a4ff546c426b4dd09ba43e2f06f87508a"
+                ]
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": "SUP04",
+        "source": "SUP04",
+        "arms": {
+          "baseline": {
+            "quality": 0,
+            "delivery": {
+              "rounds": 2,
+              "extension_tokens": 0,
+              "observation_tokens": 0,
+              "final_policy_evidence": []
+            }
+          },
+          "candidate": {
+            "quality": 1,
+            "delivery": {
+              "rounds": 2,
+              "extension_tokens": 1022,
+              "observation_tokens": 27,
+              "final_policy_evidence": []
+            }
+          }
+        }
+      },
+      {
+        "id": "SUP05",
+        "source": "SUP05",
+        "arms": {
+          "candidate": {
+            "quality": 0,
+            "delivery": {
+              "rounds": 3,
+              "extension_tokens": 1533,
+              "observation_tokens": 132,
+              "final_policy_evidence": [
+                [
+                  "POL-S05-1",
+                  "e25e8dfe9b2e90c6f51c06885ad680274dcdc409eab1cc6e76507e674bbeb3d0"
+                ],
+                [
+                  "POL-S05-1",
+                  "e25e8dfe9b2e90c6f51c06885ad680274dcdc409eab1cc6e76507e674bbeb3d0"
+                ]
+              ]
+            }
+          },
+          "baseline": {
+            "quality": 0,
+            "delivery": {
+              "rounds": 3,
+              "extension_tokens": 0,
+              "observation_tokens": 0,
+              "final_policy_evidence": [
+                [
+                  "POL-S05-1",
+                  "e25e8dfe9b2e90c6f51c06885ad680274dcdc409eab1cc6e76507e674bbeb3d0"
+                ],
+                [
+                  "POL-S05-1",
+                  "e25e8dfe9b2e90c6f51c06885ad680274dcdc409eab1cc6e76507e674bbeb3d0"
+                ]
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": "SUP06",
+        "source": "SUP06",
+        "arms": {
+          "baseline": {
+            "quality": 0,
+            "delivery": {
+              "rounds": 3,
+              "extension_tokens": 0,
+              "observation_tokens": 0,
+              "final_policy_evidence": [
+                [
+                  "POL-S06-1",
+                  "f459674a3dc07e3df825b29a45377bd5758d052ef81af6c673e6ad0e8250ef16"
+                ],
+                [
+                  "POL-S06-1",
+                  "f459674a3dc07e3df825b29a45377bd5758d052ef81af6c673e6ad0e8250ef16"
+                ]
+              ]
+            }
+          },
+          "candidate": {
+            "quality": 0,
+            "delivery": {
+              "rounds": 4,
+              "extension_tokens": 2044,
+              "observation_tokens": 198,
+              "final_policy_evidence": [
+                [
+                  "POL-S06-1",
+                  "f459674a3dc07e3df825b29a45377bd5758d052ef81af6c673e6ad0e8250ef16"
+                ],
+                [
+                  "POL-S06-1",
+                  "f459674a3dc07e3df825b29a45377bd5758d052ef81af6c673e6ad0e8250ef16"
+                ],
+                [
+                  "POL-S06-1",
+                  "f459674a3dc07e3df825b29a45377bd5758d052ef81af6c673e6ad0e8250ef16"
+                ],
+                [
+                  "POL-S06-1",
+                  "f459674a3dc07e3df825b29a45377bd5758d052ef81af6c673e6ad0e8250ef16"
+                ]
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": "SUP07",
+        "source": "SUP07",
+        "arms": {
+          "candidate": {
+            "quality": 1,
+            "delivery": {
+              "rounds": 2,
+              "extension_tokens": 1022,
+              "observation_tokens": 41,
+              "final_policy_evidence": [
+                [
+                  "POL-S07-1",
+                  "e75c8f8b3893335c2c4a281356f84cd255b00f37095b0c3cdb642c55572ccbe1"
+                ]
+              ]
+            }
+          },
+          "baseline": {
+            "quality": 1,
+            "delivery": {
+              "rounds": 3,
+              "extension_tokens": 0,
+              "observation_tokens": 0,
+              "final_policy_evidence": [
+                [
+                  "POL-S07-1",
+                  "e75c8f8b3893335c2c4a281356f84cd255b00f37095b0c3cdb642c55572ccbe1"
+                ],
+                [
+                  "POL-S07-1",
+                  "e75c8f8b3893335c2c4a281356f84cd255b00f37095b0c3cdb642c55572ccbe1"
+                ]
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": "SUP08",
+        "source": "SUP08",
+        "arms": {
+          "baseline": {
+            "quality": 0,
+            "delivery": {
+              "rounds": 3,
+              "extension_tokens": 0,
+              "observation_tokens": 0,
+              "final_policy_evidence": [
+                [
+                  "POL-S08-1",
+                  "256a979e6b4cbe780891dcf59dd3ef839c0ebdfe322090bf756498eca0d8cbb3"
+                ],
+                [
+                  "POL-S08-1",
+                  "256a979e6b4cbe780891dcf59dd3ef839c0ebdfe322090bf756498eca0d8cbb3"
+                ],
+                [
+                  "POL-S08-1",
+                  "256a979e6b4cbe780891dcf59dd3ef839c0ebdfe322090bf756498eca0d8cbb3"
+                ]
+              ]
+            }
+          },
+          "candidate": {
+            "quality": 1,
+            "delivery": {
+              "rounds": 3,
+              "extension_tokens": 1533,
+              "observation_tokens": 132,
+              "final_policy_evidence": [
+                [
+                  "POL-S08-1",
+                  "256a979e6b4cbe780891dcf59dd3ef839c0ebdfe322090bf756498eca0d8cbb3"
+                ],
+                [
+                  "POL-S08-1",
+                  "256a979e6b4cbe780891dcf59dd3ef839c0ebdfe322090bf756498eca0d8cbb3"
+                ],
+                [
+                  "POL-S08-1",
+                  "256a979e6b4cbe780891dcf59dd3ef839c0ebdfe322090bf756498eca0d8cbb3"
+                ]
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": "SUP09",
+        "source": "SUP09",
+        "arms": {
+          "candidate": {
+            "quality": 0,
+            "delivery": {
+              "rounds": 2,
+              "extension_tokens": 1022,
+              "observation_tokens": 66,
+              "final_policy_evidence": [
+                [
+                  "POL-S09-1",
+                  "7b5f820c36dab0adce21f594e2c51fc14db8f17aa7f89061860dc76b178286d1"
+                ],
+                [
+                  "POL-S09-2",
+                  "3bf0652cfd2e335eb67c545627f418557f5c69fec9a290d35dd5f0a3fcc29603"
+                ]
+              ]
+            }
+          },
+          "baseline": {
+            "quality": 0,
+            "delivery": {
+              "rounds": 2,
+              "extension_tokens": 0,
+              "observation_tokens": 0,
+              "final_policy_evidence": [
+                [
+                  "POL-S09-1",
+                  "7b5f820c36dab0adce21f594e2c51fc14db8f17aa7f89061860dc76b178286d1"
+                ],
+                [
+                  "POL-S09-2",
+                  "3bf0652cfd2e335eb67c545627f418557f5c69fec9a290d35dd5f0a3fcc29603"
+                ]
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": "SUP10",
+        "source": "SUP10",
+        "arms": {
+          "baseline": {
+            "quality": 0,
+            "delivery": {
+              "rounds": 3,
+              "extension_tokens": 0,
+              "observation_tokens": 0,
+              "final_policy_evidence": [
+                [
+                  "POL-S10-2",
+                  "16061f42d7f217fb2cc75db93d7395e40528a0797192f9e8881c51906b17a590"
+                ],
+                [
+                  "POL-S10-1",
+                  "1641d85c351c2e606822952bee98075194aba028fdfbc21fb3fb2164a8d0cfe8"
+                ],
+                [
+                  "POL-S10-2",
+                  "16061f42d7f217fb2cc75db93d7395e40528a0797192f9e8881c51906b17a590"
+                ],
+                [
+                  "POL-S10-1",
+                  "1641d85c351c2e606822952bee98075194aba028fdfbc21fb3fb2164a8d0cfe8"
+                ]
+              ]
+            }
+          },
+          "candidate": {
+            "quality": 1,
+            "delivery": {
+              "rounds": 3,
+              "extension_tokens": 1533,
+              "observation_tokens": 132,
+              "final_policy_evidence": [
+                [
+                  "POL-S10-2",
+                  "16061f42d7f217fb2cc75db93d7395e40528a0797192f9e8881c51906b17a590"
+                ],
+                [
+                  "POL-S10-1",
+                  "1641d85c351c2e606822952bee98075194aba028fdfbc21fb3fb2164a8d0cfe8"
+                ],
+                [
+                  "POL-S10-1",
+                  "1641d85c351c2e606822952bee98075194aba028fdfbc21fb3fb2164a8d0cfe8"
+                ],
+                [
+                  "POL-S10-2",
+                  "16061f42d7f217fb2cc75db93d7395e40528a0797192f9e8881c51906b17a590"
+                ],
+                [
+                  "POL-S10-2",
+                  "16061f42d7f217fb2cc75db93d7395e40528a0797192f9e8881c51906b17a590"
+                ],
+                [
+                  "POL-S10-1",
+                  "1641d85c351c2e606822952bee98075194aba028fdfbc21fb3fb2164a8d0cfe8"
+                ]
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": "SUP11",
+        "source": "SUP11",
+        "arms": {
+          "candidate": {
+            "quality": 0,
+            "delivery": {
+              "rounds": 2,
+              "extension_tokens": 1022,
+              "observation_tokens": 66,
+              "final_policy_evidence": [
+                [
+                  "POL-S11-1",
+                  "1ae3f30ed043c4839ad10d1ddfd7a81e03830bc7ded71e8f49a02a8383a0e602"
+                ],
+                [
+                  "POL-S11-2",
+                  "216dc02083887c652720e1e914fe7e3e9c45e4d8cd16d08c28580a6cfe01befb"
+                ]
+              ]
+            }
+          },
+          "baseline": {
+            "quality": 0,
+            "delivery": {
+              "rounds": 2,
+              "extension_tokens": 0,
+              "observation_tokens": 0,
+              "final_policy_evidence": [
+                [
+                  "POL-S11-1",
+                  "1ae3f30ed043c4839ad10d1ddfd7a81e03830bc7ded71e8f49a02a8383a0e602"
+                ],
+                [
+                  "POL-S11-2",
+                  "216dc02083887c652720e1e914fe7e3e9c45e4d8cd16d08c28580a6cfe01befb"
+                ]
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": "SUP12",
+        "source": "SUP12",
+        "arms": {
+          "baseline": {
+            "quality": 0,
+            "delivery": {
+              "rounds": 3,
+              "extension_tokens": 0,
+              "observation_tokens": 0,
+              "final_policy_evidence": [
+                [
+                  "POL-S12-2",
+                  "2b856674dacdcff9e83be33aef24be68bcf2f8b3b391a2fbaa9c6ac7f75249c8"
+                ],
+                [
+                  "POL-S12-1",
+                  "005ccf93557425d5367dd72137710910fcac441e44bed53b503444968f7f2c57"
+                ],
+                [
+                  "POL-S12-2",
+                  "2b856674dacdcff9e83be33aef24be68bcf2f8b3b391a2fbaa9c6ac7f75249c8"
+                ],
+                [
+                  "POL-S12-1",
+                  "005ccf93557425d5367dd72137710910fcac441e44bed53b503444968f7f2c57"
+                ]
+              ]
+            }
+          },
+          "candidate": {
+            "quality": 1,
+            "delivery": {
+              "rounds": 3,
+              "extension_tokens": 1533,
+              "observation_tokens": 132,
+              "final_policy_evidence": [
+                [
+                  "POL-S12-1",
+                  "005ccf93557425d5367dd72137710910fcac441e44bed53b503444968f7f2c57"
+                ],
+                [
+                  "POL-S12-2",
+                  "2b856674dacdcff9e83be33aef24be68bcf2f8b3b391a2fbaa9c6ac7f75249c8"
+                ],
+                [
+                  "POL-S12-2",
+                  "2b856674dacdcff9e83be33aef24be68bcf2f8b3b391a2fbaa9c6ac7f75249c8"
+                ],
+                [
+                  "POL-S12-1",
+                  "005ccf93557425d5367dd72137710910fcac441e44bed53b503444968f7f2c57"
+                ],
+                [
+                  "POL-S12-2",
+                  "2b856674dacdcff9e83be33aef24be68bcf2f8b3b391a2fbaa9c6ac7f75249c8"
+                ],
+                [
+                  "POL-S12-1",
+                  "005ccf93557425d5367dd72137710910fcac441e44bed53b503444968f7f2c57"
+                ]
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": "SUP13",
+        "source": "SUP13",
+        "arms": {
+          "candidate": {
+            "quality": 1,
+            "delivery": {
+              "rounds": 3,
+              "extension_tokens": 1533,
+              "observation_tokens": 54,
+              "final_policy_evidence": [
+                [
+                  "POL-S13-1",
+                  "a7a2c8925c769dbd385a78a907b19b42c9383aedffeb2e635244af1ffb1b542f"
+                ]
+              ]
+            }
+          },
+          "baseline": {
+            "quality": 0,
+            "delivery": {
+              "rounds": 3,
+              "extension_tokens": 0,
+              "observation_tokens": 0,
+              "final_policy_evidence": []
+            }
+          }
+        }
+      },
+      {
+        "id": "SUP14",
+        "source": "SUP14",
+        "arms": {
+          "baseline": {
+            "quality": 1,
+            "delivery": {
+              "rounds": 3,
+              "extension_tokens": 0,
+              "observation_tokens": 0,
+              "final_policy_evidence": []
+            }
+          },
+          "candidate": {
+            "quality": 0,
+            "delivery": {
+              "rounds": 4,
+              "extension_tokens": 2044,
+              "observation_tokens": 102,
+              "final_policy_evidence": []
+            }
+          }
+        }
+      },
+      {
+        "id": "SUP15",
+        "source": "SUP15",
+        "arms": {
+          "candidate": {
+            "quality": 0,
+            "delivery": {
+              "rounds": 2,
+              "extension_tokens": 1022,
+              "observation_tokens": 16,
+              "final_policy_evidence": [
+                [
+                  "POL-S15-1",
+                  "6d8a1552361c174f7b1cffa4b2381735cc8d1a213ced9918cfa341f3008e7c00"
+                ]
+              ]
+            }
+          },
+          "baseline": {
+            "quality": 0,
+            "delivery": {
+              "rounds": 3,
+              "extension_tokens": 0,
+              "observation_tokens": 0,
+              "final_policy_evidence": [
+                [
+                  "POL-S15-1",
+                  "6d8a1552361c174f7b1cffa4b2381735cc8d1a213ced9918cfa341f3008e7c00"
+                ]
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": "SUP16",
+        "source": "SUP16",
+        "arms": {
+          "baseline": {
+            "quality": 1,
+            "delivery": {
+              "rounds": 4,
+              "extension_tokens": 0,
+              "observation_tokens": 0,
+              "final_policy_evidence": [
+                [
+                  "POL-S16-1",
+                  "9e7668664ee6c00eded2cff00dde7dd6b836a682428fe2b595319df7e6c9dbe5"
+                ],
+                [
+                  "POL-S16-1",
+                  "9e7668664ee6c00eded2cff00dde7dd6b836a682428fe2b595319df7e6c9dbe5"
+                ]
+              ]
+            }
+          },
+          "candidate": {
+            "quality": 0,
+            "delivery": {
+              "rounds": 3,
+              "extension_tokens": 1533,
+              "observation_tokens": 132,
+              "final_policy_evidence": [
+                [
+                  "POL-S16-1",
+                  "9e7668664ee6c00eded2cff00dde7dd6b836a682428fe2b595319df7e6c9dbe5"
+                ],
+                [
+                  "POL-S16-1",
+                  "9e7668664ee6c00eded2cff00dde7dd6b836a682428fe2b595319df7e6c9dbe5"
+                ]
+              ]
+            }
+          }
+        }
+      }
+    ],
+    "paired": {
+      "n": 16,
+      "sources": 16,
+      "win": 6,
+      "loss": 2,
+      "tie": 8,
+      "delta": 0.25,
+      "paired_source_ci95": [
+        -0.0625,
+        0.5625
+      ]
+    },
+    "failures": [
+      {
+        "task": "support/SUP01/candidate",
+        "cause": "保留退款申请历史及当前进度合理，引用和空工单返回均相符。声称凭客户留存凭证即可解释系统查不到的原因，现有工具不能保证查明原因。",
+        "status": "SUCCEEDED"
+      },
+      {
+        "task": "support/SUP01/baseline",
+        "cause": "本次无进度且不能判断曾否提交，工单范围表述准确。但宣称系统无任何退款记录，并将原文 POL-S01-1 引作无法定位的 POL-S01。",
+        "status": "SUCCEEDED"
+      },
+      {
+        "task": "support/SUP02/baseline",
+        "cause": "所引条款与两种材料及接收未知相符。退款对象为 null 只描述这次返回；断定没有退款在流转缺乏依据。另称标记一更新复核就能往下走，把更新字段当作材料齐备的充分条件，条款未规定。",
+        "status": "SUCCEEDED"
+      },
+      {
+        "task": "support/SUP02/candidate",
+        "cause": "所引条款支持两种材料和收件未知，退款缺失也限定在本次查询。已发过时补交属于建议，正文没有宣称条款规定必须重新提交。另称可以帮用户转人工并请仓库核实，现有工具仅能申请建单，不能确认可直接把会话转给人工或仓库。",
+        "status": "SUCCEEDED"
+      },
+      {
+        "task": "support/SUP03/baseline",
+        "cause": "清单仅支持未记附件缺失，无法确认开机状况。答复邀用户提供功能检测编号或名称以继续查记录，所列接口不提供这种查询。",
+        "status": "SUCCEEDED"
+      },
+      {
+        "task": "support/SUP04/baseline",
+        "cause": "当前未结工单为空与历史联系未知均有据。但末段将确认历史联系纳入可以进一步查询的事项，现有查询明确不含历史。",
+        "status": "SUCCEEDED"
+      },
+      {
+        "task": "support/SUP05/candidate",
+        "cause": "截止18日14:30及实际13:50均核对无误。但将 MISSING 转述成查询返回“无退款记录”，遗漏该字段并非给出记录不存在的结果。",
+        "status": "SUCCEEDED"
+      },
+      {
+        "task": "support/SUP05/baseline",
+        "cause": "签收后连续24小时及13:50提前40分钟均正确。但退款查询只返回 null，不能据此断言退款流程尚未生成记录。",
+        "status": "SUCCEEDED"
+      },
+      {
+        "task": "support/SUP06/baseline",
+        "cause": "260减40得商品款220，押金80待验收单独复核，条款齐全。额外断言还没有已登记退款单，无从以 null 证明。",
+        "status": "SUCCEEDED"
+      },
+      {
+        "task": "support/SUP06/candidate",
+        "cause": "订单支持发票260、抵券40、实付220、押金80元及待验收。所引第2条支持押金单独结算、验收后复核；正文用它进一步断言必然分两笔、两个时点处理，条款不能确定实际处理日期，故该引文未支持归属它的全部主张。",
+        "status": "SUCCEEDED"
+      },
+      {
+        "task": "support/SUP08/baseline",
+        "cause": "审核通过、渠道受理和银行到账未确认均有据；额外声称支付渠道仍在处理中，受理状态并不证明当前仍在处理。",
+        "status": "SUCCEEDED"
+      },
+      {
+        "task": "support/SUP09/candidate",
+        "cause": "主条款支持能核验本单的电子凭证及非穷尽列举；另一条仅用于说明保修卡补寄地址，归引正确。退款字段缺失无法证明没有在途申请，要求先提交退款申请或按原渠道递交也没有相应条款。",
+        "status": "SUCCEEDED"
+      },
+      {
+        "task": "support/SUP09/baseline",
+        "cause": "两条引文均用于正确范围，保修卡补寄没有被当作核验依据。退款空值不能证明没有退款，档案未返回地址也不能推出未登记地址。",
+        "status": "SUCCEEDED"
+      },
+      {
+        "task": "support/SUP10/baseline",
+        "cause": "原路唯一且为本单购物金账户，两条政策均引对。refund 为空不足以否定正在处理或已完成的退款。",
+        "status": "SUCCEEDED"
+      },
+      {
+        "task": "support/SUP11/candidate",
+        "cause": "第一份政策支持拆封缺页例外，第二份列明两种照片及核验后决定。正文把必须人工核验归于原文，又无据指明印次页通常在版权页附近。让用户把照片发到此处即可，超出了现有工具支持的材料提交能力。",
+        "status": "SUCCEEDED"
+      },
+      {
+        "task": "support/SUP11/baseline",
+        "cause": "缺页例外、两类照片及核验后再决定均正确。退款对象为 null 不足以断定这单没有任何退款记录。正文援引第1条，把仅凭拆封即认定无理由渠道不符合规定套到本单，强于原文的“一般不受理”；第二份条款对材料与核验的支持成立。",
+        "status": "SUCCEEDED"
+      },
+      {
+        "task": "support/SUP12/baseline",
+        "cause": "两条引文分别支持收礼人登记权及购买人退款确认权。把 refund 空值扩张为没有任何退款记录、没有需要纠正的既成事实，超出读取结果。",
+        "status": "SUCCEEDED"
+      },
+      {
+        "task": "support/SUP13/baseline",
+        "cause": "客户、主题、OPEN 编号与实际回执相符，仅做登记。工单工具不支持更新或写入邮箱，答复却称可走修改/新建流程补联系方式。",
+        "status": "SUCCEEDED"
+      },
+      {
+        "task": "support/SUP14/candidate",
+        "cause": "同客户精确主题在限定三种状态下查空。原调用和审批实参吻合，仅申请一次，DENIED／NOT_STARTED；卡上工单数前后均为零，未建成及无新编号准确。拒批后另提可代为转交人工，工具只支持经审批建单，没有可证的另行转交途径。",
+        "status": "SUCCEEDED"
+      },
+      {
+        "task": "support/SUP15/candidate",
+        "cause": "客户档案不能定位该笔退款，明确要求订单号且未建单。按标题逐字引述了可见查询指引，但承诺申请、审批、发起、到账等时点均可说明，接口没有这种保证。",
+        "status": "SUCCEEDED"
+      },
+      {
+        "task": "support/SUP15/baseline",
+        "cause": "需要订单号有指引依据，当前无法定位且未建单。承诺届时一定能读出发起及到账时间、判定正常窗口，超出接口及现有政策保证。",
+        "status": "SUCCEEDED"
+      },
+      {
+        "task": "support/SUP16/candidate",
+        "cause": "受理状态、原账户、窗口不能改卡及本次未发起建单均有据。在本次请求的语境里，关于审批和提交的说明承接其本次未写入。窗口条款与本窗口工具清单无法证明其他自助入口一概不存在。明确回答不能改卡，未回避所问。",
+        "status": "SUCCEEDED"
+      }
+    ],
+    "unstarted": []
+  }
+}

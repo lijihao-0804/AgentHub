@@ -1,0 +1,302 @@
+{
+  "initial_process_exit": 1,
+  "remaining_schedule_process_exit": 0,
+  "source_of_cost": "physical ledger reconciled to each provider response and Run totals",
+  "original_partial_files_preserved_locally": true,
+  "physical_retries": 0,
+  "runs": [
+    {
+      "task": "support/SUP01/baseline",
+      "run_id": "8f63763e-9673-42ee-94d2-84f434427234",
+      "kind": "frozen json.dump cannot encode ModelRequest.required_capabilities.required",
+      "partial_first_file_sha256": "557aad9cada43f32de57ce96b567b151e663b2b356cf5cf779a2c3d31e2dc040",
+      "original_run_file_sha256": "bf58fe2686b9300ac48e9daf0b9ef5fcce0c18e083a7d6f7dfa9c0344f9e7db7",
+      "postgres_terminal_readback": true,
+      "elapsed_source": "frozen scheduler perf_counter"
+    },
+    {
+      "task": "support/SUP01/candidate",
+      "run_id": "10333299-28fd-4a7a-b523-71c5b44dfc72",
+      "kind": "frozen json.dump cannot encode ModelRequest.required_capabilities.required",
+      "partial_first_file_sha256": "395fc0e2f8a6bdb67b1b2d991122467dc2a522123eb027c6c10a8aefdf048feb",
+      "original_run_file_sha256": "d075393824947a717d3348ea77597b52ecf7d0a48bd66671cb568bc2506ad107",
+      "postgres_terminal_readback": true,
+      "elapsed_source": "Windows creation times, task directory to first receipt writer"
+    },
+    {
+      "task": "support/SUP02/baseline",
+      "run_id": "313bbd18-7311-40a1-b7cc-c55a6d66f938",
+      "kind": "frozen json.dump cannot encode ModelRequest.required_capabilities.required",
+      "partial_first_file_sha256": "2275af93f1162be6ab0c9d638dadb5b3618bd26d2e25e0a73739e3c0cfb7e1e6",
+      "original_run_file_sha256": "f38c8876b60fce0885b3818278e9ab52f28fff653a64b4c735adbebf35e86eb5",
+      "postgres_terminal_readback": true,
+      "elapsed_source": "frozen scheduler perf_counter"
+    },
+    {
+      "task": "support/SUP02/candidate",
+      "run_id": "45d92207-d559-4f8d-8733-ad38378490dc",
+      "kind": "frozen json.dump cannot encode ModelRequest.required_capabilities.required",
+      "partial_first_file_sha256": "b824170b78c280cef58577561cc414bfa7a1cdd39e55ff2f475f5ed7699e6048",
+      "original_run_file_sha256": "fcf632dc9b553d1fd14b96902e9724f8e9e6900bb20be068fc4afaf831957c3b",
+      "postgres_terminal_readback": true,
+      "elapsed_source": "frozen scheduler perf_counter"
+    },
+    {
+      "task": "support/SUP03/baseline",
+      "run_id": "e5965d25-6f84-4a0a-ad5c-b3440a469e64",
+      "kind": "frozen json.dump cannot encode ModelRequest.required_capabilities.required",
+      "partial_first_file_sha256": "ea1edfc459f2fe861020478bda82245052f448af7418edef4997786f1fcba250",
+      "original_run_file_sha256": "0f8e3c54d49220284ab20cab19864671fbc67278d70ab7c7f5baedc7dce52c91",
+      "postgres_terminal_readback": true,
+      "elapsed_source": "frozen scheduler perf_counter"
+    },
+    {
+      "task": "support/SUP03/candidate",
+      "run_id": "dfce8619-d23f-4c12-88cb-60e7314b3b13",
+      "kind": "frozen json.dump cannot encode ModelRequest.required_capabilities.required",
+      "partial_first_file_sha256": "f48883ee48d6e785a121e28a1c9c65dac013dde3dfa57dcc8d5c6257d7d3dc69",
+      "original_run_file_sha256": "27d0b0bb3aa62643e9c732149baf57de19df101cd053ecfa019451ed35ffc6ab",
+      "postgres_terminal_readback": true,
+      "elapsed_source": "frozen scheduler perf_counter"
+    },
+    {
+      "task": "support/SUP04/baseline",
+      "run_id": "23d68f7b-376e-477c-b779-889ea0111d54",
+      "kind": "frozen json.dump cannot encode ModelRequest.required_capabilities.required",
+      "partial_first_file_sha256": "d5e975421b50cd7222973256d3c43865f790ccd57381d14eaa7cb4bd7c96302a",
+      "original_run_file_sha256": "694c1f8b9a3aa87ac19a88a35e127e21456126715985296673bdc21707cd0cab",
+      "postgres_terminal_readback": true,
+      "elapsed_source": "frozen scheduler perf_counter"
+    },
+    {
+      "task": "support/SUP04/candidate",
+      "run_id": "279f1d42-d01e-4b85-9504-837557e39ba4",
+      "kind": "frozen json.dump cannot encode ModelRequest.required_capabilities.required",
+      "partial_first_file_sha256": "e8926629b4243d70a3cdd92c47fe5e706e34fdeb60e2cf1bbd3a07b2273d2d72",
+      "original_run_file_sha256": "db135152648d748f3ca63cbc9f75b092f6c72fce76df3d07d6d264fbb115cb85",
+      "postgres_terminal_readback": true,
+      "elapsed_source": "frozen scheduler perf_counter"
+    },
+    {
+      "task": "support/SUP05/baseline",
+      "run_id": "8076db6c-1df8-40f9-880d-6702543cb3e3",
+      "kind": "frozen json.dump cannot encode ModelRequest.required_capabilities.required",
+      "partial_first_file_sha256": "7ea7b56e56e18d88905cd9964099f349f6096b4e7acb9d232a17c6368dcbc345",
+      "original_run_file_sha256": "e71507af99c4c62dee17e135c95a6d36306c877b27ce0b222c8e5250308e3581",
+      "postgres_terminal_readback": true,
+      "elapsed_source": "frozen scheduler perf_counter"
+    },
+    {
+      "task": "support/SUP05/candidate",
+      "run_id": "5606e5e8-323a-41f8-af9a-5137bc5dcf37",
+      "kind": "frozen json.dump cannot encode ModelRequest.required_capabilities.required",
+      "partial_first_file_sha256": "184735a4ec77622ad3a436427056ef8277bc1c34a91f7af56e020342087ae0ba",
+      "original_run_file_sha256": "46817387f56c1559537734ff4155d6965e77cd0da8c639c87ea92dad800cfad9",
+      "postgres_terminal_readback": true,
+      "elapsed_source": "frozen scheduler perf_counter"
+    },
+    {
+      "task": "support/SUP06/baseline",
+      "run_id": "d504ae95-301e-4a62-b436-e42790473c20",
+      "kind": "frozen json.dump cannot encode ModelRequest.required_capabilities.required",
+      "partial_first_file_sha256": "71340d3293703cc9572391b4ac5d912f8d09513b5aa238de73e52aef12a86d28",
+      "original_run_file_sha256": "9b2064dacdadee3ee81c37c835edfe308961bbc25b148f63624bc0ff0ee05cbd",
+      "postgres_terminal_readback": true,
+      "elapsed_source": "frozen scheduler perf_counter"
+    },
+    {
+      "task": "support/SUP06/candidate",
+      "run_id": "b39247a9-e339-48fd-b406-ba29e220bb0f",
+      "kind": "frozen json.dump cannot encode ModelRequest.required_capabilities.required",
+      "partial_first_file_sha256": "91e9f9eda9cef5b8679095e847520edbb7404d4181b194da02ccc94efca304eb",
+      "original_run_file_sha256": "73e1ae762b93904627d0f9c49c38d2db3c743000d2e04e12caba3bac4ae4812f",
+      "postgres_terminal_readback": true,
+      "elapsed_source": "frozen scheduler perf_counter"
+    },
+    {
+      "task": "support/SUP07/baseline",
+      "run_id": "c4eb264c-6253-4e54-a2bc-ef951a1d7e6c",
+      "kind": "frozen json.dump cannot encode ModelRequest.required_capabilities.required",
+      "partial_first_file_sha256": "25a175155f63ffde4e11c98319ee103963dbe58b193da0bea7f5f5ec9a1b76fd",
+      "original_run_file_sha256": "e3e31a9be6345769d8106e23186b19af9814eda9fa748fdc14e5b4df845a0e5f",
+      "postgres_terminal_readback": true,
+      "elapsed_source": "frozen scheduler perf_counter"
+    },
+    {
+      "task": "support/SUP07/candidate",
+      "run_id": "4dff8cba-74d6-4a08-ab37-101fd792c852",
+      "kind": "frozen json.dump cannot encode ModelRequest.required_capabilities.required",
+      "partial_first_file_sha256": "35bb2f5116f7759ed890c6a7494b2f97d0855372d50826d6ab71e52fb266a559",
+      "original_run_file_sha256": "263f63991d09911a61ab63d689c975e2c8956797be333c314f3afcdb9e738ecb",
+      "postgres_terminal_readback": true,
+      "elapsed_source": "frozen scheduler perf_counter"
+    },
+    {
+      "task": "support/SUP08/baseline",
+      "run_id": "7dd2db53-0ded-40df-a8ee-66ca653b29eb",
+      "kind": "frozen json.dump cannot encode ModelRequest.required_capabilities.required",
+      "partial_first_file_sha256": "6c80e58ded7eb8aaf9cb27926183147b694171090436242c8c50f25b338e39c9",
+      "original_run_file_sha256": "2f6e617098cf0eb2404474a423631231aefb0d79289f39263d98020a1064ac51",
+      "postgres_terminal_readback": true,
+      "elapsed_source": "frozen scheduler perf_counter"
+    },
+    {
+      "task": "support/SUP08/candidate",
+      "run_id": "ad95da10-d963-40fc-9bbb-9cb82e412554",
+      "kind": "frozen json.dump cannot encode ModelRequest.required_capabilities.required",
+      "partial_first_file_sha256": "3523bc70c5ec5fd4aba47ba47e784b9c74181ab186f767274538c91301a859c3",
+      "original_run_file_sha256": "d6f3c8e0b5dca77b85ae9bea909691bc822adaea84e33ef2a99e423b57e66130",
+      "postgres_terminal_readback": true,
+      "elapsed_source": "frozen scheduler perf_counter"
+    },
+    {
+      "task": "support/SUP09/baseline",
+      "run_id": "73e507c2-5186-483e-b7df-cbdb9de46963",
+      "kind": "frozen json.dump cannot encode ModelRequest.required_capabilities.required",
+      "partial_first_file_sha256": "b4144e5788c559b8a84dc37772d7338832b1bac13ad13fba4dfb8c7a1f044e31",
+      "original_run_file_sha256": "78f41e4772f0afc5250cbfecae39bc312c9a30d8df3bfce1fd665ab7a89b0bd1",
+      "postgres_terminal_readback": true,
+      "elapsed_source": "frozen scheduler perf_counter"
+    },
+    {
+      "task": "support/SUP09/candidate",
+      "run_id": "09364236-80bd-4c62-9ac8-26b5302a0767",
+      "kind": "frozen json.dump cannot encode ModelRequest.required_capabilities.required",
+      "partial_first_file_sha256": "9cd48b07bafa15b542d2359ed681336b486cdf1b6c8f4ff91a0fe7ce5f086bbc",
+      "original_run_file_sha256": "5d7f8e2a46110de2317e559fe46e49997686f25d74f3dee0177d8ddd4528abed",
+      "postgres_terminal_readback": true,
+      "elapsed_source": "frozen scheduler perf_counter"
+    },
+    {
+      "task": "support/SUP10/baseline",
+      "run_id": "c0b5376b-a191-41fc-95c8-4a27354d7bbf",
+      "kind": "frozen json.dump cannot encode ModelRequest.required_capabilities.required",
+      "partial_first_file_sha256": "9fd2587f0683e9994a3bbd3c8c1740e6d7edddee12a6db605c42c67b31cb5b66",
+      "original_run_file_sha256": "77a967ce34f865eb6c9ff799c3bdd224f73d9e82fa898180fc7825daa0993be3",
+      "postgres_terminal_readback": true,
+      "elapsed_source": "frozen scheduler perf_counter"
+    },
+    {
+      "task": "support/SUP10/candidate",
+      "run_id": "53522b4f-7fe5-4d93-b8b7-cde2f62cf418",
+      "kind": "frozen json.dump cannot encode ModelRequest.required_capabilities.required",
+      "partial_first_file_sha256": "cbe7a544629d7b9440d4ae68e2163a87bf865aa04d1bc4daebd431500d57c83a",
+      "original_run_file_sha256": "d5fd56e3aa36d6c8c0e36b9dfc078f80b0b062d3ef4387995cfb53feedbcdd5d",
+      "postgres_terminal_readback": true,
+      "elapsed_source": "frozen scheduler perf_counter"
+    },
+    {
+      "task": "support/SUP11/baseline",
+      "run_id": "c7f0eb51-60ee-49d6-8c5a-78e73b2cba44",
+      "kind": "frozen json.dump cannot encode ModelRequest.required_capabilities.required",
+      "partial_first_file_sha256": "8dc51afd990bf21a7778cd97dde51da12055d64faef4a8941982037c4d2d5fc0",
+      "original_run_file_sha256": "0e2a65e2608b9cb2fb7d19f3a2a93ed813b5db58749396468e04ad12b07d5df1",
+      "postgres_terminal_readback": true,
+      "elapsed_source": "frozen scheduler perf_counter"
+    },
+    {
+      "task": "support/SUP11/candidate",
+      "run_id": "da92c84b-ef04-4028-a0fe-fcdfe53cf6a2",
+      "kind": "frozen json.dump cannot encode ModelRequest.required_capabilities.required",
+      "partial_first_file_sha256": "4c7b566fb5c8a396df95a10eb877256c6c46297ce506aa4623ea061f2f3c41ac",
+      "original_run_file_sha256": "ff564eed9bbc03f2b32647c7723738621f14298532a7e42f468c70cc4cee47c9",
+      "postgres_terminal_readback": true,
+      "elapsed_source": "frozen scheduler perf_counter"
+    },
+    {
+      "task": "support/SUP12/baseline",
+      "run_id": "e2d93aa9-34b3-4640-8064-9ff997e29868",
+      "kind": "frozen json.dump cannot encode ModelRequest.required_capabilities.required",
+      "partial_first_file_sha256": "b5d467cf67d14449a99f9877c3c47a62f60179534676199d328553ed573f0e4c",
+      "original_run_file_sha256": "9c7086a9ff49bf336b8d3c5d06aa8e1f97792608c5f8a1b99437af67fd619b1e",
+      "postgres_terminal_readback": true,
+      "elapsed_source": "frozen scheduler perf_counter"
+    },
+    {
+      "task": "support/SUP12/candidate",
+      "run_id": "ca3d4d7e-171e-4025-9582-c42a1ff51fad",
+      "kind": "frozen json.dump cannot encode ModelRequest.required_capabilities.required",
+      "partial_first_file_sha256": "202ecd4748f72a5c13e7c0d24c2e72145c7789a5feb38ed597380f2da11920df",
+      "original_run_file_sha256": "36dfd867e292c35b20b75bf7a0e11eedd73769c46f5defe893c28c7abd3fc425",
+      "postgres_terminal_readback": true,
+      "elapsed_source": "frozen scheduler perf_counter"
+    },
+    {
+      "task": "support/SUP13/baseline",
+      "run_id": "09029b90-a424-493a-a8cd-01024384101f",
+      "kind": "frozen json.dump cannot encode ModelRequest.required_capabilities.required",
+      "partial_first_file_sha256": "cfea086c186f1251740a908c76e97f3fcbd91604f266418eea5931256cff56ce",
+      "original_run_file_sha256": "442ceaf9ee4446398565b7bfd67833d96486e7b799704dd69fa29868e3cc12cd",
+      "postgres_terminal_readback": true,
+      "elapsed_source": "frozen scheduler perf_counter"
+    },
+    {
+      "task": "support/SUP13/candidate",
+      "run_id": "02d5ae38-479a-4b60-b17f-ce4f885f724d",
+      "kind": "frozen json.dump cannot encode ModelRequest.required_capabilities.required",
+      "partial_first_file_sha256": "e54442e473780043d85eb3bc99ca3e46156e2870e8196019739d359bc88f8141",
+      "original_run_file_sha256": "163a3e0219cb31bb84964dbf76fb6ff1f01afec64d4a499cc865c98e9fa68dee",
+      "postgres_terminal_readback": true,
+      "elapsed_source": "frozen scheduler perf_counter"
+    },
+    {
+      "task": "support/SUP14/baseline",
+      "run_id": "88ae5eed-ba78-44bc-b394-f12f9967b7b0",
+      "kind": "frozen json.dump cannot encode ModelRequest.required_capabilities.required",
+      "partial_first_file_sha256": "55aabb4bc5c0fcae8355817d09cbf7718e405b0e4df5e0621e5922fd25eb5454",
+      "original_run_file_sha256": "801f8661e2e94e7c8a12a7bfa47ef3571dda9b1a01e1b59b4ae876ba5a0a39d9",
+      "postgres_terminal_readback": true,
+      "elapsed_source": "frozen scheduler perf_counter"
+    },
+    {
+      "task": "support/SUP14/candidate",
+      "run_id": "6bc88371-030c-4bca-8db8-a6aa1a8376c3",
+      "kind": "frozen json.dump cannot encode ModelRequest.required_capabilities.required",
+      "partial_first_file_sha256": "6204c4cc8b01efc8f61c37a210844398ab493febbf69effc5ce4fb0dfd4d949e",
+      "original_run_file_sha256": "7a07acf32d6803f77f7c9ccb1165bd6d27518951bd492e5ad66379086cb09942",
+      "postgres_terminal_readback": true,
+      "elapsed_source": "frozen scheduler perf_counter"
+    },
+    {
+      "task": "support/SUP15/baseline",
+      "run_id": "1a6ebf63-67bc-43a6-be53-565215dbacd7",
+      "kind": "frozen json.dump cannot encode ModelRequest.required_capabilities.required",
+      "partial_first_file_sha256": "26b2c49f7b442bf2e5b1d177dee6cca677ae983c535784c53da031d0f6f570ca",
+      "original_run_file_sha256": "dd7f985d302e00529d523302ef0602d3fa4f5fcb7e5a0c4d5852eda5fff66afb",
+      "postgres_terminal_readback": true,
+      "elapsed_source": "frozen scheduler perf_counter"
+    },
+    {
+      "task": "support/SUP15/candidate",
+      "run_id": "322c46e8-d676-4f0a-b992-3d82bb435c4f",
+      "kind": "frozen json.dump cannot encode ModelRequest.required_capabilities.required",
+      "partial_first_file_sha256": "6be05bf47f0c98f88a0806ffbe8724a4348f71d335fd85a8d546419642795d46",
+      "original_run_file_sha256": "1e59ecc25c6368fdcdd217ab52f6f339e3f3ebfef0ec9840ff127e34a987804a",
+      "postgres_terminal_readback": true,
+      "elapsed_source": "frozen scheduler perf_counter"
+    },
+    {
+      "task": "support/SUP16/baseline",
+      "run_id": "fd1e66e2-8447-4461-ad45-14efdc3511b6",
+      "kind": "frozen json.dump cannot encode ModelRequest.required_capabilities.required",
+      "partial_first_file_sha256": "602a386b1e520a851ceb30b6d8316c9d7c03cfdf2cb0ec37f22a64d02b800530",
+      "original_run_file_sha256": "d06ec320d5b9c0ffb2323567d08b2f5ba139dc48706655560ec75d7ff40d02c8",
+      "postgres_terminal_readback": true,
+      "elapsed_source": "frozen scheduler perf_counter"
+    },
+    {
+      "task": "support/SUP16/candidate",
+      "run_id": "4f97c0a4-0914-49d7-89ce-bbb6927cbeeb",
+      "kind": "frozen json.dump cannot encode ModelRequest.required_capabilities.required",
+      "partial_first_file_sha256": "2dc15bb32e624d987ae5462ace2febfbc179f738cf0a886005e05382a0a84fab",
+      "original_run_file_sha256": "e5eaf843bb6860174d1c1a627aa1824eb708a19741227987920b65c7ed4f46fa",
+      "postgres_terminal_readback": true,
+      "elapsed_source": "frozen scheduler perf_counter"
+    }
+  ],
+  "first_support_candidate_elapsed_proxy_seconds": 85.4075148,
+  "fifteen_precisely_timed_support_candidate_p50_p95_seconds": [
+    49.56,
+    59.92
+  ]
+}

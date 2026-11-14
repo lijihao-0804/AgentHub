@@ -1,0 +1,6257 @@
+{
+  "summary": {
+    "QA": {
+      "baseline": {
+        "physical_calls": 16,
+        "input_tokens": 5494,
+        "output_tokens": 1037,
+        "elapsed_s": 27.35904970000047,
+        "median_elapsed_s": 1.4965791000013269
+      },
+      "candidate": {
+        "physical_calls": 16,
+        "input_tokens": 7462,
+        "output_tokens": 1046,
+        "elapsed_s": 25.770544199996948,
+        "median_elapsed_s": 1.499798800001372
+      }
+    },
+    "SUP": {
+      "baseline": {
+        "physical_calls": 46,
+        "input_tokens": 110904,
+        "output_tokens": 17658,
+        "elapsed_s": 809.7566664999977,
+        "median_elapsed_s": 50.710240849999536,
+        "search_count": 24,
+        "retrieved_occurrences": 30,
+        "final_occurrences": 30,
+        "required_read_instances": 24,
+        "missing_reads": [],
+        "system_extension_total": 0,
+        "observation_total": 0,
+        "ticket_delta": 1,
+        "distinct_read_errors": 0
+      },
+      "candidate": {
+        "physical_calls": 44,
+        "input_tokens": 134199,
+        "output_tokens": 17996,
+        "elapsed_s": 813.6494381999898,
+        "median_elapsed_s": 49.9818155999983,
+        "search_count": 28,
+        "retrieved_occurrences": 36,
+        "final_occurrences": 36,
+        "required_read_instances": 24,
+        "missing_reads": [],
+        "system_extension_total": 22484,
+        "observation_total": 1537,
+        "ticket_delta": 1,
+        "distinct_read_errors": 0
+      }
+    },
+    "isolation_unique_counts": {
+      "database": 32,
+      "workspace": 32,
+      "thread_id": 32,
+      "run_id": 32,
+      "turn_id": 32,
+      "snapshot_id": 32,
+      "version_id": 32
+    }
+  },
+  "rows": {
+    "QA01": {
+      "baseline": {
+        "input_tokens": 367,
+        "output_tokens": 51,
+        "physical_calls": 1,
+        "elapsed_s": 4.616469700002199,
+        "terminal": true,
+        "user_sha256": "558defcb3d68b1f032a3272a02db98e03afc9b956741d66ac701e55e1e28ea77",
+        "system_sha256": "9921923abe84909a433d1333667a6cb16f7ba0928080ec0b21136d1b12238499",
+        "system_tokens": 223,
+        "sources": [
+          [
+            "QA01-A",
+            "1b34a73c8f68cb80277e429fc95fb5c1722b1980f97a107fad3c530b5970c806"
+          ],
+          [
+            "QA01-B",
+            "808c7ccc5a437386797dee21ea93f697527e167e704c6d2e2a740a0326fda9f9"
+          ]
+        ],
+        "delivered_exact": true,
+        "input_present": true,
+        "versus_frozen_documents": true
+      },
+      "candidate": {
+        "input_tokens": 490,
+        "output_tokens": 51,
+        "physical_calls": 1,
+        "elapsed_s": 2.1492005000000063,
+        "terminal": true,
+        "user_sha256": "558defcb3d68b1f032a3272a02db98e03afc9b956741d66ac701e55e1e28ea77",
+        "system_sha256": "8d109317cd05cf86c58d3b4084fb3e91664115acf80f08c30ca019a9a1b321b3",
+        "system_tokens": 346,
+        "sources": [
+          [
+            "QA01-A",
+            "1b34a73c8f68cb80277e429fc95fb5c1722b1980f97a107fad3c530b5970c806"
+          ],
+          [
+            "QA01-B",
+            "808c7ccc5a437386797dee21ea93f697527e167e704c6d2e2a740a0326fda9f9"
+          ]
+        ],
+        "delivered_exact": true,
+        "input_present": true,
+        "versus_frozen_documents": true
+      },
+      "pair": {
+        "same_user_bytes": true,
+        "same_sources": true,
+        "system_token_delta": 123
+      }
+    },
+    "QA02": {
+      "baseline": {
+        "input_tokens": 383,
+        "output_tokens": 94,
+        "physical_calls": 1,
+        "elapsed_s": 1.7779465000021446,
+        "terminal": true,
+        "user_sha256": "5b5b58b5303825d98c38cdcf0f2bfd3609ea8ab1232bff03f945701605c62c07",
+        "system_sha256": "9921923abe84909a433d1333667a6cb16f7ba0928080ec0b21136d1b12238499",
+        "system_tokens": 223,
+        "sources": [
+          [
+            "QA02-B",
+            "d464447278aadbe4f4b6dd093c65e429230b077f194b225776363d1cd285c155"
+          ],
+          [
+            "QA02-A",
+            "d34723101e322080365426c37449c23287d95cb889431cd302bdf9463f78fd8f"
+          ]
+        ],
+        "delivered_exact": true,
+        "input_present": true,
+        "versus_frozen_documents": true
+      },
+      "candidate": {
+        "input_tokens": 506,
+        "output_tokens": 113,
+        "physical_calls": 1,
+        "elapsed_s": 1.6847079999970447,
+        "terminal": true,
+        "user_sha256": "5b5b58b5303825d98c38cdcf0f2bfd3609ea8ab1232bff03f945701605c62c07",
+        "system_sha256": "8d109317cd05cf86c58d3b4084fb3e91664115acf80f08c30ca019a9a1b321b3",
+        "system_tokens": 346,
+        "sources": [
+          [
+            "QA02-B",
+            "d464447278aadbe4f4b6dd093c65e429230b077f194b225776363d1cd285c155"
+          ],
+          [
+            "QA02-A",
+            "d34723101e322080365426c37449c23287d95cb889431cd302bdf9463f78fd8f"
+          ]
+        ],
+        "delivered_exact": true,
+        "input_present": true,
+        "versus_frozen_documents": true
+      },
+      "pair": {
+        "same_user_bytes": true,
+        "same_sources": true,
+        "system_token_delta": 123
+      }
+    },
+    "QA03": {
+      "baseline": {
+        "input_tokens": 368,
+        "output_tokens": 96,
+        "physical_calls": 1,
+        "elapsed_s": 1.5320562000015343,
+        "terminal": true,
+        "user_sha256": "285403ad91e844b49bd40f7ff4c677d5adbebd3ec772b3263c1d32ab8c28c0b6",
+        "system_sha256": "9921923abe84909a433d1333667a6cb16f7ba0928080ec0b21136d1b12238499",
+        "system_tokens": 223,
+        "sources": [
+          [
+            "QA03-A",
+            "3b000c302ea4a7248bd6a466a4fe7c67c255418f4f04cc5a0f70ff5c32989e54"
+          ],
+          [
+            "QA03-B",
+            "8d461a83c12f6b2a41f556d628b12e8258070c222a5c155029fd01303bfd3d09"
+          ]
+        ],
+        "delivered_exact": true,
+        "input_present": true,
+        "versus_frozen_documents": true
+      },
+      "candidate": {
+        "input_tokens": 491,
+        "output_tokens": 88,
+        "physical_calls": 1,
+        "elapsed_s": 1.5065013000021281,
+        "terminal": true,
+        "user_sha256": "285403ad91e844b49bd40f7ff4c677d5adbebd3ec772b3263c1d32ab8c28c0b6",
+        "system_sha256": "8d109317cd05cf86c58d3b4084fb3e91664115acf80f08c30ca019a9a1b321b3",
+        "system_tokens": 346,
+        "sources": [
+          [
+            "QA03-A",
+            "3b000c302ea4a7248bd6a466a4fe7c67c255418f4f04cc5a0f70ff5c32989e54"
+          ],
+          [
+            "QA03-B",
+            "8d461a83c12f6b2a41f556d628b12e8258070c222a5c155029fd01303bfd3d09"
+          ]
+        ],
+        "delivered_exact": true,
+        "input_present": true,
+        "versus_frozen_documents": true
+      },
+      "pair": {
+        "same_user_bytes": true,
+        "same_sources": true,
+        "system_token_delta": 123
+      }
+    },
+    "QA04": {
+      "baseline": {
+        "input_tokens": 327,
+        "output_tokens": 48,
+        "physical_calls": 1,
+        "elapsed_s": 1.3810577000003832,
+        "terminal": true,
+        "user_sha256": "f99f3de09810e75eec797926b4c4a7ade96bfa0fea9926cf474125e465eef4e8",
+        "system_sha256": "9921923abe84909a433d1333667a6cb16f7ba0928080ec0b21136d1b12238499",
+        "system_tokens": 223,
+        "sources": [
+          [
+            "QA04-A",
+            "beff7ba897ce7b5c8b5429081e25d72b840445e5f619bb91b3da4334e46651cd"
+          ]
+        ],
+        "delivered_exact": true,
+        "input_present": true,
+        "versus_frozen_documents": true
+      },
+      "candidate": {
+        "input_tokens": 450,
+        "output_tokens": 42,
+        "physical_calls": 1,
+        "elapsed_s": 1.4811809999991965,
+        "terminal": true,
+        "user_sha256": "f99f3de09810e75eec797926b4c4a7ade96bfa0fea9926cf474125e465eef4e8",
+        "system_sha256": "8d109317cd05cf86c58d3b4084fb3e91664115acf80f08c30ca019a9a1b321b3",
+        "system_tokens": 346,
+        "sources": [
+          [
+            "QA04-A",
+            "beff7ba897ce7b5c8b5429081e25d72b840445e5f619bb91b3da4334e46651cd"
+          ]
+        ],
+        "delivered_exact": true,
+        "input_present": true,
+        "versus_frozen_documents": true
+      },
+      "pair": {
+        "same_user_bytes": true,
+        "same_sources": true,
+        "system_token_delta": 123
+      }
+    },
+    "QA05": {
+      "baseline": {
+        "input_tokens": 335,
+        "output_tokens": 58,
+        "physical_calls": 1,
+        "elapsed_s": 1.5938729000008607,
+        "terminal": true,
+        "user_sha256": "31e04fe63e2d87266c8d4d0504506f7110d6eb388dd42f31c59dc624c9866031",
+        "system_sha256": "9921923abe84909a433d1333667a6cb16f7ba0928080ec0b21136d1b12238499",
+        "system_tokens": 223,
+        "sources": [
+          [
+            "QA05-A",
+            "4c70f5b8799e75681e70c90d1d4011022e243de7a4977f4e78ad52a6a0617079"
+          ]
+        ],
+        "delivered_exact": true,
+        "input_present": true,
+        "versus_frozen_documents": true
+      },
+      "candidate": {
+        "input_tokens": 458,
+        "output_tokens": 58,
+        "physical_calls": 1,
+        "elapsed_s": 1.5359145000002172,
+        "terminal": true,
+        "user_sha256": "31e04fe63e2d87266c8d4d0504506f7110d6eb388dd42f31c59dc624c9866031",
+        "system_sha256": "8d109317cd05cf86c58d3b4084fb3e91664115acf80f08c30ca019a9a1b321b3",
+        "system_tokens": 346,
+        "sources": [
+          [
+            "QA05-A",
+            "4c70f5b8799e75681e70c90d1d4011022e243de7a4977f4e78ad52a6a0617079"
+          ]
+        ],
+        "delivered_exact": true,
+        "input_present": true,
+        "versus_frozen_documents": true
+      },
+      "pair": {
+        "same_user_bytes": true,
+        "same_sources": true,
+        "system_token_delta": 123
+      }
+    },
+    "QA06": {
+      "baseline": {
+        "input_tokens": 372,
+        "output_tokens": 63,
+        "physical_calls": 1,
+        "elapsed_s": 1.5932164999976521,
+        "terminal": true,
+        "user_sha256": "6a0ab3b135c95ce2f0f7911b3d45eae1f0067cbe52a6545cd2cf5990f661ebae",
+        "system_sha256": "9921923abe84909a433d1333667a6cb16f7ba0928080ec0b21136d1b12238499",
+        "system_tokens": 223,
+        "sources": [
+          [
+            "QA06-B",
+            "6f8238898fcf3b8195f9217bc2c1d4b5f65f40a5c88249d9c1141ab466d49588"
+          ],
+          [
+            "QA06-A",
+            "253d4a8f2e2d7c52d2b59b4e132c0ce7aa4fdf15654d38b74546a32aab230b5a"
+          ]
+        ],
+        "delivered_exact": true,
+        "input_present": true,
+        "versus_frozen_documents": true
+      },
+      "candidate": {
+        "input_tokens": 495,
+        "output_tokens": 53,
+        "physical_calls": 1,
+        "elapsed_s": 1.4697919000027468,
+        "terminal": true,
+        "user_sha256": "6a0ab3b135c95ce2f0f7911b3d45eae1f0067cbe52a6545cd2cf5990f661ebae",
+        "system_sha256": "8d109317cd05cf86c58d3b4084fb3e91664115acf80f08c30ca019a9a1b321b3",
+        "system_tokens": 346,
+        "sources": [
+          [
+            "QA06-B",
+            "6f8238898fcf3b8195f9217bc2c1d4b5f65f40a5c88249d9c1141ab466d49588"
+          ],
+          [
+            "QA06-A",
+            "253d4a8f2e2d7c52d2b59b4e132c0ce7aa4fdf15654d38b74546a32aab230b5a"
+          ]
+        ],
+        "delivered_exact": true,
+        "input_present": true,
+        "versus_frozen_documents": true
+      },
+      "pair": {
+        "same_user_bytes": true,
+        "same_sources": true,
+        "system_token_delta": 123
+      }
+    },
+    "QA07": {
+      "baseline": {
+        "input_tokens": 319,
+        "output_tokens": 62,
+        "physical_calls": 1,
+        "elapsed_s": 1.794326600000204,
+        "terminal": true,
+        "user_sha256": "d0870914ae26f1da46383e4403ba52fce373b5bc56bc4bda8d01844bf3de0f23",
+        "system_sha256": "9921923abe84909a433d1333667a6cb16f7ba0928080ec0b21136d1b12238499",
+        "system_tokens": 223,
+        "sources": [
+          [
+            "QA07-A",
+            "8ff53a555dea384fda7db47164c5246b685564a50fc19ef87e0e77b97545f455"
+          ]
+        ],
+        "delivered_exact": true,
+        "input_present": true,
+        "versus_frozen_documents": true
+      },
+      "candidate": {
+        "input_tokens": 442,
+        "output_tokens": 64,
+        "physical_calls": 1,
+        "elapsed_s": 2.481664599999931,
+        "terminal": true,
+        "user_sha256": "d0870914ae26f1da46383e4403ba52fce373b5bc56bc4bda8d01844bf3de0f23",
+        "system_sha256": "8d109317cd05cf86c58d3b4084fb3e91664115acf80f08c30ca019a9a1b321b3",
+        "system_tokens": 346,
+        "sources": [
+          [
+            "QA07-A",
+            "8ff53a555dea384fda7db47164c5246b685564a50fc19ef87e0e77b97545f455"
+          ]
+        ],
+        "delivered_exact": true,
+        "input_present": true,
+        "versus_frozen_documents": true
+      },
+      "pair": {
+        "same_user_bytes": true,
+        "same_sources": true,
+        "system_token_delta": 123
+      }
+    },
+    "QA08": {
+      "baseline": {
+        "input_tokens": 318,
+        "output_tokens": 48,
+        "physical_calls": 1,
+        "elapsed_s": 1.4058689000012237,
+        "terminal": true,
+        "user_sha256": "40079dc71fa76eb0b84edfa5aa9b36f418468dee2ea9df67dd9d142b01bacd16",
+        "system_sha256": "9921923abe84909a433d1333667a6cb16f7ba0928080ec0b21136d1b12238499",
+        "system_tokens": 223,
+        "sources": [
+          [
+            "QA08-A",
+            "4820ed7862ca9e3433daf82b4f57a3100bd74a8a59bd5c7aea438f7819800806"
+          ]
+        ],
+        "delivered_exact": true,
+        "input_present": true,
+        "versus_frozen_documents": true
+      },
+      "candidate": {
+        "input_tokens": 441,
+        "output_tokens": 48,
+        "physical_calls": 1,
+        "elapsed_s": 1.4529764999970212,
+        "terminal": true,
+        "user_sha256": "40079dc71fa76eb0b84edfa5aa9b36f418468dee2ea9df67dd9d142b01bacd16",
+        "system_sha256": "8d109317cd05cf86c58d3b4084fb3e91664115acf80f08c30ca019a9a1b321b3",
+        "system_tokens": 346,
+        "sources": [
+          [
+            "QA08-A",
+            "4820ed7862ca9e3433daf82b4f57a3100bd74a8a59bd5c7aea438f7819800806"
+          ]
+        ],
+        "delivered_exact": true,
+        "input_present": true,
+        "versus_frozen_documents": true
+      },
+      "pair": {
+        "same_user_bytes": true,
+        "same_sources": true,
+        "system_token_delta": 123
+      }
+    },
+    "QA09": {
+      "baseline": {
+        "input_tokens": 317,
+        "output_tokens": 65,
+        "physical_calls": 1,
+        "elapsed_s": 1.5867134000000078,
+        "terminal": true,
+        "user_sha256": "8565e600f2794c7afab3adc85ee8f7f91907accfb9d8fcb149e13d1144c05e62",
+        "system_sha256": "9921923abe84909a433d1333667a6cb16f7ba0928080ec0b21136d1b12238499",
+        "system_tokens": 223,
+        "sources": [
+          [
+            "QA09-A",
+            "7a88a244c93e92f9f13ca1747989de828f997551e905b38a3c0b88a250c4008c"
+          ]
+        ],
+        "delivered_exact": true,
+        "input_present": true,
+        "versus_frozen_documents": true
+      },
+      "candidate": {
+        "input_tokens": 440,
+        "output_tokens": 61,
+        "physical_calls": 1,
+        "elapsed_s": 1.4698987000010675,
+        "terminal": true,
+        "user_sha256": "8565e600f2794c7afab3adc85ee8f7f91907accfb9d8fcb149e13d1144c05e62",
+        "system_sha256": "8d109317cd05cf86c58d3b4084fb3e91664115acf80f08c30ca019a9a1b321b3",
+        "system_tokens": 346,
+        "sources": [
+          [
+            "QA09-A",
+            "7a88a244c93e92f9f13ca1747989de828f997551e905b38a3c0b88a250c4008c"
+          ]
+        ],
+        "delivered_exact": true,
+        "input_present": true,
+        "versus_frozen_documents": true
+      },
+      "pair": {
+        "same_user_bytes": true,
+        "same_sources": true,
+        "system_token_delta": 123
+      }
+    },
+    "QA10": {
+      "baseline": {
+        "input_tokens": 316,
+        "output_tokens": 48,
+        "physical_calls": 1,
+        "elapsed_s": 1.3228983999979391,
+        "terminal": true,
+        "user_sha256": "093649443ac6a21b97e342ce1f733620d56e478dbaa656e3b7af41f83ec53663",
+        "system_sha256": "9921923abe84909a433d1333667a6cb16f7ba0928080ec0b21136d1b12238499",
+        "system_tokens": 223,
+        "sources": [
+          [
+            "QA10-A",
+            "a632037b39a5d30dd1c5e7c7c44f3ddd53a330148d3fec5378c870c7a12ef2f8"
+          ]
+        ],
+        "delivered_exact": true,
+        "input_present": true,
+        "versus_frozen_documents": true
+      },
+      "candidate": {
+        "input_tokens": 439,
+        "output_tokens": 62,
+        "physical_calls": 1,
+        "elapsed_s": 1.5202705999981845,
+        "terminal": true,
+        "user_sha256": "093649443ac6a21b97e342ce1f733620d56e478dbaa656e3b7af41f83ec53663",
+        "system_sha256": "8d109317cd05cf86c58d3b4084fb3e91664115acf80f08c30ca019a9a1b321b3",
+        "system_tokens": 346,
+        "sources": [
+          [
+            "QA10-A",
+            "a632037b39a5d30dd1c5e7c7c44f3ddd53a330148d3fec5378c870c7a12ef2f8"
+          ]
+        ],
+        "delivered_exact": true,
+        "input_present": true,
+        "versus_frozen_documents": true
+      },
+      "pair": {
+        "same_user_bytes": true,
+        "same_sources": true,
+        "system_token_delta": 123
+      }
+    },
+    "QA11": {
+      "baseline": {
+        "input_tokens": 320,
+        "output_tokens": 52,
+        "physical_calls": 1,
+        "elapsed_s": 1.423795999999129,
+        "terminal": true,
+        "user_sha256": "3caef486a5a635286afb9c5027a37f6246cc8f9c9cf27a457af92bbf47b9a573",
+        "system_sha256": "9921923abe84909a433d1333667a6cb16f7ba0928080ec0b21136d1b12238499",
+        "system_tokens": 223,
+        "sources": [
+          [
+            "QA11-A",
+            "1e6ebc33e830f5795dc6e0635aa85c35c49d8132b7696ebd691348e9b4261e32"
+          ]
+        ],
+        "delivered_exact": true,
+        "input_present": true,
+        "versus_frozen_documents": true
+      },
+      "candidate": {
+        "input_tokens": 443,
+        "output_tokens": 50,
+        "physical_calls": 1,
+        "elapsed_s": 1.4918298000011418,
+        "terminal": true,
+        "user_sha256": "3caef486a5a635286afb9c5027a37f6246cc8f9c9cf27a457af92bbf47b9a573",
+        "system_sha256": "8d109317cd05cf86c58d3b4084fb3e91664115acf80f08c30ca019a9a1b321b3",
+        "system_tokens": 346,
+        "sources": [
+          [
+            "QA11-A",
+            "1e6ebc33e830f5795dc6e0635aa85c35c49d8132b7696ebd691348e9b4261e32"
+          ]
+        ],
+        "delivered_exact": true,
+        "input_present": true,
+        "versus_frozen_documents": true
+      },
+      "pair": {
+        "same_user_bytes": true,
+        "same_sources": true,
+        "system_token_delta": 123
+      }
+    },
+    "QA12": {
+      "baseline": {
+        "input_tokens": 320,
+        "output_tokens": 67,
+        "physical_calls": 1,
+        "elapsed_s": 1.4047112999978708,
+        "terminal": true,
+        "user_sha256": "ee1c4141a3b875c3bee28bb7c0e6aef89bac2f5b3593872c7548a571fab245e4",
+        "system_sha256": "9921923abe84909a433d1333667a6cb16f7ba0928080ec0b21136d1b12238499",
+        "system_tokens": 223,
+        "sources": [
+          [
+            "QA12-A",
+            "2ad47a08620b307b17ba57586423890991fa1475ea2e207c266f82a60c1df413"
+          ]
+        ],
+        "delivered_exact": true,
+        "input_present": true,
+        "versus_frozen_documents": true
+      },
+      "candidate": {
+        "input_tokens": 443,
+        "output_tokens": 66,
+        "physical_calls": 1,
+        "elapsed_s": 1.393399499997031,
+        "terminal": true,
+        "user_sha256": "ee1c4141a3b875c3bee28bb7c0e6aef89bac2f5b3593872c7548a571fab245e4",
+        "system_sha256": "8d109317cd05cf86c58d3b4084fb3e91664115acf80f08c30ca019a9a1b321b3",
+        "system_tokens": 346,
+        "sources": [
+          [
+            "QA12-A",
+            "2ad47a08620b307b17ba57586423890991fa1475ea2e207c266f82a60c1df413"
+          ]
+        ],
+        "delivered_exact": true,
+        "input_present": true,
+        "versus_frozen_documents": true
+      },
+      "pair": {
+        "same_user_bytes": true,
+        "same_sources": true,
+        "system_token_delta": 123
+      }
+    },
+    "QA13": {
+      "baseline": {
+        "input_tokens": 379,
+        "output_tokens": 62,
+        "physical_calls": 1,
+        "elapsed_s": 1.4268598999988171,
+        "terminal": true,
+        "user_sha256": "65a248650f22f8b4d564b1e1d6395314518935128cf4139c30342e6ddbb4bf45",
+        "system_sha256": "9921923abe84909a433d1333667a6cb16f7ba0928080ec0b21136d1b12238499",
+        "system_tokens": 223,
+        "sources": [
+          [
+            "QA13-B",
+            "d088a0df274fa035c52f1fe5e46a8142b8e32b4210ce885c488f99f8b1934b98"
+          ],
+          [
+            "QA13-A",
+            "80eb4efeb6ddae869c031ff120c2e87e02adc331f30fbc149d5abc5c26405a83"
+          ]
+        ],
+        "delivered_exact": true,
+        "input_present": true,
+        "versus_frozen_documents": true
+      },
+      "candidate": {
+        "input_tokens": 502,
+        "output_tokens": 69,
+        "physical_calls": 1,
+        "elapsed_s": 1.5897645000004559,
+        "terminal": true,
+        "user_sha256": "65a248650f22f8b4d564b1e1d6395314518935128cf4139c30342e6ddbb4bf45",
+        "system_sha256": "8d109317cd05cf86c58d3b4084fb3e91664115acf80f08c30ca019a9a1b321b3",
+        "system_tokens": 346,
+        "sources": [
+          [
+            "QA13-B",
+            "d088a0df274fa035c52f1fe5e46a8142b8e32b4210ce885c488f99f8b1934b98"
+          ],
+          [
+            "QA13-A",
+            "80eb4efeb6ddae869c031ff120c2e87e02adc331f30fbc149d5abc5c26405a83"
+          ]
+        ],
+        "delivered_exact": true,
+        "input_present": true,
+        "versus_frozen_documents": true
+      },
+      "pair": {
+        "same_user_bytes": true,
+        "same_sources": true,
+        "system_token_delta": 123
+      }
+    },
+    "QA14": {
+      "baseline": {
+        "input_tokens": 331,
+        "output_tokens": 71,
+        "physical_calls": 1,
+        "elapsed_s": 1.440740599999117,
+        "terminal": true,
+        "user_sha256": "53aba4d9b38179cafbb3da7b6050fb01c80215635136a39021b34ec64e1441c4",
+        "system_sha256": "9921923abe84909a433d1333667a6cb16f7ba0928080ec0b21136d1b12238499",
+        "system_tokens": 223,
+        "sources": [
+          [
+            "QA14-A",
+            "2005759c431900127bf6326c8ecf7c3705445e31d5a946b3ba518516f4cb6201"
+          ]
+        ],
+        "delivered_exact": true,
+        "input_present": true,
+        "versus_frozen_documents": true
+      },
+      "candidate": {
+        "input_tokens": 454,
+        "output_tokens": 71,
+        "physical_calls": 1,
+        "elapsed_s": 1.4661859000007098,
+        "terminal": true,
+        "user_sha256": "53aba4d9b38179cafbb3da7b6050fb01c80215635136a39021b34ec64e1441c4",
+        "system_sha256": "8d109317cd05cf86c58d3b4084fb3e91664115acf80f08c30ca019a9a1b321b3",
+        "system_tokens": 346,
+        "sources": [
+          [
+            "QA14-A",
+            "2005759c431900127bf6326c8ecf7c3705445e31d5a946b3ba518516f4cb6201"
+          ]
+        ],
+        "delivered_exact": true,
+        "input_present": true,
+        "versus_frozen_documents": true
+      },
+      "pair": {
+        "same_user_bytes": true,
+        "same_sources": true,
+        "system_token_delta": 123
+      }
+    },
+    "QA15": {
+      "baseline": {
+        "input_tokens": 344,
+        "output_tokens": 78,
+        "physical_calls": 1,
+        "elapsed_s": 1.5974131000002671,
+        "terminal": true,
+        "user_sha256": "e17c165ffe8b9697b80388835c078bc8170dbc91f4a345de09e8d0275b5e9206",
+        "system_sha256": "9921923abe84909a433d1333667a6cb16f7ba0928080ec0b21136d1b12238499",
+        "system_tokens": 223,
+        "sources": [
+          [
+            "QA15-A",
+            "a97caf51054e3766615e70d499b4bdc5b523db0c032a7e1047cc6b142ff8767a"
+          ]
+        ],
+        "delivered_exact": true,
+        "input_present": true,
+        "versus_frozen_documents": true
+      },
+      "candidate": {
+        "input_tokens": 467,
+        "output_tokens": 73,
+        "physical_calls": 1,
+        "elapsed_s": 1.4930963000006159,
+        "terminal": true,
+        "user_sha256": "e17c165ffe8b9697b80388835c078bc8170dbc91f4a345de09e8d0275b5e9206",
+        "system_sha256": "8d109317cd05cf86c58d3b4084fb3e91664115acf80f08c30ca019a9a1b321b3",
+        "system_tokens": 346,
+        "sources": [
+          [
+            "QA15-A",
+            "a97caf51054e3766615e70d499b4bdc5b523db0c032a7e1047cc6b142ff8767a"
+          ]
+        ],
+        "delivered_exact": true,
+        "input_present": true,
+        "versus_frozen_documents": true
+      },
+      "pair": {
+        "same_user_bytes": true,
+        "same_sources": true,
+        "system_token_delta": 123
+      }
+    },
+    "QA16": {
+      "baseline": {
+        "input_tokens": 378,
+        "output_tokens": 74,
+        "physical_calls": 1,
+        "elapsed_s": 1.4611020000011194,
+        "terminal": true,
+        "user_sha256": "7d1fe473bf834e85dde27d75e6ab5d1d4f9dce0a5fa7caef1d87c2fa2de1421f",
+        "system_sha256": "9921923abe84909a433d1333667a6cb16f7ba0928080ec0b21136d1b12238499",
+        "system_tokens": 223,
+        "sources": [
+          [
+            "QA16-A",
+            "c89fa8ab7a683d8c7bd0f2a88e246413d6f72754bd69771c17cf5e4cd743d125"
+          ],
+          [
+            "QA16-B",
+            "ddefb604eae56121417d7ccbfe2386cc04613c77c3379878f67140a934cab0ef"
+          ]
+        ],
+        "delivered_exact": true,
+        "input_present": true,
+        "versus_frozen_documents": true
+      },
+      "candidate": {
+        "input_tokens": 501,
+        "output_tokens": 77,
+        "physical_calls": 1,
+        "elapsed_s": 1.58416059999945,
+        "terminal": true,
+        "user_sha256": "7d1fe473bf834e85dde27d75e6ab5d1d4f9dce0a5fa7caef1d87c2fa2de1421f",
+        "system_sha256": "8d109317cd05cf86c58d3b4084fb3e91664115acf80f08c30ca019a9a1b321b3",
+        "system_tokens": 346,
+        "sources": [
+          [
+            "QA16-A",
+            "c89fa8ab7a683d8c7bd0f2a88e246413d6f72754bd69771c17cf5e4cd743d125"
+          ],
+          [
+            "QA16-B",
+            "ddefb604eae56121417d7ccbfe2386cc04613c77c3379878f67140a934cab0ef"
+          ]
+        ],
+        "delivered_exact": true,
+        "input_present": true,
+        "versus_frozen_documents": true
+      },
+      "pair": {
+        "same_user_bytes": true,
+        "same_sources": true,
+        "system_token_delta": 123
+      }
+    },
+    "SUP01": {
+      "baseline": {
+        "input_tokens": 6815,
+        "output_tokens": 1671,
+        "physical_calls": 3,
+        "elapsed_s": 82.11572589999923,
+        "terminal": true,
+        "queries": [
+          "退款申请 提交 记录 查询 退款进度 政策"
+        ],
+        "retrieved": [
+          [
+            [
+              "POL-S01-1",
+              "9234ee3b9d6c2f6d240a3d51f0cbec37883cf325854d3037326f1c9869b2617e"
+            ]
+          ]
+        ],
+        "delivered": [
+          [
+            [
+              "POL-S01-1",
+              "9234ee3b9d6c2f6d240a3d51f0cbec37883cf325854d3037326f1c9869b2617e"
+            ]
+          ]
+        ],
+        "retained_order_and_bytes": true,
+        "truncated": [
+          false
+        ],
+        "user_sha256": "9f9cfeda6b9bbe165f86ed778af5c67e57091e7e818ec75e612065ca114fd216",
+        "required_reads": [
+          "get_refund_status"
+        ],
+        "missing_reads": [],
+        "wrong_scope": [],
+        "proposals": [
+          {
+            "name": "query_customer",
+            "arguments": {
+              "customer_ref": "CU-S01"
+            }
+          },
+          {
+            "name": "get_order",
+            "arguments": {
+              "order_id": "ORD-S01"
+            }
+          },
+          {
+            "name": "get_refund_status",
+            "arguments": {
+              "order_id": "ORD-S01"
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "query": "退款申请 提交 记录 查询 退款进度 政策"
+            }
+          },
+          {
+            "name": "query_customer",
+            "arguments": {
+              "customer_ref": "CU-S01",
+              "include_open_tickets": true
+            }
+          }
+        ],
+        "read_execution": [
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_order",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_refund_status",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "final_tool_results": [
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_order",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_refund_status",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "approvals": [],
+        "expected_decision": null,
+        "expected_subject": null,
+        "tickets_before": 0,
+        "tickets_after": 0,
+        "system_extension_tokens_by_call": [
+          0,
+          0,
+          0
+        ],
+        "observation_tokens_by_call": [
+          0,
+          0,
+          0
+        ],
+        "ids": {
+          "database": "refund_product_984e18085418406a",
+          "workspace": "workspaces/b3eea19a-f3b3-4817-a742-00be43625450",
+          "thread_id": "13107ddc-ca5b-4f9c-b9d5-c8201535ad6e",
+          "run_id": "8f63763e-9673-42ee-94d2-84f434427234"
+        },
+        "turn_id": "cde4f23b-328f-4b48-9da0-f763f76bd8ae",
+        "snapshot_id": "5f350510-1aa2-4cab-9c98-67c2175ba687",
+        "version_id": "b47c8259-cd79-40ef-a858-631e8e87eec9",
+        "pg": {
+          "join_matches": true,
+          "read_only": true,
+          "output_matches_archived_run_and_turn": true,
+          "output_sha256": "fd529d6a20b79ae50113eefb8f0bda194dcc82b86a32838e6560e062271725cc",
+          "status": "SUCCEEDED",
+          "version_hash_matches": true,
+          "version_snapshot_ids_match": true,
+          "run_snapshot_matches": true,
+          "input_matches": true,
+          "turn_run_link": true,
+          "workspaces_match": true,
+          "threads_match": true,
+          "event_log_complete": false,
+          "turn_sequence": 1
+        },
+        "missing_frozen_docs": [],
+        "final_snippets_match_frozen_docs": true
+      },
+      "candidate": {
+        "input_tokens": 9324,
+        "output_tokens": 1824,
+        "physical_calls": 3,
+        "elapsed_s": 85.4075148,
+        "terminal": true,
+        "queries": [
+          "refund application window status timeline policy",
+          "退款窗口 未展示记录 原申请人 留存凭证 核对 客服界面空白"
+        ],
+        "retrieved": [
+          [
+            [
+              "POL-S01-1",
+              "9234ee3b9d6c2f6d240a3d51f0cbec37883cf325854d3037326f1c9869b2617e"
+            ]
+          ],
+          [
+            [
+              "POL-S01-1",
+              "9234ee3b9d6c2f6d240a3d51f0cbec37883cf325854d3037326f1c9869b2617e"
+            ]
+          ]
+        ],
+        "delivered": [
+          [
+            [
+              "POL-S01-1",
+              "9234ee3b9d6c2f6d240a3d51f0cbec37883cf325854d3037326f1c9869b2617e"
+            ]
+          ],
+          [
+            [
+              "POL-S01-1",
+              "9234ee3b9d6c2f6d240a3d51f0cbec37883cf325854d3037326f1c9869b2617e"
+            ]
+          ]
+        ],
+        "retained_order_and_bytes": true,
+        "truncated": [
+          false,
+          false
+        ],
+        "user_sha256": "9f9cfeda6b9bbe165f86ed778af5c67e57091e7e818ec75e612065ca114fd216",
+        "required_reads": [
+          "get_refund_status"
+        ],
+        "missing_reads": [],
+        "wrong_scope": [],
+        "proposals": [
+          {
+            "name": "get_order",
+            "arguments": {
+              "order_id": "ORD-S01"
+            }
+          },
+          {
+            "name": "get_refund_status",
+            "arguments": {
+              "order_id": "ORD-S01"
+            }
+          },
+          {
+            "name": "query_customer",
+            "arguments": {
+              "customer_ref": "CU-S01"
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "query": "refund application window status timeline policy"
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "query": "退款窗口 未展示记录 原申请人 留存凭证 核对 客服界面空白",
+              "limit": 10
+            }
+          },
+          {
+            "name": "query_customer",
+            "arguments": {
+              "customer_ref": "CU-S01",
+              "include_open_tickets": true
+            }
+          }
+        ],
+        "read_execution": [
+          [
+            "get_order",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_refund_status",
+            "SUCCESS",
+            null
+          ],
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "final_tool_results": [
+          [
+            "get_order",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_refund_status",
+            "SUCCESS",
+            null
+          ],
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "approvals": [],
+        "expected_decision": null,
+        "expected_subject": null,
+        "tickets_before": 0,
+        "tickets_after": 0,
+        "system_extension_tokens_by_call": [
+          511,
+          511,
+          511
+        ],
+        "observation_tokens_by_call": [
+          0,
+          66,
+          93
+        ],
+        "ids": {
+          "database": "refund_product_835a6be486454172",
+          "workspace": "workspaces/94ba508e-f825-4512-b9c0-dcc9e9043804",
+          "thread_id": "f9bc6655-d507-4499-8d61-7ab04de75d05",
+          "run_id": "10333299-28fd-4a7a-b523-71c5b44dfc72"
+        },
+        "turn_id": "f7c95b0e-2ca7-458a-a3d3-5e6764a4a366",
+        "snapshot_id": "4f80e231-8b4e-4ba2-893b-be1a62beeeba",
+        "version_id": "fab6b74f-ddd9-482a-851c-098c290e41a1",
+        "pg": {
+          "join_matches": true,
+          "read_only": true,
+          "output_matches_archived_run_and_turn": true,
+          "output_sha256": "8fc0f3d6de290337c8b38168a91fc7073ce0dc953bbfae2a0bc35f7bfe5cfbf0",
+          "status": "SUCCEEDED",
+          "version_hash_matches": true,
+          "version_snapshot_ids_match": true,
+          "run_snapshot_matches": true,
+          "input_matches": true,
+          "turn_run_link": true,
+          "workspaces_match": true,
+          "threads_match": true,
+          "event_log_complete": false,
+          "turn_sequence": 1
+        },
+        "missing_frozen_docs": [],
+        "final_snippets_match_frozen_docs": true
+      },
+      "pair": {
+        "same_queries": false,
+        "same_unique_sources": true,
+        "baseline_only_sources": [],
+        "candidate_only_sources": []
+      }
+    },
+    "SUP02": {
+      "baseline": {
+        "input_tokens": 7490,
+        "output_tokens": 1057,
+        "physical_calls": 3,
+        "elapsed_s": 50.503621400002885,
+        "terminal": true,
+        "queries": [
+          "箱损复核 需要两种材料 照片 仓库",
+          "承运签收备注 箱体照片 材料标记为空 复核流程 升级"
+        ],
+        "retrieved": [
+          [
+            [
+              "POL-S02-1",
+              "1d7e35fd235ff4374a59657c65fa6a26f23ceab937174a1e02bf56387db3652b"
+            ]
+          ],
+          [
+            [
+              "POL-S02-1",
+              "1d7e35fd235ff4374a59657c65fa6a26f23ceab937174a1e02bf56387db3652b"
+            ]
+          ]
+        ],
+        "delivered": [
+          [
+            [
+              "POL-S02-1",
+              "1d7e35fd235ff4374a59657c65fa6a26f23ceab937174a1e02bf56387db3652b"
+            ]
+          ],
+          [
+            [
+              "POL-S02-1",
+              "1d7e35fd235ff4374a59657c65fa6a26f23ceab937174a1e02bf56387db3652b"
+            ]
+          ]
+        ],
+        "retained_order_and_bytes": true,
+        "truncated": [
+          false,
+          false
+        ],
+        "user_sha256": "28b2974ed13537766d93334f2cc57443bd63ebb9745fd985b8102608ce70caea",
+        "required_reads": [
+          "get_order",
+          "search_knowledge"
+        ],
+        "missing_reads": [],
+        "wrong_scope": [],
+        "proposals": [
+          {
+            "name": "query_customer",
+            "arguments": {
+              "customer_ref": "CU-S02"
+            }
+          },
+          {
+            "name": "get_order",
+            "arguments": {
+              "order_id": "ORD-S02"
+            }
+          },
+          {
+            "name": "get_refund_status",
+            "arguments": {
+              "order_id": "ORD-S02"
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "query": "箱损复核 需要两种材料 照片 仓库"
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "query": "承运签收备注 箱体照片 材料标记为空 复核流程 升级"
+            }
+          }
+        ],
+        "read_execution": [
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_order",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_refund_status",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "final_tool_results": [
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_order",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_refund_status",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "approvals": [],
+        "expected_decision": null,
+        "expected_subject": null,
+        "tickets_before": 0,
+        "tickets_after": 0,
+        "system_extension_tokens_by_call": [
+          0,
+          0,
+          0
+        ],
+        "observation_tokens_by_call": [
+          0,
+          0,
+          0
+        ],
+        "ids": {
+          "database": "refund_product_b23417cfc37849e9",
+          "workspace": "workspaces/cd0d5afd-8b21-489d-9f1a-ed8a340fe58e",
+          "thread_id": "a1584904-832b-4e31-b240-4413b02063ce",
+          "run_id": "313bbd18-7311-40a1-b7cc-c55a6d66f938"
+        },
+        "turn_id": "b90b6e95-fa05-408e-a47b-0dc29b514516",
+        "snapshot_id": "b5a2e829-ee75-42b1-a0ef-c7ca360465e9",
+        "version_id": "1dd6b0e8-a069-4e73-b5dd-1bdd62d18718",
+        "pg": {
+          "join_matches": true,
+          "read_only": true,
+          "output_matches_archived_run_and_turn": true,
+          "output_sha256": "3b1e6b86b645245d897b6b198f5d1839b2465a78a9a1c07be93cda7e3ba0dc6b",
+          "status": "SUCCEEDED",
+          "version_hash_matches": true,
+          "version_snapshot_ids_match": true,
+          "run_snapshot_matches": true,
+          "input_matches": true,
+          "turn_run_link": true,
+          "workspaces_match": true,
+          "threads_match": true,
+          "event_log_complete": false,
+          "turn_sequence": 1
+        },
+        "missing_frozen_docs": [],
+        "final_snippets_match_frozen_docs": true
+      },
+      "candidate": {
+        "input_tokens": 5590,
+        "output_tokens": 1023,
+        "physical_calls": 2,
+        "elapsed_s": 44.54462989999956,
+        "terminal": true,
+        "queries": [
+          "箱损复核 需要材料 照片 仓库收货"
+        ],
+        "retrieved": [
+          [
+            [
+              "POL-S02-1",
+              "1d7e35fd235ff4374a59657c65fa6a26f23ceab937174a1e02bf56387db3652b"
+            ]
+          ]
+        ],
+        "delivered": [
+          [
+            [
+              "POL-S02-1",
+              "1d7e35fd235ff4374a59657c65fa6a26f23ceab937174a1e02bf56387db3652b"
+            ]
+          ]
+        ],
+        "retained_order_and_bytes": true,
+        "truncated": [
+          false
+        ],
+        "user_sha256": "28b2974ed13537766d93334f2cc57443bd63ebb9745fd985b8102608ce70caea",
+        "required_reads": [
+          "get_order",
+          "search_knowledge"
+        ],
+        "missing_reads": [],
+        "wrong_scope": [],
+        "proposals": [
+          {
+            "name": "query_customer",
+            "arguments": {
+              "customer_ref": "CU-S02"
+            }
+          },
+          {
+            "name": "get_order",
+            "arguments": {
+              "order_id": "ORD-S02"
+            }
+          },
+          {
+            "name": "get_refund_status",
+            "arguments": {
+              "order_id": "ORD-S02"
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "query": "箱损复核 需要材料 照片 仓库收货"
+            }
+          }
+        ],
+        "read_execution": [
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_order",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_refund_status",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "final_tool_results": [
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_order",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_refund_status",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "approvals": [],
+        "expected_decision": null,
+        "expected_subject": null,
+        "tickets_before": 0,
+        "tickets_after": 0,
+        "system_extension_tokens_by_call": [
+          511,
+          511
+        ],
+        "observation_tokens_by_call": [
+          0,
+          66
+        ],
+        "ids": {
+          "database": "refund_product_93f946f022684048",
+          "workspace": "workspaces/8e38d310-6814-4234-b29e-7d17dd9d7ab2",
+          "thread_id": "2532fa52-170f-4738-97fc-75d05737e4cc",
+          "run_id": "45d92207-d559-4f8d-8733-ad38378490dc"
+        },
+        "turn_id": "7770a33c-5088-4608-9478-7835812cf1e3",
+        "snapshot_id": "c7bba805-b1e9-41bd-bc02-7f61e83363e2",
+        "version_id": "6e0de8dc-ab1a-45c0-9fe4-affd020b094c",
+        "pg": {
+          "join_matches": true,
+          "read_only": true,
+          "output_matches_archived_run_and_turn": true,
+          "output_sha256": "9f5119bf83d0f8f2e4e302b24b0d29393a54e7f04a10acc2e148d49dd04ada5b",
+          "status": "SUCCEEDED",
+          "version_hash_matches": true,
+          "version_snapshot_ids_match": true,
+          "run_snapshot_matches": true,
+          "input_matches": true,
+          "turn_run_link": true,
+          "workspaces_match": true,
+          "threads_match": true,
+          "event_log_complete": false,
+          "turn_sequence": 1
+        },
+        "missing_frozen_docs": [],
+        "final_snippets_match_frozen_docs": true
+      },
+      "pair": {
+        "same_queries": false,
+        "same_unique_sources": true,
+        "baseline_only_sources": [],
+        "candidate_only_sources": []
+      }
+    },
+    "SUP03": {
+      "baseline": {
+        "input_tokens": 7717,
+        "output_tokens": 943,
+        "physical_calls": 3,
+        "elapsed_s": 49.19748459999755,
+        "terminal": true,
+        "queries": [
+          "handover checklist required items 交接清单 缺件 设备开机检测",
+          "交接清单说明 全部条款 附件缺失 空列表含义",
+          "功能检测 开机 记录 交接清单 证明范围 POL-S03"
+        ],
+        "retrieved": [
+          [
+            [
+              "POL-S03-1",
+              "022b88a012bf6a3e712586921427bc4a4ff546c426b4dd09ba43e2f06f87508a"
+            ]
+          ],
+          [
+            [
+              "POL-S03-1",
+              "022b88a012bf6a3e712586921427bc4a4ff546c426b4dd09ba43e2f06f87508a"
+            ]
+          ],
+          [
+            [
+              "POL-S03-1",
+              "022b88a012bf6a3e712586921427bc4a4ff546c426b4dd09ba43e2f06f87508a"
+            ]
+          ]
+        ],
+        "delivered": [
+          [
+            [
+              "POL-S03-1",
+              "022b88a012bf6a3e712586921427bc4a4ff546c426b4dd09ba43e2f06f87508a"
+            ]
+          ],
+          [
+            [
+              "POL-S03-1",
+              "022b88a012bf6a3e712586921427bc4a4ff546c426b4dd09ba43e2f06f87508a"
+            ]
+          ],
+          [
+            [
+              "POL-S03-1",
+              "022b88a012bf6a3e712586921427bc4a4ff546c426b4dd09ba43e2f06f87508a"
+            ]
+          ]
+        ],
+        "retained_order_and_bytes": true,
+        "truncated": [
+          false,
+          false,
+          false
+        ],
+        "user_sha256": "7fc4c669f9ad5faf2725330e31b4bbf4075330c7670331e6ac2a18b825cc51a4",
+        "required_reads": [
+          "get_order",
+          "search_knowledge"
+        ],
+        "missing_reads": [],
+        "wrong_scope": [],
+        "proposals": [
+          {
+            "name": "query_customer",
+            "arguments": {
+              "customer_ref": "CU-S03"
+            }
+          },
+          {
+            "name": "get_order",
+            "arguments": {
+              "order_id": "ORD-S03"
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "query": "handover checklist required items 交接清单 缺件 设备开机检测"
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "query": "功能检测 开机 记录 交接清单 证明范围 POL-S03"
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "query": "交接清单说明 全部条款 附件缺失 空列表含义"
+            }
+          }
+        ],
+        "read_execution": [
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_order",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "final_tool_results": [
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_order",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "approvals": [],
+        "expected_decision": null,
+        "expected_subject": null,
+        "tickets_before": 0,
+        "tickets_after": 0,
+        "system_extension_tokens_by_call": [
+          0,
+          0,
+          0
+        ],
+        "observation_tokens_by_call": [
+          0,
+          0,
+          0
+        ],
+        "ids": {
+          "database": "refund_product_504af13ba6484d2b",
+          "workspace": "workspaces/9dcf55ac-3071-41bc-a625-83c483d2d0f0",
+          "thread_id": "99f3c96d-6453-4eeb-a043-dc2b65c8f5f9",
+          "run_id": "e5965d25-6f84-4a0a-ad5c-b3440a469e64"
+        },
+        "turn_id": "3819b0a9-c4d0-412c-af65-ea73e840e599",
+        "snapshot_id": "909d720e-2991-4541-9d65-40b95a3e62e6",
+        "version_id": "cb6fea63-f9f2-4342-b754-bcae0705a75e",
+        "pg": {
+          "join_matches": true,
+          "read_only": true,
+          "output_matches_archived_run_and_turn": true,
+          "output_sha256": "0a8770d5d86a09842c063127d7b788fa55f694da7104112d5dc7c9138932a9f4",
+          "status": "SUCCEEDED",
+          "version_hash_matches": true,
+          "version_snapshot_ids_match": true,
+          "run_snapshot_matches": true,
+          "input_matches": true,
+          "turn_run_link": true,
+          "workspaces_match": true,
+          "threads_match": true,
+          "event_log_complete": false,
+          "turn_sequence": 1
+        },
+        "missing_frozen_docs": [],
+        "final_snippets_match_frozen_docs": true
+      },
+      "candidate": {
+        "input_tokens": 9325,
+        "output_tokens": 994,
+        "physical_calls": 3,
+        "elapsed_s": 50.404302999999345,
+        "terminal": true,
+        "queries": [
+          "handover checklist missing items device power on",
+          "功能检测记录 交接清单 能否证明设备正常运行",
+          "POL-S03 policy 缺件 功能检测 记录"
+        ],
+        "retrieved": [
+          [
+            [
+              "POL-S03-1",
+              "022b88a012bf6a3e712586921427bc4a4ff546c426b4dd09ba43e2f06f87508a"
+            ]
+          ],
+          [
+            [
+              "POL-S03-1",
+              "022b88a012bf6a3e712586921427bc4a4ff546c426b4dd09ba43e2f06f87508a"
+            ]
+          ],
+          [
+            [
+              "POL-S03-1",
+              "022b88a012bf6a3e712586921427bc4a4ff546c426b4dd09ba43e2f06f87508a"
+            ]
+          ]
+        ],
+        "delivered": [
+          [
+            [
+              "POL-S03-1",
+              "022b88a012bf6a3e712586921427bc4a4ff546c426b4dd09ba43e2f06f87508a"
+            ]
+          ],
+          [
+            [
+              "POL-S03-1",
+              "022b88a012bf6a3e712586921427bc4a4ff546c426b4dd09ba43e2f06f87508a"
+            ]
+          ],
+          [
+            [
+              "POL-S03-1",
+              "022b88a012bf6a3e712586921427bc4a4ff546c426b4dd09ba43e2f06f87508a"
+            ]
+          ]
+        ],
+        "retained_order_and_bytes": true,
+        "truncated": [
+          false,
+          false,
+          false
+        ],
+        "user_sha256": "7fc4c669f9ad5faf2725330e31b4bbf4075330c7670331e6ac2a18b825cc51a4",
+        "required_reads": [
+          "get_order",
+          "search_knowledge"
+        ],
+        "missing_reads": [],
+        "wrong_scope": [],
+        "proposals": [
+          {
+            "name": "query_customer",
+            "arguments": {
+              "customer_ref": "CU-S03"
+            }
+          },
+          {
+            "name": "get_order",
+            "arguments": {
+              "order_id": "ORD-S03"
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "query": "handover checklist missing items device power on"
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "query": "功能检测记录 交接清单 能否证明设备正常运行"
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "query": "POL-S03 policy 缺件 功能检测 记录"
+            }
+          }
+        ],
+        "read_execution": [
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_order",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "final_tool_results": [
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_order",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "approvals": [],
+        "expected_decision": null,
+        "expected_subject": null,
+        "tickets_before": 0,
+        "tickets_after": 0,
+        "system_extension_tokens_by_call": [
+          511,
+          511,
+          511
+        ],
+        "observation_tokens_by_call": [
+          0,
+          41,
+          41
+        ],
+        "ids": {
+          "database": "refund_product_9fd01027117f4627",
+          "workspace": "workspaces/ebf8160f-854e-4d40-90c7-7e394911bf65",
+          "thread_id": "c240e5ef-0ef4-4705-95e9-db6516c9d4a0",
+          "run_id": "dfce8619-d23f-4c12-88cb-60e7314b3b13"
+        },
+        "turn_id": "90d7e1f5-6b09-4b43-8f6f-0f0ffb0e41fe",
+        "snapshot_id": "6eb3991e-b3a0-41d0-b2b2-11e7cc94f670",
+        "version_id": "9dc6b75d-b732-4fa3-83e1-18a3c109a6c2",
+        "pg": {
+          "join_matches": true,
+          "read_only": true,
+          "output_matches_archived_run_and_turn": true,
+          "output_sha256": "aabef7524b3a754af4784572048b631141461b48f0eb41c6a34b8d2fd5ac6dbe",
+          "status": "SUCCEEDED",
+          "version_hash_matches": true,
+          "version_snapshot_ids_match": true,
+          "run_snapshot_matches": true,
+          "input_matches": true,
+          "turn_run_link": true,
+          "workspaces_match": true,
+          "threads_match": true,
+          "event_log_complete": false,
+          "turn_sequence": 1
+        },
+        "missing_frozen_docs": [],
+        "final_snippets_match_frozen_docs": true
+      },
+      "pair": {
+        "same_queries": false,
+        "same_unique_sources": true,
+        "baseline_only_sources": [],
+        "candidate_only_sources": []
+      }
+    },
+    "SUP04": {
+      "baseline": {
+        "input_tokens": 3949,
+        "output_tokens": 573,
+        "physical_calls": 2,
+        "elapsed_s": 36.37009040000339,
+        "terminal": true,
+        "queries": [],
+        "retrieved": [],
+        "delivered": [],
+        "retained_order_and_bytes": true,
+        "truncated": [],
+        "user_sha256": "c0d5dd0f5d4ccd6b2e9105851577204bb74e4618ec477a24d9b0a321c4b7850b",
+        "required_reads": [
+          "query_customer"
+        ],
+        "missing_reads": [],
+        "wrong_scope": [],
+        "proposals": [
+          {
+            "name": "query_customer",
+            "arguments": {
+              "customer_ref": "CU-S04",
+              "include_open_tickets": true
+            }
+          }
+        ],
+        "read_execution": [
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "final_tool_results": [
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "approvals": [],
+        "expected_decision": null,
+        "expected_subject": null,
+        "tickets_before": 0,
+        "tickets_after": 0,
+        "system_extension_tokens_by_call": [
+          0,
+          0
+        ],
+        "observation_tokens_by_call": [
+          0,
+          0
+        ],
+        "ids": {
+          "database": "refund_product_af252cbedb7d4b19",
+          "workspace": "workspaces/3cbc1616-0d8c-451a-8a06-6ff9d39355cf",
+          "thread_id": "e833a966-1672-447f-9591-7527e7cf7f76",
+          "run_id": "23d68f7b-376e-477c-b779-889ea0111d54"
+        },
+        "turn_id": "9befcecd-73ff-412d-9585-8337daae0ae5",
+        "snapshot_id": "c70641cc-8b89-4bb1-af0b-de47b266ee18",
+        "version_id": "a1abc4dc-dff1-4761-8b23-fe338e677359",
+        "pg": {
+          "join_matches": true,
+          "read_only": true,
+          "output_matches_archived_run_and_turn": true,
+          "output_sha256": "8a6f13213960334d4579cfd1e7bacea6cd2c03e512a7ad86e1e81dcb1a91eedf",
+          "status": "SUCCEEDED",
+          "version_hash_matches": true,
+          "version_snapshot_ids_match": true,
+          "run_snapshot_matches": true,
+          "input_matches": true,
+          "turn_run_link": true,
+          "workspaces_match": true,
+          "threads_match": true,
+          "event_log_complete": false,
+          "turn_sequence": 1
+        },
+        "missing_frozen_docs": [
+          "POL-S04-1"
+        ],
+        "final_snippets_match_frozen_docs": true
+      },
+      "candidate": {
+        "input_tokens": 5000,
+        "output_tokens": 583,
+        "physical_calls": 2,
+        "elapsed_s": 35.86745620000147,
+        "terminal": true,
+        "queries": [],
+        "retrieved": [],
+        "delivered": [],
+        "retained_order_and_bytes": true,
+        "truncated": [],
+        "user_sha256": "c0d5dd0f5d4ccd6b2e9105851577204bb74e4618ec477a24d9b0a321c4b7850b",
+        "required_reads": [
+          "query_customer"
+        ],
+        "missing_reads": [],
+        "wrong_scope": [],
+        "proposals": [
+          {
+            "name": "query_customer",
+            "arguments": {
+              "customer_ref": "CU-S04",
+              "include_open_tickets": true
+            }
+          }
+        ],
+        "read_execution": [
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "final_tool_results": [
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "approvals": [],
+        "expected_decision": null,
+        "expected_subject": null,
+        "tickets_before": 0,
+        "tickets_after": 0,
+        "system_extension_tokens_by_call": [
+          511,
+          511
+        ],
+        "observation_tokens_by_call": [
+          0,
+          27
+        ],
+        "ids": {
+          "database": "refund_product_18f6777fa32d4990",
+          "workspace": "workspaces/a166a1d0-0500-469b-b2ea-6b52b247efdf",
+          "thread_id": "945e4ce5-f168-49a8-a251-c706a9a2ee5f",
+          "run_id": "279f1d42-d01e-4b85-9504-837557e39ba4"
+        },
+        "turn_id": "0a53a7d4-eceb-480d-8411-f2ffebf708fb",
+        "snapshot_id": "fd218b01-4692-464e-ad00-ba73fadb55fc",
+        "version_id": "0175853f-b6a6-4458-abe2-441ba37037e4",
+        "pg": {
+          "join_matches": true,
+          "read_only": true,
+          "output_matches_archived_run_and_turn": true,
+          "output_sha256": "f7b66d1668ea45fb4314500aec5e3290165a40b5419ada30113ecab73f128c5e",
+          "status": "SUCCEEDED",
+          "version_hash_matches": true,
+          "version_snapshot_ids_match": true,
+          "run_snapshot_matches": true,
+          "input_matches": true,
+          "turn_run_link": true,
+          "workspaces_match": true,
+          "threads_match": true,
+          "event_log_complete": false,
+          "turn_sequence": 1
+        },
+        "missing_frozen_docs": [
+          "POL-S04-1"
+        ],
+        "final_snippets_match_frozen_docs": true
+      },
+      "pair": {
+        "same_queries": true,
+        "same_unique_sources": true,
+        "baseline_only_sources": [],
+        "candidate_only_sources": []
+      }
+    },
+    "SUP05": {
+      "baseline": {
+        "input_tokens": 7585,
+        "output_tokens": 1374,
+        "physical_calls": 3,
+        "elapsed_s": 54.22618109999894,
+        "terminal": true,
+        "queries": [
+          "退租申请 截止时间 政策 订单时间",
+          "短租退租政策 全部条款 24小时 签收 起算"
+        ],
+        "retrieved": [
+          [
+            [
+              "POL-S05-1",
+              "e25e8dfe9b2e90c6f51c06885ad680274dcdc409eab1cc6e76507e674bbeb3d0"
+            ]
+          ],
+          [
+            [
+              "POL-S05-1",
+              "e25e8dfe9b2e90c6f51c06885ad680274dcdc409eab1cc6e76507e674bbeb3d0"
+            ]
+          ]
+        ],
+        "delivered": [
+          [
+            [
+              "POL-S05-1",
+              "e25e8dfe9b2e90c6f51c06885ad680274dcdc409eab1cc6e76507e674bbeb3d0"
+            ]
+          ],
+          [
+            [
+              "POL-S05-1",
+              "e25e8dfe9b2e90c6f51c06885ad680274dcdc409eab1cc6e76507e674bbeb3d0"
+            ]
+          ]
+        ],
+        "retained_order_and_bytes": true,
+        "truncated": [
+          false,
+          false
+        ],
+        "user_sha256": "b61c07fb18a99e0cbc622c7f7250f9233be8138464921e5a6c4a9542bcfd534e",
+        "required_reads": [
+          "get_order",
+          "search_knowledge"
+        ],
+        "missing_reads": [],
+        "wrong_scope": [],
+        "proposals": [
+          {
+            "name": "get_order",
+            "arguments": {
+              "order_id": "ORD-S05"
+            }
+          },
+          {
+            "name": "query_customer",
+            "arguments": {
+              "customer_ref": "CU-S05"
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "query": "退租申请 截止时间 政策 订单时间"
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "query": "短租退租政策 全部条款 24小时 签收 起算",
+              "limit": 10
+            }
+          },
+          {
+            "name": "get_refund_status",
+            "arguments": {
+              "order_id": "ORD-S05"
+            }
+          }
+        ],
+        "read_execution": [
+          [
+            "get_order",
+            "SUCCESS",
+            null
+          ],
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_refund_status",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "final_tool_results": [
+          [
+            "get_order",
+            "SUCCESS",
+            null
+          ],
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_refund_status",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "approvals": [],
+        "expected_decision": null,
+        "expected_subject": null,
+        "tickets_before": 0,
+        "tickets_after": 0,
+        "system_extension_tokens_by_call": [
+          0,
+          0,
+          0
+        ],
+        "observation_tokens_by_call": [
+          0,
+          0,
+          0
+        ],
+        "ids": {
+          "database": "refund_product_1242e845e9a142d9",
+          "workspace": "workspaces/05f53843-5964-46e5-89f4-09f600fc06e8",
+          "thread_id": "57541795-8b15-4937-9d3d-6300c4748237",
+          "run_id": "8076db6c-1df8-40f9-880d-6702543cb3e3"
+        },
+        "turn_id": "fb90bf62-fb26-4424-b9ad-ff30f7313827",
+        "snapshot_id": "affffc90-8dd4-4995-8145-9c2dfaa45ec8",
+        "version_id": "cc81cdc5-915b-4871-be56-207e4e3df878",
+        "pg": {
+          "join_matches": true,
+          "read_only": true,
+          "output_matches_archived_run_and_turn": true,
+          "output_sha256": "4fb6672c2ed293324db082f09460a50f3b57bc0baae0ac10e04072f166801441",
+          "status": "SUCCEEDED",
+          "version_hash_matches": true,
+          "version_snapshot_ids_match": true,
+          "run_snapshot_matches": true,
+          "input_matches": true,
+          "turn_run_link": true,
+          "workspaces_match": true,
+          "threads_match": true,
+          "event_log_complete": false,
+          "turn_sequence": 1
+        },
+        "missing_frozen_docs": [],
+        "final_snippets_match_frozen_docs": true
+      },
+      "candidate": {
+        "input_tokens": 9340,
+        "output_tokens": 1068,
+        "physical_calls": 3,
+        "elapsed_s": 49.55932819999725,
+        "terminal": true,
+        "queries": [
+          "退租 申请 截止时间 窗口 政策",
+          "短租退租 24小时 签收 截止时刻 例外 计算方式"
+        ],
+        "retrieved": [
+          [
+            [
+              "POL-S05-1",
+              "e25e8dfe9b2e90c6f51c06885ad680274dcdc409eab1cc6e76507e674bbeb3d0"
+            ]
+          ],
+          [
+            [
+              "POL-S05-1",
+              "e25e8dfe9b2e90c6f51c06885ad680274dcdc409eab1cc6e76507e674bbeb3d0"
+            ]
+          ]
+        ],
+        "delivered": [
+          [
+            [
+              "POL-S05-1",
+              "e25e8dfe9b2e90c6f51c06885ad680274dcdc409eab1cc6e76507e674bbeb3d0"
+            ]
+          ],
+          [
+            [
+              "POL-S05-1",
+              "e25e8dfe9b2e90c6f51c06885ad680274dcdc409eab1cc6e76507e674bbeb3d0"
+            ]
+          ]
+        ],
+        "retained_order_and_bytes": true,
+        "truncated": [
+          false,
+          false
+        ],
+        "user_sha256": "b61c07fb18a99e0cbc622c7f7250f9233be8138464921e5a6c4a9542bcfd534e",
+        "required_reads": [
+          "get_order",
+          "search_knowledge"
+        ],
+        "missing_reads": [],
+        "wrong_scope": [],
+        "proposals": [
+          {
+            "name": "get_order",
+            "arguments": {
+              "order_id": "ORD-S05"
+            }
+          },
+          {
+            "name": "get_refund_status",
+            "arguments": {
+              "order_id": "ORD-S05"
+            }
+          },
+          {
+            "name": "query_customer",
+            "arguments": {
+              "customer_ref": "CU-S05"
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "query": "退租 申请 截止时间 窗口 政策"
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "query": "短租退租 24小时 签收 截止时刻 例外 计算方式",
+              "limit": 10
+            }
+          }
+        ],
+        "read_execution": [
+          [
+            "get_order",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_refund_status",
+            "SUCCESS",
+            null
+          ],
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "final_tool_results": [
+          [
+            "get_order",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_refund_status",
+            "SUCCESS",
+            null
+          ],
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "approvals": [],
+        "expected_decision": null,
+        "expected_subject": null,
+        "tickets_before": 0,
+        "tickets_after": 0,
+        "system_extension_tokens_by_call": [
+          511,
+          511,
+          511
+        ],
+        "observation_tokens_by_call": [
+          0,
+          66,
+          66
+        ],
+        "ids": {
+          "database": "refund_product_7d9cf0151de04847",
+          "workspace": "workspaces/0c454e11-2fca-46aa-b49b-7e853af6be12",
+          "thread_id": "ba41e91c-97cf-41c8-8eac-d7a6a1306271",
+          "run_id": "5606e5e8-323a-41f8-af9a-5137bc5dcf37"
+        },
+        "turn_id": "8fd32b32-83ff-4df4-9230-7f4d195ae89a",
+        "snapshot_id": "c421b025-1118-4832-9dd1-d307afe4b797",
+        "version_id": "9962b422-0841-4249-8536-775d540daaa8",
+        "pg": {
+          "join_matches": true,
+          "read_only": true,
+          "output_matches_archived_run_and_turn": true,
+          "output_sha256": "48eb6ea32f2426ce563d07e2864d73873d0beda5ba91f5dcbcf36b50fe39251c",
+          "status": "SUCCEEDED",
+          "version_hash_matches": true,
+          "version_snapshot_ids_match": true,
+          "run_snapshot_matches": true,
+          "input_matches": true,
+          "turn_run_link": true,
+          "workspaces_match": true,
+          "threads_match": true,
+          "event_log_complete": false,
+          "turn_sequence": 1
+        },
+        "missing_frozen_docs": [],
+        "final_snippets_match_frozen_docs": true
+      },
+      "pair": {
+        "same_queries": false,
+        "same_unique_sources": true,
+        "baseline_only_sources": [],
+        "candidate_only_sources": []
+      }
+    },
+    "SUP06": {
+      "baseline": {
+        "input_tokens": 7727,
+        "output_tokens": 1325,
+        "physical_calls": 3,
+        "elapsed_s": 53.06458869999915,
+        "terminal": true,
+        "queries": [
+          "结算条款 商品款 押金 发放 顺序 发票价 优惠券抵扣",
+          "押金 验收完成后复核 退还时限 单独结算 退还天数"
+        ],
+        "retrieved": [
+          [
+            [
+              "POL-S06-1",
+              "f459674a3dc07e3df825b29a45377bd5758d052ef81af6c673e6ad0e8250ef16"
+            ]
+          ],
+          [
+            [
+              "POL-S06-1",
+              "f459674a3dc07e3df825b29a45377bd5758d052ef81af6c673e6ad0e8250ef16"
+            ]
+          ]
+        ],
+        "delivered": [
+          [
+            [
+              "POL-S06-1",
+              "f459674a3dc07e3df825b29a45377bd5758d052ef81af6c673e6ad0e8250ef16"
+            ]
+          ],
+          [
+            [
+              "POL-S06-1",
+              "f459674a3dc07e3df825b29a45377bd5758d052ef81af6c673e6ad0e8250ef16"
+            ]
+          ]
+        ],
+        "retained_order_and_bytes": true,
+        "truncated": [
+          false,
+          false
+        ],
+        "user_sha256": "fc10912ef77f300e065837bf69963b8264df52d37711833a4c957233b28d92d0",
+        "required_reads": [
+          "get_order",
+          "search_knowledge"
+        ],
+        "missing_reads": [],
+        "wrong_scope": [],
+        "proposals": [
+          {
+            "name": "query_customer",
+            "arguments": {
+              "customer_ref": "CU-S06"
+            }
+          },
+          {
+            "name": "get_order",
+            "arguments": {
+              "order_id": "ORD-S06"
+            }
+          },
+          {
+            "name": "get_refund_status",
+            "arguments": {
+              "order_id": "ORD-S06"
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "query": "结算条款 商品款 押金 发放 顺序 发票价 优惠券抵扣"
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "query": "押金 验收完成后复核 退还时限 单独结算 退还天数"
+            }
+          }
+        ],
+        "read_execution": [
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_order",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_refund_status",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "final_tool_results": [
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_order",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_refund_status",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "approvals": [],
+        "expected_decision": null,
+        "expected_subject": null,
+        "tickets_before": 0,
+        "tickets_after": 0,
+        "system_extension_tokens_by_call": [
+          0,
+          0,
+          0
+        ],
+        "observation_tokens_by_call": [
+          0,
+          0,
+          0
+        ],
+        "ids": {
+          "database": "refund_product_07d9b5d7415548c9",
+          "workspace": "workspaces/27e89beb-12ee-4d02-b3e2-adf878b591ce",
+          "thread_id": "725d0a7b-fa50-4146-984d-2707e1dcbcb6",
+          "run_id": "d504ae95-301e-4a62-b436-e42790473c20"
+        },
+        "turn_id": "410da8ec-6b0f-420d-bb2e-4740ad01ec28",
+        "snapshot_id": "e54cf5f5-766e-44f7-bd35-9664288d3a41",
+        "version_id": "8c612a06-2331-40b4-bf2c-a35435105425",
+        "pg": {
+          "join_matches": true,
+          "read_only": true,
+          "output_matches_archived_run_and_turn": true,
+          "output_sha256": "c43842ac8fa23c41f72eca4be781fbf7436b7837c2564c418158bbe4f578dce1",
+          "status": "SUCCEEDED",
+          "version_hash_matches": true,
+          "version_snapshot_ids_match": true,
+          "run_snapshot_matches": true,
+          "input_matches": true,
+          "turn_run_link": true,
+          "workspaces_match": true,
+          "threads_match": true,
+          "event_log_complete": false,
+          "turn_sequence": 1
+        },
+        "missing_frozen_docs": [],
+        "final_snippets_match_frozen_docs": true
+      },
+      "candidate": {
+        "input_tokens": 13466,
+        "output_tokens": 1676,
+        "physical_calls": 4,
+        "elapsed_s": 56.27077409999765,
+        "terminal": true,
+        "queries": [
+          "发票商品价 优惠券抵扣 应退商品款 押金 结算条款 分批发放",
+          "押金 settlement status 待验收 退还 商品款 批次",
+          "POL-S06 退款 押金 发放 同一批次",
+          "器材退还结算条款 押金复核 验收完成后 退款时限 工作日"
+        ],
+        "retrieved": [
+          [
+            [
+              "POL-S06-1",
+              "f459674a3dc07e3df825b29a45377bd5758d052ef81af6c673e6ad0e8250ef16"
+            ]
+          ],
+          [
+            [
+              "POL-S06-1",
+              "f459674a3dc07e3df825b29a45377bd5758d052ef81af6c673e6ad0e8250ef16"
+            ]
+          ],
+          [
+            [
+              "POL-S06-1",
+              "f459674a3dc07e3df825b29a45377bd5758d052ef81af6c673e6ad0e8250ef16"
+            ]
+          ],
+          [
+            [
+              "POL-S06-1",
+              "f459674a3dc07e3df825b29a45377bd5758d052ef81af6c673e6ad0e8250ef16"
+            ]
+          ]
+        ],
+        "delivered": [
+          [
+            [
+              "POL-S06-1",
+              "f459674a3dc07e3df825b29a45377bd5758d052ef81af6c673e6ad0e8250ef16"
+            ]
+          ],
+          [
+            [
+              "POL-S06-1",
+              "f459674a3dc07e3df825b29a45377bd5758d052ef81af6c673e6ad0e8250ef16"
+            ]
+          ],
+          [
+            [
+              "POL-S06-1",
+              "f459674a3dc07e3df825b29a45377bd5758d052ef81af6c673e6ad0e8250ef16"
+            ]
+          ],
+          [
+            [
+              "POL-S06-1",
+              "f459674a3dc07e3df825b29a45377bd5758d052ef81af6c673e6ad0e8250ef16"
+            ]
+          ]
+        ],
+        "retained_order_and_bytes": true,
+        "truncated": [
+          false,
+          false,
+          false,
+          false
+        ],
+        "user_sha256": "fc10912ef77f300e065837bf69963b8264df52d37711833a4c957233b28d92d0",
+        "required_reads": [
+          "get_order",
+          "search_knowledge"
+        ],
+        "missing_reads": [],
+        "wrong_scope": [],
+        "proposals": [
+          {
+            "name": "query_customer",
+            "arguments": {
+              "customer_ref": "CU-S06"
+            }
+          },
+          {
+            "name": "get_order",
+            "arguments": {
+              "order_id": "ORD-S06"
+            }
+          },
+          {
+            "name": "get_refund_status",
+            "arguments": {
+              "order_id": "ORD-S06"
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "query": "发票商品价 优惠券抵扣 应退商品款 押金 结算条款 分批发放"
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "query": "押金 settlement status 待验收 退还 商品款 批次"
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "query": "器材退还结算条款 押金复核 验收完成后 退款时限 工作日",
+              "limit": 10
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "query": "POL-S06 退款 押金 发放 同一批次",
+              "limit": 10
+            }
+          }
+        ],
+        "read_execution": [
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_order",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_refund_status",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "final_tool_results": [
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_order",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_refund_status",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "approvals": [],
+        "expected_decision": null,
+        "expected_subject": null,
+        "tickets_before": 0,
+        "tickets_after": 0,
+        "system_extension_tokens_by_call": [
+          511,
+          511,
+          511,
+          511
+        ],
+        "observation_tokens_by_call": [
+          0,
+          66,
+          66,
+          66
+        ],
+        "ids": {
+          "database": "refund_product_785eafcb14294078",
+          "workspace": "workspaces/2d55656c-25d8-4b82-b450-1656aa042f65",
+          "thread_id": "9acb0349-1ba5-4b83-ade4-4280ba8c8190",
+          "run_id": "b39247a9-e339-48fd-b406-ba29e220bb0f"
+        },
+        "turn_id": "ab0c9ac7-c883-4ecf-8ac6-55eb7287f245",
+        "snapshot_id": "05d9f97c-452e-43ac-bb25-2d3b53d5e495",
+        "version_id": "8a191f27-172b-486c-af5d-466c83c14816",
+        "pg": {
+          "join_matches": true,
+          "read_only": true,
+          "output_matches_archived_run_and_turn": true,
+          "output_sha256": "036ba39fe7b38952febfc2bbd9095b3eab2eeb60e0a1d1014ac0263a20e02b20",
+          "status": "SUCCEEDED",
+          "version_hash_matches": true,
+          "version_snapshot_ids_match": true,
+          "run_snapshot_matches": true,
+          "input_matches": true,
+          "turn_run_link": true,
+          "workspaces_match": true,
+          "threads_match": true,
+          "event_log_complete": false,
+          "turn_sequence": 1
+        },
+        "missing_frozen_docs": [],
+        "final_snippets_match_frozen_docs": true
+      },
+      "pair": {
+        "same_queries": false,
+        "same_unique_sources": true,
+        "baseline_only_sources": [],
+        "candidate_only_sources": []
+      }
+    },
+    "SUP07": {
+      "baseline": {
+        "input_tokens": 7347,
+        "output_tokens": 1126,
+        "physical_calls": 3,
+        "elapsed_s": 48.74245919999885,
+        "terminal": true,
+        "queries": [
+          "安装方质检反馈期限 installer QC feedback deadline",
+          "POL-S07 安装质检 反馈窗口 48小时 包裹签收 物流交付"
+        ],
+        "retrieved": [
+          [
+            [
+              "POL-S07-1",
+              "e75c8f8b3893335c2c4a281356f84cd255b00f37095b0c3cdb642c55572ccbe1"
+            ]
+          ],
+          [
+            [
+              "POL-S07-1",
+              "e75c8f8b3893335c2c4a281356f84cd255b00f37095b0c3cdb642c55572ccbe1"
+            ]
+          ]
+        ],
+        "delivered": [
+          [
+            [
+              "POL-S07-1",
+              "e75c8f8b3893335c2c4a281356f84cd255b00f37095b0c3cdb642c55572ccbe1"
+            ]
+          ],
+          [
+            [
+              "POL-S07-1",
+              "e75c8f8b3893335c2c4a281356f84cd255b00f37095b0c3cdb642c55572ccbe1"
+            ]
+          ]
+        ],
+        "retained_order_and_bytes": true,
+        "truncated": [
+          false,
+          false
+        ],
+        "user_sha256": "9f757f289ac1b2b0ef8a4dd227a5768a6d5ffd0cc111e97106cafeaf747555d3",
+        "required_reads": [
+          "get_order",
+          "search_knowledge"
+        ],
+        "missing_reads": [],
+        "wrong_scope": [],
+        "proposals": [
+          {
+            "name": "get_order",
+            "arguments": {
+              "order_id": "ORD-S07"
+            }
+          },
+          {
+            "name": "query_customer",
+            "arguments": {
+              "customer_ref": "CU-S07"
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "query": "安装方质检反馈期限 installer QC feedback deadline"
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "query": "POL-S07 安装质检 反馈窗口 48小时 包裹签收 物流交付"
+            }
+          }
+        ],
+        "read_execution": [
+          [
+            "get_order",
+            "SUCCESS",
+            null
+          ],
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "final_tool_results": [
+          [
+            "get_order",
+            "SUCCESS",
+            null
+          ],
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "approvals": [],
+        "expected_decision": null,
+        "expected_subject": null,
+        "tickets_before": 0,
+        "tickets_after": 0,
+        "system_extension_tokens_by_call": [
+          0,
+          0,
+          0
+        ],
+        "observation_tokens_by_call": [
+          0,
+          0,
+          0
+        ],
+        "ids": {
+          "database": "refund_product_3e24c532c7744a9a",
+          "workspace": "workspaces/fc5e35cf-ffd4-4c1d-90de-ae09b65e0b75",
+          "thread_id": "9db62301-00ef-40a3-9aa0-684ac27ae96d",
+          "run_id": "c4eb264c-6253-4e54-a2bc-ef951a1d7e6c"
+        },
+        "turn_id": "cd262f0a-1bee-4349-8014-265940d683f7",
+        "snapshot_id": "c427f814-acea-4ef3-86ff-72a8211675b6",
+        "version_id": "b1a4f094-e7b5-444e-a9dd-2397a1aa0c13",
+        "pg": {
+          "join_matches": true,
+          "read_only": true,
+          "output_matches_archived_run_and_turn": true,
+          "output_sha256": "4921df0e31698dcf896fff2461184440cc4aa8549ce7e6d8e8a73a023e60d5f9",
+          "status": "SUCCEEDED",
+          "version_hash_matches": true,
+          "version_snapshot_ids_match": true,
+          "run_snapshot_matches": true,
+          "input_matches": true,
+          "turn_run_link": true,
+          "workspaces_match": true,
+          "threads_match": true,
+          "event_log_complete": false,
+          "turn_sequence": 1
+        },
+        "missing_frozen_docs": [],
+        "final_snippets_match_frozen_docs": true
+      },
+      "candidate": {
+        "input_tokens": 5511,
+        "output_tokens": 798,
+        "physical_calls": 2,
+        "elapsed_s": 41.376181600000564,
+        "terminal": true,
+        "queries": [
+          "安装 质检 反馈期限 installation quality inspection feedback window"
+        ],
+        "retrieved": [
+          [
+            [
+              "POL-S07-1",
+              "e75c8f8b3893335c2c4a281356f84cd255b00f37095b0c3cdb642c55572ccbe1"
+            ]
+          ]
+        ],
+        "delivered": [
+          [
+            [
+              "POL-S07-1",
+              "e75c8f8b3893335c2c4a281356f84cd255b00f37095b0c3cdb642c55572ccbe1"
+            ]
+          ]
+        ],
+        "retained_order_and_bytes": true,
+        "truncated": [
+          false
+        ],
+        "user_sha256": "9f757f289ac1b2b0ef8a4dd227a5768a6d5ffd0cc111e97106cafeaf747555d3",
+        "required_reads": [
+          "get_order",
+          "search_knowledge"
+        ],
+        "missing_reads": [],
+        "wrong_scope": [],
+        "proposals": [
+          {
+            "name": "get_order",
+            "arguments": {
+              "order_id": "ORD-S07"
+            }
+          },
+          {
+            "name": "query_customer",
+            "arguments": {
+              "customer_ref": "CU-S07"
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "query": "安装 质检 反馈期限 installation quality inspection feedback window"
+            }
+          }
+        ],
+        "read_execution": [
+          [
+            "get_order",
+            "SUCCESS",
+            null
+          ],
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "final_tool_results": [
+          [
+            "get_order",
+            "SUCCESS",
+            null
+          ],
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "approvals": [],
+        "expected_decision": null,
+        "expected_subject": null,
+        "tickets_before": 0,
+        "tickets_after": 0,
+        "system_extension_tokens_by_call": [
+          511,
+          511
+        ],
+        "observation_tokens_by_call": [
+          0,
+          41
+        ],
+        "ids": {
+          "database": "refund_product_f17ec0e62cf04c8e",
+          "workspace": "workspaces/308ffbde-b2e2-4d7c-8b6d-6d74f1c79011",
+          "thread_id": "4e41392c-5fd5-4757-af5d-cc3988c2ad2b",
+          "run_id": "4dff8cba-74d6-4a08-ab37-101fd792c852"
+        },
+        "turn_id": "569eabf5-50f8-4d72-88b4-7ecece5a6b56",
+        "snapshot_id": "54f110b1-3091-48b1-b673-b4046245dc2a",
+        "version_id": "b70cf184-35af-4e06-86d5-22c113dc5d14",
+        "pg": {
+          "join_matches": true,
+          "read_only": true,
+          "output_matches_archived_run_and_turn": true,
+          "output_sha256": "161accc7c3426515544d4bd6d6837e1d4d0f3bde03824b284a295b4de30eee69",
+          "status": "SUCCEEDED",
+          "version_hash_matches": true,
+          "version_snapshot_ids_match": true,
+          "run_snapshot_matches": true,
+          "input_matches": true,
+          "turn_run_link": true,
+          "workspaces_match": true,
+          "threads_match": true,
+          "event_log_complete": false,
+          "turn_sequence": 1
+        },
+        "missing_frozen_docs": [],
+        "final_snippets_match_frozen_docs": true
+      },
+      "pair": {
+        "same_queries": false,
+        "same_unique_sources": true,
+        "baseline_only_sources": [],
+        "candidate_only_sources": []
+      }
+    },
+    "SUP08": {
+      "baseline": {
+        "input_tokens": 7969,
+        "output_tokens": 1200,
+        "physical_calls": 3,
+        "elapsed_s": 50.63530140000148,
+        "terminal": true,
+        "queries": [
+          "退款审核 支付渠道受理 银行卡入账 阶段区分 到账时间",
+          "POL-S08-1 退款节点 银行入账回执 到账时效 工作日",
+          "退款审核通过但银行未入账 客户询问是否到账 如何表述"
+        ],
+        "retrieved": [
+          [
+            [
+              "POL-S08-1",
+              "256a979e6b4cbe780891dcf59dd3ef839c0ebdfe322090bf756498eca0d8cbb3"
+            ]
+          ],
+          [
+            [
+              "POL-S08-1",
+              "256a979e6b4cbe780891dcf59dd3ef839c0ebdfe322090bf756498eca0d8cbb3"
+            ]
+          ],
+          [
+            [
+              "POL-S08-1",
+              "256a979e6b4cbe780891dcf59dd3ef839c0ebdfe322090bf756498eca0d8cbb3"
+            ]
+          ]
+        ],
+        "delivered": [
+          [
+            [
+              "POL-S08-1",
+              "256a979e6b4cbe780891dcf59dd3ef839c0ebdfe322090bf756498eca0d8cbb3"
+            ]
+          ],
+          [
+            [
+              "POL-S08-1",
+              "256a979e6b4cbe780891dcf59dd3ef839c0ebdfe322090bf756498eca0d8cbb3"
+            ]
+          ],
+          [
+            [
+              "POL-S08-1",
+              "256a979e6b4cbe780891dcf59dd3ef839c0ebdfe322090bf756498eca0d8cbb3"
+            ]
+          ]
+        ],
+        "retained_order_and_bytes": true,
+        "truncated": [
+          false,
+          false,
+          false
+        ],
+        "user_sha256": "266b30c9393af9e4ef01d5ae02c3991e0be611e5647eebc53f71238899c19417",
+        "required_reads": [
+          "get_refund_status",
+          "search_knowledge"
+        ],
+        "missing_reads": [],
+        "wrong_scope": [],
+        "proposals": [
+          {
+            "name": "query_customer",
+            "arguments": {
+              "customer_ref": "CU-S08"
+            }
+          },
+          {
+            "name": "get_order",
+            "arguments": {
+              "order_id": "ORD-S08"
+            }
+          },
+          {
+            "name": "get_refund_status",
+            "arguments": {
+              "order_id": "ORD-S08"
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "query": "退款审核 支付渠道受理 银行卡入账 阶段区分 到账时间"
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "query": "POL-S08-1 退款节点 银行入账回执 到账时效 工作日",
+              "limit": 10
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "query": "退款审核通过但银行未入账 客户询问是否到账 如何表述",
+              "limit": 10
+            }
+          }
+        ],
+        "read_execution": [
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_order",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_refund_status",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "final_tool_results": [
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_order",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_refund_status",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "approvals": [],
+        "expected_decision": null,
+        "expected_subject": null,
+        "tickets_before": 0,
+        "tickets_after": 0,
+        "system_extension_tokens_by_call": [
+          0,
+          0,
+          0
+        ],
+        "observation_tokens_by_call": [
+          0,
+          0,
+          0
+        ],
+        "ids": {
+          "database": "refund_product_d04005935e164b82",
+          "workspace": "workspaces/e772ad38-99f9-4c85-9b88-681008d45096",
+          "thread_id": "97682d8b-35bc-4049-81ea-b7cf5c66cc90",
+          "run_id": "7dd2db53-0ded-40df-a8ee-66ca653b29eb"
+        },
+        "turn_id": "f5eb527f-6148-42ab-ba4c-1115dde2a4f2",
+        "snapshot_id": "63a1aa80-54b2-470a-9164-c568a76365da",
+        "version_id": "bfc32b2c-b8c5-4e67-ae29-0a52f33b984c",
+        "pg": {
+          "join_matches": true,
+          "read_only": true,
+          "output_matches_archived_run_and_turn": true,
+          "output_sha256": "bdf3e85e07ddd451778347045a8bb0d0f53d9afb0ecfc07930b6eee91bd9832d",
+          "status": "SUCCEEDED",
+          "version_hash_matches": true,
+          "version_snapshot_ids_match": true,
+          "run_snapshot_matches": true,
+          "input_matches": true,
+          "turn_run_link": true,
+          "workspaces_match": true,
+          "threads_match": true,
+          "event_log_complete": false,
+          "turn_sequence": 1
+        },
+        "missing_frozen_docs": [],
+        "final_snippets_match_frozen_docs": true
+      },
+      "candidate": {
+        "input_tokens": 9706,
+        "output_tokens": 1172,
+        "physical_calls": 3,
+        "elapsed_s": 52.44961229999899,
+        "terminal": true,
+        "queries": [
+          "refund approval, payment channel acceptance, and bank card settlement stages timeline",
+          "商家审核 支付渠道受理 银行入账 分别记录 到账回执 政策全文",
+          "退款到账时间 工作日 银行处理时限 退款申请时间"
+        ],
+        "retrieved": [
+          [
+            [
+              "POL-S08-1",
+              "256a979e6b4cbe780891dcf59dd3ef839c0ebdfe322090bf756498eca0d8cbb3"
+            ]
+          ],
+          [
+            [
+              "POL-S08-1",
+              "256a979e6b4cbe780891dcf59dd3ef839c0ebdfe322090bf756498eca0d8cbb3"
+            ]
+          ],
+          [
+            [
+              "POL-S08-1",
+              "256a979e6b4cbe780891dcf59dd3ef839c0ebdfe322090bf756498eca0d8cbb3"
+            ]
+          ]
+        ],
+        "delivered": [
+          [
+            [
+              "POL-S08-1",
+              "256a979e6b4cbe780891dcf59dd3ef839c0ebdfe322090bf756498eca0d8cbb3"
+            ]
+          ],
+          [
+            [
+              "POL-S08-1",
+              "256a979e6b4cbe780891dcf59dd3ef839c0ebdfe322090bf756498eca0d8cbb3"
+            ]
+          ],
+          [
+            [
+              "POL-S08-1",
+              "256a979e6b4cbe780891dcf59dd3ef839c0ebdfe322090bf756498eca0d8cbb3"
+            ]
+          ]
+        ],
+        "retained_order_and_bytes": true,
+        "truncated": [
+          false,
+          false,
+          false
+        ],
+        "user_sha256": "266b30c9393af9e4ef01d5ae02c3991e0be611e5647eebc53f71238899c19417",
+        "required_reads": [
+          "get_refund_status",
+          "search_knowledge"
+        ],
+        "missing_reads": [],
+        "wrong_scope": [],
+        "proposals": [
+          {
+            "name": "get_order",
+            "arguments": {
+              "order_id": "ORD-S08"
+            }
+          },
+          {
+            "name": "get_refund_status",
+            "arguments": {
+              "order_id": "ORD-S08"
+            }
+          },
+          {
+            "name": "query_customer",
+            "arguments": {
+              "customer_ref": "CU-S08"
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "query": "refund approval, payment channel acceptance, and bank card settlement stages timeline"
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "query": "商家审核 支付渠道受理 银行入账 分别记录 到账回执 政策全文",
+              "limit": 10
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "query": "退款到账时间 工作日 银行处理时限 退款申请时间",
+              "limit": 10
+            }
+          }
+        ],
+        "read_execution": [
+          [
+            "get_order",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_refund_status",
+            "SUCCESS",
+            null
+          ],
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "final_tool_results": [
+          [
+            "get_order",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_refund_status",
+            "SUCCESS",
+            null
+          ],
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "approvals": [],
+        "expected_decision": null,
+        "expected_subject": null,
+        "tickets_before": 0,
+        "tickets_after": 0,
+        "system_extension_tokens_by_call": [
+          511,
+          511,
+          511
+        ],
+        "observation_tokens_by_call": [
+          0,
+          66,
+          66
+        ],
+        "ids": {
+          "database": "refund_product_040e1629ace2433a",
+          "workspace": "workspaces/2f945f3c-dbae-4b02-b969-32447bcf9417",
+          "thread_id": "055e565c-4bde-4654-a435-0186bc7a1c8a",
+          "run_id": "ad95da10-d963-40fc-9bbb-9cb82e412554"
+        },
+        "turn_id": "fc9c41e0-3c27-4b70-9d33-abf751f74c96",
+        "snapshot_id": "d2742e23-a013-4bda-a80d-54dbd3069d38",
+        "version_id": "5c9ad582-a1a8-4b53-bb73-6dddf1beb9ff",
+        "pg": {
+          "join_matches": true,
+          "read_only": true,
+          "output_matches_archived_run_and_turn": true,
+          "output_sha256": "38687e0fa3d898a275082a954a2ce9e16b63101f1689ddfc901b31362e529798",
+          "status": "SUCCEEDED",
+          "version_hash_matches": true,
+          "version_snapshot_ids_match": true,
+          "run_snapshot_matches": true,
+          "input_matches": true,
+          "turn_run_link": true,
+          "workspaces_match": true,
+          "threads_match": true,
+          "event_log_complete": false,
+          "turn_sequence": 1
+        },
+        "missing_frozen_docs": [],
+        "final_snippets_match_frozen_docs": true
+      },
+      "pair": {
+        "same_queries": false,
+        "same_unique_sources": true,
+        "baseline_only_sources": [],
+        "candidate_only_sources": []
+      }
+    },
+    "SUP09": {
+      "baseline": {
+        "input_tokens": 4828,
+        "output_tokens": 1661,
+        "physical_calls": 2,
+        "elapsed_s": 53.38623150000058,
+        "terminal": true,
+        "queries": [
+          "纸质随箱凭证丢失 电子购买记录 送审 退款凭证要求"
+        ],
+        "retrieved": [
+          [
+            [
+              "POL-S09-1",
+              "7b5f820c36dab0adce21f594e2c51fc14db8f17aa7f89061860dc76b178286d1"
+            ],
+            [
+              "POL-S09-2",
+              "3bf0652cfd2e335eb67c545627f418557f5c69fec9a290d35dd5f0a3fcc29603"
+            ]
+          ]
+        ],
+        "delivered": [
+          [
+            [
+              "POL-S09-1",
+              "7b5f820c36dab0adce21f594e2c51fc14db8f17aa7f89061860dc76b178286d1"
+            ],
+            [
+              "POL-S09-2",
+              "3bf0652cfd2e335eb67c545627f418557f5c69fec9a290d35dd5f0a3fcc29603"
+            ]
+          ]
+        ],
+        "retained_order_and_bytes": true,
+        "truncated": [
+          false
+        ],
+        "user_sha256": "7b3b31329192a807e980b7cb939ca23b8a7d4c2169fe861e90c014e7935b0a4e",
+        "required_reads": [
+          "get_order",
+          "search_knowledge"
+        ],
+        "missing_reads": [],
+        "wrong_scope": [],
+        "proposals": [
+          {
+            "name": "query_customer",
+            "arguments": {
+              "customer_ref": "CU-S09"
+            }
+          },
+          {
+            "name": "get_order",
+            "arguments": {
+              "order_id": "ORD-S09"
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "query": "纸质随箱凭证丢失 电子购买记录 送审 退款凭证要求"
+            }
+          },
+          {
+            "name": "get_refund_status",
+            "arguments": {
+              "order_id": "ORD-S09"
+            }
+          }
+        ],
+        "read_execution": [
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_order",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_refund_status",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "final_tool_results": [
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_order",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_refund_status",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "approvals": [],
+        "expected_decision": null,
+        "expected_subject": null,
+        "tickets_before": 0,
+        "tickets_after": 0,
+        "system_extension_tokens_by_call": [
+          0,
+          0
+        ],
+        "observation_tokens_by_call": [
+          0,
+          0
+        ],
+        "ids": {
+          "database": "refund_product_621098ff9335496b",
+          "workspace": "workspaces/06b64655-fae6-4915-ae68-648edf4ec3e9",
+          "thread_id": "749b2a96-3388-43ea-b070-16e568f9125e",
+          "run_id": "73e507c2-5186-483e-b7df-cbdb9de46963"
+        },
+        "turn_id": "28d83940-25d7-4792-aed9-e3cebe7db64d",
+        "snapshot_id": "8816c0d2-14b3-487d-b60b-ee9388e1995e",
+        "version_id": "a71f9979-1024-4b13-b4dd-98a8db0740c3",
+        "pg": {
+          "join_matches": true,
+          "read_only": true,
+          "output_matches_archived_run_and_turn": true,
+          "output_sha256": "c6413e22ac11942e2ce6f2dc65da803c7f8c10823087bd0b9a8c1cdf67993651",
+          "status": "SUCCEEDED",
+          "version_hash_matches": true,
+          "version_snapshot_ids_match": true,
+          "run_snapshot_matches": true,
+          "input_matches": true,
+          "turn_run_link": true,
+          "workspaces_match": true,
+          "threads_match": true,
+          "event_log_complete": false,
+          "turn_sequence": 1
+        },
+        "missing_frozen_docs": [],
+        "final_snippets_match_frozen_docs": true
+      },
+      "candidate": {
+        "input_tokens": 5915,
+        "output_tokens": 1947,
+        "physical_calls": 2,
+        "elapsed_s": 59.54545479999797,
+        "terminal": true,
+        "queries": [
+          "lost paper packing slip proof of purchase electronic record refund eligibility"
+        ],
+        "retrieved": [
+          [
+            [
+              "POL-S09-1",
+              "7b5f820c36dab0adce21f594e2c51fc14db8f17aa7f89061860dc76b178286d1"
+            ],
+            [
+              "POL-S09-2",
+              "3bf0652cfd2e335eb67c545627f418557f5c69fec9a290d35dd5f0a3fcc29603"
+            ]
+          ]
+        ],
+        "delivered": [
+          [
+            [
+              "POL-S09-1",
+              "7b5f820c36dab0adce21f594e2c51fc14db8f17aa7f89061860dc76b178286d1"
+            ],
+            [
+              "POL-S09-2",
+              "3bf0652cfd2e335eb67c545627f418557f5c69fec9a290d35dd5f0a3fcc29603"
+            ]
+          ]
+        ],
+        "retained_order_and_bytes": true,
+        "truncated": [
+          false
+        ],
+        "user_sha256": "7b3b31329192a807e980b7cb939ca23b8a7d4c2169fe861e90c014e7935b0a4e",
+        "required_reads": [
+          "get_order",
+          "search_knowledge"
+        ],
+        "missing_reads": [],
+        "wrong_scope": [],
+        "proposals": [
+          {
+            "name": "query_customer",
+            "arguments": {
+              "customer_ref": "CU-S09"
+            }
+          },
+          {
+            "name": "get_order",
+            "arguments": {
+              "order_id": "ORD-S09"
+            }
+          },
+          {
+            "name": "get_refund_status",
+            "arguments": {
+              "order_id": "ORD-S09"
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "query": "lost paper packing slip proof of purchase electronic record refund eligibility"
+            }
+          }
+        ],
+        "read_execution": [
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_order",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_refund_status",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "final_tool_results": [
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_order",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_refund_status",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "approvals": [],
+        "expected_decision": null,
+        "expected_subject": null,
+        "tickets_before": 0,
+        "tickets_after": 0,
+        "system_extension_tokens_by_call": [
+          511,
+          511
+        ],
+        "observation_tokens_by_call": [
+          0,
+          66
+        ],
+        "ids": {
+          "database": "refund_product_270d3302a3074e23",
+          "workspace": "workspaces/d33206b2-390f-4a27-a573-bf0f3cd74d1b",
+          "thread_id": "d4416fdd-c3a5-4f9f-84ee-226bbdc326e0",
+          "run_id": "09364236-80bd-4c62-9ac8-26b5302a0767"
+        },
+        "turn_id": "12f18170-14eb-43ee-8f38-a015f1df4de2",
+        "snapshot_id": "a9deb29c-9508-4d3b-b267-c8f64b4aa881",
+        "version_id": "418083b7-f6a4-4e5c-8605-77a729ae0cf8",
+        "pg": {
+          "join_matches": true,
+          "read_only": true,
+          "output_matches_archived_run_and_turn": true,
+          "output_sha256": "631cd3d7cd95617ee734ae46ac5785c1cd1e0ad7ca3a4e69c6bc39b63e9a015c",
+          "status": "SUCCEEDED",
+          "version_hash_matches": true,
+          "version_snapshot_ids_match": true,
+          "run_snapshot_matches": true,
+          "input_matches": true,
+          "turn_run_link": true,
+          "workspaces_match": true,
+          "threads_match": true,
+          "event_log_complete": false,
+          "turn_sequence": 1
+        },
+        "missing_frozen_docs": [],
+        "final_snippets_match_frozen_docs": true
+      },
+      "pair": {
+        "same_queries": false,
+        "same_unique_sources": true,
+        "baseline_only_sources": [],
+        "candidate_only_sources": []
+      }
+    },
+    "SUP10": {
+      "baseline": {
+        "input_tokens": 8423,
+        "output_tokens": 955,
+        "physical_calls": 3,
+        "elapsed_s": 56.28521230000115,
+        "terminal": true,
+        "queries": [
+          "购物金付款订单退款路径 退回原支付方式 银行卡",
+          "原路退款例外 购物金账户注销 无法退回 特殊情况处理"
+        ],
+        "retrieved": [
+          [
+            [
+              "POL-S10-2",
+              "16061f42d7f217fb2cc75db93d7395e40528a0797192f9e8881c51906b17a590"
+            ],
+            [
+              "POL-S10-1",
+              "1641d85c351c2e606822952bee98075194aba028fdfbc21fb3fb2164a8d0cfe8"
+            ]
+          ],
+          [
+            [
+              "POL-S10-2",
+              "16061f42d7f217fb2cc75db93d7395e40528a0797192f9e8881c51906b17a590"
+            ],
+            [
+              "POL-S10-1",
+              "1641d85c351c2e606822952bee98075194aba028fdfbc21fb3fb2164a8d0cfe8"
+            ]
+          ]
+        ],
+        "delivered": [
+          [
+            [
+              "POL-S10-2",
+              "16061f42d7f217fb2cc75db93d7395e40528a0797192f9e8881c51906b17a590"
+            ],
+            [
+              "POL-S10-1",
+              "1641d85c351c2e606822952bee98075194aba028fdfbc21fb3fb2164a8d0cfe8"
+            ]
+          ],
+          [
+            [
+              "POL-S10-2",
+              "16061f42d7f217fb2cc75db93d7395e40528a0797192f9e8881c51906b17a590"
+            ],
+            [
+              "POL-S10-1",
+              "1641d85c351c2e606822952bee98075194aba028fdfbc21fb3fb2164a8d0cfe8"
+            ]
+          ]
+        ],
+        "retained_order_and_bytes": true,
+        "truncated": [
+          false,
+          false
+        ],
+        "user_sha256": "e4e6fb4c47fcc9989070a0bb655b86d8396d4e6aa0eb76309a598c2da13065dc",
+        "required_reads": [
+          "get_order",
+          "search_knowledge"
+        ],
+        "missing_reads": [],
+        "wrong_scope": [],
+        "proposals": [
+          {
+            "name": "query_customer",
+            "arguments": {
+              "customer_ref": "CU-S10"
+            }
+          },
+          {
+            "name": "get_order",
+            "arguments": {
+              "order_id": "ORD-S10"
+            }
+          },
+          {
+            "name": "get_refund_status",
+            "arguments": {
+              "order_id": "ORD-S10"
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "query": "购物金付款订单退款路径 退回原支付方式 银行卡"
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "query": "原路退款例外 购物金账户注销 无法退回 特殊情况处理"
+            }
+          }
+        ],
+        "read_execution": [
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_order",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_refund_status",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "final_tool_results": [
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_order",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_refund_status",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "approvals": [],
+        "expected_decision": null,
+        "expected_subject": null,
+        "tickets_before": 0,
+        "tickets_after": 0,
+        "system_extension_tokens_by_call": [
+          0,
+          0,
+          0
+        ],
+        "observation_tokens_by_call": [
+          0,
+          0,
+          0
+        ],
+        "ids": {
+          "database": "refund_product_aba09250857f4cce",
+          "workspace": "workspaces/5596afbf-6439-4556-8acb-f337e945bbcd",
+          "thread_id": "bc1232aa-8939-4e94-aeda-04e740032679",
+          "run_id": "c0b5376b-a191-41fc-95c8-4a27354d7bbf"
+        },
+        "turn_id": "11defc06-1c3c-479d-94a3-25239670b977",
+        "snapshot_id": "5a4c3d59-425a-4938-8d20-c9b6082cfc18",
+        "version_id": "a9d2f671-ee2c-4fe4-9ac2-451eb1af658f",
+        "pg": {
+          "join_matches": true,
+          "read_only": true,
+          "output_matches_archived_run_and_turn": true,
+          "output_sha256": "ea944f1612cba3dc8c9d702c2d4c0983dde99a69734cfb0e3a91e2afb65a9c29",
+          "status": "SUCCEEDED",
+          "version_hash_matches": true,
+          "version_snapshot_ids_match": true,
+          "run_snapshot_matches": true,
+          "input_matches": true,
+          "turn_run_link": true,
+          "workspaces_match": true,
+          "threads_match": true,
+          "event_log_complete": false,
+          "turn_sequence": 1
+        },
+        "missing_frozen_docs": [],
+        "final_snippets_match_frozen_docs": true
+      },
+      "candidate": {
+        "input_tokens": 10769,
+        "output_tokens": 1100,
+        "physical_calls": 3,
+        "elapsed_s": 56.302973900001234,
+        "terminal": true,
+        "queries": [
+          "refund path original payment method shopping credit 购物金 refund to bank card",
+          "原路退款 唯一允许方式 例外 特殊情况 申请换路径 银行卡",
+          "购物金退款 第2条 第3条 时效 到账时间"
+        ],
+        "retrieved": [
+          [
+            [
+              "POL-S10-2",
+              "16061f42d7f217fb2cc75db93d7395e40528a0797192f9e8881c51906b17a590"
+            ],
+            [
+              "POL-S10-1",
+              "1641d85c351c2e606822952bee98075194aba028fdfbc21fb3fb2164a8d0cfe8"
+            ]
+          ],
+          [
+            [
+              "POL-S10-1",
+              "1641d85c351c2e606822952bee98075194aba028fdfbc21fb3fb2164a8d0cfe8"
+            ],
+            [
+              "POL-S10-2",
+              "16061f42d7f217fb2cc75db93d7395e40528a0797192f9e8881c51906b17a590"
+            ]
+          ],
+          [
+            [
+              "POL-S10-2",
+              "16061f42d7f217fb2cc75db93d7395e40528a0797192f9e8881c51906b17a590"
+            ],
+            [
+              "POL-S10-1",
+              "1641d85c351c2e606822952bee98075194aba028fdfbc21fb3fb2164a8d0cfe8"
+            ]
+          ]
+        ],
+        "delivered": [
+          [
+            [
+              "POL-S10-2",
+              "16061f42d7f217fb2cc75db93d7395e40528a0797192f9e8881c51906b17a590"
+            ],
+            [
+              "POL-S10-1",
+              "1641d85c351c2e606822952bee98075194aba028fdfbc21fb3fb2164a8d0cfe8"
+            ]
+          ],
+          [
+            [
+              "POL-S10-1",
+              "1641d85c351c2e606822952bee98075194aba028fdfbc21fb3fb2164a8d0cfe8"
+            ],
+            [
+              "POL-S10-2",
+              "16061f42d7f217fb2cc75db93d7395e40528a0797192f9e8881c51906b17a590"
+            ]
+          ],
+          [
+            [
+              "POL-S10-2",
+              "16061f42d7f217fb2cc75db93d7395e40528a0797192f9e8881c51906b17a590"
+            ],
+            [
+              "POL-S10-1",
+              "1641d85c351c2e606822952bee98075194aba028fdfbc21fb3fb2164a8d0cfe8"
+            ]
+          ]
+        ],
+        "retained_order_and_bytes": true,
+        "truncated": [
+          false,
+          false,
+          false
+        ],
+        "user_sha256": "e4e6fb4c47fcc9989070a0bb655b86d8396d4e6aa0eb76309a598c2da13065dc",
+        "required_reads": [
+          "get_order",
+          "search_knowledge"
+        ],
+        "missing_reads": [],
+        "wrong_scope": [],
+        "proposals": [
+          {
+            "name": "query_customer",
+            "arguments": {
+              "customer_ref": "CU-S10"
+            }
+          },
+          {
+            "name": "get_order",
+            "arguments": {
+              "order_id": "ORD-S10"
+            }
+          },
+          {
+            "name": "get_refund_status",
+            "arguments": {
+              "order_id": "ORD-S10"
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "query": "refund path original payment method shopping credit 购物金 refund to bank card"
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "query": "原路退款 唯一允许方式 例外 特殊情况 申请换路径 银行卡"
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "query": "购物金退款 第2条 第3条 时效 到账时间"
+            }
+          }
+        ],
+        "read_execution": [
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_order",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_refund_status",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "final_tool_results": [
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_order",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_refund_status",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "approvals": [],
+        "expected_decision": null,
+        "expected_subject": null,
+        "tickets_before": 0,
+        "tickets_after": 0,
+        "system_extension_tokens_by_call": [
+          511,
+          511,
+          511
+        ],
+        "observation_tokens_by_call": [
+          0,
+          66,
+          66
+        ],
+        "ids": {
+          "database": "refund_product_6e8e0ec1c8f4470c",
+          "workspace": "workspaces/97d052d9-3688-49a3-b0d0-b179701aff21",
+          "thread_id": "5174c21f-2b01-4b38-b5e4-f2a239d5ff66",
+          "run_id": "53522b4f-7fe5-4d93-b8b7-cde2f62cf418"
+        },
+        "turn_id": "b69d413c-10a9-4f0a-a4fa-45a235ce7b68",
+        "snapshot_id": "80f30de9-8648-43f1-836d-4cdafe29178a",
+        "version_id": "dbca159d-ade3-4830-a230-cbde8bbebeb2",
+        "pg": {
+          "join_matches": true,
+          "read_only": true,
+          "output_matches_archived_run_and_turn": true,
+          "output_sha256": "60d139144bf17cea2b879c327a6861b3b49d2332386651d21d5eb4289e0b7081",
+          "status": "SUCCEEDED",
+          "version_hash_matches": true,
+          "version_snapshot_ids_match": true,
+          "run_snapshot_matches": true,
+          "input_matches": true,
+          "turn_run_link": true,
+          "workspaces_match": true,
+          "threads_match": true,
+          "event_log_complete": false,
+          "turn_sequence": 1
+        },
+        "missing_frozen_docs": [],
+        "final_snippets_match_frozen_docs": true
+      },
+      "pair": {
+        "same_queries": false,
+        "same_unique_sources": true,
+        "baseline_only_sources": [],
+        "candidate_only_sources": []
+      }
+    },
+    "SUP11": {
+      "baseline": {
+        "input_tokens": 4839,
+        "output_tokens": 979,
+        "physical_calls": 2,
+        "elapsed_s": 51.46871639999881,
+        "terminal": true,
+        "queries": [
+          "防拆封条已拆 出厂缺页 退换货 规则"
+        ],
+        "retrieved": [
+          [
+            [
+              "POL-S11-1",
+              "1ae3f30ed043c4839ad10d1ddfd7a81e03830bc7ded71e8f49a02a8383a0e602"
+            ],
+            [
+              "POL-S11-2",
+              "216dc02083887c652720e1e914fe7e3e9c45e4d8cd16d08c28580a6cfe01befb"
+            ]
+          ]
+        ],
+        "delivered": [
+          [
+            [
+              "POL-S11-1",
+              "1ae3f30ed043c4839ad10d1ddfd7a81e03830bc7ded71e8f49a02a8383a0e602"
+            ],
+            [
+              "POL-S11-2",
+              "216dc02083887c652720e1e914fe7e3e9c45e4d8cd16d08c28580a6cfe01befb"
+            ]
+          ]
+        ],
+        "retained_order_and_bytes": true,
+        "truncated": [
+          false
+        ],
+        "user_sha256": "f5a59910ce1ebcc4e7e9282e780e03f8e2f7fca77379785bb1aa5502f8badf23",
+        "required_reads": [
+          "get_order",
+          "search_knowledge"
+        ],
+        "missing_reads": [],
+        "wrong_scope": [],
+        "proposals": [
+          {
+            "name": "query_customer",
+            "arguments": {
+              "customer_ref": "CU-S11"
+            }
+          },
+          {
+            "name": "get_order",
+            "arguments": {
+              "order_id": "ORD-S11"
+            }
+          },
+          {
+            "name": "get_refund_status",
+            "arguments": {
+              "order_id": "ORD-S11"
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "query": "防拆封条已拆 出厂缺页 退换货 规则"
+            }
+          }
+        ],
+        "read_execution": [
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_order",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_refund_status",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "final_tool_results": [
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_order",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_refund_status",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "approvals": [],
+        "expected_decision": null,
+        "expected_subject": null,
+        "tickets_before": 0,
+        "tickets_after": 0,
+        "system_extension_tokens_by_call": [
+          0,
+          0
+        ],
+        "observation_tokens_by_call": [
+          0,
+          0
+        ],
+        "ids": {
+          "database": "refund_product_5fd772d609c3426e",
+          "workspace": "workspaces/01ebaeee-d7d3-40a2-a7e4-aacb29ec118d",
+          "thread_id": "06a766d8-3f05-4b53-a55d-24c1284e7cbd",
+          "run_id": "c7f0eb51-60ee-49d6-8c5a-78e73b2cba44"
+        },
+        "turn_id": "232a4e19-8aab-420c-a7ad-79ca58d0bf14",
+        "snapshot_id": "2cf6abd6-7afe-443f-b6e9-75a20ce95fd5",
+        "version_id": "7d191aa5-43e4-4295-8121-25a128de24eb",
+        "pg": {
+          "join_matches": true,
+          "read_only": true,
+          "output_matches_archived_run_and_turn": true,
+          "output_sha256": "847ba37795b18d28cb981fdd582b26314ee021a12e1a99d16e705b7a5ed6464e",
+          "status": "SUCCEEDED",
+          "version_hash_matches": true,
+          "version_snapshot_ids_match": true,
+          "run_snapshot_matches": true,
+          "input_matches": true,
+          "turn_run_link": true,
+          "workspaces_match": true,
+          "threads_match": true,
+          "event_log_complete": false,
+          "turn_sequence": 1
+        },
+        "missing_frozen_docs": [],
+        "final_snippets_match_frozen_docs": true
+      },
+      "candidate": {
+        "input_tokens": 5941,
+        "output_tokens": 1002,
+        "physical_calls": 2,
+        "elapsed_s": 51.44392700000026,
+        "terminal": true,
+        "queries": [
+          "防拆封条已开 出厂缺页 退货换货 规则"
+        ],
+        "retrieved": [
+          [
+            [
+              "POL-S11-1",
+              "1ae3f30ed043c4839ad10d1ddfd7a81e03830bc7ded71e8f49a02a8383a0e602"
+            ],
+            [
+              "POL-S11-2",
+              "216dc02083887c652720e1e914fe7e3e9c45e4d8cd16d08c28580a6cfe01befb"
+            ]
+          ]
+        ],
+        "delivered": [
+          [
+            [
+              "POL-S11-1",
+              "1ae3f30ed043c4839ad10d1ddfd7a81e03830bc7ded71e8f49a02a8383a0e602"
+            ],
+            [
+              "POL-S11-2",
+              "216dc02083887c652720e1e914fe7e3e9c45e4d8cd16d08c28580a6cfe01befb"
+            ]
+          ]
+        ],
+        "retained_order_and_bytes": true,
+        "truncated": [
+          false
+        ],
+        "user_sha256": "f5a59910ce1ebcc4e7e9282e780e03f8e2f7fca77379785bb1aa5502f8badf23",
+        "required_reads": [
+          "get_order",
+          "search_knowledge"
+        ],
+        "missing_reads": [],
+        "wrong_scope": [],
+        "proposals": [
+          {
+            "name": "query_customer",
+            "arguments": {
+              "customer_ref": "CU-S11"
+            }
+          },
+          {
+            "name": "get_order",
+            "arguments": {
+              "order_id": "ORD-S11"
+            }
+          },
+          {
+            "name": "get_refund_status",
+            "arguments": {
+              "order_id": "ORD-S11"
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "query": "防拆封条已开 出厂缺页 退货换货 规则"
+            }
+          }
+        ],
+        "read_execution": [
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_order",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_refund_status",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "final_tool_results": [
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_order",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_refund_status",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "approvals": [],
+        "expected_decision": null,
+        "expected_subject": null,
+        "tickets_before": 0,
+        "tickets_after": 0,
+        "system_extension_tokens_by_call": [
+          511,
+          511
+        ],
+        "observation_tokens_by_call": [
+          0,
+          66
+        ],
+        "ids": {
+          "database": "refund_product_a3e1a4c076c743a5",
+          "workspace": "workspaces/aad5bdf2-c470-4737-8d95-5838e4756f68",
+          "thread_id": "dac66646-59dc-4dc5-aafb-beaa9a61772c",
+          "run_id": "da92c84b-ef04-4028-a0fe-fcdfe53cf6a2"
+        },
+        "turn_id": "757f5cd5-f6ac-4273-942b-3d5d7c39df0d",
+        "snapshot_id": "42d00e80-8488-4900-b9be-4cd480faf66d",
+        "version_id": "40060928-580b-4b3e-b832-8cc94252a38f",
+        "pg": {
+          "join_matches": true,
+          "read_only": true,
+          "output_matches_archived_run_and_turn": true,
+          "output_sha256": "b0fb5007c59ff13c75d1bbd1f68f263daf4070d0208c0ef2fad0f8c5ebc1944b",
+          "status": "SUCCEEDED",
+          "version_hash_matches": true,
+          "version_snapshot_ids_match": true,
+          "run_snapshot_matches": true,
+          "input_matches": true,
+          "turn_run_link": true,
+          "workspaces_match": true,
+          "threads_match": true,
+          "event_log_complete": false,
+          "turn_sequence": 1
+        },
+        "missing_frozen_docs": [],
+        "final_snippets_match_frozen_docs": true
+      },
+      "pair": {
+        "same_queries": false,
+        "same_unique_sources": true,
+        "baseline_only_sources": [],
+        "candidate_only_sources": []
+      }
+    },
+    "SUP12": {
+      "baseline": {
+        "input_tokens": 7772,
+        "output_tokens": 1009,
+        "physical_calls": 3,
+        "elapsed_s": 50.78518029999759,
+        "terminal": true,
+        "queries": [
+          "礼品单 收件人 非购买人 登记质量问题 退款账户 决定权",
+          "gift order recipient not buyer quality issue refund destination authorization"
+        ],
+        "retrieved": [
+          [
+            [
+              "POL-S12-2",
+              "2b856674dacdcff9e83be33aef24be68bcf2f8b3b391a2fbaa9c6ac7f75249c8"
+            ],
+            [
+              "POL-S12-1",
+              "005ccf93557425d5367dd72137710910fcac441e44bed53b503444968f7f2c57"
+            ]
+          ],
+          [
+            [
+              "POL-S12-2",
+              "2b856674dacdcff9e83be33aef24be68bcf2f8b3b391a2fbaa9c6ac7f75249c8"
+            ],
+            [
+              "POL-S12-1",
+              "005ccf93557425d5367dd72137710910fcac441e44bed53b503444968f7f2c57"
+            ]
+          ]
+        ],
+        "delivered": [
+          [
+            [
+              "POL-S12-2",
+              "2b856674dacdcff9e83be33aef24be68bcf2f8b3b391a2fbaa9c6ac7f75249c8"
+            ],
+            [
+              "POL-S12-1",
+              "005ccf93557425d5367dd72137710910fcac441e44bed53b503444968f7f2c57"
+            ]
+          ],
+          [
+            [
+              "POL-S12-2",
+              "2b856674dacdcff9e83be33aef24be68bcf2f8b3b391a2fbaa9c6ac7f75249c8"
+            ],
+            [
+              "POL-S12-1",
+              "005ccf93557425d5367dd72137710910fcac441e44bed53b503444968f7f2c57"
+            ]
+          ]
+        ],
+        "retained_order_and_bytes": true,
+        "truncated": [
+          false,
+          false
+        ],
+        "user_sha256": "f0dc746a38b8610fd626095af3c4156bd85c693eb260460dc32eebc8458fe318",
+        "required_reads": [
+          "get_order",
+          "search_knowledge"
+        ],
+        "missing_reads": [],
+        "wrong_scope": [],
+        "proposals": [
+          {
+            "name": "query_customer",
+            "arguments": {
+              "customer_ref": "CU-S12"
+            }
+          },
+          {
+            "name": "get_order",
+            "arguments": {
+              "order_id": "ORD-S12"
+            }
+          },
+          {
+            "name": "get_refund_status",
+            "arguments": {
+              "order_id": "ORD-S12"
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "query": "礼品单 收件人 非购买人 登记质量问题 退款账户 决定权"
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "query": "gift order recipient not buyer quality issue refund destination authorization"
+            }
+          }
+        ],
+        "read_execution": [
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_order",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_refund_status",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "final_tool_results": [
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_order",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_refund_status",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "approvals": [],
+        "expected_decision": null,
+        "expected_subject": null,
+        "tickets_before": 0,
+        "tickets_after": 0,
+        "system_extension_tokens_by_call": [
+          0,
+          0,
+          0
+        ],
+        "observation_tokens_by_call": [
+          0,
+          0,
+          0
+        ],
+        "ids": {
+          "database": "refund_product_99f6d7e4f4e845bd",
+          "workspace": "workspaces/5449d550-91c9-455a-bdd4-07bc492c6916",
+          "thread_id": "8e2f6422-bfab-46db-a502-b1a572abbf40",
+          "run_id": "e2d93aa9-34b3-4640-8064-9ff997e29868"
+        },
+        "turn_id": "3feda441-6519-47c6-bae2-e1494e31ff70",
+        "snapshot_id": "69e6f502-2757-499a-a1ca-e8021e1e8598",
+        "version_id": "487d7b03-c4e0-4ea4-8311-4394eccff9a8",
+        "pg": {
+          "join_matches": true,
+          "read_only": true,
+          "output_matches_archived_run_and_turn": true,
+          "output_sha256": "2142e6810d8b30bf3a50526241800b7fcfc2d3de00674fd958c70be10b778d81",
+          "status": "SUCCEEDED",
+          "version_hash_matches": true,
+          "version_snapshot_ids_match": true,
+          "run_snapshot_matches": true,
+          "input_matches": true,
+          "turn_run_link": true,
+          "workspaces_match": true,
+          "threads_match": true,
+          "event_log_complete": false,
+          "turn_sequence": 1
+        },
+        "missing_frozen_docs": [],
+        "final_snippets_match_frozen_docs": true
+      },
+      "candidate": {
+        "input_tokens": 11017,
+        "output_tokens": 1533,
+        "physical_calls": 3,
+        "elapsed_s": 60.77943739999682,
+        "terminal": true,
+        "queries": [
+          "gift recipient quality issue claim refund account policy",
+          "赠礼 收礼人 质量问题 登记 退款账户 购买人 确认 原付款账户 例外 适用范围",
+          "POL-S12 gift after-sales registration refund authorization exception scope window"
+        ],
+        "retrieved": [
+          [
+            [
+              "POL-S12-1",
+              "005ccf93557425d5367dd72137710910fcac441e44bed53b503444968f7f2c57"
+            ],
+            [
+              "POL-S12-2",
+              "2b856674dacdcff9e83be33aef24be68bcf2f8b3b391a2fbaa9c6ac7f75249c8"
+            ]
+          ],
+          [
+            [
+              "POL-S12-2",
+              "2b856674dacdcff9e83be33aef24be68bcf2f8b3b391a2fbaa9c6ac7f75249c8"
+            ],
+            [
+              "POL-S12-1",
+              "005ccf93557425d5367dd72137710910fcac441e44bed53b503444968f7f2c57"
+            ]
+          ],
+          [
+            [
+              "POL-S12-2",
+              "2b856674dacdcff9e83be33aef24be68bcf2f8b3b391a2fbaa9c6ac7f75249c8"
+            ],
+            [
+              "POL-S12-1",
+              "005ccf93557425d5367dd72137710910fcac441e44bed53b503444968f7f2c57"
+            ]
+          ]
+        ],
+        "delivered": [
+          [
+            [
+              "POL-S12-1",
+              "005ccf93557425d5367dd72137710910fcac441e44bed53b503444968f7f2c57"
+            ],
+            [
+              "POL-S12-2",
+              "2b856674dacdcff9e83be33aef24be68bcf2f8b3b391a2fbaa9c6ac7f75249c8"
+            ]
+          ],
+          [
+            [
+              "POL-S12-2",
+              "2b856674dacdcff9e83be33aef24be68bcf2f8b3b391a2fbaa9c6ac7f75249c8"
+            ],
+            [
+              "POL-S12-1",
+              "005ccf93557425d5367dd72137710910fcac441e44bed53b503444968f7f2c57"
+            ]
+          ],
+          [
+            [
+              "POL-S12-2",
+              "2b856674dacdcff9e83be33aef24be68bcf2f8b3b391a2fbaa9c6ac7f75249c8"
+            ],
+            [
+              "POL-S12-1",
+              "005ccf93557425d5367dd72137710910fcac441e44bed53b503444968f7f2c57"
+            ]
+          ]
+        ],
+        "retained_order_and_bytes": true,
+        "truncated": [
+          false,
+          false,
+          false
+        ],
+        "user_sha256": "f0dc746a38b8610fd626095af3c4156bd85c693eb260460dc32eebc8458fe318",
+        "required_reads": [
+          "get_order",
+          "search_knowledge"
+        ],
+        "missing_reads": [],
+        "wrong_scope": [],
+        "proposals": [
+          {
+            "name": "query_customer",
+            "arguments": {
+              "customer_ref": "CU-S12"
+            }
+          },
+          {
+            "name": "get_order",
+            "arguments": {
+              "order_id": "ORD-S12"
+            }
+          },
+          {
+            "name": "get_refund_status",
+            "arguments": {
+              "order_id": "ORD-S12"
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "query": "gift recipient quality issue claim refund account policy",
+              "limit": 10
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "limit": 10,
+              "query": "赠礼 收礼人 质量问题 登记 退款账户 购买人 确认 原付款账户 例外 适用范围"
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "limit": 10,
+              "query": "POL-S12 gift after-sales registration refund authorization exception scope window"
+            }
+          }
+        ],
+        "read_execution": [
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_order",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_refund_status",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "final_tool_results": [
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_order",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_refund_status",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "approvals": [],
+        "expected_decision": null,
+        "expected_subject": null,
+        "tickets_before": 0,
+        "tickets_after": 0,
+        "system_extension_tokens_by_call": [
+          511,
+          511,
+          511
+        ],
+        "observation_tokens_by_call": [
+          0,
+          66,
+          66
+        ],
+        "ids": {
+          "database": "refund_product_b19b8b4b219141e9",
+          "workspace": "workspaces/5980b1b4-839d-4b16-8198-e34a0260760a",
+          "thread_id": "cb021655-47fb-4797-bbf6-06ad342714d6",
+          "run_id": "ca3d4d7e-171e-4025-9582-c42a1ff51fad"
+        },
+        "turn_id": "b4438207-b898-456f-81d4-22b6d0f39fd6",
+        "snapshot_id": "5a8b7f1e-8f82-4ef4-a9ab-3cacbe858f73",
+        "version_id": "313c6596-ac18-444f-94c6-5b9b927924e6",
+        "pg": {
+          "join_matches": true,
+          "read_only": true,
+          "output_matches_archived_run_and_turn": true,
+          "output_sha256": "af28459541c4c359206bb9b750e9d68f14c684a191a08db3a161124b460e80bb",
+          "status": "SUCCEEDED",
+          "version_hash_matches": true,
+          "version_snapshot_ids_match": true,
+          "run_snapshot_matches": true,
+          "input_matches": true,
+          "turn_run_link": true,
+          "workspaces_match": true,
+          "threads_match": true,
+          "event_log_complete": false,
+          "turn_sequence": 1
+        },
+        "missing_frozen_docs": [],
+        "final_snippets_match_frozen_docs": true
+      },
+      "pair": {
+        "same_queries": false,
+        "same_unique_sources": true,
+        "baseline_only_sources": [],
+        "candidate_only_sources": []
+      }
+    },
+    "SUP13": {
+      "baseline": {
+        "input_tokens": 6085,
+        "output_tokens": 768,
+        "physical_calls": 3,
+        "elapsed_s": 38.39469800000006,
+        "terminal": true,
+        "queries": [],
+        "retrieved": [],
+        "delivered": [],
+        "retained_order_and_bytes": true,
+        "truncated": [],
+        "user_sha256": "41c740742995dd73c4f2f6bb8f64130c535c3f07c16d0893f42449c2494259d1",
+        "required_reads": [],
+        "missing_reads": [],
+        "wrong_scope": [],
+        "proposals": [
+          {
+            "name": "query_customer",
+            "arguments": {
+              "customer_ref": "CU-S13"
+            }
+          },
+          {
+            "name": "create_ticket",
+            "arguments": {
+              "customer_ref": "CU-S13",
+              "subject": "包装回收预约",
+              "priority": "MEDIUM"
+            }
+          }
+        ],
+        "read_execution": [
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "final_tool_results": [
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "create_ticket",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "approvals": [
+          {
+            "tool_identity": "create_ticket",
+            "decision_status": "APPROVED",
+            "execution_status": "SUCCEEDED",
+            "execution_attempt_count": 1,
+            "canonical_arguments": {
+              "subject": "包装回收预约",
+              "priority": "MEDIUM",
+              "customer_ref": "CU-S13"
+            }
+          }
+        ],
+        "expected_decision": "approve",
+        "expected_subject": "包装回收预约",
+        "tickets_before": 0,
+        "tickets_after": 1,
+        "system_extension_tokens_by_call": [
+          0,
+          0,
+          0
+        ],
+        "observation_tokens_by_call": [
+          0,
+          0,
+          0
+        ],
+        "ids": {
+          "database": "refund_product_91d2b3313c1b4dbf",
+          "workspace": "workspaces/f98aea90-a125-438c-bf89-c10d7ab2e55e",
+          "thread_id": "27efa943-46ff-47a6-8023-82d8164e9c00",
+          "run_id": "09029b90-a424-493a-a8cd-01024384101f"
+        },
+        "turn_id": "983d81f8-7cfb-46ab-8782-e9117ea0827a",
+        "snapshot_id": "92c4d758-8091-4935-a520-aed0fe4dfc9d",
+        "version_id": "fce394e9-5263-4f18-921f-51e62b0dcc0d",
+        "pg": {
+          "join_matches": true,
+          "read_only": true,
+          "output_matches_archived_run_and_turn": true,
+          "output_sha256": "9f9e7956352f39e0624839d4acfdea2c2a2660012df7e4e2b20a93ab1ddd024c",
+          "status": "SUCCEEDED",
+          "version_hash_matches": true,
+          "version_snapshot_ids_match": true,
+          "run_snapshot_matches": true,
+          "input_matches": true,
+          "turn_run_link": true,
+          "workspaces_match": true,
+          "threads_match": true,
+          "event_log_complete": true,
+          "turn_sequence": 1
+        },
+        "missing_frozen_docs": [
+          "POL-S13-1"
+        ],
+        "final_snippets_match_frozen_docs": true
+      },
+      "candidate": {
+        "input_tokens": 8619,
+        "output_tokens": 881,
+        "physical_calls": 3,
+        "elapsed_s": 42.815611800000624,
+        "terminal": true,
+        "queries": [
+          "包装回收预约 工单 登记"
+        ],
+        "retrieved": [
+          [
+            [
+              "POL-S13-1",
+              "a7a2c8925c769dbd385a78a907b19b42c9383aedffeb2e635244af1ffb1b542f"
+            ]
+          ]
+        ],
+        "delivered": [
+          [
+            [
+              "POL-S13-1",
+              "a7a2c8925c769dbd385a78a907b19b42c9383aedffeb2e635244af1ffb1b542f"
+            ]
+          ]
+        ],
+        "retained_order_and_bytes": true,
+        "truncated": [
+          false
+        ],
+        "user_sha256": "41c740742995dd73c4f2f6bb8f64130c535c3f07c16d0893f42449c2494259d1",
+        "required_reads": [],
+        "missing_reads": [],
+        "wrong_scope": [],
+        "proposals": [
+          {
+            "name": "query_customer",
+            "arguments": {
+              "customer_ref": "CU-S13",
+              "include_open_tickets": true,
+              "open_ticket_subject": "包装回收预约"
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "query": "包装回收预约 工单 登记"
+            }
+          },
+          {
+            "name": "create_ticket",
+            "arguments": {
+              "customer_ref": "CU-S13",
+              "subject": "包装回收预约",
+              "priority": "MEDIUM"
+            }
+          }
+        ],
+        "read_execution": [
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "final_tool_results": [
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "create_ticket",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "approvals": [
+          {
+            "tool_identity": "create_ticket",
+            "decision_status": "APPROVED",
+            "execution_status": "SUCCEEDED",
+            "execution_attempt_count": 1,
+            "canonical_arguments": {
+              "subject": "包装回收预约",
+              "priority": "MEDIUM",
+              "customer_ref": "CU-S13"
+            }
+          }
+        ],
+        "expected_decision": "approve",
+        "expected_subject": "包装回收预约",
+        "tickets_before": 0,
+        "tickets_after": 1,
+        "system_extension_tokens_by_call": [
+          511,
+          511,
+          511
+        ],
+        "observation_tokens_by_call": [
+          0,
+          27,
+          27
+        ],
+        "ids": {
+          "database": "refund_product_f2aa2ae6f5574ab7",
+          "workspace": "workspaces/895a053d-7079-4e0b-9954-d2f3cbe23a05",
+          "thread_id": "f6a09b65-2987-414b-ab71-00581a8db81d",
+          "run_id": "02d5ae38-479a-4b60-b17f-ce4f885f724d"
+        },
+        "turn_id": "a410b6d3-589a-4401-9483-de6ebaaeb168",
+        "snapshot_id": "1ac17cf4-8109-46f1-8298-b025175e4c61",
+        "version_id": "e3e37dd6-fba2-458d-bdb0-8cf23bfaad10",
+        "pg": {
+          "join_matches": true,
+          "read_only": true,
+          "output_matches_archived_run_and_turn": true,
+          "output_sha256": "355f5bfb0284de17b194e0667aab627d58875ee1cb666db4a6757744c70ebbd6",
+          "status": "SUCCEEDED",
+          "version_hash_matches": true,
+          "version_snapshot_ids_match": true,
+          "run_snapshot_matches": true,
+          "input_matches": true,
+          "turn_run_link": true,
+          "workspaces_match": true,
+          "threads_match": true,
+          "event_log_complete": true,
+          "turn_sequence": 1
+        },
+        "missing_frozen_docs": [],
+        "final_snippets_match_frozen_docs": true
+      },
+      "pair": {
+        "same_queries": false,
+        "same_unique_sources": false,
+        "baseline_only_sources": [],
+        "candidate_only_sources": [
+          [
+            "POL-S13-1",
+            "a7a2c8925c769dbd385a78a907b19b42c9383aedffeb2e635244af1ffb1b542f"
+          ]
+        ]
+      }
+    },
+    "SUP14": {
+      "baseline": {
+        "input_tokens": 6211,
+        "output_tokens": 737,
+        "physical_calls": 3,
+        "elapsed_s": 38.61452260000078,
+        "terminal": true,
+        "queries": [],
+        "retrieved": [],
+        "delivered": [],
+        "retained_order_and_bytes": true,
+        "truncated": [],
+        "user_sha256": "c6ed6f95a0f1a12590ba18235e9e1a0657d98a0c3697d424bc7c8465d275ffbf",
+        "required_reads": [],
+        "missing_reads": [],
+        "wrong_scope": [],
+        "proposals": [
+          {
+            "name": "query_customer",
+            "arguments": {
+              "customer_ref": "CU-S14",
+              "include_open_tickets": true,
+              "open_ticket_subject": "纸质账单补寄咨询"
+            }
+          },
+          {
+            "name": "create_ticket",
+            "arguments": {
+              "customer_ref": "CU-S14",
+              "subject": "纸质账单补寄咨询",
+              "priority": "MEDIUM"
+            }
+          }
+        ],
+        "read_execution": [
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "final_tool_results": [
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "create_ticket",
+            "ERROR",
+            "TOOL_APPROVAL_DENIED"
+          ]
+        ],
+        "approvals": [
+          {
+            "tool_identity": "create_ticket",
+            "decision_status": "DENIED",
+            "execution_status": "NOT_STARTED",
+            "execution_attempt_count": 0,
+            "canonical_arguments": {
+              "subject": "纸质账单补寄咨询",
+              "priority": "MEDIUM",
+              "customer_ref": "CU-S14"
+            }
+          }
+        ],
+        "expected_decision": "deny",
+        "expected_subject": "纸质账单补寄咨询",
+        "tickets_before": 0,
+        "tickets_after": 0,
+        "system_extension_tokens_by_call": [
+          0,
+          0,
+          0
+        ],
+        "observation_tokens_by_call": [
+          0,
+          0,
+          0
+        ],
+        "ids": {
+          "database": "refund_product_23d60d1e8cb046ba",
+          "workspace": "workspaces/c2ba0a26-f7fa-427a-bb9e-f258ada58082",
+          "thread_id": "e09ab51a-41be-40e2-9a2e-63c5dd83cb78",
+          "run_id": "88ae5eed-ba78-44bc-b394-f12f9967b7b0"
+        },
+        "turn_id": "2cd8f068-bb77-4843-b6f5-dbaf4e2e2c83",
+        "snapshot_id": "5396bf3e-7638-4419-8a4d-13daf47751e1",
+        "version_id": "62a21652-84b4-4dfc-bed2-b9fc38370c8c",
+        "pg": {
+          "join_matches": true,
+          "read_only": true,
+          "output_matches_archived_run_and_turn": true,
+          "output_sha256": "2c9b9fb771e4ac5ae85dcc4a85805faf12b80e05373a8ec5e96c7ae69693879b",
+          "status": "SUCCEEDED",
+          "version_hash_matches": true,
+          "version_snapshot_ids_match": true,
+          "run_snapshot_matches": true,
+          "input_matches": true,
+          "turn_run_link": true,
+          "workspaces_match": true,
+          "threads_match": true,
+          "event_log_complete": true,
+          "turn_sequence": 1
+        },
+        "missing_frozen_docs": [
+          "POL-S14-1"
+        ],
+        "final_snippets_match_frozen_docs": true
+      },
+      "candidate": {
+        "input_tokens": 10508,
+        "output_tokens": 1061,
+        "physical_calls": 4,
+        "elapsed_s": 41.74262589999853,
+        "terminal": true,
+        "queries": [],
+        "retrieved": [],
+        "delivered": [],
+        "retained_order_and_bytes": true,
+        "truncated": [],
+        "user_sha256": "c6ed6f95a0f1a12590ba18235e9e1a0657d98a0c3697d424bc7c8465d275ffbf",
+        "required_reads": [],
+        "missing_reads": [],
+        "wrong_scope": [],
+        "proposals": [
+          {
+            "name": "query_customer",
+            "arguments": {
+              "customer_ref": "CU-S14"
+            }
+          },
+          {
+            "name": "query_customer",
+            "arguments": {
+              "customer_ref": "CU-S14",
+              "include_open_tickets": true,
+              "open_ticket_subject": "纸质账单补寄咨询"
+            }
+          },
+          {
+            "name": "create_ticket",
+            "arguments": {
+              "customer_ref": "CU-S14",
+              "subject": "纸质账单补寄咨询"
+            }
+          }
+        ],
+        "read_execution": [
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "final_tool_results": [
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "create_ticket",
+            "ERROR",
+            "TOOL_APPROVAL_DENIED"
+          ]
+        ],
+        "approvals": [
+          {
+            "tool_identity": "create_ticket",
+            "decision_status": "DENIED",
+            "execution_status": "NOT_STARTED",
+            "execution_attempt_count": 0,
+            "canonical_arguments": {
+              "subject": "纸质账单补寄咨询",
+              "customer_ref": "CU-S14"
+            }
+          }
+        ],
+        "expected_decision": "deny",
+        "expected_subject": "纸质账单补寄咨询",
+        "tickets_before": 0,
+        "tickets_after": 0,
+        "system_extension_tokens_by_call": [
+          511,
+          511,
+          511,
+          511
+        ],
+        "observation_tokens_by_call": [
+          0,
+          16,
+          43,
+          43
+        ],
+        "ids": {
+          "database": "refund_product_0dcd15eae1f34b96",
+          "workspace": "workspaces/7faea6ac-c7a2-49e9-8e64-1e894a34e31a",
+          "thread_id": "081b4043-b888-4894-9a43-7eddda61b1d8",
+          "run_id": "6bc88371-030c-4bca-8db8-a6aa1a8376c3"
+        },
+        "turn_id": "40a1cf12-997d-4d2e-b17f-112209e31d6c",
+        "snapshot_id": "527b6b56-d371-4c25-9ad3-4331847dceac",
+        "version_id": "c039c7b5-f918-4fd0-a2ee-e0d3d55f7ded",
+        "pg": {
+          "join_matches": true,
+          "read_only": true,
+          "output_matches_archived_run_and_turn": true,
+          "output_sha256": "86abce1570e74b8c5474d96c7f90179e4f9e89993eb14a59e554eb2fb5dc97d9",
+          "status": "SUCCEEDED",
+          "version_hash_matches": true,
+          "version_snapshot_ids_match": true,
+          "run_snapshot_matches": true,
+          "input_matches": true,
+          "turn_run_link": true,
+          "workspaces_match": true,
+          "threads_match": true,
+          "event_log_complete": true,
+          "turn_sequence": 1
+        },
+        "missing_frozen_docs": [
+          "POL-S14-1"
+        ],
+        "final_snippets_match_frozen_docs": true
+      },
+      "pair": {
+        "same_queries": true,
+        "same_unique_sources": true,
+        "baseline_only_sources": [],
+        "candidate_only_sources": []
+      }
+    },
+    "SUP15": {
+      "baseline": {
+        "input_tokens": 6301,
+        "output_tokens": 790,
+        "physical_calls": 3,
+        "elapsed_s": 44.155764699997235,
+        "terminal": true,
+        "queries": [
+          "查询退款状态需要哪些标识 订单号 客户编号 退款流程"
+        ],
+        "retrieved": [
+          [
+            [
+              "POL-S15-1",
+              "6d8a1552361c174f7b1cffa4b2381735cc8d1a213ced9918cfa341f3008e7c00"
+            ]
+          ]
+        ],
+        "delivered": [
+          [
+            [
+              "POL-S15-1",
+              "6d8a1552361c174f7b1cffa4b2381735cc8d1a213ced9918cfa341f3008e7c00"
+            ]
+          ]
+        ],
+        "retained_order_and_bytes": true,
+        "truncated": [
+          false
+        ],
+        "user_sha256": "890314b3404f845829b8104be480c6beeab0d45f1211af38d63219870f7fc710",
+        "required_reads": [],
+        "missing_reads": [],
+        "wrong_scope": [],
+        "proposals": [
+          {
+            "name": "query_customer",
+            "arguments": {
+              "customer_ref": "CU-S15"
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "query": "查询退款状态需要哪些标识 订单号 客户编号 退款流程"
+            }
+          }
+        ],
+        "read_execution": [
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "final_tool_results": [
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "approvals": [],
+        "expected_decision": null,
+        "expected_subject": null,
+        "tickets_before": 0,
+        "tickets_after": 0,
+        "system_extension_tokens_by_call": [
+          0,
+          0,
+          0
+        ],
+        "observation_tokens_by_call": [
+          0,
+          0,
+          0
+        ],
+        "ids": {
+          "database": "refund_product_289093180cfb4173",
+          "workspace": "workspaces/39a5321e-cafe-4f19-8cca-25972f4e2305",
+          "thread_id": "e901f404-c6ef-4ca9-a91b-6d8dd743cb75",
+          "run_id": "1a6ebf63-67bc-43a6-be53-565215dbacd7"
+        },
+        "turn_id": "d9f94c38-b7c8-4aaf-8aba-2d347f3f83bd",
+        "snapshot_id": "71331f03-1789-4f64-a85a-2c74b414cbb2",
+        "version_id": "83f6bb31-f001-4ebf-b4c3-364ac4d60863",
+        "pg": {
+          "join_matches": true,
+          "read_only": true,
+          "output_matches_archived_run_and_turn": true,
+          "output_sha256": "7afb54a1b09e90587c5b06197ff09c9bb674df14edd50f2a80b0386ada0797c8",
+          "status": "SUCCEEDED",
+          "version_hash_matches": true,
+          "version_snapshot_ids_match": true,
+          "run_snapshot_matches": true,
+          "input_matches": true,
+          "turn_run_link": true,
+          "workspaces_match": true,
+          "threads_match": true,
+          "event_log_complete": false,
+          "turn_sequence": 1
+        },
+        "missing_frozen_docs": [],
+        "final_snippets_match_frozen_docs": true
+      },
+      "candidate": {
+        "input_tokens": 5352,
+        "output_tokens": 507,
+        "physical_calls": 2,
+        "elapsed_s": 42.29502169999978,
+        "terminal": true,
+        "queries": [
+          "refund status lookup without order number customer reference"
+        ],
+        "retrieved": [
+          [
+            [
+              "POL-S15-1",
+              "6d8a1552361c174f7b1cffa4b2381735cc8d1a213ced9918cfa341f3008e7c00"
+            ]
+          ]
+        ],
+        "delivered": [
+          [
+            [
+              "POL-S15-1",
+              "6d8a1552361c174f7b1cffa4b2381735cc8d1a213ced9918cfa341f3008e7c00"
+            ]
+          ]
+        ],
+        "retained_order_and_bytes": true,
+        "truncated": [
+          false
+        ],
+        "user_sha256": "890314b3404f845829b8104be480c6beeab0d45f1211af38d63219870f7fc710",
+        "required_reads": [],
+        "missing_reads": [],
+        "wrong_scope": [],
+        "proposals": [
+          {
+            "name": "query_customer",
+            "arguments": {
+              "customer_ref": "CU-S15"
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "query": "refund status lookup without order number customer reference"
+            }
+          }
+        ],
+        "read_execution": [
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "final_tool_results": [
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "approvals": [],
+        "expected_decision": null,
+        "expected_subject": null,
+        "tickets_before": 0,
+        "tickets_after": 0,
+        "system_extension_tokens_by_call": [
+          511,
+          511
+        ],
+        "observation_tokens_by_call": [
+          0,
+          16
+        ],
+        "ids": {
+          "database": "refund_product_132dd1005c6a4529",
+          "workspace": "workspaces/db4c6404-5eb3-4cc4-8116-fbe640a80b2a",
+          "thread_id": "82474825-6aa0-4658-bdb2-4776881fedc5",
+          "run_id": "322c46e8-d676-4f0a-b992-3d82bb435c4f"
+        },
+        "turn_id": "fedf02e8-fef4-4e53-9cac-e5171d73702d",
+        "snapshot_id": "35c2f705-da2e-4684-9fc4-6d582e9dcd6a",
+        "version_id": "a6bf389a-7536-493d-8261-ec200df21236",
+        "pg": {
+          "join_matches": true,
+          "read_only": true,
+          "output_matches_archived_run_and_turn": true,
+          "output_sha256": "b39b8901f938a2a158c4c9562836f8a6769309f5f2e0b349c29722c8eb6fdeb8",
+          "status": "SUCCEEDED",
+          "version_hash_matches": true,
+          "version_snapshot_ids_match": true,
+          "run_snapshot_matches": true,
+          "input_matches": true,
+          "turn_run_link": true,
+          "workspaces_match": true,
+          "threads_match": true,
+          "event_log_complete": false,
+          "turn_sequence": 1
+        },
+        "missing_frozen_docs": [],
+        "final_snippets_match_frozen_docs": true
+      },
+      "pair": {
+        "same_queries": false,
+        "same_unique_sources": true,
+        "baseline_only_sources": [],
+        "candidate_only_sources": []
+      }
+    },
+    "SUP16": {
+      "baseline": {
+        "input_tokens": 9846,
+        "output_tokens": 1490,
+        "physical_calls": 4,
+        "elapsed_s": 51.81088799999998,
+        "terminal": true,
+        "queries": [
+          "退款到账后修改退款去向 更换银行卡 退款目的地变更政策",
+          "POL-S16-1 已受理退款 全部条款 例外 人工处理 第2条 第3条"
+        ],
+        "retrieved": [
+          [
+            [
+              "POL-S16-1",
+              "9e7668664ee6c00eded2cff00dde7dd6b836a682428fe2b595319df7e6c9dbe5"
+            ]
+          ],
+          [
+            [
+              "POL-S16-1",
+              "9e7668664ee6c00eded2cff00dde7dd6b836a682428fe2b595319df7e6c9dbe5"
+            ]
+          ]
+        ],
+        "delivered": [
+          [
+            [
+              "POL-S16-1",
+              "9e7668664ee6c00eded2cff00dde7dd6b836a682428fe2b595319df7e6c9dbe5"
+            ]
+          ],
+          [
+            [
+              "POL-S16-1",
+              "9e7668664ee6c00eded2cff00dde7dd6b836a682428fe2b595319df7e6c9dbe5"
+            ]
+          ]
+        ],
+        "retained_order_and_bytes": true,
+        "truncated": [
+          false,
+          false
+        ],
+        "user_sha256": "a4924d716f9eadfbb5ffb08364013d6bc3bde0a0c763ff4d33ac553b91c8bfd1",
+        "required_reads": [
+          "get_refund_status",
+          "search_knowledge"
+        ],
+        "missing_reads": [],
+        "wrong_scope": [],
+        "proposals": [
+          {
+            "name": "get_order",
+            "arguments": {
+              "order_id": "ORD-S16"
+            }
+          },
+          {
+            "name": "get_refund_status",
+            "arguments": {
+              "order_id": "ORD-S16"
+            }
+          },
+          {
+            "name": "query_customer",
+            "arguments": {
+              "customer_ref": "CU-S16"
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "query": "退款到账后修改退款去向 更换银行卡 退款目的地变更政策"
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "query": "POL-S16-1 已受理退款 全部条款 例外 人工处理 第2条 第3条",
+              "limit": 10
+            }
+          }
+        ],
+        "read_execution": [
+          [
+            "get_order",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_refund_status",
+            "SUCCESS",
+            null
+          ],
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "final_tool_results": [
+          [
+            "get_order",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_refund_status",
+            "SUCCESS",
+            null
+          ],
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "approvals": [],
+        "expected_decision": null,
+        "expected_subject": null,
+        "tickets_before": 0,
+        "tickets_after": 0,
+        "system_extension_tokens_by_call": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "observation_tokens_by_call": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "ids": {
+          "database": "refund_product_44139f3409bf4350",
+          "workspace": "workspaces/07063ce5-69dd-44d4-8cee-2b42e17408ec",
+          "thread_id": "f877fa7a-90ff-4d18-8190-002ecb6fb2cf",
+          "run_id": "fd1e66e2-8447-4461-ad45-14efdc3511b6"
+        },
+        "turn_id": "6957815e-60a2-4c98-abfe-cb34ca2a048b",
+        "snapshot_id": "91712abb-f802-4a7e-a06b-203caaac7024",
+        "version_id": "4939524b-9234-4ad1-a601-c47d5e6556ea",
+        "pg": {
+          "join_matches": true,
+          "read_only": true,
+          "output_matches_archived_run_and_turn": true,
+          "output_sha256": "768d9bf8ffc1316ddfef768313cae0b8ecc0f9312b9362651ab2ab3206835ad2",
+          "status": "SUCCEEDED",
+          "version_hash_matches": true,
+          "version_snapshot_ids_match": true,
+          "run_snapshot_matches": true,
+          "input_matches": true,
+          "turn_run_link": true,
+          "workspaces_match": true,
+          "threads_match": true,
+          "event_log_complete": false,
+          "turn_sequence": 1
+        },
+        "missing_frozen_docs": [],
+        "final_snippets_match_frozen_docs": true
+      },
+      "candidate": {
+        "input_tokens": 8816,
+        "output_tokens": 827,
+        "physical_calls": 3,
+        "elapsed_s": 42.844585599999846,
+        "terminal": true,
+        "queries": [
+          "退款改到其他卡 更换退款账户 已受理退款 修改收款卡",
+          "refund destination change original payment method policy"
+        ],
+        "retrieved": [
+          [
+            [
+              "POL-S16-1",
+              "9e7668664ee6c00eded2cff00dde7dd6b836a682428fe2b595319df7e6c9dbe5"
+            ]
+          ],
+          [
+            [
+              "POL-S16-1",
+              "9e7668664ee6c00eded2cff00dde7dd6b836a682428fe2b595319df7e6c9dbe5"
+            ]
+          ]
+        ],
+        "delivered": [
+          [
+            [
+              "POL-S16-1",
+              "9e7668664ee6c00eded2cff00dde7dd6b836a682428fe2b595319df7e6c9dbe5"
+            ]
+          ],
+          [
+            [
+              "POL-S16-1",
+              "9e7668664ee6c00eded2cff00dde7dd6b836a682428fe2b595319df7e6c9dbe5"
+            ]
+          ]
+        ],
+        "retained_order_and_bytes": true,
+        "truncated": [
+          false,
+          false
+        ],
+        "user_sha256": "a4924d716f9eadfbb5ffb08364013d6bc3bde0a0c763ff4d33ac553b91c8bfd1",
+        "required_reads": [
+          "get_refund_status",
+          "search_knowledge"
+        ],
+        "missing_reads": [],
+        "wrong_scope": [],
+        "proposals": [
+          {
+            "name": "get_order",
+            "arguments": {
+              "order_id": "ORD-S16"
+            }
+          },
+          {
+            "name": "get_refund_status",
+            "arguments": {
+              "order_id": "ORD-S16"
+            }
+          },
+          {
+            "name": "query_customer",
+            "arguments": {
+              "customer_ref": "CU-S16"
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "query": "退款改到其他卡 更换退款账户 已受理退款 修改收款卡"
+            }
+          },
+          {
+            "name": "search_knowledge",
+            "arguments": {
+              "query": "refund destination change original payment method policy"
+            }
+          }
+        ],
+        "read_execution": [
+          [
+            "get_order",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_refund_status",
+            "SUCCESS",
+            null
+          ],
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "final_tool_results": [
+          [
+            "get_order",
+            "SUCCESS",
+            null
+          ],
+          [
+            "get_refund_status",
+            "SUCCESS",
+            null
+          ],
+          [
+            "query_customer",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ],
+          [
+            "search_knowledge",
+            "SUCCESS",
+            null
+          ]
+        ],
+        "approvals": [],
+        "expected_decision": null,
+        "expected_subject": null,
+        "tickets_before": 0,
+        "tickets_after": 0,
+        "system_extension_tokens_by_call": [
+          511,
+          511,
+          511
+        ],
+        "observation_tokens_by_call": [
+          0,
+          66,
+          66
+        ],
+        "ids": {
+          "database": "refund_product_3d7d7d49c99c4adf",
+          "workspace": "workspaces/1de8068d-e7f3-4078-97ea-47a56bfa0451",
+          "thread_id": "6504cf91-20f2-438f-bc03-10d6f9b93301",
+          "run_id": "4f97c0a4-0914-49d7-89ce-bbb6927cbeeb"
+        },
+        "turn_id": "5c5a4504-94f1-4560-9deb-21b9fa5bfafc",
+        "snapshot_id": "9dfd195f-f1ae-4220-b342-dc5a8303b148",
+        "version_id": "fd107d2f-55bd-48b3-ac9b-b570591ccab9",
+        "pg": {
+          "join_matches": true,
+          "read_only": true,
+          "output_matches_archived_run_and_turn": true,
+          "output_sha256": "2a190d63957cde532063d7f6986e1f98840e11bc0b7988f2ba079515d1483982",
+          "status": "SUCCEEDED",
+          "version_hash_matches": true,
+          "version_snapshot_ids_match": true,
+          "run_snapshot_matches": true,
+          "input_matches": true,
+          "turn_run_link": true,
+          "workspaces_match": true,
+          "threads_match": true,
+          "event_log_complete": false,
+          "turn_sequence": 1
+        },
+        "missing_frozen_docs": [],
+        "final_snippets_match_frozen_docs": true
+      },
+      "pair": {
+        "same_queries": false,
+        "same_unique_sources": true,
+        "baseline_only_sources": [],
+        "candidate_only_sources": []
+      }
+    }
+  },
+  "scope_notes": [
+    "Support final evidence parsed directly from the last provider request search_knowledge tool messages. Source equality uses fixture source ID and SHA-256 over exact UTF-8 snippet. Retrieved occurrences count repeats.",
+    "thread_turns stores agent_run_id, not an independent final_output. Compare the DB Run text to both frozen Turn and Run views and independently join actual persisted Turn and Run.",
+    "Elapsed times are frozen task elapsed times, not model-only latency. System extension and observation field metrics are archived request token estimates. Physical input and output totals come from the physical receipts.",
+    "No semantic judgments or model calls. Event-log completeness is recorded separately from terminal state."
+  ]
+}

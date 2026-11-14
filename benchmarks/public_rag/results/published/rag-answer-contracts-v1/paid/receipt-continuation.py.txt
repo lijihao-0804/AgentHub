@@ -1,0 +1,101 @@
+"""Recover known serializer-only interruptions. Never re-execute a claimed task."""
+import argparse
+import asyncio
+import hashlib
+import json
+import sqlite3
+import sys
+from contextlib import closing
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
+from benchmarks.evaluation.experiments.support_refund_rag.answer_contract_pair import recover_case
+from benchmarks.public_rag import answer_pair_run as scheduled
+from benchmarks.public_rag.answer_pair_freeze import RUN_DIR, cases, load, verify
+from benchmarks.public_rag.confirmation_cases import save
+from packages.agent_runtime.adapters.langgraph import configure_windows_asyncio_policy
+
+
+async def reconcile(*, measured=None):
+    f = verify()
+    path = RUN_DIR / "ledger.sqlite"
+    with closing(sqlite3.connect(f"{path.resolve().as_uri()}?mode=ro", uri=True)) as db:
+        if (db.execute("SELECT manifest FROM study").fetchone() != (scheduled.identity(),)
+                or db.execute("SELECT 1 FROM stops").fetchone()
+                or db.execute("SELECT 1 FROM wires WHERE status != 'returned'").fetchone()):
+            raise RuntimeError("Stop: drift, use or dispatch unresolved")
+        active = db.execute("SELECT task FROM attempts WHERE state='active'").fetchall()
+        if len(active) != 1:
+            raise RuntimeError("Missing unique existing task")
+        key = active[0][0]
+        if key not in f["schedule"] or not key.startswith("support/"):
+            raise RuntimeError("Only an already-dispatched support receipt can be recovered")
+        wires = scheduled.wires(db, key)
+    folder = RUN_DIR / key
+    partial = folder / "first.json"
+    source = partial.read_bytes()
+    # The frozen JSON writer interrupted at exactly this un-JSON-able ModelRequest field.
+    if not source.rstrip().endswith(b'"required":') or b'"required_capabilities":' not in source[-120:]:
+        raise RuntimeError("Different local failure; stop")
+    original = load(folder / "run.json")
+    if not original.get("terminal_known") or not wires:
+        raise RuntimeError("Run or physical outcome unknown; stop")
+    if any(w["cost"] != 2*w["input"] + 8*w["output"] or not w["provider_id"] for w in wires):
+        raise RuntimeError("Unreconciled usage or cost")
+    _chain, case, arm = next((c, q, a) for c,q,a in cases() if f"{c}/{q['case_id']}/{a}" == key)
+    checked = await recover_case(case, arm, output=folder, wires=wires)
+    if not checked["terminal_known"] or any(
+        checked["run"].get(k) != original["run"].get(k)
+        for k in ("id", "status", "final_output", "total_input_tokens", "total_output_tokens")
+    ) or checked["turn"]["final_output"] != original["turn"]["final_output"]:
+        raise RuntimeError("Database and original terminal receipt disagree; stop")
+    # Keep original API output intact. Read-back validates it and the transaction's effects.
+    elapsed = measured if measured is not None else (
+        partial.stat().st_ctime_ns - folder.stat().st_ctime_ns
+    ) / 1e9
+    if elapsed <= 0:
+        raise ValueError("Missing elapsed measurement")
+    rec = folder / "first-reconciled.json"
+    save(rec, {
+        **original, "task": key, "elapsed_seconds": elapsed,
+        "provider_receipts": original["physical_receipts"], "physical_receipts": wires,
+        "receipt_reconciliation": {
+            "kind": "frozen json.dump cannot encode ModelRequest.required_capabilities.required",
+            "partial_first_file_sha256": hashlib.sha256(source).hexdigest(),
+            "original_run_file_sha256": hashlib.sha256((folder/"run.json").read_bytes()).hexdigest(),
+            "run_id": checked["run_id"], "postgres_terminal_readback": True,
+            "elapsed_source": "frozen scheduler perf_counter" if measured is not None
+                else "Windows creation times, task directory to first receipt writer",
+        },
+    })
+    scheduled.finish(path, key, rec)
+    print("Reconciled existing terminal receipt", key, checked["run_id"], len(wires), flush=True)
+
+
+async def proceed():
+    while True:
+        try:
+            await scheduled.run(RUN_DIR)
+            return
+        except TypeError as exc:
+            if str(exc) != "Object of type frozenset is not JSON serializable":
+                raise
+            measured = None
+            tb = exc.__traceback__
+            while tb is not None:
+                frame = tb.tb_frame
+                if frame.f_code is save.__code__ and frame.f_locals["path"].name == "first.json":
+                    measured = frame.f_locals["value"]["elapsed_seconds"]
+                tb = tb.tb_next
+            if measured is None:
+                raise
+        await reconcile(measured=measured)
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("action", choices=("reconcile", "proceed"))
+    args = parser.parse_args()
+    configure_windows_asyncio_policy()
+    asyncio.run(reconcile() if args.action == "reconcile" else proceed())
