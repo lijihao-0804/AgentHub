@@ -1,0 +1,235 @@
+{
+  "arm": "512",
+  "source": {
+    "packages/knowledge/citation_qa.py": "1968f8581b9954c4565ba3361b7a52965c8f048d8d092cb9e0ada42a6ec5daf8",
+    "apps/api/routes/citation_qa.py": "f818f3a8928bd7213317d4b21913824755f2276a32f64223926fecd0ba54cfdc",
+    "apps/api/schemas/citation_qa.py": "b9bfa5fcea10c45be4a33cf408a2546114f2e7800ff7d93c371cf51a048453c8",
+    "packages/model_gateway/adapters/litellm/adapter.py": "e768ea18574984723642b03f59e2385f12eeca09091f8485254dda46b0c6d6af",
+    "packages/model_gateway/gateway.py": "c6d02969e16ef7f825644b247c79e23905e39a2740ba936587f5401b696e9d92",
+    "packages/model_gateway/contracts.py": "6c6507db40e667883706e59c130cabba97827482a92fd6802fe489339475cda1",
+    "packages/model_gateway/errors.py": "600b6c85e4f50b353a7a5bba456df8d4fca63c3bbc8ead8c92478023b3a23349",
+    "packages/knowledge/retrieval.py": "83b29728707cac0f26b0a8edaf7d2e0e3a9ea33467f6975b17eae3a3233a88e7"
+  },
+  "model": "deepseek-v4.1-flash-1017",
+  "profile": "ce850b69-68c2-437d-89ec-5f66f488346b",
+  "snapshot": "4bf2f6bd-a6f1-4ded-a622-44114187066d",
+  "snapshot_hash": "043b5bac347b6e658c3f13aa09c99bc078f8adb85c95c8bc7eefaa96c8285bf5",
+  "documents": 7,
+  "chunks": 99,
+  "protocol_sha256": "07b5e6d650830647e787b7205c79c63a58157df5dbfe2d9565caab21c10ab63e",
+  "endpoint": "POST /api/v1/knowledge/query",
+  "rows": [
+    {
+      "id": "a130aa735de3b65c71f27018f20d3c068bafb826",
+      "state": "returned",
+      "utc": "2026-11-14T02:40:12.086033+00:00",
+      "http": 502,
+      "elapsed_s": 33.594,
+      "error": "CITATION_QA_INVALID_MODEL_OUTPUT",
+      "message": "The model returned an invalid citation answer. JSON parsing failed at the model output limit.",
+      "events": [
+        {
+          "kind": "retrieval",
+          "snapshot": "4bf2f6bd-a6f1-4ded-a622-44114187066d",
+          "candidate": [
+            {
+              "source": "1910.04887",
+              "ordinal": 0,
+              "chunk_id": "4e6c58d4d97888d9db4dbbd8ce1f5b1f0147918db4ee428a8797eae8165022ab"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 2,
+              "chunk_id": "59860a87f1fd646f2eef82237be7f185be5d5a21069016ce2ccbb0761718d44f"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 3,
+              "chunk_id": "dd989b93ff76afaa9cf12f655a3822a1d3b527ab28c3c51d1aaeb5fe4434cdc1"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 5,
+              "chunk_id": "ece6e2d6560f1316e2a1acb7afff0a5bbbe58f010c7d5458b7661b0bb8bea5bc"
+            },
+            {
+              "source": "1601.02166",
+              "ordinal": 3,
+              "chunk_id": "33b526efedd15ef5ff6ec1db44d543228f74d2183441cfcc4ce3bdd8f8316df0"
+            },
+            {
+              "source": "1707.08559",
+              "ordinal": 6,
+              "chunk_id": "19a8ae5700d0ce68fbefdea2f001dab2fbb46c9e1c34dfebb43840aa1be1db2d"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 4,
+              "chunk_id": "fddc00338b9c968585cd24d292c4c8df5a5ae43e6d9eedf23d174b30850b7f9a"
+            },
+            {
+              "source": "1911.01680",
+              "ordinal": 13,
+              "chunk_id": "1fed724e26090008085ef9d93e80a38c2623b05060cf2ad944fd294463500214"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 8,
+              "chunk_id": "d99e4cb013c520723ccd08ae1a8668c390c462c340c38d55be0346127078a977"
+            },
+            {
+              "source": "2002.01861",
+              "ordinal": 12,
+              "chunk_id": "c079d101a8f159611100aeae0e52b116ee1982fa2132cedc88383c557403eb5d"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 6,
+              "chunk_id": "76a94c17da3d17cc758a9f8269e8959c6a42781ecc3953cc7ec9b91bf60e0d09"
+            },
+            {
+              "source": "1601.02166",
+              "ordinal": 8,
+              "chunk_id": "0db3784f697c448fd38703b082b6a199f94475061a73af9b4ad80cb9631d1e1b"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 7,
+              "chunk_id": "adc55a09e04f24def56839f292bcda780dbed6aecee8c30c490a01c4ffccccbe"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 1,
+              "chunk_id": "368c75d5d0afa4fd7177b95140287c59e91399ee3d4f0eb1ca52aa85e0b0ab83"
+            },
+            {
+              "source": "1601.02166",
+              "ordinal": 7,
+              "chunk_id": "8caccd068b144ffcae30d54f91a58bdc71a5833b8e784318bde2cc92c949839c"
+            },
+            {
+              "source": "2002.01861",
+              "ordinal": 2,
+              "chunk_id": "73479e02dba02d46847bc243043afb69f18560ee718dce6787b3b6be9bb5be9d"
+            },
+            {
+              "source": "1707.06945",
+              "ordinal": 5,
+              "chunk_id": "3737597acdcff410b145d894c84ec9b5a1d6383ff81b36579ae2016fbdd762da"
+            },
+            {
+              "source": "1707.08559",
+              "ordinal": 8,
+              "chunk_id": "b9c8e5d87ccd6f3326d81298df9e30743583c99f3030e410f4a80b45200f5fa3"
+            },
+            {
+              "source": "1911.01680",
+              "ordinal": 3,
+              "chunk_id": "5425b5a0bbfd2c9de50565d0dec05e3530047ba32971bb6fe779276abaa9101c"
+            },
+            {
+              "source": "1911.01680",
+              "ordinal": 0,
+              "chunk_id": "c0c7580de7704d7d83c65620b6764f0d9ca4a614c932d8ce15ab2fdbabf2eca4"
+            }
+          ],
+          "reranked": [
+            {
+              "source": "1910.04887",
+              "ordinal": 8,
+              "chunk_id": "d99e4cb013c520723ccd08ae1a8668c390c462c340c38d55be0346127078a977"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 0,
+              "chunk_id": "4e6c58d4d97888d9db4dbbd8ce1f5b1f0147918db4ee428a8797eae8165022ab"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 2,
+              "chunk_id": "59860a87f1fd646f2eef82237be7f185be5d5a21069016ce2ccbb0761718d44f"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 7,
+              "chunk_id": "adc55a09e04f24def56839f292bcda780dbed6aecee8c30c490a01c4ffccccbe"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 3,
+              "chunk_id": "dd989b93ff76afaa9cf12f655a3822a1d3b527ab28c3c51d1aaeb5fe4434cdc1"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 6,
+              "chunk_id": "76a94c17da3d17cc758a9f8269e8959c6a42781ecc3953cc7ec9b91bf60e0d09"
+            }
+          ],
+          "times_ms": {
+            "dense": 252.274,
+            "sparse": 8.273,
+            "fusion": 0.171,
+            "rerank": 29555.638
+          },
+          "total_ms": 29834.612
+        },
+        {
+          "kind": "reader",
+          "prompt_sha256": "0a54d0d80b0f1a2a60a7fa278e8037e1e98920f3601eb3e1c6c5ff33d4cd788a",
+          "chunks": [
+            {
+              "source": "1910.04887",
+              "ordinal": 8,
+              "chunk_id": "d99e4cb013c520723ccd08ae1a8668c390c462c340c38d55be0346127078a977"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 0,
+              "chunk_id": "4e6c58d4d97888d9db4dbbd8ce1f5b1f0147918db4ee428a8797eae8165022ab"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 2,
+              "chunk_id": "59860a87f1fd646f2eef82237be7f185be5d5a21069016ce2ccbb0761718d44f"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 7,
+              "chunk_id": "adc55a09e04f24def56839f292bcda780dbed6aecee8c30c490a01c4ffccccbe"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 3,
+              "chunk_id": "dd989b93ff76afaa9cf12f655a3822a1d3b527ab28c3c51d1aaeb5fe4434cdc1"
+            },
+            {
+              "source": "1910.04887",
+              "ordinal": 6,
+              "chunk_id": "76a94c17da3d17cc758a9f8269e8959c6a42781ecc3953cc7ec9b91bf60e0d09"
+            }
+          ]
+        },
+        {
+          "kind": "wire",
+          "max_tokens": 512,
+          "temperature": 0.0,
+          "model": "deepseek-v4.1-flash-1017",
+          "retry_limit": 0,
+          "enable_thinking": null,
+          "prompt_sha256": "0a54d0d80b0f1a2a60a7fa278e8037e1e98920f3601eb3e1c6c5ff33d4cd788a"
+        },
+        {
+          "kind": "response",
+          "elapsed_ms": 3730,
+          "finish_reason": "length",
+          "content_present": true,
+          "usage": {
+            "input_tokens": 2350,
+            "output_tokens": 512,
+            "total_tokens": 2862
+          }
+        }
+      ]
+    }
+  ]
+}

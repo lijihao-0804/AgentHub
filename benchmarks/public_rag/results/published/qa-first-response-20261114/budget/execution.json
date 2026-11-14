@@ -1,0 +1,54 @@
+{
+  "job": {
+    "state": "completed",
+    "started_at": "2026-11-14T02:18:19.921824+00:00",
+    "finished_at": "2026-11-14T02:42:02.454302+00:00",
+    "exit_code": 0,
+    "elapsed_seconds": 1422.532
+  },
+  "receipts": {
+    "512-full.json": {
+      "count": 1,
+      "http": {
+        "502": 1
+      },
+      "sha256_lf": "ac8003f439dfc5f134198b639160423a395d20b214fe1a72d51d1ea8bf00de2f"
+    },
+    "512-qasper.json": {
+      "count": 1,
+      "http": {
+        "502": 1
+      },
+      "sha256_lf": "aede02d4aff017e6d880327276c2aa68e3a87c5afd6a77a6501926c2a99c8bf1"
+    },
+    "512-reserve14.json": {
+      "count": 14,
+      "http": {
+        "200": 11,
+        "502": 3
+      },
+      "sha256_lf": "c54f5526eee92cd634adc23112a9deb0dad2aa5c70c756ab5dc65209208f9111"
+    },
+    "2048-full.json": {
+      "count": 1,
+      "http": {
+        "200": 1
+      },
+      "sha256_lf": "872886b17eeb867f4f76448153bdc4843ad1880f598e88e9b820f9537aa1acae"
+    },
+    "2048-qasper.json": {
+      "count": 1,
+      "http": {
+        "200": 1
+      },
+      "sha256_lf": "811730077cf8d2928bce18eb7ad9ebb3dc19d174fadf3a2d68c7b70b0944e3ed"
+    },
+    "2048-reserve14.json": {
+      "count": 14,
+      "http": {
+        "200": 14
+      },
+      "sha256_lf": "b7dc4de4c4db923b068cf727cbac22a4655137985feac58df6f7855785120050"
+    }
+  }
+}

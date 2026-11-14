@@ -1,0 +1,632 @@
+{
+  "summary": {
+    "full": {
+      "metrics": {
+        "baseline": {
+          "n": 1,
+          "http200": 0,
+          "answerable": 1,
+          "unanswerable": 0,
+          "positive_outcomes": {
+            "failure": 1
+          },
+          "negative_outcomes": {},
+          "supporting_citations": 0,
+          "returned_citations": 0
+        },
+        "candidate": {
+          "n": 1,
+          "http200": 1,
+          "answerable": 1,
+          "unanswerable": 0,
+          "positive_outcomes": {
+            "wrong": 1
+          },
+          "negative_outcomes": {},
+          "supporting_citations": 2,
+          "returned_citations": 6
+        }
+      },
+      "http200": {
+        "retained": [],
+        "lost": [],
+        "gained": [
+          "620"
+        ]
+      },
+      "supported_answer": {
+        "retained": [],
+        "lost": [],
+        "gained": []
+      },
+      "correct_refusal": {
+        "retained": [],
+        "lost": [],
+        "gained": []
+      },
+      "wrong_positive": {
+        "retained": [],
+        "lost": [],
+        "gained": [
+          "620"
+        ]
+      }
+    },
+    "qasper": {
+      "metrics": {
+        "baseline": {
+          "n": 1,
+          "http200": 0,
+          "answerable": 1,
+          "unanswerable": 0,
+          "positive_outcomes": {
+            "failure": 1
+          },
+          "negative_outcomes": {},
+          "supporting_citations": 0,
+          "returned_citations": 0
+        },
+        "candidate": {
+          "n": 1,
+          "http200": 1,
+          "answerable": 1,
+          "unanswerable": 0,
+          "positive_outcomes": {
+            "full": 1
+          },
+          "negative_outcomes": {},
+          "supporting_citations": 2,
+          "returned_citations": 2
+        }
+      },
+      "http200": {
+        "retained": [],
+        "lost": [],
+        "gained": [
+          "a130aa735de3b65c71f27018f20d3c068bafb826"
+        ]
+      },
+      "supported_answer": {
+        "retained": [],
+        "lost": [],
+        "gained": [
+          "a130aa735de3b65c71f27018f20d3c068bafb826"
+        ]
+      },
+      "correct_refusal": {
+        "retained": [],
+        "lost": [],
+        "gained": []
+      },
+      "wrong_positive": {
+        "retained": [],
+        "lost": [],
+        "gained": []
+      }
+    },
+    "reserve14": {
+      "metrics": {
+        "baseline": {
+          "n": 14,
+          "http200": 11,
+          "answerable": 10,
+          "unanswerable": 4,
+          "positive_outcomes": {
+            "full": 8,
+            "partial": 1,
+            "failure": 1
+          },
+          "negative_outcomes": {
+            "refusal": 1,
+            "full": 1,
+            "failure": 2
+          },
+          "supporting_citations": 17,
+          "returned_citations": 17
+        },
+        "candidate": {
+          "n": 14,
+          "http200": 14,
+          "answerable": 10,
+          "unanswerable": 4,
+          "positive_outcomes": {
+            "full": 8,
+            "wrong": 1,
+            "partial": 1
+          },
+          "negative_outcomes": {
+            "refusal": 2,
+            "wrong": 1,
+            "partial": 1
+          },
+          "supporting_citations": 31,
+          "returned_citations": 31
+        }
+      },
+      "http200": {
+        "retained": [
+          "1d1ab5d8a24dfd15d95a5a7506ac0456d1192209",
+          "281cb27cfa0eea12180fd82ae33035945476609e",
+          "29983f4bc8a5513a198755e474361deee93d4ab6",
+          "30db81df46474363d5749d7f6a94b7ef95cd3e01",
+          "3de27c81af3030eb2d9de1df5ec9bfacdef281a9",
+          "63337fd803f6fdd060ebd0f53f9de79d451810cd",
+          "89e1e0dc5d15a05f8740f471e1cb3ddd296b8942",
+          "94c5f5b1eb8414ad924c3568cedd81dc35f29c48",
+          "b2b0321b0aaf58c3aa9050906ade6ef35874c5c1",
+          "f52ec4d68de91dba66668f0affc198706949ff90",
+          "fb56743e942883d7e74a73c70bd11016acddc348"
+        ],
+        "lost": [],
+        "gained": [
+          "86a93a2d1c19cd0cd21ad1608f2a336240725700",
+          "b3ec918827cd22b16212265fcdd5b3eadee654ae",
+          "dc57ae854d78aa5d5e8c979826d3e2524d4e9165"
+        ]
+      },
+      "supported_answer": {
+        "retained": [
+          "281cb27cfa0eea12180fd82ae33035945476609e",
+          "29983f4bc8a5513a198755e474361deee93d4ab6",
+          "30db81df46474363d5749d7f6a94b7ef95cd3e01",
+          "89e1e0dc5d15a05f8740f471e1cb3ddd296b8942",
+          "94c5f5b1eb8414ad924c3568cedd81dc35f29c48",
+          "b2b0321b0aaf58c3aa9050906ade6ef35874c5c1",
+          "f52ec4d68de91dba66668f0affc198706949ff90"
+        ],
+        "lost": [
+          "3de27c81af3030eb2d9de1df5ec9bfacdef281a9"
+        ],
+        "gained": [
+          "86a93a2d1c19cd0cd21ad1608f2a336240725700"
+        ]
+      },
+      "correct_refusal": {
+        "retained": [
+          "1d1ab5d8a24dfd15d95a5a7506ac0456d1192209"
+        ],
+        "lost": [],
+        "gained": [
+          "dc57ae854d78aa5d5e8c979826d3e2524d4e9165"
+        ]
+      },
+      "wrong_positive": {
+        "retained": [
+          "63337fd803f6fdd060ebd0f53f9de79d451810cd"
+        ],
+        "lost": [],
+        "gained": [
+          "3de27c81af3030eb2d9de1df5ec9bfacdef281a9",
+          "b3ec918827cd22b16212265fcdd5b3eadee654ae"
+        ]
+      }
+    }
+  },
+  "assessment": {
+    "independent_checks": {
+      "http_200_improved": true,
+      "previously_correct_preserved": false,
+      "previously_correct_refusals_preserved": true,
+      "no_new_wrong_positive": false,
+      "semantic_citation_precision_preserved": true
+    },
+    "historical_preservation": {
+      "full": {
+        "lost_supported": [],
+        "lost_correct_refusals": [],
+        "new_wrong_positives": [
+          "620"
+        ]
+      },
+      "qasper": {
+        "lost_supported": [],
+        "lost_correct_refusals": [],
+        "new_wrong_positives": []
+      }
+    },
+    "http_discordant_gain_loss": [
+      3,
+      0
+    ],
+    "two_sided_exact_p_http": 0.25,
+    "note": "Source integrity, retrieval parity and historical controls are checked separately."
+  },
+  "rows": {
+    "94c5f5b1eb8414ad924c3568cedd81dc35f29c48": {
+      "baseline": {
+        "masked_id": "2da9b08a007cf8eaaa6c",
+        "verdict": "full",
+        "supporting_citations": [
+          3
+        ],
+        "reason": "[3] directly identifies 3,000 hard samples selected from the full test set and the exact-match accuracy metric for both.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "05a4cb60f32dd695b628",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          3,
+          4
+        ],
+        "reason": "[3] establishes that the hard set is 3,000 selected test samples and describes the metric. [1] and [4] substantiate the respective submitted and optimized scores for each split.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "1d1ab5d8a24dfd15d95a5a7506ac0456d1192209": {
+      "baseline": {
+        "masked_id": "79f0d3ea83b0103c8aaf",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "Structured refusal with no citations for the predeclared negative. The qualitative statement about faster training does not give a duration.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true
+      },
+      "candidate": {
+        "masked_id": "c35aee8bd462977a0dcf",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "Structured refusal with no citations for the predeclared negative. The qualitative statement about faster training does not give a duration.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true
+      }
+    },
+    "3de27c81af3030eb2d9de1df5ec9bfacdef281a9": {
+      "baseline": {
+        "masked_id": "6afe334c828fcd9d8775",
+        "verdict": "full",
+        "supporting_citations": [
+          1
+        ],
+        "reason": "[1] gives 2.6 GB of raw text, 421,829,960 words and 17,305,401 sentences.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "353123f3dca2dacf7115",
+        "verdict": "wrong",
+        "supporting_citations": [
+          1
+        ],
+        "reason": "[1] supports all three size figures and mentions Italian Google News and anonymized chatbot chats. The cited excerpt starts mid-date and never identifies Italian Wikipedia. That additional provenance claim occurs in the reference paragraph but lacks support in the returned citation.",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "fb56743e942883d7e74a73c70bd11016acddc348": {
+      "baseline": {
+        "masked_id": "f9d6e83332fe169c4769",
+        "verdict": "partial",
+        "supporting_citations": [
+          1,
+          2
+        ],
+        "reason": "[2] specifies all available paired text per target language, no external text, and the RNNLM architecture. [1] supports separate training and the character dictionary over 15 languages. The response identifies the type of data but omits its annotated corpus name, BABEL.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "7829e9cc0b42d348549d",
+        "verdict": "partial",
+        "supporting_citations": [
+          1,
+          2
+        ],
+        "reason": "[2] specifies all available paired text per target language, no external text, and the RNNLM architecture. [1] supports separate training and the character dictionary over 15 languages. The response identifies the type of data but omits its annotated corpus name, BABEL.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "63337fd803f6fdd060ebd0f53f9de79d451810cd": {
+      "baseline": {
+        "masked_id": "f64e23f29a798950c829",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          4
+        ],
+        "reason": "The official label is unanswerable, but [4] expressly gives language-dependent features such as dependency structure and says experts often predefine them. [1] supports the broader reliance on expert cybersecurity knowledge.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": true
+      },
+      "candidate": {
+        "masked_id": "0f64de3b638541297726",
+        "verdict": "wrong",
+        "supporting_citations": [
+          1,
+          4
+        ],
+        "reason": "[4] supplies the example of dependency structure despite the official negative label, and [1] confirms reliance on cybersecurity expertise. The answer turns “often have to be pre-defined” into an unqualified requirement that these features must be pre-defined by experts.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": true
+      }
+    },
+    "29983f4bc8a5513a198755e474361deee93d4ab6": {
+      "baseline": {
+        "masked_id": "1ea5d7e20039f40f0525",
+        "verdict": "full",
+        "supporting_citations": [
+          2,
+          4
+        ],
+        "reason": "[2] defines the five-minute reuse and 1–25-hour return positives and explains why interruption labels are unsuitable. [4] names both strategies and explains the friction of explicit feedback.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "b96f9f71ef97f3f19c77",
+        "verdict": "full",
+        "supporting_citations": [
+          2,
+          4
+        ],
+        "reason": "[2] defines the five-minute reuse and 1–25-hour return positives and explains why interruption labels are unsuitable. [4] names both strategies and explains the friction of explicit feedback.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "89e1e0dc5d15a05f8740f471e1cb3ddd296b8942": {
+      "baseline": {
+        "masked_id": "d9c848044acd6e67fa91",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2
+        ],
+        "reason": "[1] reports greater reliance on punchlines by models and humans on the body/punchline tests. [2] assigns punchlines greater weight and supplies the authors’ hypothesis about variation in setup length.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "9c3a01c29bf85b145946",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2
+        ],
+        "reason": "[1] reports greater reliance on punchlines by models and humans on the body/punchline tests. [2] assigns punchlines greater weight and supplies the authors’ hypothesis about variation in setup length.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "b2b0321b0aaf58c3aa9050906ade6ef35874c5c1": {
+      "baseline": {
+        "masked_id": "ec5c5e87c3419eb7b7dc",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          4
+        ],
+        "reason": "[4] directly describes 150,000 image-and-text tweets in MMHS150K. [1] independently states the 150K total.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "894b9918bc37ac268871",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          4
+        ],
+        "reason": "[4] directly describes 150,000 image-and-text tweets in MMHS150K. [1] independently states the 150K total.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "86a93a2d1c19cd0cd21ad1608f2a336240725700": {
+      "baseline": {
+        "masked_id": "fec3ac4a61a4e8de4479",
+        "verdict": "failure",
+        "supporting_citations": [],
+        "reason": "HTTP 502 on the first response. No answer or citation was returned.",
+        "returned_citations": 0,
+        "http": 502,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "a252821fde2c012c1551",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2,
+          3,
+          4,
+          6
+        ],
+        "reason": "[4] defines contextual meaning in the distributional hypothesis and [6] gives Frege’s sentence holism. [1] describes the Skip-gram analogy. [2] explicitly relates both accounts through whole-to-part meaning and [3] supports expanding the hypothesis via the Fregean account.",
+        "returned_citations": 5,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "dc57ae854d78aa5d5e8c979826d3e2524d4e9165": {
+      "baseline": {
+        "masked_id": "84064d724d8016a45b1d",
+        "verdict": "failure",
+        "supporting_citations": [],
+        "reason": "HTTP 502 on the first response. No answer or citation was returned.",
+        "returned_citations": 0,
+        "http": 502,
+        "negative": true
+      },
+      "candidate": {
+        "masked_id": "c7b1276cdf1972ec1e9a",
+        "verdict": "refusal",
+        "supporting_citations": [],
+        "reason": "Structured refusal with no citations. It distinguishes a claim that the feature-free method is advantageous from an explanation of why, in agreement with the official negative.",
+        "returned_citations": 0,
+        "http": 200,
+        "negative": true
+      }
+    },
+    "b3ec918827cd22b16212265fcdd5b3eadee654ae": {
+      "baseline": {
+        "masked_id": "479d4b9d5debd4ba40f1",
+        "verdict": "failure",
+        "supporting_citations": [],
+        "reason": "HTTP 502 on the first response. No answer or citation was returned.",
+        "returned_citations": 0,
+        "http": 502,
+        "negative": true
+      },
+      "candidate": {
+        "masked_id": "a95a14d2d42cfdc2a973",
+        "verdict": "partial",
+        "supporting_citations": [
+          2,
+          3,
+          4,
+          6
+        ],
+        "reason": "Although officially unanswerable, [4] and the overlapping [6] document the #Drunk error example. [2] and [3] support the supervision procedure, and [2] stops before any list. The answer expressly leaves the complete hashtag inventory unresolved.",
+        "returned_citations": 4,
+        "http": 200,
+        "negative": true
+      }
+    },
+    "281cb27cfa0eea12180fd82ae33035945476609e": {
+      "baseline": {
+        "masked_id": "0129eea8542d7ba7e675",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2
+        ],
+        "reason": "[2] explicitly contrasts joint and independent learning of relations. [1] confirms joint learning is a component of the framework.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "ca86c15cf55aabd5fce2",
+        "verdict": "full",
+        "supporting_citations": [
+          2,
+          3,
+          6
+        ],
+        "reason": "[2] states the contrast and cites interrelated family relations that benefit. [3] explicitly describes the comparison and [3] and [6] identify joint learning and inference from noisy relational data as an RDN application.",
+        "returned_citations": 3,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "30db81df46474363d5749d7f6a94b7ef95cd3e01": {
+      "baseline": {
+        "masked_id": "cd5c048c3f5ac90e6d12",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          3
+        ],
+        "reason": "Both excerpts identify news as the source and Twitter, Yelp reviews and movie reviews as targets.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "bc6515df3f02baa91fc7",
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2,
+          3,
+          5
+        ],
+        "reason": "[1] and [3] identify news as source and name all three targets. [2] and [5] substantiate the count of three experimental target domains, though neither enumerates them.",
+        "returned_citations": 4,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "f52ec4d68de91dba66668f0affc198706949ff90": {
+      "baseline": {
+        "masked_id": "df9f5dd9924b44c2730a",
+        "verdict": "full",
+        "supporting_citations": [
+          3
+        ],
+        "reason": "[3] names the Women–Yoga correlation and all four Topic 2 keywords. The statements about practice, teaching and diet are specifically attributed to the authors’ inferences and are present in [3].",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "476da0ed7bbb91c3839e",
+        "verdict": "full",
+        "supporting_citations": [
+          3
+        ],
+        "reason": "[3] names the Women–Yoga correlation and all four Topic 2 keywords. The statements about practice, teaching and diet are specifically attributed to the authors’ inferences and are present in [3].",
+        "returned_citations": 1,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "a130aa735de3b65c71f27018f20d3c068bafb826": {
+      "baseline": {
+        "masked_id": "d52c31c6c5192ac6fb25",
+        "verdict": "failure",
+        "supporting_citations": [],
+        "reason": "First response was HTTP 502 with no answer or citations.",
+        "returned_citations": 0,
+        "http": 502,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "2c967c7412f6ea2abfca",
+        "verdict": "full",
+        "supporting_citations": [
+          4,
+          6
+        ],
+        "reason": "[6] gives the VG and ReferIt image and description/expression counts. [4] independently gives 1.73M instance-selection training samples and 300K validation/test samples.",
+        "returned_citations": 2,
+        "http": 200,
+        "negative": false
+      }
+    },
+    "620": {
+      "baseline": {
+        "masked_id": "cd4ea3eb843c46f41927",
+        "verdict": "failure",
+        "supporting_citations": [],
+        "reason": "First response was HTTP 502 with no answer or citations.",
+        "returned_citations": 0,
+        "http": 502,
+        "negative": false
+      },
+      "candidate": {
+        "masked_id": "47ad65abe1a73e7a7628",
+        "verdict": "wrong",
+        "supporting_citations": [
+          1,
+          6
+        ],
+        "reason": "The answer endorses consistency with the compound claim without identifying the missing fibrosis result. [1] supports the specific mouse findings on stroma, drug delivery, vascularity and transient stabilization. [6] supports the separate description of pulmonary vascular lesions in idiopathic pulmonary fibrosis. [2]–[5] are only grouped under broad topic labels and supply no substantive result used in the answer.",
+        "returned_citations": 6,
+        "http": 200,
+        "negative": false
+      }
+    }
+  }
+}

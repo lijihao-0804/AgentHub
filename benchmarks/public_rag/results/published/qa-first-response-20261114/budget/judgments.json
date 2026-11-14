@@ -1,0 +1,238 @@
+{
+  "0129eea8542d7ba7e675": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      2
+    ],
+    "reason": "[2] explicitly contrasts joint and independent learning of relations. [1] confirms joint learning is a component of the framework."
+  },
+  "ca86c15cf55aabd5fce2": {
+    "verdict": "full",
+    "supporting_citations": [
+      2,
+      3,
+      6
+    ],
+    "reason": "[2] states the contrast and cites interrelated family relations that benefit. [3] explicitly describes the comparison and [3] and [6] identify joint learning and inference from noisy relational data as an RDN application."
+  },
+  "05a4cb60f32dd695b628": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      3,
+      4
+    ],
+    "reason": "[3] establishes that the hard set is 3,000 selected test samples and describes the metric. [1] and [4] substantiate the respective submitted and optimized scores for each split."
+  },
+  "2da9b08a007cf8eaaa6c": {
+    "verdict": "full",
+    "supporting_citations": [
+      3
+    ],
+    "reason": "[3] directly identifies 3,000 hard samples selected from the full test set and the exact-match accuracy metric for both."
+  },
+  "0f64de3b638541297726": {
+    "verdict": "wrong",
+    "supporting_citations": [
+      1,
+      4
+    ],
+    "reason": "[4] supplies the example of dependency structure despite the official negative label, and [1] confirms reliance on cybersecurity expertise. The answer turns “often have to be pre-defined” into an unqualified requirement that these features must be pre-defined by experts."
+  },
+  "f64e23f29a798950c829": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      4
+    ],
+    "reason": "The official label is unanswerable, but [4] expressly gives language-dependent features such as dependency structure and says experts often predefine them. [1] supports the broader reliance on expert cybersecurity knowledge."
+  },
+  "1ea5d7e20039f40f0525": {
+    "verdict": "full",
+    "supporting_citations": [
+      2,
+      4
+    ],
+    "reason": "[2] defines the five-minute reuse and 1–25-hour return positives and explains why interruption labels are unsuitable. [4] names both strategies and explains the friction of explicit feedback."
+  },
+  "b96f9f71ef97f3f19c77": {
+    "verdict": "full",
+    "supporting_citations": [
+      2,
+      4
+    ],
+    "reason": "[2] defines the five-minute reuse and 1–25-hour return positives and explains why interruption labels are unsuitable. [4] names both strategies and explains the friction of explicit feedback."
+  },
+  "353123f3dca2dacf7115": {
+    "verdict": "wrong",
+    "supporting_citations": [
+      1
+    ],
+    "reason": "[1] supports all three size figures and mentions Italian Google News and anonymized chatbot chats. The cited excerpt starts mid-date and never identifies Italian Wikipedia. That additional provenance claim occurs in the reference paragraph but lacks support in the returned citation."
+  },
+  "6afe334c828fcd9d8775": {
+    "verdict": "full",
+    "supporting_citations": [
+      1
+    ],
+    "reason": "[1] gives 2.6 GB of raw text, 421,829,960 words and 17,305,401 sentences."
+  },
+  "476da0ed7bbb91c3839e": {
+    "verdict": "full",
+    "supporting_citations": [
+      3
+    ],
+    "reason": "[3] names the Women–Yoga correlation and all four Topic 2 keywords. The statements about practice, teaching and diet are specifically attributed to the authors’ inferences and are present in [3]."
+  },
+  "df9f5dd9924b44c2730a": {
+    "verdict": "full",
+    "supporting_citations": [
+      3
+    ],
+    "reason": "[3] names the Women–Yoga correlation and all four Topic 2 keywords. The statements about practice, teaching and diet are specifically attributed to the authors’ inferences and are present in [3]."
+  },
+  "479d4b9d5debd4ba40f1": {
+    "verdict": "failure",
+    "supporting_citations": [],
+    "reason": "HTTP 502 on the first response. No answer or citation was returned."
+  },
+  "84064d724d8016a45b1d": {
+    "verdict": "failure",
+    "supporting_citations": [],
+    "reason": "HTTP 502 on the first response. No answer or citation was returned."
+  },
+  "fec3ac4a61a4e8de4479": {
+    "verdict": "failure",
+    "supporting_citations": [],
+    "reason": "HTTP 502 on the first response. No answer or citation was returned."
+  },
+  "7829e9cc0b42d348549d": {
+    "verdict": "partial",
+    "supporting_citations": [
+      1,
+      2
+    ],
+    "reason": "[2] specifies all available paired text per target language, no external text, and the RNNLM architecture. [1] supports separate training and the character dictionary over 15 languages. The response identifies the type of data but omits its annotated corpus name, BABEL."
+  },
+  "f9d6e83332fe169c4769": {
+    "verdict": "partial",
+    "supporting_citations": [
+      1,
+      2
+    ],
+    "reason": "[2] specifies all available paired text per target language, no external text, and the RNNLM architecture. [1] supports separate training and the character dictionary over 15 languages. The response identifies the type of data but omits its annotated corpus name, BABEL."
+  },
+  "79f0d3ea83b0103c8aaf": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "Structured refusal with no citations for the predeclared negative. The qualitative statement about faster training does not give a duration."
+  },
+  "c35aee8bd462977a0dcf": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "Structured refusal with no citations for the predeclared negative. The qualitative statement about faster training does not give a duration."
+  },
+  "c7b1276cdf1972ec1e9a": {
+    "verdict": "refusal",
+    "supporting_citations": [],
+    "reason": "Structured refusal with no citations. It distinguishes a claim that the feature-free method is advantageous from an explanation of why, in agreement with the official negative."
+  },
+  "894b9918bc37ac268871": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      4
+    ],
+    "reason": "[4] directly describes 150,000 image-and-text tweets in MMHS150K. [1] independently states the 150K total."
+  },
+  "ec5c5e87c3419eb7b7dc": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      4
+    ],
+    "reason": "[4] directly describes 150,000 image-and-text tweets in MMHS150K. [1] independently states the 150K total."
+  },
+  "9c3a01c29bf85b145946": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      2
+    ],
+    "reason": "[1] reports greater reliance on punchlines by models and humans on the body/punchline tests. [2] assigns punchlines greater weight and supplies the authors’ hypothesis about variation in setup length."
+  },
+  "d9c848044acd6e67fa91": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      2
+    ],
+    "reason": "[1] reports greater reliance on punchlines by models and humans on the body/punchline tests. [2] assigns punchlines greater weight and supplies the authors’ hypothesis about variation in setup length."
+  },
+  "a252821fde2c012c1551": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      2,
+      3,
+      4,
+      6
+    ],
+    "reason": "[4] defines contextual meaning in the distributional hypothesis and [6] gives Frege’s sentence holism. [1] describes the Skip-gram analogy. [2] explicitly relates both accounts through whole-to-part meaning and [3] supports expanding the hypothesis via the Fregean account."
+  },
+  "a95a14d2d42cfdc2a973": {
+    "verdict": "partial",
+    "supporting_citations": [
+      2,
+      3,
+      4,
+      6
+    ],
+    "reason": "Although officially unanswerable, [4] and the overlapping [6] document the #Drunk error example. [2] and [3] support the supervision procedure, and [2] stops before any list. The answer expressly leaves the complete hashtag inventory unresolved."
+  },
+  "bc6515df3f02baa91fc7": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      2,
+      3,
+      5
+    ],
+    "reason": "[1] and [3] identify news as source and name all three targets. [2] and [5] substantiate the count of three experimental target domains, though neither enumerates them."
+  },
+  "cd5c048c3f5ac90e6d12": {
+    "verdict": "full",
+    "supporting_citations": [
+      1,
+      3
+    ],
+    "reason": "Both excerpts identify news as the source and Twitter, Yelp reviews and movie reviews as targets."
+  },
+  "2c967c7412f6ea2abfca": {
+    "verdict": "full",
+    "supporting_citations": [
+      4,
+      6
+    ],
+    "reason": "[6] gives the VG and ReferIt image and description/expression counts. [4] independently gives 1.73M instance-selection training samples and 300K validation/test samples."
+  },
+  "47ad65abe1a73e7a7628": {
+    "verdict": "wrong",
+    "supporting_citations": [
+      1,
+      6
+    ],
+    "reason": "The answer endorses consistency with the compound claim without identifying the missing fibrosis result. [1] supports the specific mouse findings on stroma, drug delivery, vascularity and transient stabilization. [6] supports the separate description of pulmonary vascular lesions in idiopathic pulmonary fibrosis. [2]–[5] are only grouped under broad topic labels and supply no substantive result used in the answer."
+  },
+  "cd4ea3eb843c46f41927": {
+    "verdict": "failure",
+    "supporting_citations": [],
+    "reason": "First response was HTTP 502 with no answer or citations."
+  },
+  "d52c31c6c5192ac6fb25": {
+    "verdict": "failure",
+    "supporting_citations": [],
+    "reason": "First response was HTTP 502 with no answer or citations."
+  }
+}

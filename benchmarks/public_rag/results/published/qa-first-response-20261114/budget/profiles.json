@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "512": "ce850b69-68c2-437d-89ec-5f66f488346b",
+    "2048": "174e5ef9-418e-4fa2-861e-499956058c10"
+  },
+  "helper_sha256": "e75ffce66a9e84cf526f626589e06cc74a2d4223f564fa9b2ed8729cbb73f33a",
+  "cap": 2048,
+  "timeout_seconds": 60
+}

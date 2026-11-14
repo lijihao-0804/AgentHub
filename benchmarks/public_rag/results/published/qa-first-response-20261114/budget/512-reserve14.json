@@ -1,0 +1,3301 @@
+{
+  "arm": "512",
+  "source": {
+    "packages/knowledge/citation_qa.py": "1968f8581b9954c4565ba3361b7a52965c8f048d8d092cb9e0ada42a6ec5daf8",
+    "apps/api/routes/citation_qa.py": "f818f3a8928bd7213317d4b21913824755f2276a32f64223926fecd0ba54cfdc",
+    "apps/api/schemas/citation_qa.py": "b9bfa5fcea10c45be4a33cf408a2546114f2e7800ff7d93c371cf51a048453c8",
+    "packages/model_gateway/adapters/litellm/adapter.py": "e768ea18574984723642b03f59e2385f12eeca09091f8485254dda46b0c6d6af",
+    "packages/model_gateway/gateway.py": "c6d02969e16ef7f825644b247c79e23905e39a2740ba936587f5401b696e9d92",
+    "packages/model_gateway/contracts.py": "6c6507db40e667883706e59c130cabba97827482a92fd6802fe489339475cda1",
+    "packages/model_gateway/errors.py": "600b6c85e4f50b353a7a5bba456df8d4fca63c3bbc8ead8c92478023b3a23349",
+    "packages/knowledge/retrieval.py": "83b29728707cac0f26b0a8edaf7d2e0e3a9ea33467f6975b17eae3a3233a88e7"
+  },
+  "model": "deepseek-v4.1-flash-1017",
+  "profile": "ce850b69-68c2-437d-89ec-5f66f488346b",
+  "snapshot": "4ebf2700-7b8f-4091-9e7d-b8aed4a44b11",
+  "snapshot_hash": "8df6024d1dfcab92ff64c265d7f6531b4ca4f3e5dd077504336c0746912f8269",
+  "documents": 14,
+  "chunks": 285,
+  "protocol_sha256": "07b5e6d650830647e787b7205c79c63a58157df5dbfe2d9565caab21c10ab63e",
+  "endpoint": "POST /api/v1/knowledge/query",
+  "rows": [
+    {
+      "id": "94c5f5b1eb8414ad924c3568cedd81dc35f29c48",
+      "state": "returned",
+      "utc": "2026-11-14T02:25:11.951309+00:00",
+      "http": 200,
+      "elapsed_s": 34.242,
+      "answer": "The hard test set is a subset made up of 3,000 hard samples selected from the test set, whereas the full test set is the complete test set. The evaluation reports exactly matching accuracy on both the full test set and the hard test subset [3].",
+      "insufficient": false,
+      "citations": [
+        {
+          "number": 3,
+          "source": "1909.00574",
+          "ordinal": 5,
+          "chunk_id": "fa090e063b908e9e88fe30697731078da1007909919350a9a816a02d3a006447",
+          "revision": "9428d60d-43b5-40c3-923d-2d0be8548238",
+          "excerpt": "e work.\n\nData Analyzation\n\nThe dataset MSParS is published by NLPCC 2019 evaluation task. The whole dataset consists of 81,826 samples annotated by native English speakers. 80% of them are used as training set. 10% of them are used as validation set while the rest is used as test set. 3000 hard samples are selected from the test set. Metric for this dataset is the exactly matching accuracy on both full test set and hard test subset. Each sample is composed of the question, the logical form, the parameters(entity/value/type) and question type as the Table TABREF3 demonstrates.\n\nSamples are classified to 12 classes originally at a coarse level while we reclassify them at a finer level, which is the basis of our sketch-based method. We replace the predicate in the triple as $P_i$, the entity in the triple as $E_i$ and distinguish different ones with subscripts. The number in superlative class and comparative class is replaced as $V$ while the type in the triple begin with special predicate “isa\" is replaced as $T$ as well. In this way, we get the sketch of the logical form. Finally, we produce 15 classes of sketches.\n\nWe believe the features of questions highly correlate with the sket",
+          "chunk_text_sha256": "3092606a386e7a537ce49640bb0cdf709100bd5c0c6ee294dde3484f6c920efc",
+          "excerpt_sha256": "3092606a386e7a537ce49640bb0cdf709100bd5c0c6ee294dde3484f6c920efc",
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1200,
+          "locator": {
+            "type": "text_range",
+            "char_end": 6200,
+            "char_start": 5000
+          }
+        }
+      ],
+      "events": [
+        {
+          "kind": "retrieval",
+          "snapshot": "4ebf2700-7b8f-4091-9e7d-b8aed4a44b11",
+          "candidate": [
+            {
+              "source": "1909.00574",
+              "ordinal": 0,
+              "chunk_id": "b7be9bffeed402c75f55c5e9de94a0999dad3b5da3f219d468f0a7b73238df51"
+            },
+            {
+              "source": "1909.00574",
+              "ordinal": 1,
+              "chunk_id": "ee55fe2948ab6693ba4c2c4bacf58c6e6f8097613644aea40f09580235a95012"
+            },
+            {
+              "source": "1909.00574",
+              "ordinal": 19,
+              "chunk_id": "2e59f263d08fa52aab947b964cae87a7e9b66c1ccc83bca25f1dd8c956cf9ba3"
+            },
+            {
+              "source": "1909.00574",
+              "ordinal": 21,
+              "chunk_id": "13cf94719d4fd839acf299e92faa6935d9bcad924cf06fd64f29b72b9d7ebc5a"
+            },
+            {
+              "source": "1909.00574",
+              "ordinal": 5,
+              "chunk_id": "fa090e063b908e9e88fe30697731078da1007909919350a9a816a02d3a006447"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 26,
+              "chunk_id": "102768c6b709fd18f0b9f701ddcb355e5956076ff5c8fa05a4cb36779f89ca20"
+            },
+            {
+              "source": "1909.00574",
+              "ordinal": 4,
+              "chunk_id": "a8d9d2e21d2ae5f212f9e231c4cc387e99905e9f39896ab2544486aa8c2c79fe"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 25,
+              "chunk_id": "46882d7f0513b140d8b92edc380dc6507bae6d06b812de3e8fa15d67777a05f0"
+            },
+            {
+              "source": "1811.05085",
+              "ordinal": 21,
+              "chunk_id": "b77b0a50876fd465abc18bdeb5182c06a32d3614eeb87745f4c88021d8181567"
+            },
+            {
+              "source": "1909.00574",
+              "ordinal": 14,
+              "chunk_id": "ba71e89dd3f24ad796aee81bacde0b1a1cfed41f1a79da1ca5d0e42cdca816c6"
+            },
+            {
+              "source": "2003.05522",
+              "ordinal": 2,
+              "chunk_id": "853edd117ef617100b2ca1523219e24a957e194e5a991056adf45bb41ed4aa98"
+            },
+            {
+              "source": "1909.00574",
+              "ordinal": 8,
+              "chunk_id": "2cc75227c2279dee6d97e509459118d6b62ac820c21d67de7f1b8d190199c380"
+            },
+            {
+              "source": "2003.05522",
+              "ordinal": 17,
+              "chunk_id": "6010d000d9a4b95c29c378cb558c37d274ddf2ad87485d8c817b065ac316f3c1"
+            },
+            {
+              "source": "2003.05522",
+              "ordinal": 0,
+              "chunk_id": "51e146e787642bae2b1700c59fd781bc7099e5b34877a503d107774180fb2ad2"
+            },
+            {
+              "source": "1909.00574",
+              "ordinal": 2,
+              "chunk_id": "04b9d832a54917d96311ce45a7ed9378f804a90b3afbac4ee16073d9ec945d22"
+            },
+            {
+              "source": "1909.00574",
+              "ordinal": 17,
+              "chunk_id": "921f89759701020aba2d8ad681802f34d98b925aba5c0dfbec76e8c09a9eaa56"
+            },
+            {
+              "source": "2003.05522",
+              "ordinal": 11,
+              "chunk_id": "704806664c42e7666ac50bd3e212d9c0ac2c04b4fa1dcb4e306c5fa6d80146d0"
+            },
+            {
+              "source": "2003.05522",
+              "ordinal": 10,
+              "chunk_id": "58699addd30707a7e94d127974435fd7183dbfee1768f1c52d508608ce442258"
+            },
+            {
+              "source": "1811.05085",
+              "ordinal": 27,
+              "chunk_id": "6a781ca8374059af5dacd2148d6e13c2f76e5dfe7d1dee556466aae50ec0347a"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 20,
+              "chunk_id": "75d2f274e2a500bc15502ae80aea06c4a722ef0fd4220ea13dcfad719eca1df4"
+            }
+          ],
+          "reranked": [
+            {
+              "source": "1909.00574",
+              "ordinal": 0,
+              "chunk_id": "b7be9bffeed402c75f55c5e9de94a0999dad3b5da3f219d468f0a7b73238df51"
+            },
+            {
+              "source": "1909.00574",
+              "ordinal": 19,
+              "chunk_id": "2e59f263d08fa52aab947b964cae87a7e9b66c1ccc83bca25f1dd8c956cf9ba3"
+            },
+            {
+              "source": "1909.00574",
+              "ordinal": 5,
+              "chunk_id": "fa090e063b908e9e88fe30697731078da1007909919350a9a816a02d3a006447"
+            },
+            {
+              "source": "1909.00574",
+              "ordinal": 1,
+              "chunk_id": "ee55fe2948ab6693ba4c2c4bacf58c6e6f8097613644aea40f09580235a95012"
+            },
+            {
+              "source": "1909.00574",
+              "ordinal": 17,
+              "chunk_id": "921f89759701020aba2d8ad681802f34d98b925aba5c0dfbec76e8c09a9eaa56"
+            },
+            {
+              "source": "1909.00574",
+              "ordinal": 4,
+              "chunk_id": "a8d9d2e21d2ae5f212f9e231c4cc387e99905e9f39896ab2544486aa8c2c79fe"
+            }
+          ],
+          "times_ms": {
+            "dense": 452.184,
+            "sparse": 23.604,
+            "fusion": 0.196,
+            "rerank": 31206.514
+          },
+          "total_ms": 31705.006
+        },
+        {
+          "kind": "reader",
+          "prompt_sha256": "e79bab73537884c2f2cf7d52916cb078ab62dada6aa034b148fbb2ff40e5a279",
+          "chunks": [
+            {
+              "source": "1909.00574",
+              "ordinal": 0,
+              "chunk_id": "b7be9bffeed402c75f55c5e9de94a0999dad3b5da3f219d468f0a7b73238df51"
+            },
+            {
+              "source": "1909.00574",
+              "ordinal": 19,
+              "chunk_id": "2e59f263d08fa52aab947b964cae87a7e9b66c1ccc83bca25f1dd8c956cf9ba3"
+            },
+            {
+              "source": "1909.00574",
+              "ordinal": 5,
+              "chunk_id": "fa090e063b908e9e88fe30697731078da1007909919350a9a816a02d3a006447"
+            },
+            {
+              "source": "1909.00574",
+              "ordinal": 1,
+              "chunk_id": "ee55fe2948ab6693ba4c2c4bacf58c6e6f8097613644aea40f09580235a95012"
+            },
+            {
+              "source": "1909.00574",
+              "ordinal": 17,
+              "chunk_id": "921f89759701020aba2d8ad681802f34d98b925aba5c0dfbec76e8c09a9eaa56"
+            },
+            {
+              "source": "1909.00574",
+              "ordinal": 4,
+              "chunk_id": "a8d9d2e21d2ae5f212f9e231c4cc387e99905e9f39896ab2544486aa8c2c79fe"
+            }
+          ]
+        },
+        {
+          "kind": "wire",
+          "max_tokens": 512,
+          "temperature": 0.0,
+          "model": "deepseek-v4.1-flash-1017",
+          "retry_limit": 0,
+          "enable_thinking": null,
+          "prompt_sha256": "e79bab73537884c2f2cf7d52916cb078ab62dada6aa034b148fbb2ff40e5a279"
+        },
+        {
+          "kind": "response",
+          "elapsed_ms": 2488,
+          "finish_reason": "stop",
+          "content_present": true,
+          "usage": {
+            "input_tokens": 2446,
+            "output_tokens": 241,
+            "total_tokens": 2687
+          }
+        }
+      ]
+    },
+    {
+      "id": "1d1ab5d8a24dfd15d95a5a7506ac0456d1192209",
+      "state": "returned",
+      "utc": "2026-11-14T02:25:46.197499+00:00",
+      "http": 200,
+      "elapsed_s": 38.526,
+      "answer": "证据中没有给出该模型的具体运行时间或训练时长。论文仅笼统说明，由于逐词匹配过程高度可并行化且不需要 LSTM 或 CNN 等复杂编码网络，该框架训练所需时间显著更少，但未提供任何具体耗时数值。因此无法据此回答“运行需要多长时间”。",
+      "insufficient": true,
+      "citations": [],
+      "events": [
+        {
+          "kind": "retrieval",
+          "snapshot": "4ebf2700-7b8f-4091-9e7d-b8aed4a44b11",
+          "candidate": [
+            {
+              "source": "1808.09633",
+              "ordinal": 0,
+              "chunk_id": "2f0de4f40b8b84c1fcd4cf041f056af1b35c37413c7195f2135458ef84832754"
+            },
+            {
+              "source": "1808.09633",
+              "ordinal": 4,
+              "chunk_id": "f5b246f672aacc9f9642731537fa5d2fff14ece7187a0041eaee18d77d511c7a"
+            },
+            {
+              "source": "1808.09633",
+              "ordinal": 11,
+              "chunk_id": "a8a1ec03fabbab83e6b779e08a47023f2d3b2f7a5976e69b1e7e113549c864dc"
+            },
+            {
+              "source": "1808.09633",
+              "ordinal": 18,
+              "chunk_id": "cfeb54b00e9eddabdf7d71521e80b324f7d316d1d865c95a157154d77dd2bc4f"
+            },
+            {
+              "source": "1808.09633",
+              "ordinal": 3,
+              "chunk_id": "9d17cbe0e15123844f2a9b42955c409ca22c158025097b0bdd0a6cd2c258714c"
+            },
+            {
+              "source": "1808.09633",
+              "ordinal": 9,
+              "chunk_id": "b291ec35f8631288c7e97e159ff7cf282e95467d8f4a869794d8129bc73299c9"
+            },
+            {
+              "source": "2001.09332",
+              "ordinal": 3,
+              "chunk_id": "f586ba139bf2ee8d2e605226da864d543072d196ce2ed9ad635b11cae496d7ff"
+            },
+            {
+              "source": "1909.00574",
+              "ordinal": 19,
+              "chunk_id": "2e59f263d08fa52aab947b964cae87a7e9b66c1ccc83bca25f1dd8c956cf9ba3"
+            },
+            {
+              "source": "2003.05522",
+              "ordinal": 9,
+              "chunk_id": "ccf66631d4266795bf2f61155f1b71a99aedefbd292a385262fedac3ceb2467d"
+            },
+            {
+              "source": "1909.00574",
+              "ordinal": 14,
+              "chunk_id": "ba71e89dd3f24ad796aee81bacde0b1a1cfed41f1a79da1ca5d0e42cdca816c6"
+            },
+            {
+              "source": "1808.09633",
+              "ordinal": 17,
+              "chunk_id": "2e90e8f8a079cc4cf385a57c65462a859163beb55d77595ac90091084d04a055"
+            },
+            {
+              "source": "1811.05085",
+              "ordinal": 20,
+              "chunk_id": "9c13f38ddf0fb15b82b51702a21873993ecd09ff108da73d0b3b3d1464fd6c9e"
+            },
+            {
+              "source": "2003.05522",
+              "ordinal": 10,
+              "chunk_id": "58699addd30707a7e94d127974435fd7183dbfee1768f1c52d508608ce442258"
+            },
+            {
+              "source": "1808.09633",
+              "ordinal": 5,
+              "chunk_id": "db95ffb3630035fd42d75a4bdf7a0c8c445c31d1799abbfbbbfe0fde4e8fba76"
+            },
+            {
+              "source": "1810.03459",
+              "ordinal": 10,
+              "chunk_id": "571004208da57d09f134c03f695350974cbe002efb801b0b4f2b558ec188aa2b"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 16,
+              "chunk_id": "2624aa414bde8fc2f14654bc27d2e17fadd4a9868a947e2c5c38710bba21043c"
+            },
+            {
+              "source": "2003.05522",
+              "ordinal": 17,
+              "chunk_id": "6010d000d9a4b95c29c378cb558c37d274ddf2ad87485d8c817b065ac316f3c1"
+            },
+            {
+              "source": "1808.09633",
+              "ordinal": 19,
+              "chunk_id": "11fc8fccbecb4326c26d03406011ec4b05c6aa88ef507063834c5a9aeda45b58"
+            },
+            {
+              "source": "2003.05522",
+              "ordinal": 11,
+              "chunk_id": "704806664c42e7666ac50bd3e212d9c0ac2c04b4fa1dcb4e306c5fa6d80146d0"
+            },
+            {
+              "source": "2003.05522",
+              "ordinal": 0,
+              "chunk_id": "51e146e787642bae2b1700c59fd781bc7099e5b34877a503d107774180fb2ad2"
+            }
+          ],
+          "reranked": [
+            {
+              "source": "1808.09633",
+              "ordinal": 4,
+              "chunk_id": "f5b246f672aacc9f9642731537fa5d2fff14ece7187a0041eaee18d77d511c7a"
+            },
+            {
+              "source": "1810.03459",
+              "ordinal": 10,
+              "chunk_id": "571004208da57d09f134c03f695350974cbe002efb801b0b4f2b558ec188aa2b"
+            },
+            {
+              "source": "1808.09633",
+              "ordinal": 0,
+              "chunk_id": "2f0de4f40b8b84c1fcd4cf041f056af1b35c37413c7195f2135458ef84832754"
+            },
+            {
+              "source": "1808.09633",
+              "ordinal": 5,
+              "chunk_id": "db95ffb3630035fd42d75a4bdf7a0c8c445c31d1799abbfbbbfe0fde4e8fba76"
+            },
+            {
+              "source": "1808.09633",
+              "ordinal": 3,
+              "chunk_id": "9d17cbe0e15123844f2a9b42955c409ca22c158025097b0bdd0a6cd2c258714c"
+            },
+            {
+              "source": "1808.09633",
+              "ordinal": 19,
+              "chunk_id": "11fc8fccbecb4326c26d03406011ec4b05c6aa88ef507063834c5a9aeda45b58"
+            }
+          ],
+          "times_ms": {
+            "dense": 463.899,
+            "sparse": 24.623,
+            "fusion": 0.348,
+            "rerank": 35302.085
+          },
+          "total_ms": 35821.383
+        },
+        {
+          "kind": "reader",
+          "prompt_sha256": "38304369513c2ad5c0e655813b216068e76c41f14465ac32268192b9e01e1de5",
+          "chunks": [
+            {
+              "source": "1808.09633",
+              "ordinal": 4,
+              "chunk_id": "f5b246f672aacc9f9642731537fa5d2fff14ece7187a0041eaee18d77d511c7a"
+            },
+            {
+              "source": "1810.03459",
+              "ordinal": 10,
+              "chunk_id": "571004208da57d09f134c03f695350974cbe002efb801b0b4f2b558ec188aa2b"
+            },
+            {
+              "source": "1808.09633",
+              "ordinal": 0,
+              "chunk_id": "2f0de4f40b8b84c1fcd4cf041f056af1b35c37413c7195f2135458ef84832754"
+            },
+            {
+              "source": "1808.09633",
+              "ordinal": 5,
+              "chunk_id": "db95ffb3630035fd42d75a4bdf7a0c8c445c31d1799abbfbbbfe0fde4e8fba76"
+            },
+            {
+              "source": "1808.09633",
+              "ordinal": 3,
+              "chunk_id": "9d17cbe0e15123844f2a9b42955c409ca22c158025097b0bdd0a6cd2c258714c"
+            },
+            {
+              "source": "1808.09633",
+              "ordinal": 19,
+              "chunk_id": "11fc8fccbecb4326c26d03406011ec4b05c6aa88ef507063834c5a9aeda45b58"
+            }
+          ]
+        },
+        {
+          "kind": "wire",
+          "max_tokens": 512,
+          "temperature": 0.0,
+          "model": "deepseek-v4.1-flash-1017",
+          "retry_limit": 0,
+          "enable_thinking": null,
+          "prompt_sha256": "38304369513c2ad5c0e655813b216068e76c41f14465ac32268192b9e01e1de5"
+        },
+        {
+          "kind": "response",
+          "elapsed_ms": 2644,
+          "finish_reason": "stop",
+          "content_present": true,
+          "usage": {
+            "input_tokens": 2249,
+            "output_tokens": 194,
+            "total_tokens": 2443
+          }
+        }
+      ]
+    },
+    {
+      "id": "3de27c81af3030eb2d9de1df5ec9bfacdef281a9",
+      "state": "returned",
+      "utc": "2026-11-14T02:27:35.381371+00:00",
+      "http": 200,
+      "elapsed_s": 35.528,
+      "answer": "The dataset used to train Word2Vec for Italian consisted of 2.6 GB of raw text, containing 421,829,960 words divided into 17,305,401 sentences [1].",
+      "insufficient": false,
+      "citations": [
+        {
+          "number": 1,
+          "source": "2001.09332",
+          "ordinal": 8,
+          "chunk_id": "7e670437108bc9abe84c9345b3a7d7411631686845a351cdf414af0f0682b1a2",
+          "revision": "9ca6b277-9800-41f8-ac77-a8546a4a7fd3",
+          "excerpt": "19.04.01), from the main categories of Italian Google News (WORLD, NATION, BUSINESS, TECHNOLOGY, ENTERTAINMENT, SPORTS, SCIENCE, HEALTH) and from some anonymized chats between users and a customer care chatbot (Laila). The dataset (composed of 2.6 GB of raw text) includes $421\\,829\\,960$ words divided into $17\\,305\\,401$ sentences.\n\nThe text was previously preprocessed by removing the words whose absolute frequency was less than 5 and eliminating all special characters. Since it is impossible to represent every imaginable numerical value, but not wanting to eliminate the concept of “numerical representation\" linked to certain words, it was also decided to replace every number present in the text with the particular $\\langle NUM \\rangle $ token; which probably also assumes a better representation in the embedding space (not separating into the various possible values). All the words were then transformed to lowercase (to avoid a double presence) finally producing a vocabulary of $618\\,224$ words.\n\nNote that among the special characters are also included punctuation marks, which therefore do not appear within the vocabulary. However, some of them (`.', `?' and `!') are later removed,",
+          "chunk_text_sha256": "b857febc7388ec207f98e0da94765e41f2bb2d049d7dfaa52b46aa1a95b0b9c5",
+          "excerpt_sha256": "b857febc7388ec207f98e0da94765e41f2bb2d049d7dfaa52b46aa1a95b0b9c5",
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1200,
+          "locator": {
+            "type": "text_range",
+            "char_end": 9200,
+            "char_start": 8000
+          }
+        }
+      ],
+      "events": [
+        {
+          "kind": "retrieval",
+          "snapshot": "4ebf2700-7b8f-4091-9e7d-b8aed4a44b11",
+          "candidate": [
+            {
+              "source": "2001.09332",
+              "ordinal": 0,
+              "chunk_id": "554fd3f409d9a4007b201c07501812b59330c2f864eb01e4037a904877ae5202"
+            },
+            {
+              "source": "2001.09332",
+              "ordinal": 14,
+              "chunk_id": "e1924ab9131b6e93fadaa74f70b18bd6a40bb5c3fcf1d64ffaddc0f814b13346"
+            },
+            {
+              "source": "2001.09332",
+              "ordinal": 7,
+              "chunk_id": "ff0177b07f158858beeabf8fe96bc7871dea047be962c3c2f2b88772e4da3d7f"
+            },
+            {
+              "source": "1906.07668",
+              "ordinal": 12,
+              "chunk_id": "7824fafb8fe8791bef7a186b6adb7b9f14f2e15b21a3df962688a78a03bde54d"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 15,
+              "chunk_id": "4d167740b93c9d47d666c3980c1baa979f2fa2f05b0f0a392d4ee0b2aa14833b"
+            },
+            {
+              "source": "2001.09332",
+              "ordinal": 5,
+              "chunk_id": "ed93fb447ca598b546fc80ecd35dc61beefaeeb036eedbb4db2b7f0c99ea14ca"
+            },
+            {
+              "source": "2001.09332",
+              "ordinal": 6,
+              "chunk_id": "17d792366ab5c847724afcbedcd92954d418cde1e3d8c7bd5260c01c301dffef"
+            },
+            {
+              "source": "2001.09332",
+              "ordinal": 2,
+              "chunk_id": "9918d7e0f814f46355ca5984127d090b15111580f35f79d5ff38b22098655944"
+            },
+            {
+              "source": "2001.09332",
+              "ordinal": 3,
+              "chunk_id": "f586ba139bf2ee8d2e605226da864d543072d196ce2ed9ad635b11cae496d7ff"
+            },
+            {
+              "source": "2001.09332",
+              "ordinal": 8,
+              "chunk_id": "7e670437108bc9abe84c9345b3a7d7411631686845a351cdf414af0f0682b1a2"
+            },
+            {
+              "source": "1607.00424",
+              "ordinal": 4,
+              "chunk_id": "f5577a6f710657dbfdb9e60ccb2df3d3a7765ec3d61de5030721a337903196f8"
+            },
+            {
+              "source": "1910.03814",
+              "ordinal": 5,
+              "chunk_id": "25feb09ee32892c4726fbe188263bf79f502e4b8316433ab9426735cfee1e95c"
+            },
+            {
+              "source": "1909.03526",
+              "ordinal": 15,
+              "chunk_id": "2579b9f8a1ed95d36d25babeff5a31153eb94bd557bec09aeed984400d4e4479"
+            },
+            {
+              "source": "2001.09332",
+              "ordinal": 13,
+              "chunk_id": "507bf14319f5262553c9d3bde9fd50ad5632209db6474070dc0f941e0c3819a0"
+            },
+            {
+              "source": "1810.03459",
+              "ordinal": 7,
+              "chunk_id": "876a2f3178a9e27b6ae7c5e0804d5a631525606ee4c49f8a521206666f71542a"
+            },
+            {
+              "source": "1909.00574",
+              "ordinal": 5,
+              "chunk_id": "fa090e063b908e9e88fe30697731078da1007909919350a9a816a02d3a006447"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 23,
+              "chunk_id": "ce9339e1d4eb37a777746f1239dff79da7329d5ef09a401437f8bf79ab4b38ec"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 18,
+              "chunk_id": "1d477be77fb68ad2c79e81644662f438de7d04d25e5233f86f05399458f30dbd"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 24,
+              "chunk_id": "fd40edad61383f15efb54281514967d65c5c1aa5d48422900500e764f6fd690c"
+            },
+            {
+              "source": "1910.03814",
+              "ordinal": 4,
+              "chunk_id": "c02e36e6fd722e984e28dd4180260ff4489e0a040385a15a17d258d52449e637"
+            }
+          ],
+          "reranked": [
+            {
+              "source": "2001.09332",
+              "ordinal": 8,
+              "chunk_id": "7e670437108bc9abe84c9345b3a7d7411631686845a351cdf414af0f0682b1a2"
+            },
+            {
+              "source": "2001.09332",
+              "ordinal": 7,
+              "chunk_id": "ff0177b07f158858beeabf8fe96bc7871dea047be962c3c2f2b88772e4da3d7f"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 15,
+              "chunk_id": "4d167740b93c9d47d666c3980c1baa979f2fa2f05b0f0a392d4ee0b2aa14833b"
+            },
+            {
+              "source": "2001.09332",
+              "ordinal": 14,
+              "chunk_id": "e1924ab9131b6e93fadaa74f70b18bd6a40bb5c3fcf1d64ffaddc0f814b13346"
+            },
+            {
+              "source": "2001.09332",
+              "ordinal": 6,
+              "chunk_id": "17d792366ab5c847724afcbedcd92954d418cde1e3d8c7bd5260c01c301dffef"
+            },
+            {
+              "source": "2001.09332",
+              "ordinal": 0,
+              "chunk_id": "554fd3f409d9a4007b201c07501812b59330c2f864eb01e4037a904877ae5202"
+            }
+          ],
+          "times_ms": {
+            "dense": 382.896,
+            "sparse": 22.8,
+            "fusion": 0.161,
+            "rerank": 32557.738
+          },
+          "total_ms": 32990.612
+        },
+        {
+          "kind": "reader",
+          "prompt_sha256": "3851564ef6174fc15c3b0a0dc656b33220afec9e2ac71482f0135f0d1126490b",
+          "chunks": [
+            {
+              "source": "2001.09332",
+              "ordinal": 8,
+              "chunk_id": "7e670437108bc9abe84c9345b3a7d7411631686845a351cdf414af0f0682b1a2"
+            },
+            {
+              "source": "2001.09332",
+              "ordinal": 7,
+              "chunk_id": "ff0177b07f158858beeabf8fe96bc7871dea047be962c3c2f2b88772e4da3d7f"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 15,
+              "chunk_id": "4d167740b93c9d47d666c3980c1baa979f2fa2f05b0f0a392d4ee0b2aa14833b"
+            },
+            {
+              "source": "2001.09332",
+              "ordinal": 14,
+              "chunk_id": "e1924ab9131b6e93fadaa74f70b18bd6a40bb5c3fcf1d64ffaddc0f814b13346"
+            },
+            {
+              "source": "2001.09332",
+              "ordinal": 6,
+              "chunk_id": "17d792366ab5c847724afcbedcd92954d418cde1e3d8c7bd5260c01c301dffef"
+            },
+            {
+              "source": "2001.09332",
+              "ordinal": 0,
+              "chunk_id": "554fd3f409d9a4007b201c07501812b59330c2f864eb01e4037a904877ae5202"
+            }
+          ]
+        },
+        {
+          "kind": "wire",
+          "max_tokens": 512,
+          "temperature": 0.0,
+          "model": "deepseek-v4.1-flash-1017",
+          "retry_limit": 0,
+          "enable_thinking": null,
+          "prompt_sha256": "3851564ef6174fc15c3b0a0dc656b33220afec9e2ac71482f0135f0d1126490b"
+        },
+        {
+          "kind": "response",
+          "elapsed_ms": 2487,
+          "finish_reason": "stop",
+          "content_present": true,
+          "usage": {
+            "input_tokens": 2335,
+            "output_tokens": 172,
+            "total_tokens": 2507
+          }
+        }
+      ]
+    },
+    {
+      "id": "fb56743e942883d7e74a73c70bd11016acddc348",
+      "state": "returned",
+      "utc": "2026-11-14T02:28:10.912288+00:00",
+      "http": 200,
+      "elapsed_s": 33.32,
+      "answer": "The language models were character-level RNNLMs trained with a 2-layer LSTM on character sequences. For each target language, they used all available paired text in that language to train the LM, and no external text data were used. The LMs were trained separately from the seq2seq models [2][1]. When building the dictionary, they combined all characters across all 15 languages to support transferred models [1].",
+      "insufficient": false,
+      "citations": [
+        {
+          "number": 1,
+          "source": "1810.03459",
+          "ordinal": 12,
+          "chunk_id": "df2c248ee36480495a654640d42f430829cb5e2e693f02dde16c32576fdfefaf",
+          "revision": "d543e95b-b80e-48a9-a4d7-39fc6281be26",
+          "excerpt": "xt in the corresponding target language to train the LM for the language. No external text data were used. All language models are trained separately from the seq2seq models. When building dictionary, we combined all the characters over all 15 languages mentioned in table TABREF14 to make them work with transferred models. Regardless of the amount of data used for transfer learning, the RNNLM provides consistent gains across all languages over different data sizes.\n\nAs explained already, language models were trained separately and used to decode jointly with seq2seq models. The intuition behind it is to use the separately trained language model as a complementary component that works with a implicit language model within a seq2seq decoder. The way of RNNLM assisting decoding follows the equation below: DISPLAYFORM0 \n\n INLINEFORM0 is a scaling factor that combines the scores from a joint decoding eq.( EQREF13 ) with RNN-LM, denoted as INLINEFORM1 . This approach is called shallow fusion.\n\nOur experiments for target languages show that the gains from adding RNNLM are consistent regardless of the amount of data used for transfer learning. In other words, in Figure FIGREF27 , the gap b",
+          "chunk_text_sha256": "96f03c002abf085bfe7af9508766050825fb1998cfc55a9ff47a032bc5c9ff28",
+          "excerpt_sha256": "96f03c002abf085bfe7af9508766050825fb1998cfc55a9ff47a032bc5c9ff28",
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1200,
+          "locator": {
+            "type": "text_range",
+            "char_end": 13200,
+            "char_start": 12000
+          }
+        },
+        {
+          "number": 2,
+          "source": "1810.03459",
+          "ordinal": 11,
+          "chunk_id": "cfce566822186b8d7a8208d4bea41718d1d16db6c74eaacf248af2be42c3dd6f",
+          "revision": "d543e95b-b80e-48a9-a4d7-39fc6281be26",
+          "excerpt": "stage-2 retraining across all languages compared to monolingual model.\n\nMultilingual RNNLM\n\nIn an ASR system, a language model (LM) takes an important role by incorporating external knowledge into the system. Conventional ASR systems combine an LM with an acoustic model by FST giving a huge performance gain. This trend is also shown in general including hybrid ASR systems and neural network-based sequence-to-sequence ASR systems.\n\nThe following experiments show a benefit of using a language model in decoding with the previous stage-2 transferred models. Although the performance gains in %CER are also generally observed over all target languages, the improvement in %WER was more distinctive. The results shown in the following Fig. FIGREF27 are in %WER. “whole” in each figure means we used all the available data for the target language as full set explained before.\n\nWe used a character-level RNNLM, which was trained with 2-layer LSTM on character sequences. We use all available paired text in the corresponding target language to train the LM for the language. No external text data were used. All language models are trained separately from the seq2seq models. When building dictionary,",
+          "chunk_text_sha256": "f6aa41d215e87899e3ac62260024e746fb3b15fb277db4e7e4011b64d6d96f73",
+          "excerpt_sha256": "f6aa41d215e87899e3ac62260024e746fb3b15fb277db4e7e4011b64d6d96f73",
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1200,
+          "locator": {
+            "type": "text_range",
+            "char_end": 12200,
+            "char_start": 11000
+          }
+        }
+      ],
+      "events": [
+        {
+          "kind": "retrieval",
+          "snapshot": "4ebf2700-7b8f-4091-9e7d-b8aed4a44b11",
+          "candidate": [
+            {
+              "source": "1810.03459",
+              "ordinal": 0,
+              "chunk_id": "eb8cf17e28173a03e76ade3029f1cb117627445d8115651b4d28045b7fcd45b9"
+            },
+            {
+              "source": "1810.03459",
+              "ordinal": 1,
+              "chunk_id": "1aa4bab2ba208e43975459a602fdac93afd6fd5af27ea3d49fbc03a77840adbe"
+            },
+            {
+              "source": "1810.03459",
+              "ordinal": 3,
+              "chunk_id": "25514be0f02d10450479413938cb99ff84d4b775dae37ecb3956ef0701619201"
+            },
+            {
+              "source": "1810.03459",
+              "ordinal": 14,
+              "chunk_id": "6b6c11606cf615c1b0ab192b7834218e34b5e4c9ceaa9ea1cffc16af99b8f4b8"
+            },
+            {
+              "source": "1810.03459",
+              "ordinal": 11,
+              "chunk_id": "cfce566822186b8d7a8208d4bea41718d1d16db6c74eaacf248af2be42c3dd6f"
+            },
+            {
+              "source": "1810.03459",
+              "ordinal": 13,
+              "chunk_id": "6f28eb9b99503d3acc7b8b9e4eaeccc74fca330629d923abdad92f68daba4b03"
+            },
+            {
+              "source": "1810.03459",
+              "ordinal": 7,
+              "chunk_id": "876a2f3178a9e27b6ae7c5e0804d5a631525606ee4c49f8a521206666f71542a"
+            },
+            {
+              "source": "1810.03459",
+              "ordinal": 2,
+              "chunk_id": "d60c823f26b40326003ccf0e83403e2a3a41f4fe653cdba3daecd92b71edc799"
+            },
+            {
+              "source": "1810.03459",
+              "ordinal": 12,
+              "chunk_id": "df2c248ee36480495a654640d42f430829cb5e2e693f02dde16c32576fdfefaf"
+            },
+            {
+              "source": "1909.03526",
+              "ordinal": 11,
+              "chunk_id": "1c475f18efd21daecd10a3b66b1a6b8a543ae56cec1d7196e6dd98c7bea36688"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 27,
+              "chunk_id": "d35c1f651d290de4fc333139f6add68d4a3de1f326dbd30db613d88ddcf3dcbd"
+            },
+            {
+              "source": "1910.03814",
+              "ordinal": 19,
+              "chunk_id": "bfd89f8a774c0d513950bf297d75de6ffb9f0daea166a43937df9f31802afc0e"
+            },
+            {
+              "source": "1909.03526",
+              "ordinal": 13,
+              "chunk_id": "d24c3b05b8c82dcfa209ce28ff5566d88e4da357d0e1a435bdafbe4e1e98159a"
+            },
+            {
+              "source": "1909.00252",
+              "ordinal": 6,
+              "chunk_id": "3826f8b1e5bfe0edff442f2c4692a1a894c4adf8a6b68999ecca142d49dd6544"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 3,
+              "chunk_id": "c086285e2e1171687888acf3e12c3178884f5a0bce2ff7c3506d7dba5f93be50"
+            },
+            {
+              "source": "1910.03814",
+              "ordinal": 23,
+              "chunk_id": "fa498d9d2508e24efbb084a064b5dea5581911a7101ee3d9d8e3205c704d89c2"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 26,
+              "chunk_id": "102768c6b709fd18f0b9f701ddcb355e5956076ff5c8fa05a4cb36779f89ca20"
+            },
+            {
+              "source": "1909.00574",
+              "ordinal": 0,
+              "chunk_id": "b7be9bffeed402c75f55c5e9de94a0999dad3b5da3f219d468f0a7b73238df51"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 24,
+              "chunk_id": "fd40edad61383f15efb54281514967d65c5c1aa5d48422900500e764f6fd690c"
+            },
+            {
+              "source": "1910.03814",
+              "ordinal": 16,
+              "chunk_id": "122ee5a7a72cf3bfd41909da0ed5945d7bc5950c2361b6104b07427f59836919"
+            }
+          ],
+          "reranked": [
+            {
+              "source": "1810.03459",
+              "ordinal": 12,
+              "chunk_id": "df2c248ee36480495a654640d42f430829cb5e2e693f02dde16c32576fdfefaf"
+            },
+            {
+              "source": "1810.03459",
+              "ordinal": 11,
+              "chunk_id": "cfce566822186b8d7a8208d4bea41718d1d16db6c74eaacf248af2be42c3dd6f"
+            },
+            {
+              "source": "1810.03459",
+              "ordinal": 0,
+              "chunk_id": "eb8cf17e28173a03e76ade3029f1cb117627445d8115651b4d28045b7fcd45b9"
+            },
+            {
+              "source": "1810.03459",
+              "ordinal": 13,
+              "chunk_id": "6f28eb9b99503d3acc7b8b9e4eaeccc74fca330629d923abdad92f68daba4b03"
+            },
+            {
+              "source": "1810.03459",
+              "ordinal": 1,
+              "chunk_id": "1aa4bab2ba208e43975459a602fdac93afd6fd5af27ea3d49fbc03a77840adbe"
+            },
+            {
+              "source": "1810.03459",
+              "ordinal": 14,
+              "chunk_id": "6b6c11606cf615c1b0ab192b7834218e34b5e4c9ceaa9ea1cffc16af99b8f4b8"
+            }
+          ],
+          "times_ms": {
+            "dense": 444.437,
+            "sparse": 15.404,
+            "fusion": 0.368,
+            "rerank": 29745.741
+          },
+          "total_ms": 30237.72
+        },
+        {
+          "kind": "reader",
+          "prompt_sha256": "6a2330c0ba3eb1d5c52aa49a339f0a9d8f8ec5b091858d0b2a46821bf806964a",
+          "chunks": [
+            {
+              "source": "1810.03459",
+              "ordinal": 12,
+              "chunk_id": "df2c248ee36480495a654640d42f430829cb5e2e693f02dde16c32576fdfefaf"
+            },
+            {
+              "source": "1810.03459",
+              "ordinal": 11,
+              "chunk_id": "cfce566822186b8d7a8208d4bea41718d1d16db6c74eaacf248af2be42c3dd6f"
+            },
+            {
+              "source": "1810.03459",
+              "ordinal": 0,
+              "chunk_id": "eb8cf17e28173a03e76ade3029f1cb117627445d8115651b4d28045b7fcd45b9"
+            },
+            {
+              "source": "1810.03459",
+              "ordinal": 13,
+              "chunk_id": "6f28eb9b99503d3acc7b8b9e4eaeccc74fca330629d923abdad92f68daba4b03"
+            },
+            {
+              "source": "1810.03459",
+              "ordinal": 1,
+              "chunk_id": "1aa4bab2ba208e43975459a602fdac93afd6fd5af27ea3d49fbc03a77840adbe"
+            },
+            {
+              "source": "1810.03459",
+              "ordinal": 14,
+              "chunk_id": "6b6c11606cf615c1b0ab192b7834218e34b5e4c9ceaa9ea1cffc16af99b8f4b8"
+            }
+          ]
+        },
+        {
+          "kind": "wire",
+          "max_tokens": 512,
+          "temperature": 0.0,
+          "model": "deepseek-v4.1-flash-1017",
+          "retry_limit": 0,
+          "enable_thinking": null,
+          "prompt_sha256": "6a2330c0ba3eb1d5c52aa49a339f0a9d8f8ec5b091858d0b2a46821bf806964a"
+        },
+        {
+          "kind": "response",
+          "elapsed_ms": 3034,
+          "finish_reason": "stop",
+          "content_present": true,
+          "usage": {
+            "input_tokens": 2284,
+            "output_tokens": 364,
+            "total_tokens": 2648
+          }
+        }
+      ]
+    },
+    {
+      "id": "63337fd803f6fdd060ebd0f53f9de79d451810cd",
+      "state": "returned",
+      "utc": "2026-11-14T02:29:50.108046+00:00",
+      "http": 200,
+      "elapsed_s": 36.541,
+      "answer": "State-of-the-art IOC detection systems use hand-crafted features that rely on specific language knowledge, such as dependency structure, and are typically pre-defined by cybersecurity experts [4]; more generally, these systems rely heavily on hand-crafted features requiring expert cybersecurity knowledge [1].",
+      "insufficient": false,
+      "citations": [
+        {
+          "number": 1,
+          "source": "1907.02636",
+          "ordinal": 0,
+          "chunk_id": "bcd5ace7de380cfecb41f45dfd2a4f1788b6893f9f471d1ca22f6657ef9d12f4",
+          "revision": "9d2cdde1-7c8a-4796-8a2c-60c5f022f8bf",
+          "excerpt": "Collecting Indicators of Compromise from Unstructured Text of Cybersecurity Articles using Neural-Based Sequence Labelling\n\nIndicators of Compromise (IOCs) are artifacts observed on a network or in an operating system that can be utilized to indicate a computer intrusion and detect cyber-attacks in an early stage. Thus, they exert an important role in the field of cybersecurity. However, state-of-the-art IOCs detection systems rely heavily on hand-crafted features with expert knowledge of cybersecurity, and require large-scale manually annotated corpora to train an IOC classifier. In this paper, we propose using an end-to-end neural-based sequence labelling model to identify IOCs automatically from cybersecurity articles without expert knowledge of cybersecurity. By using a multi-head self-attention module and contextual features, we find that the proposed model is capable of gathering contextual information from texts of cybersecurity articles and performs better in the task of IOC identification. Experiments show that the proposed model outperforms other sequence labelling models, achieving the average F1-score of 89.0% on English cybersecurity article test set, and approximately",
+          "chunk_text_sha256": "975c4b3a31cfda9ab64a0b3c4602c69753cf33656d5353e2dd22d6288086c3c2",
+          "excerpt_sha256": "975c4b3a31cfda9ab64a0b3c4602c69753cf33656d5353e2dd22d6288086c3c2",
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1200,
+          "locator": {
+            "type": "text_range",
+            "char_end": 1200,
+            "char_start": 0
+          }
+        },
+        {
+          "number": 4,
+          "source": "1907.02636",
+          "ordinal": 2,
+          "chunk_id": "18e7decb553f1f584b972fb2c311a9ef9959e3e6109247295321fc015027105c",
+          "revision": "9d2cdde1-7c8a-4796-8a2c-60c5f022f8bf",
+          "excerpt": "viously, these kinds of IOCs can be then utilized for early detection of future attack attempts by using intrusion detection systems and antivirus software, and thus, they exert an important role in the field of cybersecurity. However, with the rapid evolvement of cyber threats, the IOC data are produced at a high volume and velocity every day, which makes it increasingly hard for human to gather and manage them.\n\nA number of systems are proposed to help discover and gather malicious information and IOCs from various types of data sources BIBREF0 , BIBREF1 , BIBREF2 , BIBREF3 , BIBREF4 , BIBREF5 . However, most of those systems consist of several components that identify IOCs by using human-crafted features that heavily rely on specific language knowledge such as dependency structure, and they often have to be pre-defined by experts in the field of the cybersecurity. Furthermore, they need a large amount of annotated data used as the training data to train an IOC classifier. Those training data are frequently difficult to be crowed-sourced, because non-experts can hardly distinguish IOCs from those non-malicious IPs or URLs. Thus, it is a time-consuming and laborious task to constr",
+          "chunk_text_sha256": "b1717e201be0959c50ac72483817c69b03cbf6d04bba2f79167119049fc61006",
+          "excerpt_sha256": "b1717e201be0959c50ac72483817c69b03cbf6d04bba2f79167119049fc61006",
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1200,
+          "locator": {
+            "type": "text_range",
+            "char_end": 3200,
+            "char_start": 2000
+          }
+        }
+      ],
+      "events": [
+        {
+          "kind": "retrieval",
+          "snapshot": "4ebf2700-7b8f-4091-9e7d-b8aed4a44b11",
+          "candidate": [
+            {
+              "source": "1907.02636",
+              "ordinal": 0,
+              "chunk_id": "bcd5ace7de380cfecb41f45dfd2a4f1788b6893f9f471d1ca22f6657ef9d12f4"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 1,
+              "chunk_id": "775fa5a19dc3986c25b9365fdea3e35734fe7b373f3bf1f908894487838a2e5f"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 3,
+              "chunk_id": "c086285e2e1171687888acf3e12c3178884f5a0bce2ff7c3506d7dba5f93be50"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 2,
+              "chunk_id": "18e7decb553f1f584b972fb2c311a9ef9959e3e6109247295321fc015027105c"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 4,
+              "chunk_id": "84add3768424dbd68fc709aa1eca13757598971708362ed686fd5f00bc552c21"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 14,
+              "chunk_id": "e450250bd85d757491514274b31c6067c577f867077cd4b0fdbc2c5ce292f75b"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 11,
+              "chunk_id": "7494b876e132c4f73fee50b1a1beb3cc1ba5d63327d0a9c42b5c574f88087085"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 26,
+              "chunk_id": "102768c6b709fd18f0b9f701ddcb355e5956076ff5c8fa05a4cb36779f89ca20"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 23,
+              "chunk_id": "ce9339e1d4eb37a777746f1239dff79da7329d5ef09a401437f8bf79ab4b38ec"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 15,
+              "chunk_id": "4d167740b93c9d47d666c3980c1baa979f2fa2f05b0f0a392d4ee0b2aa14833b"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 5,
+              "chunk_id": "cc84f052a588764a3811004d301f5277e75fb2143dca770fbfe5ee922e77a404"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 6,
+              "chunk_id": "61a0bea8c4b042247d108bc9b47d988925b1139519e85d6797871fdc13135654"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 20,
+              "chunk_id": "75d2f274e2a500bc15502ae80aea06c4a722ef0fd4220ea13dcfad719eca1df4"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 10,
+              "chunk_id": "0034e9cf39dca129f4c03af6f49d22a9a51ed4062c71220581f1aa1675ad8881"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 9,
+              "chunk_id": "e04a2061115d714b2282304745a1be2cf6c93659915a4013e0aa3a65f100a92d"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 19,
+              "chunk_id": "221991a342adae3ccb1a5ba81805a6d9253dc7bc2796a5205e57a73350a10bdf"
+            },
+            {
+              "source": "1811.05085",
+              "ordinal": 7,
+              "chunk_id": "c7a5e6d34a69b25d8b4e7faa90886fb5b2252fb314e7997d0a70937d77600477"
+            },
+            {
+              "source": "1810.03459",
+              "ordinal": 0,
+              "chunk_id": "eb8cf17e28173a03e76ade3029f1cb117627445d8115651b4d28045b7fcd45b9"
+            },
+            {
+              "source": "1910.03814",
+              "ordinal": 14,
+              "chunk_id": "a216e0332ec4bb4690bb2f6d08dd452e7fed3ece9cceeb86ca51a9e13070a004"
+            },
+            {
+              "source": "2003.05522",
+              "ordinal": 0,
+              "chunk_id": "51e146e787642bae2b1700c59fd781bc7099e5b34877a503d107774180fb2ad2"
+            }
+          ],
+          "reranked": [
+            {
+              "source": "1907.02636",
+              "ordinal": 0,
+              "chunk_id": "bcd5ace7de380cfecb41f45dfd2a4f1788b6893f9f471d1ca22f6657ef9d12f4"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 4,
+              "chunk_id": "84add3768424dbd68fc709aa1eca13757598971708362ed686fd5f00bc552c21"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 26,
+              "chunk_id": "102768c6b709fd18f0b9f701ddcb355e5956076ff5c8fa05a4cb36779f89ca20"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 2,
+              "chunk_id": "18e7decb553f1f584b972fb2c311a9ef9959e3e6109247295321fc015027105c"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 1,
+              "chunk_id": "775fa5a19dc3986c25b9365fdea3e35734fe7b373f3bf1f908894487838a2e5f"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 3,
+              "chunk_id": "c086285e2e1171687888acf3e12c3178884f5a0bce2ff7c3506d7dba5f93be50"
+            }
+          ],
+          "times_ms": {
+            "dense": 1132.738,
+            "sparse": 24.089,
+            "fusion": 0.232,
+            "rerank": 32861.455
+          },
+          "total_ms": 34107.738
+        },
+        {
+          "kind": "reader",
+          "prompt_sha256": "c8fbd1c245e4ce7a79875761b295e6c57d962eb4da0226e41b531c6ccd193f92",
+          "chunks": [
+            {
+              "source": "1907.02636",
+              "ordinal": 0,
+              "chunk_id": "bcd5ace7de380cfecb41f45dfd2a4f1788b6893f9f471d1ca22f6657ef9d12f4"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 4,
+              "chunk_id": "84add3768424dbd68fc709aa1eca13757598971708362ed686fd5f00bc552c21"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 26,
+              "chunk_id": "102768c6b709fd18f0b9f701ddcb355e5956076ff5c8fa05a4cb36779f89ca20"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 2,
+              "chunk_id": "18e7decb553f1f584b972fb2c311a9ef9959e3e6109247295321fc015027105c"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 1,
+              "chunk_id": "775fa5a19dc3986c25b9365fdea3e35734fe7b373f3bf1f908894487838a2e5f"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 3,
+              "chunk_id": "c086285e2e1171687888acf3e12c3178884f5a0bce2ff7c3506d7dba5f93be50"
+            }
+          ]
+        },
+        {
+          "kind": "wire",
+          "max_tokens": 512,
+          "temperature": 0.0,
+          "model": "deepseek-v4.1-flash-1017",
+          "retry_limit": 0,
+          "enable_thinking": null,
+          "prompt_sha256": "c8fbd1c245e4ce7a79875761b295e6c57d962eb4da0226e41b531c6ccd193f92"
+        },
+        {
+          "kind": "response",
+          "elapsed_ms": 2291,
+          "finish_reason": "stop",
+          "content_present": true,
+          "usage": {
+            "input_tokens": 2346,
+            "output_tokens": 258,
+            "total_tokens": 2604
+          }
+        }
+      ]
+    },
+    {
+      "id": "29983f4bc8a5513a198755e474361deee93d4ab6",
+      "state": "returned",
+      "utc": "2026-11-14T02:31:00.264838+00:00",
+      "http": 200,
+      "elapsed_s": 30.98,
+      "answer": "The paper uses two implicit feedback-based labelling strategies: five-minute reuse and 1-day return. Five-minute reuse labels an instance positive if it was followed by a new joke request within five minutes; 1-day return marks as positive all joke requests that were followed by a new one within the following 1 to 25-hour interval [2]. The paper also notes that many VVA applications use interruptions as negative labels, but this strategy is not suitable for their use-case [2][4]. Explicit user feedback was unavailable because asking users for feedback creates friction and degrades the user experience [4].",
+      "insufficient": false,
+      "citations": [
+        {
+          "number": 2,
+          "source": "1912.03234",
+          "ordinal": 4,
+          "chunk_id": "be41f9aa60547931ae1585c57d89334e0acf7847144088572669cc2735dc3d9d",
+          "revision": "6c810630-0414-470d-9e8c-341a160a3e5e",
+          "excerpt": "we need to personalize the jokes.\n\nTo overcome this difficulty, it is common to resort to implicit feedback. In particular, many VVA applications use interruptions as negative labels, the rationale being that unhappy users will stop the VVA. This strategy, however, is not suitable for our use-case since responses are short and users need to hear the entire joke to decide if it is funny. Instead, we explore two other implicit feedback labelling strategies: five-minute reuse and 1-day return. Five-minute reuse labels an instance positive if it was followed by a new joke request within five-minutes. Conversely, 1-day return marks as positive all joke requests that were followed by a new one within the following 1 to 25-hour interval. Both strategies assume that if a user returns, he is happy with the jokes. This is clearly an approximation, since a returning user might be overall satisfied with the experience, but not with all the jokes. The same is true for the implied negatives; the user might have been satisfied with some or all of the jokes. Therefore, these labels are noisy and only provide weak supervision to the models.\n\nTable TABREF2 shows an example of the labels' values for",
+          "chunk_text_sha256": "a162d1d611cb97ab05d8fff2c64937337bfadcf31ba032c8b13db304acc84614",
+          "excerpt_sha256": "a162d1d611cb97ab05d8fff2c64937337bfadcf31ba032c8b13db304acc84614",
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1199,
+          "locator": {
+            "type": "text_range",
+            "char_end": 5200,
+            "char_start": 4000
+          }
+        },
+        {
+          "number": 4,
+          "source": "1912.03234",
+          "ordinal": 3,
+          "chunk_id": "f6b7311d68918225a690f779245fde2f734fb41be2ee672f08a1236380927645",
+          "revision": "6c810630-0414-470d-9e8c-341a160a3e5e",
+          "excerpt": "cluding better performance BIBREF9, faster training/inference (important for real-time systems), and better sense disambiguation BIBREF10 (an important component of computational humor BIBREF3).\n\nThe proposed models use binary classifiers to perform point-wise ranking, and therefore require a labelled dataset. To generate it, we explore two implicit user-feedback labelling strategies: five-minute reuse and one-day return. Online A/B testing is used to determine if these labelling strategies are suited to optimize the desired user-satisfaction metrics, and offline data to evaluated and compared the system's performance.\n\nMethod ::: Labelling Strategies\n\nGenerating labels for this VVA skill is challenging. Label generation through explicit user feedback is unavailable since asking users for feedback creates friction and degrade the user experience. In addition, available humor datasets such as BIBREF3, BIBREF11 only contain jokes and corresponding labels, but not the additional features we need to personalize the jokes.\n\nTo overcome this difficulty, it is common to resort to implicit feedback. In particular, many VVA applications use interruptions as negative labels, the rationale be",
+          "chunk_text_sha256": "b0b6e857dec40d249708eac2b0507e89713e6c70353a0136cc4a52fc10f8abf6",
+          "excerpt_sha256": "b0b6e857dec40d249708eac2b0507e89713e6c70353a0136cc4a52fc10f8abf6",
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1200,
+          "locator": {
+            "type": "text_range",
+            "char_end": 4200,
+            "char_start": 3000
+          }
+        }
+      ],
+      "events": [
+        {
+          "kind": "retrieval",
+          "snapshot": "4ebf2700-7b8f-4091-9e7d-b8aed4a44b11",
+          "candidate": [
+            {
+              "source": "1912.03234",
+              "ordinal": 0,
+              "chunk_id": "288e5fe674e27317b879f200a07d3a05dd4ef8e1767a1928927c764d4f8deaed"
+            },
+            {
+              "source": "1912.03234",
+              "ordinal": 3,
+              "chunk_id": "f6b7311d68918225a690f779245fde2f734fb41be2ee672f08a1236380927645"
+            },
+            {
+              "source": "1912.03234",
+              "ordinal": 5,
+              "chunk_id": "53b487793d7311125f71e90047a3c2f6ba5c37e418ee2ac2cac47be0522b155d"
+            },
+            {
+              "source": "1912.03234",
+              "ordinal": 16,
+              "chunk_id": "38afd99de4a2815943c80731b9c8801561d2604ac3377968bff081f53e9542a2"
+            },
+            {
+              "source": "1912.03234",
+              "ordinal": 1,
+              "chunk_id": "f29e8877526692414a267cdaeb55579af02c4a51aef9dbc65b4b56faff8d6c6d"
+            },
+            {
+              "source": "1912.03234",
+              "ordinal": 4,
+              "chunk_id": "be41f9aa60547931ae1585c57d89334e0acf7847144088572669cc2735dc3d9d"
+            },
+            {
+              "source": "1909.00252",
+              "ordinal": 7,
+              "chunk_id": "986286de852c3bde62ed077cc10a4b6bccc97e5e1896fdb0841ee7ff6761adf7"
+            },
+            {
+              "source": "1912.03234",
+              "ordinal": 9,
+              "chunk_id": "ff86164c21f356b226556dd22cd22274690710c47cc7e39957dc5a34e351b3fd"
+            },
+            {
+              "source": "1909.00252",
+              "ordinal": 0,
+              "chunk_id": "819030743674f0a387591c1c3dd8577ec79c26cae6651ed1b6d85f14cee75b21"
+            },
+            {
+              "source": "1909.00252",
+              "ordinal": 1,
+              "chunk_id": "ee674dd8fc66f632a76d82420fb5fb796217288a7048f2e4b69ade76543c4ae8"
+            },
+            {
+              "source": "1909.00252",
+              "ordinal": 8,
+              "chunk_id": "9ce6ddb311d0177289c43fb382684189fba7f79c0ef0982916fcfcdd3cbcf4c7"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 20,
+              "chunk_id": "75d2f274e2a500bc15502ae80aea06c4a722ef0fd4220ea13dcfad719eca1df4"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 22,
+              "chunk_id": "ddc14dc1704aa4b11770667701dac1196015d063eb3048ade636f0baa5689901"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 26,
+              "chunk_id": "102768c6b709fd18f0b9f701ddcb355e5956076ff5c8fa05a4cb36779f89ca20"
+            },
+            {
+              "source": "1912.03234",
+              "ordinal": 17,
+              "chunk_id": "f91939c7ff3dc2a6b28bc4d6f196bf777445c129471e6b9fa90f9a2726cb0b96"
+            },
+            {
+              "source": "2003.05522",
+              "ordinal": 10,
+              "chunk_id": "58699addd30707a7e94d127974435fd7183dbfee1768f1c52d508608ce442258"
+            },
+            {
+              "source": "1912.03234",
+              "ordinal": 12,
+              "chunk_id": "721503123598559d91a2ce786da3223c6d05ecdb5da2491055e909eea41c8765"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 23,
+              "chunk_id": "ce9339e1d4eb37a777746f1239dff79da7329d5ef09a401437f8bf79ab4b38ec"
+            },
+            {
+              "source": "2003.05522",
+              "ordinal": 2,
+              "chunk_id": "853edd117ef617100b2ca1523219e24a957e194e5a991056adf45bb41ed4aa98"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 25,
+              "chunk_id": "46882d7f0513b140d8b92edc380dc6507bae6d06b812de3e8fa15d67777a05f0"
+            }
+          ],
+          "reranked": [
+            {
+              "source": "1912.03234",
+              "ordinal": 0,
+              "chunk_id": "288e5fe674e27317b879f200a07d3a05dd4ef8e1767a1928927c764d4f8deaed"
+            },
+            {
+              "source": "1912.03234",
+              "ordinal": 4,
+              "chunk_id": "be41f9aa60547931ae1585c57d89334e0acf7847144088572669cc2735dc3d9d"
+            },
+            {
+              "source": "1912.03234",
+              "ordinal": 16,
+              "chunk_id": "38afd99de4a2815943c80731b9c8801561d2604ac3377968bff081f53e9542a2"
+            },
+            {
+              "source": "1912.03234",
+              "ordinal": 3,
+              "chunk_id": "f6b7311d68918225a690f779245fde2f734fb41be2ee672f08a1236380927645"
+            },
+            {
+              "source": "1912.03234",
+              "ordinal": 1,
+              "chunk_id": "f29e8877526692414a267cdaeb55579af02c4a51aef9dbc65b4b56faff8d6c6d"
+            },
+            {
+              "source": "1912.03234",
+              "ordinal": 17,
+              "chunk_id": "f91939c7ff3dc2a6b28bc4d6f196bf777445c129471e6b9fa90f9a2726cb0b96"
+            }
+          ],
+          "times_ms": {
+            "dense": 378.156,
+            "sparse": 9.825,
+            "fusion": 0.271,
+            "rerank": 28232.832
+          },
+          "total_ms": 28650.163
+        },
+        {
+          "kind": "reader",
+          "prompt_sha256": "0defe80b819fe3f2326141cb3fe7ee5f381e57deb229c32565bc77e1939a34d2",
+          "chunks": [
+            {
+              "source": "1912.03234",
+              "ordinal": 0,
+              "chunk_id": "288e5fe674e27317b879f200a07d3a05dd4ef8e1767a1928927c764d4f8deaed"
+            },
+            {
+              "source": "1912.03234",
+              "ordinal": 4,
+              "chunk_id": "be41f9aa60547931ae1585c57d89334e0acf7847144088572669cc2735dc3d9d"
+            },
+            {
+              "source": "1912.03234",
+              "ordinal": 16,
+              "chunk_id": "38afd99de4a2815943c80731b9c8801561d2604ac3377968bff081f53e9542a2"
+            },
+            {
+              "source": "1912.03234",
+              "ordinal": 3,
+              "chunk_id": "f6b7311d68918225a690f779245fde2f734fb41be2ee672f08a1236380927645"
+            },
+            {
+              "source": "1912.03234",
+              "ordinal": 1,
+              "chunk_id": "f29e8877526692414a267cdaeb55579af02c4a51aef9dbc65b4b56faff8d6c6d"
+            },
+            {
+              "source": "1912.03234",
+              "ordinal": 17,
+              "chunk_id": "f91939c7ff3dc2a6b28bc4d6f196bf777445c129471e6b9fa90f9a2726cb0b96"
+            }
+          ]
+        },
+        {
+          "kind": "wire",
+          "max_tokens": 512,
+          "temperature": 0.0,
+          "model": "deepseek-v4.1-flash-1017",
+          "retry_limit": 0,
+          "enable_thinking": null,
+          "prompt_sha256": "0defe80b819fe3f2326141cb3fe7ee5f381e57deb229c32565bc77e1939a34d2"
+        },
+        {
+          "kind": "response",
+          "elapsed_ms": 2278,
+          "finish_reason": "stop",
+          "content_present": true,
+          "usage": {
+            "input_tokens": 2057,
+            "output_tokens": 197,
+            "total_tokens": 2254
+          }
+        }
+      ]
+    },
+    {
+      "id": "89e1e0dc5d15a05f8740f471e1cb3ddd296b8942",
+      "state": "returned",
+      "utc": "2026-11-14T02:32:01.196557+00:00",
+      "http": 200,
+      "elapsed_s": 29.156,
+      "answer": "The punchline is more important for humor. The paper reports that all models, including humans, relied more on the punchline in their predictions, and concludes that although both parts are needed for a joke to be humorous, the punchline carries higher weight than the body [1][2].",
+      "insufficient": false,
+      "citations": [
+        {
+          "number": 1,
+          "source": "1909.00252",
+          "ordinal": 9,
+          "chunk_id": "5dcd1306a47e21393a984a6b00c77e2db310b3f14c975f9adde3c34e7b810883",
+          "revision": "993d0061-a6fb-4d5f-8f3a-1765bd369ee6",
+          "excerpt": "If the participant was evaluating a sample from a body or punchline only dataset we prefaced our question with a sentence explaining that context, for example: \"Below is the punchline of a joke. Based on this punchline, do you think you would find this joke humorous?\" Taking these labels, we used the most frequently chosen tag from a majority vote to calculate the percentages found in the Human section of Table 2.\n\nExperiments ::: Results\n\nIn Table 2, we see the results of our experiment with the Reddit dataset. We ran our models on the body of the joke exclusively, the punchline exclusively, and both parts together (labeled full in our table). On the full dataset we found that the Transformer achieved an accuracy of 72.4 percent on the hold out test set, while the CNN was in the high 60's. We also note that the general human classification found 66.3% of the jokes to be humorous.\n\nIn order to understand what may be happening in the model, we used the body and punchline only datasets to see what part of the joke was most important for humor. We found that all of the models, including humans, relied more on the punchline of the joke in their predictions (Table 2). Thus, it seems tha",
+          "chunk_text_sha256": "60e581d93c7067740b19bb9bb91660de875930706d312bf821cbba2630d5f3b0",
+          "excerpt_sha256": "60e581d93c7067740b19bb9bb91660de875930706d312bf821cbba2630d5f3b0",
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1200,
+          "locator": {
+            "type": "text_range",
+            "char_end": 10200,
+            "char_start": 9000
+          }
+        },
+        {
+          "number": 2,
+          "source": "1909.00252",
+          "ordinal": 10,
+          "chunk_id": "17b980df524576c518430b93b7a04473f57767b839ecf7a0e30a642b8275e68e",
+          "revision": "993d0061-a6fb-4d5f-8f3a-1765bd369ee6",
+          "excerpt": "o see what part of the joke was most important for humor. We found that all of the models, including humans, relied more on the punchline of the joke in their predictions (Table 2). Thus, it seems that although both parts of the joke are needed for it to be humorous, the punchline carries higher weight than the body. We hypothesize that this is due to the variations found in the different joke bodies: some take paragraphs to set up the joke, while others are less than a sentence.\n\nOur experiment with the Short Jokes dataset found the Transformer model's accuracy and F1 score to be 0.986. This was a jump of 8 percent from the most recent work done with CNNs (Table 4).\n\nThe results on the Pun of the Day dataset are shown in Table 3 above. It shows an accuracy of 93 percent, close to 4 percent greater accuracy than the best CNN model proposed. Although the CNN model used a variety of techniques to extract the best features from the dataset, we see that the self-attention layers found even greater success in pulling out the crucial features.\n\nDiscussion\n\nConsidering that a joke's humor value is subjective, the results on the Reddit dataset are surprising. The model has used the context",
+          "chunk_text_sha256": "ae2d5fb16d2f2ee46aa081845683cfd4c1bba5a82e40beef46cc740c76aaf81f",
+          "excerpt_sha256": "ae2d5fb16d2f2ee46aa081845683cfd4c1bba5a82e40beef46cc740c76aaf81f",
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1200,
+          "locator": {
+            "type": "text_range",
+            "char_end": 11200,
+            "char_start": 10000
+          }
+        }
+      ],
+      "events": [
+        {
+          "kind": "retrieval",
+          "snapshot": "4ebf2700-7b8f-4091-9e7d-b8aed4a44b11",
+          "candidate": [
+            {
+              "source": "1909.00252",
+              "ordinal": 0,
+              "chunk_id": "819030743674f0a387591c1c3dd8577ec79c26cae6651ed1b6d85f14cee75b21"
+            },
+            {
+              "source": "1909.00252",
+              "ordinal": 10,
+              "chunk_id": "17b980df524576c518430b93b7a04473f57767b839ecf7a0e30a642b8275e68e"
+            },
+            {
+              "source": "1909.00252",
+              "ordinal": 9,
+              "chunk_id": "5dcd1306a47e21393a984a6b00c77e2db310b3f14c975f9adde3c34e7b810883"
+            },
+            {
+              "source": "1909.00252",
+              "ordinal": 12,
+              "chunk_id": "174fe6800e4bd422087d8a665671009bed19355264c62becac539812c883e935"
+            },
+            {
+              "source": "1909.00252",
+              "ordinal": 2,
+              "chunk_id": "3bc64e1d90f30f56784013b4f39ba64bdcaedc17aa5906ed5127b2e41db26ae0"
+            },
+            {
+              "source": "1909.00252",
+              "ordinal": 6,
+              "chunk_id": "3826f8b1e5bfe0edff442f2c4692a1a894c4adf8a6b68999ecca142d49dd6544"
+            },
+            {
+              "source": "1909.03526",
+              "ordinal": 1,
+              "chunk_id": "2740a562baa623349822c53dbd6004b52ce251b977390e3a76633ec112e2d7c0"
+            },
+            {
+              "source": "1909.00252",
+              "ordinal": 1,
+              "chunk_id": "ee674dd8fc66f632a76d82420fb5fb796217288a7048f2e4b69ade76543c4ae8"
+            },
+            {
+              "source": "1912.03234",
+              "ordinal": 0,
+              "chunk_id": "288e5fe674e27317b879f200a07d3a05dd4ef8e1767a1928927c764d4f8deaed"
+            },
+            {
+              "source": "1909.00252",
+              "ordinal": 11,
+              "chunk_id": "901a71b1a0987989fdb538ab61b6b1dad7632a9b8e0e84237b75558a1b4f02be"
+            },
+            {
+              "source": "1909.03526",
+              "ordinal": 0,
+              "chunk_id": "cdcc976ea4b790ce6caf2ea2e8bac8c851bf46ad49ea63f5868f768eeb51e02a"
+            },
+            {
+              "source": "1912.03234",
+              "ordinal": 1,
+              "chunk_id": "f29e8877526692414a267cdaeb55579af02c4a51aef9dbc65b4b56faff8d6c6d"
+            },
+            {
+              "source": "1909.00252",
+              "ordinal": 3,
+              "chunk_id": "a4893390c3c48149fb64af280278e53e01eb5ed91164bccfaa562fd2d36b4154"
+            },
+            {
+              "source": "1909.00252",
+              "ordinal": 8,
+              "chunk_id": "9ce6ddb311d0177289c43fb382684189fba7f79c0ef0982916fcfcdd3cbcf4c7"
+            },
+            {
+              "source": "1912.03234",
+              "ordinal": 6,
+              "chunk_id": "cbed33356e02c04a4156269a8f1a2979caf69ca43fd529b3c0f01d0d0151122f"
+            },
+            {
+              "source": "1912.03234",
+              "ordinal": 3,
+              "chunk_id": "f6b7311d68918225a690f779245fde2f734fb41be2ee672f08a1236380927645"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 22,
+              "chunk_id": "ddc14dc1704aa4b11770667701dac1196015d063eb3048ade636f0baa5689901"
+            },
+            {
+              "source": "1912.03234",
+              "ordinal": 8,
+              "chunk_id": "3869c4b2d6e6c7a3677f4d36718ddae551e1c0b4ab87ef0bb54a50ad04287682"
+            },
+            {
+              "source": "1912.03234",
+              "ordinal": 5,
+              "chunk_id": "53b487793d7311125f71e90047a3c2f6ba5c37e418ee2ac2cac47be0522b155d"
+            },
+            {
+              "source": "1909.00252",
+              "ordinal": 4,
+              "chunk_id": "63b5f62c058b08592efb2e83cc27028f2a32f4062a8374eac8cf85e649ecbf8d"
+            }
+          ],
+          "reranked": [
+            {
+              "source": "1909.00252",
+              "ordinal": 9,
+              "chunk_id": "5dcd1306a47e21393a984a6b00c77e2db310b3f14c975f9adde3c34e7b810883"
+            },
+            {
+              "source": "1909.00252",
+              "ordinal": 10,
+              "chunk_id": "17b980df524576c518430b93b7a04473f57767b839ecf7a0e30a642b8275e68e"
+            },
+            {
+              "source": "1909.00252",
+              "ordinal": 2,
+              "chunk_id": "3bc64e1d90f30f56784013b4f39ba64bdcaedc17aa5906ed5127b2e41db26ae0"
+            },
+            {
+              "source": "1909.00252",
+              "ordinal": 0,
+              "chunk_id": "819030743674f0a387591c1c3dd8577ec79c26cae6651ed1b6d85f14cee75b21"
+            },
+            {
+              "source": "1909.00252",
+              "ordinal": 1,
+              "chunk_id": "ee674dd8fc66f632a76d82420fb5fb796217288a7048f2e4b69ade76543c4ae8"
+            },
+            {
+              "source": "1909.00252",
+              "ordinal": 12,
+              "chunk_id": "174fe6800e4bd422087d8a665671009bed19355264c62becac539812c883e935"
+            }
+          ],
+          "times_ms": {
+            "dense": 355.925,
+            "sparse": 12.192,
+            "fusion": 0.288,
+            "rerank": 26634.684
+          },
+          "total_ms": 27023.038
+        },
+        {
+          "kind": "reader",
+          "prompt_sha256": "961dd69cf889a1f103faa45718e9cc92e8ca14d6ef79bd872df651e88ae79e19",
+          "chunks": [
+            {
+              "source": "1909.00252",
+              "ordinal": 9,
+              "chunk_id": "5dcd1306a47e21393a984a6b00c77e2db310b3f14c975f9adde3c34e7b810883"
+            },
+            {
+              "source": "1909.00252",
+              "ordinal": 10,
+              "chunk_id": "17b980df524576c518430b93b7a04473f57767b839ecf7a0e30a642b8275e68e"
+            },
+            {
+              "source": "1909.00252",
+              "ordinal": 2,
+              "chunk_id": "3bc64e1d90f30f56784013b4f39ba64bdcaedc17aa5906ed5127b2e41db26ae0"
+            },
+            {
+              "source": "1909.00252",
+              "ordinal": 0,
+              "chunk_id": "819030743674f0a387591c1c3dd8577ec79c26cae6651ed1b6d85f14cee75b21"
+            },
+            {
+              "source": "1909.00252",
+              "ordinal": 1,
+              "chunk_id": "ee674dd8fc66f632a76d82420fb5fb796217288a7048f2e4b69ade76543c4ae8"
+            },
+            {
+              "source": "1909.00252",
+              "ordinal": 12,
+              "chunk_id": "174fe6800e4bd422087d8a665671009bed19355264c62becac539812c883e935"
+            }
+          ]
+        },
+        {
+          "kind": "wire",
+          "max_tokens": 512,
+          "temperature": 0.0,
+          "model": "deepseek-v4.1-flash-1017",
+          "retry_limit": 0,
+          "enable_thinking": null,
+          "prompt_sha256": "961dd69cf889a1f103faa45718e9cc92e8ca14d6ef79bd872df651e88ae79e19"
+        },
+        {
+          "kind": "response",
+          "elapsed_ms": 2085,
+          "finish_reason": "stop",
+          "content_present": true,
+          "usage": {
+            "input_tokens": 2271,
+            "output_tokens": 250,
+            "total_tokens": 2521
+          }
+        }
+      ]
+    },
+    {
+      "id": "b2b0321b0aaf58c3aa9050906ade6ef35874c5c1",
+      "state": "returned",
+      "utc": "2026-11-14T02:32:30.361450+00:00",
+      "http": 200,
+      "elapsed_s": 30.447,
+      "answer": "The dataset, MMHS150K, is composed of 150,000 tweets, each containing text and an image [4]; the paper also describes it as a 150K-tweet dataset [1].",
+      "insufficient": false,
+      "citations": [
+        {
+          "number": 1,
+          "source": "1910.03814",
+          "ordinal": 24,
+          "chunk_id": "d116ff696ccf9f3212862553288b086f357f6dc2ee469335d991b01902aa3f10",
+          "revision": "43aea5fe-92a1-4dc5-bc47-c226b02d5161",
+          "excerpt": "text, its repercussion is bigger in more complex tasks, such as detection using images or multimodal detection.\n\nComplexity and diversity of multimodal relations. Hate speech multimodal publications employ a lot of background knowledge which makes the relations between visual and textual elements they use very complex and diverse, and therefore difficult to learn by a neural network.\n\nSmall set of multimodal examples. Fig. FIGREF5 shows some of the challenging multimodal hate examples that we aimed to detect. But although we have collected a big dataset of $150K$ tweets, the subset of multimodal hate there is still too small to learn the complex multimodal relations needed to identify multimodal hate.\n\nConclusions\n\nIn this work we have explored the task of hate speech detection on multimodal publications. We have created MMHS150K, to our knowledge the biggest available hate speech dataset, and the first one composed of multimodal data, namely tweets formed by image and text. We have trained different textual, visual and multimodal models with that data, and found out that, despite the fact that images are useful for hate speech detection, the multimodal models do not outperform th",
+          "chunk_text_sha256": "2d4e5385898923cda67168b85280f2a106cb1241f62f2efe6a7975e4d28bb7fb",
+          "excerpt_sha256": "2d4e5385898923cda67168b85280f2a106cb1241f62f2efe6a7975e4d28bb7fb",
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1199,
+          "locator": {
+            "type": "text_range",
+            "char_end": 25200,
+            "char_start": 24000
+          }
+        },
+        {
+          "number": 4,
+          "source": "1910.03814",
+          "ordinal": 9,
+          "chunk_id": "58be2832fa593d6fd46f2051f38d6fcc05cd72e8debf8d78a18b59d291db0a0f",
+          "revision": "43aea5fe-92a1-4dc5-bc47-c226b02d5161",
+          "excerpt": "l information –which they call question-guided kernels– and convolve them with the visual information in an earlier stage to get the multimodal features. Margffoy-Tuay et al. BIBREF21 use a similar approach to combine visual and textual information, but they address a different task: instance segmentation guided by natural language queries. We inspire in these latest feature fusion works to build the models for hate speech detection.\n\nThe MMHS150K dataset\n\nExisting hate speech datasets contain only textual data. Moreover, a reference benchmark does not exists. Most of the published datasets are crawled from Twitter and distributed as tweet IDs but, since Twitter removes reported user accounts, an important amount of their hate tweets is no longer accessible. We create a new manually annotated multimodal hate speech dataset formed by $150,000$ tweets, each one of them containing text and an image. We call the dataset MMHS150K, and made it available online . In this section, we explain the dataset creation steps.\n\nThe MMHS150K dataset ::: Tweets Gathering\n\nWe used the Twitter API to gather real-time tweets from September 2018 until February 2019, selecting the ones containing any of",
+          "chunk_text_sha256": "cc454277f0f905db9fd6b354dfe4debc49b813eee814809a275cebec08cc74b5",
+          "excerpt_sha256": "cc454277f0f905db9fd6b354dfe4debc49b813eee814809a275cebec08cc74b5",
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1199,
+          "locator": {
+            "type": "text_range",
+            "char_end": 10200,
+            "char_start": 9000
+          }
+        }
+      ],
+      "events": [
+        {
+          "kind": "retrieval",
+          "snapshot": "4ebf2700-7b8f-4091-9e7d-b8aed4a44b11",
+          "candidate": [
+            {
+              "source": "1910.03814",
+              "ordinal": 0,
+              "chunk_id": "64b450d9c913ec64d18b13469834caab76d1705a25715e3db300c913a2b76c72"
+            },
+            {
+              "source": "1910.03814",
+              "ordinal": 24,
+              "chunk_id": "d116ff696ccf9f3212862553288b086f357f6dc2ee469335d991b01902aa3f10"
+            },
+            {
+              "source": "1910.03814",
+              "ordinal": 3,
+              "chunk_id": "81483b3a82a5043f315b8e8ce3d14fe477cac2b046ec0c097bf093718ae58ce0"
+            },
+            {
+              "source": "1910.03814",
+              "ordinal": 9,
+              "chunk_id": "58be2832fa593d6fd46f2051f38d6fcc05cd72e8debf8d78a18b59d291db0a0f"
+            },
+            {
+              "source": "1910.03814",
+              "ordinal": 23,
+              "chunk_id": "fa498d9d2508e24efbb084a064b5dea5581911a7101ee3d9d8e3205c704d89c2"
+            },
+            {
+              "source": "1910.03814",
+              "ordinal": 13,
+              "chunk_id": "82038a3e3b66ad5e7174518a25131f8c84c927ad040b98d98ef6d02e2ada782f"
+            },
+            {
+              "source": "1910.03814",
+              "ordinal": 16,
+              "chunk_id": "122ee5a7a72cf3bfd41909da0ed5945d7bc5950c2361b6104b07427f59836919"
+            },
+            {
+              "source": "1910.03814",
+              "ordinal": 25,
+              "chunk_id": "d6af492799d6c1c378cda903f3b212bd4879464875cb350b897f1bd06c834092"
+            },
+            {
+              "source": "1910.03814",
+              "ordinal": 5,
+              "chunk_id": "25feb09ee32892c4726fbe188263bf79f502e4b8316433ab9426735cfee1e95c"
+            },
+            {
+              "source": "1910.03814",
+              "ordinal": 10,
+              "chunk_id": "b108f105e51e3dbcef7f9812b092a6e623a431c610fa685826f39473a4214d2d"
+            },
+            {
+              "source": "1910.03814",
+              "ordinal": 22,
+              "chunk_id": "3d0d649ceb0f3122b88d9a91be8a26781945480f1a22ac6245ee22fed3f6bd19"
+            },
+            {
+              "source": "1910.03814",
+              "ordinal": 15,
+              "chunk_id": "a1c0876b95f41634d96f9a78b04d599df84e355c175f171ed284992c4ee6f7c9"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 15,
+              "chunk_id": "4d167740b93c9d47d666c3980c1baa979f2fa2f05b0f0a392d4ee0b2aa14833b"
+            },
+            {
+              "source": "1910.03814",
+              "ordinal": 8,
+              "chunk_id": "114523f4c758e57032000338936879c2f1aba370b8d861cdd1376cd3ae6fe287"
+            },
+            {
+              "source": "1909.03526",
+              "ordinal": 0,
+              "chunk_id": "cdcc976ea4b790ce6caf2ea2e8bac8c851bf46ad49ea63f5868f768eeb51e02a"
+            },
+            {
+              "source": "1910.03814",
+              "ordinal": 6,
+              "chunk_id": "ed6ed145ca03dc7b9b0e7fdabe144f0693895589d724377707ab8853e62f665a"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 22,
+              "chunk_id": "ddc14dc1704aa4b11770667701dac1196015d063eb3048ade636f0baa5689901"
+            },
+            {
+              "source": "1910.03814",
+              "ordinal": 11,
+              "chunk_id": "becae57378ad7bc363db15e574976ff96f3b1370e0ad8548531b2e2b482af91e"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 23,
+              "chunk_id": "ce9339e1d4eb37a777746f1239dff79da7329d5ef09a401437f8bf79ab4b38ec"
+            },
+            {
+              "source": "1910.03814",
+              "ordinal": 19,
+              "chunk_id": "bfd89f8a774c0d513950bf297d75de6ffb9f0daea166a43937df9f31802afc0e"
+            }
+          ],
+          "reranked": [
+            {
+              "source": "1910.03814",
+              "ordinal": 24,
+              "chunk_id": "d116ff696ccf9f3212862553288b086f357f6dc2ee469335d991b01902aa3f10"
+            },
+            {
+              "source": "1910.03814",
+              "ordinal": 13,
+              "chunk_id": "82038a3e3b66ad5e7174518a25131f8c84c927ad040b98d98ef6d02e2ada782f"
+            },
+            {
+              "source": "1910.03814",
+              "ordinal": 0,
+              "chunk_id": "64b450d9c913ec64d18b13469834caab76d1705a25715e3db300c913a2b76c72"
+            },
+            {
+              "source": "1910.03814",
+              "ordinal": 9,
+              "chunk_id": "58be2832fa593d6fd46f2051f38d6fcc05cd72e8debf8d78a18b59d291db0a0f"
+            },
+            {
+              "source": "1910.03814",
+              "ordinal": 5,
+              "chunk_id": "25feb09ee32892c4726fbe188263bf79f502e4b8316433ab9426735cfee1e95c"
+            },
+            {
+              "source": "1910.03814",
+              "ordinal": 3,
+              "chunk_id": "81483b3a82a5043f315b8e8ce3d14fe477cac2b046ec0c097bf093718ae58ce0"
+            }
+          ],
+          "times_ms": {
+            "dense": 385.403,
+            "sparse": 50.979,
+            "fusion": 0.235,
+            "rerank": 28163.705
+          },
+          "total_ms": 28623.473
+        },
+        {
+          "kind": "reader",
+          "prompt_sha256": "5155696571ba8922ca05712db85efc82a8c6996a5012f83581ff2c4a16b9b1e4",
+          "chunks": [
+            {
+              "source": "1910.03814",
+              "ordinal": 24,
+              "chunk_id": "d116ff696ccf9f3212862553288b086f357f6dc2ee469335d991b01902aa3f10"
+            },
+            {
+              "source": "1910.03814",
+              "ordinal": 13,
+              "chunk_id": "82038a3e3b66ad5e7174518a25131f8c84c927ad040b98d98ef6d02e2ada782f"
+            },
+            {
+              "source": "1910.03814",
+              "ordinal": 0,
+              "chunk_id": "64b450d9c913ec64d18b13469834caab76d1705a25715e3db300c913a2b76c72"
+            },
+            {
+              "source": "1910.03814",
+              "ordinal": 9,
+              "chunk_id": "58be2832fa593d6fd46f2051f38d6fcc05cd72e8debf8d78a18b59d291db0a0f"
+            },
+            {
+              "source": "1910.03814",
+              "ordinal": 5,
+              "chunk_id": "25feb09ee32892c4726fbe188263bf79f502e4b8316433ab9426735cfee1e95c"
+            },
+            {
+              "source": "1910.03814",
+              "ordinal": 3,
+              "chunk_id": "81483b3a82a5043f315b8e8ce3d14fe477cac2b046ec0c097bf093718ae58ce0"
+            }
+          ]
+        },
+        {
+          "kind": "wire",
+          "max_tokens": 512,
+          "temperature": 0.0,
+          "model": "deepseek-v4.1-flash-1017",
+          "retry_limit": 0,
+          "enable_thinking": null,
+          "prompt_sha256": "5155696571ba8922ca05712db85efc82a8c6996a5012f83581ff2c4a16b9b1e4"
+        },
+        {
+          "kind": "response",
+          "elapsed_ms": 1772,
+          "finish_reason": "stop",
+          "content_present": true,
+          "usage": {
+            "input_tokens": 2248,
+            "output_tokens": 228,
+            "total_tokens": 2476
+          }
+        }
+      ]
+    },
+    {
+      "id": "86a93a2d1c19cd0cd21ad1608f2a336240725700",
+      "state": "returned",
+      "utc": "2026-11-14T02:33:25.532887+00:00",
+      "http": 502,
+      "elapsed_s": 31.46,
+      "error": "MODEL_BAD_RESPONSE",
+      "message": "The model reached its output limit without visible content.",
+      "events": [
+        {
+          "kind": "retrieval",
+          "snapshot": "4ebf2700-7b8f-4091-9e7d-b8aed4a44b11",
+          "candidate": [
+            {
+              "source": "2003.05522",
+              "ordinal": 0,
+              "chunk_id": "51e146e787642bae2b1700c59fd781bc7099e5b34877a503d107774180fb2ad2"
+            },
+            {
+              "source": "2003.05522",
+              "ordinal": 12,
+              "chunk_id": "1eabb23145ab4e489ccdd5e7953664a330ca8ca4121de33c9fd071a5b4cce048"
+            },
+            {
+              "source": "2003.05522",
+              "ordinal": 19,
+              "chunk_id": "a11f05647631e082e7f7317508ae5586d94e98335a3984eaec171b2d791c2e0f"
+            },
+            {
+              "source": "2003.05522",
+              "ordinal": 6,
+              "chunk_id": "d80b5b83bb55ccb34454e430f8fd555c97dad55261f2664b55d4ed152b4497e3"
+            },
+            {
+              "source": "2003.05522",
+              "ordinal": 1,
+              "chunk_id": "f22ffc280414bf49f251b6761a078d71e17b810baa58157d25283152ab549500"
+            },
+            {
+              "source": "2003.05522",
+              "ordinal": 2,
+              "chunk_id": "853edd117ef617100b2ca1523219e24a957e194e5a991056adf45bb41ed4aa98"
+            },
+            {
+              "source": "2003.05522",
+              "ordinal": 18,
+              "chunk_id": "be594ca5c4f1f4bc1215beca1c442b1d564f8f31aba31e93b03769b4185eab8c"
+            },
+            {
+              "source": "2003.05522",
+              "ordinal": 7,
+              "chunk_id": "5d450d1cecf1b6bd0830533215c778b8f485f686cbd654d66325d54c5f334562"
+            },
+            {
+              "source": "2003.05522",
+              "ordinal": 8,
+              "chunk_id": "3c9f63edb2ae01a0fe01028679aa2f1d348208168ae063ca7794d26feef44982"
+            },
+            {
+              "source": "2003.05522",
+              "ordinal": 13,
+              "chunk_id": "c01c18970453f7adf0cc992221b6c86cd77dddec2bb64cc3cf0b83d41c358f9c"
+            },
+            {
+              "source": "2003.05522",
+              "ordinal": 9,
+              "chunk_id": "ccf66631d4266795bf2f61155f1b71a99aedefbd292a385262fedac3ceb2467d"
+            },
+            {
+              "source": "2003.05522",
+              "ordinal": 5,
+              "chunk_id": "67a3058d1f700a2ecbddc08008ead4f47e6b368b3ca2224012012d8ef482bcb5"
+            },
+            {
+              "source": "2003.05522",
+              "ordinal": 11,
+              "chunk_id": "704806664c42e7666ac50bd3e212d9c0ac2c04b4fa1dcb4e306c5fa6d80146d0"
+            },
+            {
+              "source": "2001.09332",
+              "ordinal": 1,
+              "chunk_id": "1c8e34404f0ff20f0563bc05d3816c77d53facb512cce7c9f418c9fa6aa159f1"
+            },
+            {
+              "source": "2003.05522",
+              "ordinal": 14,
+              "chunk_id": "39110d3242e262f423f5ddaa4fc52d755c3cef0a2f8b3f5989f050e5d57f32eb"
+            },
+            {
+              "source": "2003.05522",
+              "ordinal": 15,
+              "chunk_id": "c059b5c2caed7f73b4ea3f7bc6a535ae60412219ad97ecc20a7f831c5eb0f05a"
+            },
+            {
+              "source": "2003.05522",
+              "ordinal": 4,
+              "chunk_id": "47e884c63499d95a7bab4d56836f8207f5c2c23d3af778407ce909948fb8802d"
+            },
+            {
+              "source": "2003.05522",
+              "ordinal": 16,
+              "chunk_id": "31c6bd4786b5fa616a239fe7c50d4f22439fa79290d7ed01dc2ab3b6f623a5fd"
+            },
+            {
+              "source": "2003.05522",
+              "ordinal": 3,
+              "chunk_id": "d9b1e38d76ebb0ab9aeb650c50714b9a40bf0e6c785fcb4bc375ee71bbadc9dd"
+            },
+            {
+              "source": "2003.05522",
+              "ordinal": 17,
+              "chunk_id": "6010d000d9a4b95c29c378cb558c37d274ddf2ad87485d8c817b065ac316f3c1"
+            }
+          ],
+          "reranked": [
+            {
+              "source": "2003.05522",
+              "ordinal": 0,
+              "chunk_id": "51e146e787642bae2b1700c59fd781bc7099e5b34877a503d107774180fb2ad2"
+            },
+            {
+              "source": "2003.05522",
+              "ordinal": 19,
+              "chunk_id": "a11f05647631e082e7f7317508ae5586d94e98335a3984eaec171b2d791c2e0f"
+            },
+            {
+              "source": "2003.05522",
+              "ordinal": 18,
+              "chunk_id": "be594ca5c4f1f4bc1215beca1c442b1d564f8f31aba31e93b03769b4185eab8c"
+            },
+            {
+              "source": "2003.05522",
+              "ordinal": 12,
+              "chunk_id": "1eabb23145ab4e489ccdd5e7953664a330ca8ca4121de33c9fd071a5b4cce048"
+            },
+            {
+              "source": "2003.05522",
+              "ordinal": 1,
+              "chunk_id": "f22ffc280414bf49f251b6761a078d71e17b810baa58157d25283152ab549500"
+            },
+            {
+              "source": "2003.05522",
+              "ordinal": 6,
+              "chunk_id": "d80b5b83bb55ccb34454e430f8fd555c97dad55261f2664b55d4ed152b4497e3"
+            }
+          ],
+          "times_ms": {
+            "dense": 375.579,
+            "sparse": 100.258,
+            "fusion": 0.114,
+            "rerank": 26197.411
+          },
+          "total_ms": 26691.328
+        },
+        {
+          "kind": "reader",
+          "prompt_sha256": "f1fa90989a865bc01a9f8bc31be708c272c676c26ed9461803e0a0e4ae61c249",
+          "chunks": [
+            {
+              "source": "2003.05522",
+              "ordinal": 0,
+              "chunk_id": "51e146e787642bae2b1700c59fd781bc7099e5b34877a503d107774180fb2ad2"
+            },
+            {
+              "source": "2003.05522",
+              "ordinal": 19,
+              "chunk_id": "a11f05647631e082e7f7317508ae5586d94e98335a3984eaec171b2d791c2e0f"
+            },
+            {
+              "source": "2003.05522",
+              "ordinal": 18,
+              "chunk_id": "be594ca5c4f1f4bc1215beca1c442b1d564f8f31aba31e93b03769b4185eab8c"
+            },
+            {
+              "source": "2003.05522",
+              "ordinal": 12,
+              "chunk_id": "1eabb23145ab4e489ccdd5e7953664a330ca8ca4121de33c9fd071a5b4cce048"
+            },
+            {
+              "source": "2003.05522",
+              "ordinal": 1,
+              "chunk_id": "f22ffc280414bf49f251b6761a078d71e17b810baa58157d25283152ab549500"
+            },
+            {
+              "source": "2003.05522",
+              "ordinal": 6,
+              "chunk_id": "d80b5b83bb55ccb34454e430f8fd555c97dad55261f2664b55d4ed152b4497e3"
+            }
+          ]
+        },
+        {
+          "kind": "wire",
+          "max_tokens": 512,
+          "temperature": 0.0,
+          "model": "deepseek-v4.1-flash-1017",
+          "retry_limit": 0,
+          "enable_thinking": null,
+          "prompt_sha256": "f1fa90989a865bc01a9f8bc31be708c272c676c26ed9461803e0a0e4ae61c249"
+        },
+        {
+          "kind": "response",
+          "elapsed_ms": 4714,
+          "finish_reason": "length",
+          "content_present": false,
+          "usage": {
+            "input_tokens": 2206,
+            "output_tokens": 512,
+            "total_tokens": 2718
+          }
+        }
+      ]
+    },
+    {
+      "id": "dc57ae854d78aa5d5e8c979826d3e2524d4e9165",
+      "state": "returned",
+      "utc": "2026-11-14T02:35:02.911181+00:00",
+      "http": 502,
+      "elapsed_s": 34.804,
+      "error": "CITATION_QA_INVALID_MODEL_OUTPUT",
+      "message": "The model returned an invalid citation answer. JSON parsing failed at the model output limit.",
+      "events": [
+        {
+          "kind": "retrieval",
+          "snapshot": "4ebf2700-7b8f-4091-9e7d-b8aed4a44b11",
+          "candidate": [
+            {
+              "source": "1909.03526",
+              "ordinal": 0,
+              "chunk_id": "cdcc976ea4b790ce6caf2ea2e8bac8c851bf46ad49ea63f5868f768eeb51e02a"
+            },
+            {
+              "source": "1909.03526",
+              "ordinal": 1,
+              "chunk_id": "2740a562baa623349822c53dbd6004b52ce251b977390e3a76633ec112e2d7c0"
+            },
+            {
+              "source": "1909.00252",
+              "ordinal": 0,
+              "chunk_id": "819030743674f0a387591c1c3dd8577ec79c26cae6651ed1b6d85f14cee75b21"
+            },
+            {
+              "source": "1909.03526",
+              "ordinal": 16,
+              "chunk_id": "92275dd785f847b15ec7884885744471d96829ddeee619d53a7161cd0a94dbb9"
+            },
+            {
+              "source": "1909.03526",
+              "ordinal": 15,
+              "chunk_id": "2579b9f8a1ed95d36d25babeff5a31153eb94bd557bec09aeed984400d4e4479"
+            },
+            {
+              "source": "1909.03526",
+              "ordinal": 14,
+              "chunk_id": "06258a3319411189839c423116b75bf9c3c30e171366d3447d5ea3439cea6bc1"
+            },
+            {
+              "source": "2003.05522",
+              "ordinal": 9,
+              "chunk_id": "ccf66631d4266795bf2f61155f1b71a99aedefbd292a385262fedac3ceb2467d"
+            },
+            {
+              "source": "2003.05522",
+              "ordinal": 2,
+              "chunk_id": "853edd117ef617100b2ca1523219e24a957e194e5a991056adf45bb41ed4aa98"
+            },
+            {
+              "source": "1912.03234",
+              "ordinal": 8,
+              "chunk_id": "3869c4b2d6e6c7a3677f4d36718ddae551e1c0b4ab87ef0bb54a50ad04287682"
+            },
+            {
+              "source": "1909.03526",
+              "ordinal": 2,
+              "chunk_id": "aa4e44564df091817211f39f1a5bdc90b4640dff6ac0a363605b9bf4ac40b3b4"
+            },
+            {
+              "source": "1909.00252",
+              "ordinal": 12,
+              "chunk_id": "174fe6800e4bd422087d8a665671009bed19355264c62becac539812c883e935"
+            },
+            {
+              "source": "1909.03526",
+              "ordinal": 5,
+              "chunk_id": "e8621eaadffb7c7e1ec23a8dcbf55a74e44b2bd665770c0b412f166071fda081"
+            },
+            {
+              "source": "1912.03234",
+              "ordinal": 5,
+              "chunk_id": "53b487793d7311125f71e90047a3c2f6ba5c37e418ee2ac2cac47be0522b155d"
+            },
+            {
+              "source": "1909.00252",
+              "ordinal": 10,
+              "chunk_id": "17b980df524576c518430b93b7a04473f57767b839ecf7a0e30a642b8275e68e"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 22,
+              "chunk_id": "ddc14dc1704aa4b11770667701dac1196015d063eb3048ade636f0baa5689901"
+            },
+            {
+              "source": "1909.00252",
+              "ordinal": 2,
+              "chunk_id": "3bc64e1d90f30f56784013b4f39ba64bdcaedc17aa5906ed5127b2e41db26ae0"
+            },
+            {
+              "source": "1909.00252",
+              "ordinal": 5,
+              "chunk_id": "80d9897c199aa1938727457dd0999d0c829a49e4aa1848bc979ab8941f5980ae"
+            },
+            {
+              "source": "2003.05522",
+              "ordinal": 7,
+              "chunk_id": "5d450d1cecf1b6bd0830533215c778b8f485f686cbd654d66325d54c5f334562"
+            },
+            {
+              "source": "1912.03234",
+              "ordinal": 16,
+              "chunk_id": "38afd99de4a2815943c80731b9c8801561d2604ac3377968bff081f53e9542a2"
+            },
+            {
+              "source": "1910.03814",
+              "ordinal": 19,
+              "chunk_id": "bfd89f8a774c0d513950bf297d75de6ffb9f0daea166a43937df9f31802afc0e"
+            }
+          ],
+          "reranked": [
+            {
+              "source": "1909.03526",
+              "ordinal": 0,
+              "chunk_id": "cdcc976ea4b790ce6caf2ea2e8bac8c851bf46ad49ea63f5868f768eeb51e02a"
+            },
+            {
+              "source": "1909.03526",
+              "ordinal": 1,
+              "chunk_id": "2740a562baa623349822c53dbd6004b52ce251b977390e3a76633ec112e2d7c0"
+            },
+            {
+              "source": "1912.03234",
+              "ordinal": 16,
+              "chunk_id": "38afd99de4a2815943c80731b9c8801561d2604ac3377968bff081f53e9542a2"
+            },
+            {
+              "source": "1909.03526",
+              "ordinal": 16,
+              "chunk_id": "92275dd785f847b15ec7884885744471d96829ddeee619d53a7161cd0a94dbb9"
+            },
+            {
+              "source": "1909.03526",
+              "ordinal": 14,
+              "chunk_id": "06258a3319411189839c423116b75bf9c3c30e171366d3447d5ea3439cea6bc1"
+            },
+            {
+              "source": "1909.03526",
+              "ordinal": 15,
+              "chunk_id": "2579b9f8a1ed95d36d25babeff5a31153eb94bd557bec09aeed984400d4e4479"
+            }
+          ],
+          "times_ms": {
+            "dense": 384.275,
+            "sparse": 10.596,
+            "fusion": 0.252,
+            "rerank": 30375.603
+          },
+          "total_ms": 30793.463
+        },
+        {
+          "kind": "reader",
+          "prompt_sha256": "ee291659c193ed39be64b56de14708419f96665117f12cfbaa48d084cdb89eff",
+          "chunks": [
+            {
+              "source": "1909.03526",
+              "ordinal": 0,
+              "chunk_id": "cdcc976ea4b790ce6caf2ea2e8bac8c851bf46ad49ea63f5868f768eeb51e02a"
+            },
+            {
+              "source": "1909.03526",
+              "ordinal": 1,
+              "chunk_id": "2740a562baa623349822c53dbd6004b52ce251b977390e3a76633ec112e2d7c0"
+            },
+            {
+              "source": "1912.03234",
+              "ordinal": 16,
+              "chunk_id": "38afd99de4a2815943c80731b9c8801561d2604ac3377968bff081f53e9542a2"
+            },
+            {
+              "source": "1909.03526",
+              "ordinal": 16,
+              "chunk_id": "92275dd785f847b15ec7884885744471d96829ddeee619d53a7161cd0a94dbb9"
+            },
+            {
+              "source": "1909.03526",
+              "ordinal": 14,
+              "chunk_id": "06258a3319411189839c423116b75bf9c3c30e171366d3447d5ea3439cea6bc1"
+            },
+            {
+              "source": "1909.03526",
+              "ordinal": 15,
+              "chunk_id": "2579b9f8a1ed95d36d25babeff5a31153eb94bd557bec09aeed984400d4e4479"
+            }
+          ]
+        },
+        {
+          "kind": "wire",
+          "max_tokens": 512,
+          "temperature": 0.0,
+          "model": "deepseek-v4.1-flash-1017",
+          "retry_limit": 0,
+          "enable_thinking": null,
+          "prompt_sha256": "ee291659c193ed39be64b56de14708419f96665117f12cfbaa48d084cdb89eff"
+        },
+        {
+          "kind": "response",
+          "elapsed_ms": 3971,
+          "finish_reason": "length",
+          "content_present": true,
+          "usage": {
+            "input_tokens": 2403,
+            "output_tokens": 512,
+            "total_tokens": 2915
+          }
+        }
+      ]
+    },
+    {
+      "id": "b3ec918827cd22b16212265fcdd5b3eadee654ae",
+      "state": "returned",
+      "utc": "2026-11-14T02:35:37.725879+00:00",
+      "http": 502,
+      "elapsed_s": 30.694,
+      "error": "CITATION_QA_INVALID_MODEL_OUTPUT",
+      "message": "The model returned an invalid citation answer. JSON parsing failed at the model output limit.",
+      "events": [
+        {
+          "kind": "retrieval",
+          "snapshot": "4ebf2700-7b8f-4091-9e7d-b8aed4a44b11",
+          "candidate": [
+            {
+              "source": "1610.00879",
+              "ordinal": 0,
+              "chunk_id": "875d7bab553a0973da525c2e5a5f44e6df54c6db0d2fcaa1047a7a0a02cf8314"
+            },
+            {
+              "source": "1610.00879",
+              "ordinal": 3,
+              "chunk_id": "4f111d7f3ab22ed63857d086448170a5a408b1f4d193bb0d944182130917c0f6"
+            },
+            {
+              "source": "1610.00879",
+              "ordinal": 1,
+              "chunk_id": "431f8b8fbeabb5280006a9a0b64ba4dc291e071ce9b6979bdd318c87762f7d08"
+            },
+            {
+              "source": "1607.00424",
+              "ordinal": 8,
+              "chunk_id": "9818c405f697ee85bb83785a82b4616d1d9db395b8f55f04f1b65c2d927488c8"
+            },
+            {
+              "source": "1607.00424",
+              "ordinal": 5,
+              "chunk_id": "aac5be0308c963d6e670ca1b31ac5f4dc804c95b029371b946d0fbbd54cc38c5"
+            },
+            {
+              "source": "1610.00879",
+              "ordinal": 8,
+              "chunk_id": "b9cf5d0982af8329988130aef7ba6ecf28c06248b95aaa52ced1b881aa33a9c4"
+            },
+            {
+              "source": "1610.00879",
+              "ordinal": 10,
+              "chunk_id": "fd1abdb1d46db792ccb54cd4ae25d6be9a0693774d52074301a19348ded7448d"
+            },
+            {
+              "source": "1610.00879",
+              "ordinal": 2,
+              "chunk_id": "9b856dc7b34a81a725a0befacaa0e90a923323e0fbba60605cd5fc454a7d8e81"
+            },
+            {
+              "source": "1610.00879",
+              "ordinal": 7,
+              "chunk_id": "79b3ba4b18f9471eb397872f0e11ca5585bb22959486e4de4a40f1652cb204e6"
+            },
+            {
+              "source": "1909.00574",
+              "ordinal": 9,
+              "chunk_id": "beafc8922bce69cae1e661a1fca186135563d357223ba1e95be3464116b4f06a"
+            },
+            {
+              "source": "1610.00879",
+              "ordinal": 4,
+              "chunk_id": "364fd3989601d88e0b3decdc9ad81b6bc57525d2f70f3e6a04806a33ca8cf6ed"
+            },
+            {
+              "source": "1909.00574",
+              "ordinal": 12,
+              "chunk_id": "e428f9b95157df1e409442349a2d038054968644191ea0460db6e7fd9fcb79b9"
+            },
+            {
+              "source": "1808.09633",
+              "ordinal": 18,
+              "chunk_id": "cfeb54b00e9eddabdf7d71521e80b324f7d316d1d865c95a157154d77dd2bc4f"
+            },
+            {
+              "source": "1610.00879",
+              "ordinal": 9,
+              "chunk_id": "e1b314b6844484dd6d8b5a807f305d18420cc456551534076917b489ad9e89d9"
+            },
+            {
+              "source": "1607.00424",
+              "ordinal": 1,
+              "chunk_id": "737af376a67b30b54c51801bb92420364c0cf5bb560163022f2c4a15fc25ea0f"
+            },
+            {
+              "source": "1906.07668",
+              "ordinal": 19,
+              "chunk_id": "7d0d8d4f1a58ed0a4e08d2abfd7e557724f7af2cb00defa10b8050ac323260b5"
+            },
+            {
+              "source": "1906.07668",
+              "ordinal": 18,
+              "chunk_id": "3c09b6dda7d81c6c88fcac40fbb0a88d17a91510ef54cb0226a81ac2b57183a7"
+            },
+            {
+              "source": "1909.00574",
+              "ordinal": 14,
+              "chunk_id": "ba71e89dd3f24ad796aee81bacde0b1a1cfed41f1a79da1ca5d0e42cdca816c6"
+            },
+            {
+              "source": "1909.00574",
+              "ordinal": 13,
+              "chunk_id": "2dbebec569807263fb5aaa4b3149f59d17223d41397bc2baab37720eff496732"
+            },
+            {
+              "source": "1906.07668",
+              "ordinal": 7,
+              "chunk_id": "d1989f7960864888ad78e0e197984a1fe6be18c2d1cb7ee78b704b46b39f5104"
+            }
+          ],
+          "reranked": [
+            {
+              "source": "1610.00879",
+              "ordinal": 0,
+              "chunk_id": "875d7bab553a0973da525c2e5a5f44e6df54c6db0d2fcaa1047a7a0a02cf8314"
+            },
+            {
+              "source": "1610.00879",
+              "ordinal": 3,
+              "chunk_id": "4f111d7f3ab22ed63857d086448170a5a408b1f4d193bb0d944182130917c0f6"
+            },
+            {
+              "source": "1610.00879",
+              "ordinal": 1,
+              "chunk_id": "431f8b8fbeabb5280006a9a0b64ba4dc291e071ce9b6979bdd318c87762f7d08"
+            },
+            {
+              "source": "1610.00879",
+              "ordinal": 8,
+              "chunk_id": "b9cf5d0982af8329988130aef7ba6ecf28c06248b95aaa52ced1b881aa33a9c4"
+            },
+            {
+              "source": "1610.00879",
+              "ordinal": 10,
+              "chunk_id": "fd1abdb1d46db792ccb54cd4ae25d6be9a0693774d52074301a19348ded7448d"
+            },
+            {
+              "source": "1610.00879",
+              "ordinal": 9,
+              "chunk_id": "e1b314b6844484dd6d8b5a807f305d18420cc456551534076917b489ad9e89d9"
+            }
+          ],
+          "times_ms": {
+            "dense": 522.33,
+            "sparse": 84.445,
+            "fusion": 0.352,
+            "rerank": 26260.812
+          },
+          "total_ms": 26888.848
+        },
+        {
+          "kind": "reader",
+          "prompt_sha256": "9c370741e427b61cd3d6658c87cda9c5faf1020e482b72e5391dfc5d7d790370",
+          "chunks": [
+            {
+              "source": "1610.00879",
+              "ordinal": 0,
+              "chunk_id": "875d7bab553a0973da525c2e5a5f44e6df54c6db0d2fcaa1047a7a0a02cf8314"
+            },
+            {
+              "source": "1610.00879",
+              "ordinal": 3,
+              "chunk_id": "4f111d7f3ab22ed63857d086448170a5a408b1f4d193bb0d944182130917c0f6"
+            },
+            {
+              "source": "1610.00879",
+              "ordinal": 1,
+              "chunk_id": "431f8b8fbeabb5280006a9a0b64ba4dc291e071ce9b6979bdd318c87762f7d08"
+            },
+            {
+              "source": "1610.00879",
+              "ordinal": 8,
+              "chunk_id": "b9cf5d0982af8329988130aef7ba6ecf28c06248b95aaa52ced1b881aa33a9c4"
+            },
+            {
+              "source": "1610.00879",
+              "ordinal": 10,
+              "chunk_id": "fd1abdb1d46db792ccb54cd4ae25d6be9a0693774d52074301a19348ded7448d"
+            },
+            {
+              "source": "1610.00879",
+              "ordinal": 9,
+              "chunk_id": "e1b314b6844484dd6d8b5a807f305d18420cc456551534076917b489ad9e89d9"
+            }
+          ]
+        },
+        {
+          "kind": "wire",
+          "max_tokens": 512,
+          "temperature": 0.0,
+          "model": "deepseek-v4.1-flash-1017",
+          "retry_limit": 0,
+          "enable_thinking": null,
+          "prompt_sha256": "9c370741e427b61cd3d6658c87cda9c5faf1020e482b72e5391dfc5d7d790370"
+        },
+        {
+          "kind": "response",
+          "elapsed_ms": 3773,
+          "finish_reason": "length",
+          "content_present": true,
+          "usage": {
+            "input_tokens": 2278,
+            "output_tokens": 512,
+            "total_tokens": 2790
+          }
+        }
+      ]
+    },
+    {
+      "id": "281cb27cfa0eea12180fd82ae33035945476609e",
+      "state": "returned",
+      "utc": "2026-11-14T02:37:03.680287+00:00",
+      "http": 200,
+      "elapsed_s": 29.269,
+      "answer": "They learn relations jointly within the Relational Dependency Network (RDN), rather than learning each relation independently [2]. The paper treats joint learning of relations as a component of its relational framework [1].",
+      "insufficient": false,
+      "citations": [
+        {
+          "number": 1,
+          "source": "1607.00424",
+          "ordinal": 0,
+          "chunk_id": "e3f147e7b9752b01fe1555ef3ee65a75398598d6b84f53d256c79d123204529c",
+          "revision": "fcd09aba-bf15-4348-ac3b-9e848ab2640c",
+          "excerpt": "Learning Relational Dependency Networks for Relation Extraction\n\nWe consider the task of KBP slot filling -- extracting relation information from newswire documents for knowledge base construction. We present our pipeline, which employs Relational Dependency Networks (RDNs) to learn linguistic patterns for relation extraction. Additionally, we demonstrate how several components such as weak supervision, word2vec features, joint learning and the use of human advice, can be incorporated in this relational framework. We evaluate the different components in the benchmark KBP 2015 task and show that RDNs effectively model a diverse set of features and perform competitively with current state-of-the-art relation extraction.\n\nIntroduction\n\nThe problem of knowledge base population (KBP) – constructing a knowledge base (KB) of facts gleaned from a large corpus of unstructured data – poses several challenges for the NLP community. Commonly, this relation extraction task is decomposed into two subtasks – entity linking, in which entities are linked to already identified identities within the document or to entities in the existing KB, and slot filling, which identifies certain attributes abou",
+          "chunk_text_sha256": "59a417b0f868cbc98794d60603fe0d171fdb1183cca8a53c16b10372e8047b39",
+          "excerpt_sha256": "59a417b0f868cbc98794d60603fe0d171fdb1183cca8a53c16b10372e8047b39",
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1200,
+          "locator": {
+            "type": "text_range",
+            "char_end": 1200,
+            "char_start": 0
+          }
+        },
+        {
+          "number": 2,
+          "source": "1607.00424",
+          "ordinal": 14,
+          "chunk_id": "b20f53bd555fa92b1f0e6ba5bc615ada846d11c7a8598ab57e8e2b0668c8b845",
+          "revision": "fcd09aba-bf15-4348-ac3b-9e848ab2640c",
+          "excerpt": "default setting for our experiments is individual learning, standard features, with gold standard examples only (i.e., no weak supervision, word2vec, advice, or advice).\n\nSince our system had different components, we aimed to answer the following questions:\n\nJoint learning\n\nTo address our next question, we assessed our pipeline when learning relations independently (i.e., individually) versus learning relations jointly within the RDN, displayed in Table TABREF22 . Recall and F1 are omitted for conciseness – the conclusions are the same across all metrics. Joint learning appears to help in about half of the relations (8/14). Particularly, in person category, joint learning with gold standard outperforms their individual learning counterparts. This is due to the fact that some relations such as parents, spouse, siblings etc. are inter-related and learning them jointly indeed improves performance. Hence Q2 can be answered affirmatively for half the relations.\n\nword2vec\n\nTable TABREF24 shows the results of experiments comparing the RDN framework with and without word2vec features. word2vec appears to largely have no impact, boosting results in just 4 relations. We hypothesize that this",
+          "chunk_text_sha256": "ec1467ce40cb23c7c085cc57da236f02ab39d2818c6a9286640c69e9da565e12",
+          "excerpt_sha256": "ec1467ce40cb23c7c085cc57da236f02ab39d2818c6a9286640c69e9da565e12",
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1200,
+          "locator": {
+            "type": "text_range",
+            "char_end": 15200,
+            "char_start": 14000
+          }
+        }
+      ],
+      "events": [
+        {
+          "kind": "retrieval",
+          "snapshot": "4ebf2700-7b8f-4091-9e7d-b8aed4a44b11",
+          "candidate": [
+            {
+              "source": "1607.00424",
+              "ordinal": 10,
+              "chunk_id": "19cafff2a165f7781c01757eb35a3fad0f25efa93235c510b1d75b33e16a4689"
+            },
+            {
+              "source": "1607.00424",
+              "ordinal": 0,
+              "chunk_id": "e3f147e7b9752b01fe1555ef3ee65a75398598d6b84f53d256c79d123204529c"
+            },
+            {
+              "source": "1607.00424",
+              "ordinal": 17,
+              "chunk_id": "a414dfd81b7091c350452f7976ba93964351f09f70b2604b4c5e8684613a926b"
+            },
+            {
+              "source": "1607.00424",
+              "ordinal": 9,
+              "chunk_id": "eba92e3c9926723a0133207299d4a6966c87d8a666d3baef58d9adb4e3a4ec74"
+            },
+            {
+              "source": "1607.00424",
+              "ordinal": 1,
+              "chunk_id": "737af376a67b30b54c51801bb92420364c0cf5bb560163022f2c4a15fc25ea0f"
+            },
+            {
+              "source": "1607.00424",
+              "ordinal": 16,
+              "chunk_id": "97cb486bc3fac22a75bffb969bf394f7afa54c8b5ef17437557e415edc17d435"
+            },
+            {
+              "source": "1808.09633",
+              "ordinal": 18,
+              "chunk_id": "cfeb54b00e9eddabdf7d71521e80b324f7d316d1d865c95a157154d77dd2bc4f"
+            },
+            {
+              "source": "1808.09633",
+              "ordinal": 12,
+              "chunk_id": "ed2dbf6553d170bd2edc3dc5cab4886e96748aa100c01c7fbdeadd02403af52a"
+            },
+            {
+              "source": "1607.00424",
+              "ordinal": 14,
+              "chunk_id": "b20f53bd555fa92b1f0e6ba5bc615ada846d11c7a8598ab57e8e2b0668c8b845"
+            },
+            {
+              "source": "1607.00424",
+              "ordinal": 11,
+              "chunk_id": "48c6d932668c91b7c1e4fe73576fbf55696ba0f9b0af7fe506cd8bd200920fa3"
+            },
+            {
+              "source": "1909.00574",
+              "ordinal": 7,
+              "chunk_id": "cdf251f08bfc72072e148ef1a4b0562e23f3c75ea346242f252acaeaaab74133"
+            },
+            {
+              "source": "1607.00424",
+              "ordinal": 2,
+              "chunk_id": "24d81d39d5d6d25b0de489bf3a3abe8e3cf022a56e0c0f2765bd43c71942d16c"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 22,
+              "chunk_id": "ddc14dc1704aa4b11770667701dac1196015d063eb3048ade636f0baa5689901"
+            },
+            {
+              "source": "2003.05522",
+              "ordinal": 11,
+              "chunk_id": "704806664c42e7666ac50bd3e212d9c0ac2c04b4fa1dcb4e306c5fa6d80146d0"
+            },
+            {
+              "source": "1808.09633",
+              "ordinal": 3,
+              "chunk_id": "9d17cbe0e15123844f2a9b42955c409ca22c158025097b0bdd0a6cd2c258714c"
+            },
+            {
+              "source": "1808.09633",
+              "ordinal": 0,
+              "chunk_id": "2f0de4f40b8b84c1fcd4cf041f056af1b35c37413c7195f2135458ef84832754"
+            },
+            {
+              "source": "1811.05085",
+              "ordinal": 9,
+              "chunk_id": "b34be60092a387ce98fa01c3837fd17cd55f829e1014869c36073cb79f706bee"
+            },
+            {
+              "source": "1808.09633",
+              "ordinal": 7,
+              "chunk_id": "3dc44f0d53bbc16307372584e3944c17134ca543371883916401086037ef6356"
+            },
+            {
+              "source": "2003.05522",
+              "ordinal": 7,
+              "chunk_id": "5d450d1cecf1b6bd0830533215c778b8f485f686cbd654d66325d54c5f334562"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 20,
+              "chunk_id": "75d2f274e2a500bc15502ae80aea06c4a722ef0fd4220ea13dcfad719eca1df4"
+            }
+          ],
+          "reranked": [
+            {
+              "source": "1607.00424",
+              "ordinal": 0,
+              "chunk_id": "e3f147e7b9752b01fe1555ef3ee65a75398598d6b84f53d256c79d123204529c"
+            },
+            {
+              "source": "1607.00424",
+              "ordinal": 14,
+              "chunk_id": "b20f53bd555fa92b1f0e6ba5bc615ada846d11c7a8598ab57e8e2b0668c8b845"
+            },
+            {
+              "source": "1607.00424",
+              "ordinal": 1,
+              "chunk_id": "737af376a67b30b54c51801bb92420364c0cf5bb560163022f2c4a15fc25ea0f"
+            },
+            {
+              "source": "1607.00424",
+              "ordinal": 17,
+              "chunk_id": "a414dfd81b7091c350452f7976ba93964351f09f70b2604b4c5e8684613a926b"
+            },
+            {
+              "source": "1607.00424",
+              "ordinal": 9,
+              "chunk_id": "eba92e3c9926723a0133207299d4a6966c87d8a666d3baef58d9adb4e3a4ec74"
+            },
+            {
+              "source": "1607.00424",
+              "ordinal": 10,
+              "chunk_id": "19cafff2a165f7781c01757eb35a3fad0f25efa93235c510b1d75b33e16a4689"
+            }
+          ],
+          "times_ms": {
+            "dense": 232.729,
+            "sparse": 7.661,
+            "fusion": 0.143,
+            "rerank": 26510.402
+          },
+          "total_ms": 26767.045
+        },
+        {
+          "kind": "reader",
+          "prompt_sha256": "3895c363049c00ce07474b6c316dff3570708fe2097242e5da18480031efb7e9",
+          "chunks": [
+            {
+              "source": "1607.00424",
+              "ordinal": 0,
+              "chunk_id": "e3f147e7b9752b01fe1555ef3ee65a75398598d6b84f53d256c79d123204529c"
+            },
+            {
+              "source": "1607.00424",
+              "ordinal": 14,
+              "chunk_id": "b20f53bd555fa92b1f0e6ba5bc615ada846d11c7a8598ab57e8e2b0668c8b845"
+            },
+            {
+              "source": "1607.00424",
+              "ordinal": 1,
+              "chunk_id": "737af376a67b30b54c51801bb92420364c0cf5bb560163022f2c4a15fc25ea0f"
+            },
+            {
+              "source": "1607.00424",
+              "ordinal": 17,
+              "chunk_id": "a414dfd81b7091c350452f7976ba93964351f09f70b2604b4c5e8684613a926b"
+            },
+            {
+              "source": "1607.00424",
+              "ordinal": 9,
+              "chunk_id": "eba92e3c9926723a0133207299d4a6966c87d8a666d3baef58d9adb4e3a4ec74"
+            },
+            {
+              "source": "1607.00424",
+              "ordinal": 10,
+              "chunk_id": "19cafff2a165f7781c01757eb35a3fad0f25efa93235c510b1d75b33e16a4689"
+            }
+          ]
+        },
+        {
+          "kind": "wire",
+          "max_tokens": 512,
+          "temperature": 0.0,
+          "model": "deepseek-v4.1-flash-1017",
+          "retry_limit": 0,
+          "enable_thinking": null,
+          "prompt_sha256": "3895c363049c00ce07474b6c316dff3570708fe2097242e5da18480031efb7e9"
+        },
+        {
+          "kind": "response",
+          "elapsed_ms": 2472,
+          "finish_reason": "stop",
+          "content_present": true,
+          "usage": {
+            "input_tokens": 2187,
+            "output_tokens": 275,
+            "total_tokens": 2462
+          }
+        }
+      ]
+    },
+    {
+      "id": "30db81df46474363d5749d7f6a94b7ef95cd3e01",
+      "state": "returned",
+      "utc": "2026-11-14T02:37:32.951719+00:00",
+      "http": 200,
+      "elapsed_s": 22.672,
+      "answer": "They experiment with a source domain of news and three target domains: Twitter, Yelp reviews, and movie reviews [1][3].",
+      "insufficient": false,
+      "citations": [
+        {
+          "number": 1,
+          "source": "1811.05085",
+          "ordinal": 4,
+          "chunk_id": "d989022cdfaddf47b3eec623c10d9dab426921071bf76c18b96955b1d447b281",
+          "revision": "f7dda5b7-720d-4fbd-a68b-cc48b6a62908",
+          "excerpt": "o that of a pre-specified target distribution, which in our case is a specificity distribution derived from the source domain.\n\nExperimental results show that our system generates more accurate real-valued sentence specificity predictions that correlate well with human judgment, across three domains that are vastly different from the source domain (news): Twitter, Yelp reviews and movie reviews. Compared to a state-of-the-art system trained on news data BIBREF2 , our best setting achieves a 50%-68% reduction in mean absolute error and increases Kendall's Tau and Spearman correlations by 0.07-0.10 and 0.12-0.13, respectively.\n\nFinally, we conduct a task-based evaluation that demonstrates the usefulness of sentence specificity prediction in open-domain dialogue generation. Prior work showed that the quality of responses from dialog generation systems can be significantly improved if short examples are removed from training BIBREF17 , potentially preventing the system from overly favoring generic responses BIBREF18 , BIBREF19 . We show that predicted specificity works more effectively than length, and enables the system to generate more diverse and informative responses with better qu",
+          "chunk_text_sha256": "62aa5b3bd80cfaa575d07beece1596247116bb0de522a6823279d8b30617e30d",
+          "excerpt_sha256": "62aa5b3bd80cfaa575d07beece1596247116bb0de522a6823279d8b30617e30d",
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1200,
+          "locator": {
+            "type": "text_range",
+            "char_end": 5200,
+            "char_start": 4000
+          }
+        },
+        {
+          "number": 3,
+          "source": "1811.05085",
+          "ordinal": 5,
+          "chunk_id": "14972803cfc25878983a7546fb62911bb709c9f0ef5e03f3aafb59f5cbb7437b",
+          "revision": "f7dda5b7-720d-4fbd-a68b-cc48b6a62908",
+          "excerpt": "generic responses BIBREF18 , BIBREF19 . We show that predicted specificity works more effectively than length, and enables the system to generate more diverse and informative responses with better quality.\n\nIn sum, the paper's contributions are as follows:\n\nTask setup\n\nWith unsupervised domain adaptation, one has access to labeled sentence specificity in one source domain, and unlabeled sentences in all target domains. The goal is to predict the specificity of target domain data. Our source domain is news, the only domain with publicly available labeled data for training BIBREF1 . We crowdsource sentence specificity for evaluation for three target domains: Twitter, Yelp reviews and movie reviews. The data is described in Section SECREF4 .\n\nExisting sentence specificity labels in news are binary, i.e., a sentence is either general or specific. However, in practice, real-valued estimates of sentence specificity are widely adopted BIBREF6 , BIBREF12 , BIBREF7 , BIBREF8 , BIBREF9 , BIBREF10 . Most of these work directly uses the classifier posterior distributions, although we will later show that such distributions do not follow the true distribution of sentence specificity (see Figur",
+          "chunk_text_sha256": "a3de8112f66e7bcd0d4d8d1417af5b27cc8824851b509b7b73441767c3d31446",
+          "excerpt_sha256": "a3de8112f66e7bcd0d4d8d1417af5b27cc8824851b509b7b73441767c3d31446",
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1199,
+          "locator": {
+            "type": "text_range",
+            "char_end": 6200,
+            "char_start": 5000
+          }
+        }
+      ],
+      "events": [
+        {
+          "kind": "retrieval",
+          "snapshot": "4ebf2700-7b8f-4091-9e7d-b8aed4a44b11",
+          "candidate": [
+            {
+              "source": "1811.05085",
+              "ordinal": 0,
+              "chunk_id": "7c925151a3e5906aafaadf35443dbc086328e193d69fc0f221a26b6dbe948e23"
+            },
+            {
+              "source": "1811.05085",
+              "ordinal": 5,
+              "chunk_id": "14972803cfc25878983a7546fb62911bb709c9f0ef5e03f3aafb59f5cbb7437b"
+            },
+            {
+              "source": "1811.05085",
+              "ordinal": 3,
+              "chunk_id": "adc6fd4bc96435d3b8c57ffdd9569e8358a92c6ce91a6f1b21de219251c841ef"
+            },
+            {
+              "source": "1811.05085",
+              "ordinal": 13,
+              "chunk_id": "15592400679f856ff66f13a0f33ebb9440b3f41c60f1ac249465ac7588984e5b"
+            },
+            {
+              "source": "1607.00424",
+              "ordinal": 7,
+              "chunk_id": "abf74d19e8507706d0cbc598785f8a45780aa2cc573f7959098baf2c7e949924"
+            },
+            {
+              "source": "1811.05085",
+              "ordinal": 21,
+              "chunk_id": "b77b0a50876fd465abc18bdeb5182c06a32d3614eeb87745f4c88021d8181567"
+            },
+            {
+              "source": "1811.05085",
+              "ordinal": 7,
+              "chunk_id": "c7a5e6d34a69b25d8b4e7faa90886fb5b2252fb314e7997d0a70937d77600477"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 22,
+              "chunk_id": "ddc14dc1704aa4b11770667701dac1196015d063eb3048ade636f0baa5689901"
+            },
+            {
+              "source": "1811.05085",
+              "ordinal": 28,
+              "chunk_id": "21ceeb9d648bc00167a95d818407a7b443243b72d3d6ad7132a3bfecb73c9a34"
+            },
+            {
+              "source": "2003.05522",
+              "ordinal": 11,
+              "chunk_id": "704806664c42e7666ac50bd3e212d9c0ac2c04b4fa1dcb4e306c5fa6d80146d0"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 26,
+              "chunk_id": "102768c6b709fd18f0b9f701ddcb355e5956076ff5c8fa05a4cb36779f89ca20"
+            },
+            {
+              "source": "1811.05085",
+              "ordinal": 2,
+              "chunk_id": "d0d4b6d964cd8a7802c04c54a121711460d057eb0d225b69604e421bed820f9b"
+            },
+            {
+              "source": "1808.09633",
+              "ordinal": 18,
+              "chunk_id": "cfeb54b00e9eddabdf7d71521e80b324f7d316d1d865c95a157154d77dd2bc4f"
+            },
+            {
+              "source": "1811.05085",
+              "ordinal": 4,
+              "chunk_id": "d989022cdfaddf47b3eec623c10d9dab426921071bf76c18b96955b1d447b281"
+            },
+            {
+              "source": "1610.00879",
+              "ordinal": 0,
+              "chunk_id": "875d7bab553a0973da525c2e5a5f44e6df54c6db0d2fcaa1047a7a0a02cf8314"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 20,
+              "chunk_id": "75d2f274e2a500bc15502ae80aea06c4a722ef0fd4220ea13dcfad719eca1df4"
+            },
+            {
+              "source": "1811.05085",
+              "ordinal": 18,
+              "chunk_id": "a920a45900be5b7e36b05056424852383b96d1da0ad3c30fd0473d25e7fcd9af"
+            },
+            {
+              "source": "2003.05522",
+              "ordinal": 7,
+              "chunk_id": "5d450d1cecf1b6bd0830533215c778b8f485f686cbd654d66325d54c5f334562"
+            },
+            {
+              "source": "1811.05085",
+              "ordinal": 16,
+              "chunk_id": "6ba16fac066f037b8eb33db31daa58ac540d58845513ca3c65ef7df7b0ea4b19"
+            },
+            {
+              "source": "1811.05085",
+              "ordinal": 22,
+              "chunk_id": "33ab107e64e1445685412c1e010a6079fdfd116276e037279dcd5d99000d87f6"
+            }
+          ],
+          "reranked": [
+            {
+              "source": "1811.05085",
+              "ordinal": 4,
+              "chunk_id": "d989022cdfaddf47b3eec623c10d9dab426921071bf76c18b96955b1d447b281"
+            },
+            {
+              "source": "1811.05085",
+              "ordinal": 0,
+              "chunk_id": "7c925151a3e5906aafaadf35443dbc086328e193d69fc0f221a26b6dbe948e23"
+            },
+            {
+              "source": "1811.05085",
+              "ordinal": 5,
+              "chunk_id": "14972803cfc25878983a7546fb62911bb709c9f0ef5e03f3aafb59f5cbb7437b"
+            },
+            {
+              "source": "1811.05085",
+              "ordinal": 2,
+              "chunk_id": "d0d4b6d964cd8a7802c04c54a121711460d057eb0d225b69604e421bed820f9b"
+            },
+            {
+              "source": "1811.05085",
+              "ordinal": 18,
+              "chunk_id": "a920a45900be5b7e36b05056424852383b96d1da0ad3c30fd0473d25e7fcd9af"
+            },
+            {
+              "source": "1811.05085",
+              "ordinal": 28,
+              "chunk_id": "21ceeb9d648bc00167a95d818407a7b443243b72d3d6ad7132a3bfecb73c9a34"
+            }
+          ],
+          "times_ms": {
+            "dense": 280.127,
+            "sparse": 48.745,
+            "fusion": 0.166,
+            "rerank": 20320.461
+          },
+          "total_ms": 20665.402
+        },
+        {
+          "kind": "reader",
+          "prompt_sha256": "f88ac3f1c794f943e5e50c918a737b76c9a5f40df19aec868082a73ce074ef1a",
+          "chunks": [
+            {
+              "source": "1811.05085",
+              "ordinal": 4,
+              "chunk_id": "d989022cdfaddf47b3eec623c10d9dab426921071bf76c18b96955b1d447b281"
+            },
+            {
+              "source": "1811.05085",
+              "ordinal": 0,
+              "chunk_id": "7c925151a3e5906aafaadf35443dbc086328e193d69fc0f221a26b6dbe948e23"
+            },
+            {
+              "source": "1811.05085",
+              "ordinal": 5,
+              "chunk_id": "14972803cfc25878983a7546fb62911bb709c9f0ef5e03f3aafb59f5cbb7437b"
+            },
+            {
+              "source": "1811.05085",
+              "ordinal": 2,
+              "chunk_id": "d0d4b6d964cd8a7802c04c54a121711460d057eb0d225b69604e421bed820f9b"
+            },
+            {
+              "source": "1811.05085",
+              "ordinal": 18,
+              "chunk_id": "a920a45900be5b7e36b05056424852383b96d1da0ad3c30fd0473d25e7fcd9af"
+            },
+            {
+              "source": "1811.05085",
+              "ordinal": 28,
+              "chunk_id": "21ceeb9d648bc00167a95d818407a7b443243b72d3d6ad7132a3bfecb73c9a34"
+            }
+          ]
+        },
+        {
+          "kind": "wire",
+          "max_tokens": 512,
+          "temperature": 0.0,
+          "model": "deepseek-v4.1-flash-1017",
+          "retry_limit": 0,
+          "enable_thinking": null,
+          "prompt_sha256": "f88ac3f1c794f943e5e50c918a737b76c9a5f40df19aec868082a73ce074ef1a"
+        },
+        {
+          "kind": "response",
+          "elapsed_ms": 1976,
+          "finish_reason": "stop",
+          "content_present": true,
+          "usage": {
+            "input_tokens": 2204,
+            "output_tokens": 159,
+            "total_tokens": 2363
+          }
+        }
+      ]
+    },
+    {
+      "id": "f52ec4d68de91dba66668f0affc198706949ff90",
+      "state": "returned",
+      "utc": "2026-11-14T02:38:18.703875+00:00",
+      "http": 200,
+      "elapsed_s": 25.199,
+      "answer": "Besides Yoga-Veganism, the paper reports a noticeable “Women-Yoga” correlation. From Topic 2, whose top co-occurring keywords include “vegan,” “yoga,” “job,” and “every_woman,” the authors infer that women usually practice yoga more than men, that women teach yoga and take it as a job, and that yogis follow a vegan diet [3].",
+      "insufficient": false,
+      "citations": [
+        {
+          "number": 3,
+          "source": "1906.07668",
+          "ordinal": 16,
+          "chunk_id": "c8a50fcec12dd1dfa6e9bf453a9b76cb50d386508aa401a7e55ea3d56f1735be",
+          "revision": "3bc5cc5f-dad4-4322-9da8-c9c1b133a28c",
+          "excerpt": "ide, the words represent the salient keywords.\n\nIf we move the cursor over one of the bubbles (Fig. FIGREF21 ), the words and bars on the right-hand side have been updated and top-30 salient keywords that form the selected topic and their estimated term frequencies are shown.\n\nWe observe interesting hidden correlation in data. Fig. FIGREF24 has Topic 2 as selected topic. Topic 2 contains top-4 co-occurring keywords \"vegan\", \"yoga\", \"job\", \"every_woman\" having the highest term frequency. We can infer different things from the topic that \"women usually practice yoga more than men\", \"women teach yoga and take it as a job\", \"Yogi follow vegan diet\". We would say there are noticeable correlation in data i.e. `Yoga-Veganism', `Women-Yoga'.\n\nTopic Frequency Distribution\n\nEach tweet is composed of multiple topics. But, typically only one of the topics is dominant. We extract the dominant and 2nd dominant topic for each tweet and show the weight of the topic (percentage of contribution in each tweet) and the corresponding keywords.\n\nWe plot the frequency of each topic's distribution on tweets in histogram. Fig. FIGREF25 shows the dominant topics' frequency and Fig. FIGREF25 shows the 2nd do",
+          "chunk_text_sha256": "a7fa2ae53ed187c429f441270ba94cf8d8f6b07ddaa97389f0bb17825ac62c30",
+          "excerpt_sha256": "a7fa2ae53ed187c429f441270ba94cf8d8f6b07ddaa97389f0bb17825ac62c30",
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1200,
+          "locator": {
+            "type": "text_range",
+            "char_end": 17200,
+            "char_start": 16000
+          }
+        }
+      ],
+      "events": [
+        {
+          "kind": "retrieval",
+          "snapshot": "4ebf2700-7b8f-4091-9e7d-b8aed4a44b11",
+          "candidate": [
+            {
+              "source": "1906.07668",
+              "ordinal": 0,
+              "chunk_id": "1f407f07c9abf780e1aa51c1d270bbbbd9d8d14fba49df96bfa5400b189e6438"
+            },
+            {
+              "source": "1906.07668",
+              "ordinal": 20,
+              "chunk_id": "e1fabd0c41921919a7a5ae0b37b54c2a82542f9e5c4168b923e62f8341dae7bf"
+            },
+            {
+              "source": "1906.07668",
+              "ordinal": 16,
+              "chunk_id": "c8a50fcec12dd1dfa6e9bf453a9b76cb50d386508aa401a7e55ea3d56f1735be"
+            },
+            {
+              "source": "1906.07668",
+              "ordinal": 1,
+              "chunk_id": "28a4269d499fda9d6fc1707902c36953a2eb2a53e93e029c4402044c90f36163"
+            },
+            {
+              "source": "1906.07668",
+              "ordinal": 2,
+              "chunk_id": "520c6efd1614f5f52c5a070e1cfa2e3dda2d267ec2f5d3377325d7f42597b876"
+            },
+            {
+              "source": "1906.07668",
+              "ordinal": 5,
+              "chunk_id": "42a4e92f7b60bfc3274b8dbc967983d89d9756f6dce55edb6069b090d3d069a4"
+            },
+            {
+              "source": "1906.07668",
+              "ordinal": 3,
+              "chunk_id": "8e04658eeea6b630ef09ee47a48d1d1b1129b6237462f9f228d3d843c16ea958"
+            },
+            {
+              "source": "1906.07668",
+              "ordinal": 4,
+              "chunk_id": "b4b7331415caee436e5732108651b012ee9cb1e5933ece4f6395a0e727ee5571"
+            },
+            {
+              "source": "1906.07668",
+              "ordinal": 7,
+              "chunk_id": "d1989f7960864888ad78e0e197984a1fe6be18c2d1cb7ee78b704b46b39f5104"
+            },
+            {
+              "source": "1811.05085",
+              "ordinal": 4,
+              "chunk_id": "d989022cdfaddf47b3eec623c10d9dab426921071bf76c18b96955b1d447b281"
+            },
+            {
+              "source": "1906.07668",
+              "ordinal": 14,
+              "chunk_id": "1d5889965ec0b664d89f1c0f842dc60cbff5b18612d2f9974d269a9f8de328bc"
+            },
+            {
+              "source": "1906.07668",
+              "ordinal": 15,
+              "chunk_id": "afd22746b90fcf76f96bc771139e2d193e67cfb0d829d6c6bea56bc962f5a19f"
+            },
+            {
+              "source": "2003.05522",
+              "ordinal": 7,
+              "chunk_id": "5d450d1cecf1b6bd0830533215c778b8f485f686cbd654d66325d54c5f334562"
+            },
+            {
+              "source": "1907.02636",
+              "ordinal": 22,
+              "chunk_id": "ddc14dc1704aa4b11770667701dac1196015d063eb3048ade636f0baa5689901"
+            },
+            {
+              "source": "1906.07668",
+              "ordinal": 19,
+              "chunk_id": "7d0d8d4f1a58ed0a4e08d2abfd7e557724f7af2cb00defa10b8050ac323260b5"
+            },
+            {
+              "source": "1906.07668",
+              "ordinal": 13,
+              "chunk_id": "5b4583c5ba542be7c131287ef1fc5a52ee8cdedf7c284515da173f02ace0866f"
+            },
+            {
+              "source": "2003.05522",
+              "ordinal": 0,
+              "chunk_id": "51e146e787642bae2b1700c59fd781bc7099e5b34877a503d107774180fb2ad2"
+            },
+            {
+              "source": "1906.07668",
+              "ordinal": 12,
+              "chunk_id": "7824fafb8fe8791bef7a186b6adb7b9f14f2e15b21a3df962688a78a03bde54d"
+            },
+            {
+              "source": "1909.03526",
+              "ordinal": 7,
+              "chunk_id": "02c4190fd1193acbf8c66c5c36cb805d37bc7b5735c3ee21d023a463758db728"
+            },
+            {
+              "source": "2003.05522",
+              "ordinal": 10,
+              "chunk_id": "58699addd30707a7e94d127974435fd7183dbfee1768f1c52d508608ce442258"
+            }
+          ],
+          "reranked": [
+            {
+              "source": "1906.07668",
+              "ordinal": 0,
+              "chunk_id": "1f407f07c9abf780e1aa51c1d270bbbbd9d8d14fba49df96bfa5400b189e6438"
+            },
+            {
+              "source": "1906.07668",
+              "ordinal": 20,
+              "chunk_id": "e1fabd0c41921919a7a5ae0b37b54c2a82542f9e5c4168b923e62f8341dae7bf"
+            },
+            {
+              "source": "1906.07668",
+              "ordinal": 16,
+              "chunk_id": "c8a50fcec12dd1dfa6e9bf453a9b76cb50d386508aa401a7e55ea3d56f1735be"
+            },
+            {
+              "source": "1906.07668",
+              "ordinal": 1,
+              "chunk_id": "28a4269d499fda9d6fc1707902c36953a2eb2a53e93e029c4402044c90f36163"
+            },
+            {
+              "source": "1906.07668",
+              "ordinal": 3,
+              "chunk_id": "8e04658eeea6b630ef09ee47a48d1d1b1129b6237462f9f228d3d843c16ea958"
+            },
+            {
+              "source": "1906.07668",
+              "ordinal": 19,
+              "chunk_id": "7d0d8d4f1a58ed0a4e08d2abfd7e557724f7af2cb00defa10b8050ac323260b5"
+            }
+          ],
+          "times_ms": {
+            "dense": 311.323,
+            "sparse": 59.808,
+            "fusion": 0.197,
+            "rerank": 22275.597
+          },
+          "total_ms": 22664.623
+        },
+        {
+          "kind": "reader",
+          "prompt_sha256": "a0fb204251bfda34f0b0c06215fe6b611e2e65a80fbed3321a212bee1ed52f9f",
+          "chunks": [
+            {
+              "source": "1906.07668",
+              "ordinal": 0,
+              "chunk_id": "1f407f07c9abf780e1aa51c1d270bbbbd9d8d14fba49df96bfa5400b189e6438"
+            },
+            {
+              "source": "1906.07668",
+              "ordinal": 20,
+              "chunk_id": "e1fabd0c41921919a7a5ae0b37b54c2a82542f9e5c4168b923e62f8341dae7bf"
+            },
+            {
+              "source": "1906.07668",
+              "ordinal": 16,
+              "chunk_id": "c8a50fcec12dd1dfa6e9bf453a9b76cb50d386508aa401a7e55ea3d56f1735be"
+            },
+            {
+              "source": "1906.07668",
+              "ordinal": 1,
+              "chunk_id": "28a4269d499fda9d6fc1707902c36953a2eb2a53e93e029c4402044c90f36163"
+            },
+            {
+              "source": "1906.07668",
+              "ordinal": 3,
+              "chunk_id": "8e04658eeea6b630ef09ee47a48d1d1b1129b6237462f9f228d3d843c16ea958"
+            },
+            {
+              "source": "1906.07668",
+              "ordinal": 19,
+              "chunk_id": "7d0d8d4f1a58ed0a4e08d2abfd7e557724f7af2cb00defa10b8050ac323260b5"
+            }
+          ]
+        },
+        {
+          "kind": "wire",
+          "max_tokens": 512,
+          "temperature": 0.0,
+          "model": "deepseek-v4.1-flash-1017",
+          "retry_limit": 0,
+          "enable_thinking": null,
+          "prompt_sha256": "a0fb204251bfda34f0b0c06215fe6b611e2e65a80fbed3321a212bee1ed52f9f"
+        },
+        {
+          "kind": "response",
+          "elapsed_ms": 2502,
+          "finish_reason": "stop",
+          "content_present": true,
+          "usage": {
+            "input_tokens": 2210,
+            "output_tokens": 299,
+            "total_tokens": 2509
+          }
+        }
+      ]
+    }
+  ]
+}

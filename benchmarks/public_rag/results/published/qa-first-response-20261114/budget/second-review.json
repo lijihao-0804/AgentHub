@@ -1,0 +1,329 @@
+{
+  "method": "Two independent arm-masked assistant reviews of 28 responses. Root adjudication after reviews used source excerpts; not an independent third blind judge. The decision to reject does not change under either original reviewer. All disagreements below.",
+  "second_marks": {
+    "0129eea8542d7ba7e675": {
+      "verdict": "full",
+      "supporting_citations": [
+        1,
+        2
+      ],
+      "reason": "Excerpt 2 explicitly compares learning relations jointly within the RDN with learning them individually. Excerpt 1 identifies joint learning as a component."
+    },
+    "05a4cb60f32dd695b628": {
+      "verdict": "full",
+      "supporting_citations": [
+        1,
+        3,
+        4
+      ],
+      "reason": "Excerpt 3 identifies the 3,000-item subset and the metric. Excerpts 1 and 4 give the two submitted and two optimized scores respectively."
+    },
+    "0f64de3b638541297726": {
+      "verdict": "full",
+      "supporting_citations": [
+        1,
+        4
+      ],
+      "reason": "Despite the frozen unanswerable label, excerpt 4 explicitly identifies linguistic features such as dependency structure predefined by cybersecurity experts. Excerpt 1 independently supports the expert-knowledge claim."
+    },
+    "1ea5d7e20039f40f0525": {
+      "verdict": "full",
+      "supporting_citations": [
+        2,
+        4
+      ],
+      "reason": "Excerpt 2 defines five-minute reuse and the 1-to-25-hour return window and explains why interruptions are unsuitable. Excerpt 4 explains why explicit feedback is unavailable."
+    },
+    "2da9b08a007cf8eaaa6c": {
+      "verdict": "full",
+      "supporting_citations": [
+        3
+      ],
+      "reason": "Excerpt 3 states that 3,000 hard cases are drawn from the test set and that both the full set and subset are evaluated by exact match."
+    },
+    "353123f3dca2dacf7115": {
+      "verdict": "wrong",
+      "supporting_citations": [
+        1
+      ],
+      "reason": "The size, word and sentence counts, Google News and chats are supported. The added Italian Wikipedia source is present in the reference annotation but absent from the returned excerpt, which starts midway through the date. The added provenance claim thus fails the attached-evidence rule."
+    },
+    "476da0ed7bbb91c3839e": {
+      "verdict": "full",
+      "supporting_citations": [
+        3
+      ],
+      "reason": "Excerpt 3 explicitly reports Women-Yoga and attributes the stated interpretations about women practicing and teaching yoga to the topic with these four keywords."
+    },
+    "479d4b9d5debd4ba40f1": {
+      "verdict": "failure",
+      "supporting_citations": [],
+      "reason": "HTTP 502 returned no answer and no refusal on the frozen negative hashtag question."
+    },
+    "6afe334c828fcd9d8775": {
+      "verdict": "full",
+      "supporting_citations": [
+        1
+      ],
+      "reason": "Excerpt 1 confirms 2.6 GB, 421,829,960 words and 17,305,401 sentences; these directly answer the size question."
+    },
+    "7829e9cc0b42d348549d": {
+      "verdict": "full",
+      "supporting_citations": [
+        1,
+        2
+      ],
+      "reason": "The annotation names the overarching BABEL speech corpus. Excerpt 2 specifically says which data the LMs used: all available target-language paired text, no external text, and character sequences. Excerpts 1 and 2 support separate training, and 1 gives the 15-language dictionary."
+    },
+    "79f0d3ea83b0103c8aaf": {
+      "verdict": "refusal",
+      "supporting_citations": [],
+      "reason": "The response marks evidence insufficient and returns no citations or runtime estimate. This matches the frozen duration negative."
+    },
+    "84064d724d8016a45b1d": {
+      "verdict": "failure",
+      "supporting_citations": [],
+      "reason": "HTTP 502 provides neither a rationale for feature-engineering-free models nor a valid refusal."
+    },
+    "894b9918bc37ac268871": {
+      "verdict": "full",
+      "supporting_citations": [
+        1,
+        4
+      ],
+      "reason": "Excerpt 4 states that MMHS150K contains 150,000 tweets, each with text and an image. Excerpt 1 also states 150K."
+    },
+    "9c3a01c29bf85b145946": {
+      "verdict": "full",
+      "supporting_citations": [
+        1,
+        2
+      ],
+      "reason": "Excerpt 1 covers the body-only/punchline-only experiment and the greater reliance on punchlines. Excerpt 2 supports the relative weight, need for both parts, and the authors’ hypothesis about variation in setup length."
+    },
+    "a252821fde2c012c1551": {
+      "verdict": "full",
+      "supporting_citations": [
+        1,
+        2,
+        3,
+        4,
+        6
+      ],
+      "reason": "Excerpt 2 explicitly identifies both views as holistic, with whole-to-part meaning. Excerpts 4 and 6 define the distributional and Fregean context views, 1 states the Skip-gram analogy, and 2 and 3 support the conclusion."
+    },
+    "a95a14d2d42cfdc2a973": {
+      "verdict": "partial",
+      "supporting_citations": [
+        2,
+        3,
+        4,
+        6
+      ],
+      "reason": "The negative label overlooks a partial answer: excerpt 4 calls a tweet marked #Drunk an instance of incorrect hashtag supervision, with overlapping text in 6. Excerpts 2 and 3 describe hashtag-based labels. The answer explicitly leaves the list unresolved. Its flag is false and it is not a refusal."
+    },
+    "b96f9f71ef97f3f19c77": {
+      "verdict": "full",
+      "supporting_citations": [
+        2,
+        4
+      ],
+      "reason": "Excerpt 2 gives the exact five-minute and 1-to-25-hour label definitions and excludes interruptions for this use case. Excerpt 4 confirms both strategy names."
+    },
+    "bc6515df3f02baa91fc7": {
+      "verdict": "full",
+      "supporting_citations": [
+        1,
+        2,
+        3
+      ],
+      "reason": "Excerpts 1 and 3 name the news source and all three target domains. Excerpt 2 supports the count of three domains, but excerpt 5 describes a news-trained comparison system and does not establish the domains of the authors’ experiment."
+    },
+    "c35aee8bd462977a0dcf": {
+      "verdict": "refusal",
+      "supporting_citations": [],
+      "reason": "The flagged answer gives no citations or duration and distinguishes a relative training-time statement from an actual runtime. This matches the frozen negative."
+    },
+    "c7b1276cdf1972ec1e9a": {
+      "verdict": "refusal",
+      "supporting_citations": [],
+      "reason": "The response explicitly declines to infer a rationale from the authors calling the design an advantage, sets insufficient evidence, and returns no citations."
+    },
+    "ca86c15cf55aabd5fce2": {
+      "verdict": "full",
+      "supporting_citations": [
+        2,
+        3,
+        6
+      ],
+      "reason": "Excerpt 2 contrasts joint and individual learning of relations and gives the family examples; 3 describes the comparison and RDN formalism and 6 supports joint learning and inference."
+    },
+    "cd5c048c3f5ac90e6d12": {
+      "verdict": "full",
+      "supporting_citations": [
+        1,
+        3
+      ],
+      "reason": "Both excerpts name news as source domain and Twitter, Yelp reviews and movie reviews as the targets."
+    },
+    "d9c848044acd6e67fa91": {
+      "verdict": "full",
+      "supporting_citations": [
+        1,
+        2
+      ],
+      "reason": "The excerpts identify the punchline as carrying more weight in the predictions of humans and the models; excerpt 2 also says both parts are needed."
+    },
+    "df9f5dd9924b44c2730a": {
+      "verdict": "full",
+      "supporting_citations": [
+        3
+      ],
+      "reason": "Excerpt 3 identifies Women-Yoga and names all three reported interpretations of the four high-frequency keywords, including the vegan-diet inference."
+    },
+    "ec5c5e87c3419eb7b7dc": {
+      "verdict": "full",
+      "supporting_citations": [
+        1,
+        4
+      ],
+      "reason": "Excerpt 4 directly states the 150,000 tweets with text and image and the dataset name. Excerpt 1 corroborates the count."
+    },
+    "f64e23f29a798950c829": {
+      "verdict": "full",
+      "supporting_citations": [
+        1,
+        4
+      ],
+      "reason": "The official label is unanswerable, but excerpt 4 names dependency structure and linguistic expertise, and explicitly discusses features predefined by cybersecurity experts. Excerpt 1 supports the expert-knowledge characterization."
+    },
+    "f9d6e83332fe169c4769": {
+      "verdict": "full",
+      "supporting_citations": [
+        1,
+        2
+      ],
+      "reason": "The official BABEL corpus name describes the collection. Excerpt 2 directly specifies the language model data as paired target-language text and excludes external text. It corroborates the character model and separate training; 1 gives the pooled dictionary."
+    },
+    "fec3ac4a61a4e8de4479": {
+      "verdict": "failure",
+      "supporting_citations": [],
+      "reason": "HTTP 502 gives no answer to the semantic-holism question and no citations."
+    }
+  },
+  "disagreements": {
+    "0f64de3b638541297726": {
+      "first_review": {
+        "verdict": "wrong",
+        "supporting_citations": [
+          1,
+          4
+        ],
+        "reason": "[4] supplies the example of dependency structure despite the official negative label, and [1] confirms reliance on cybersecurity expertise. The answer turns “often have to be pre-defined” into an unqualified requirement that these features must be pre-defined by experts."
+      },
+      "second_review": {
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          4
+        ],
+        "reason": "Despite the frozen unanswerable label, excerpt 4 explicitly identifies linguistic features such as dependency structure predefined by cybersecurity experts. Excerpt 1 independently supports the expert-knowledge claim."
+      },
+      "final": {
+        "verdict": "wrong",
+        "supporting_citations": [
+          1,
+          4
+        ],
+        "reason": "[4] supplies the example of dependency structure despite the official negative label, and [1] confirms reliance on cybersecurity expertise. The answer turns “often have to be pre-defined” into an unqualified requirement that these features must be pre-defined by experts."
+      },
+      "adjudication": "The direct quote says often, not always. Under the material-qualifier rule do not credit the added unconditional requirement as fully grounded."
+    },
+    "7829e9cc0b42d348549d": {
+      "first_review": {
+        "verdict": "partial",
+        "supporting_citations": [
+          1,
+          2
+        ],
+        "reason": "[2] specifies all available paired text per target language, no external text, and the RNNLM architecture. [1] supports separate training and the character dictionary over 15 languages. The response identifies the type of data but omits its annotated corpus name, BABEL."
+      },
+      "second_review": {
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2
+        ],
+        "reason": "The annotation names the overarching BABEL speech corpus. Excerpt 2 specifically says which data the LMs used: all available target-language paired text, no external text, and character sequences. Excerpts 1 and 2 support separate training, and 1 gives the 15-language dictionary."
+      },
+      "final": {
+        "verdict": "partial",
+        "supporting_citations": [
+          1,
+          2
+        ],
+        "reason": "[2] specifies all available paired text per target language, no external text, and the RNNLM architecture. [1] supports separate training and the character dictionary over 15 languages. The response identifies the type of data but omits its annotated corpus name, BABEL."
+      },
+      "adjudication": "Answers the kind of text but cannot identify the annotated BABEL corpus from the cited excerpts. Retain partial under a strict corpus-identification reading; second reading would credit full. Same on both arms."
+    },
+    "bc6515df3f02baa91fc7": {
+      "first_review": {
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2,
+          3,
+          5
+        ],
+        "reason": "[1] and [3] identify news as source and name all three targets. [2] and [5] substantiate the count of three experimental target domains, though neither enumerates them."
+      },
+      "second_review": {
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2,
+          3
+        ],
+        "reason": "Excerpts 1 and 3 name the news source and all three target domains. Excerpt 2 supports the count of three domains, but excerpt 5 describes a news-trained comparison system and does not establish the domains of the authors’ experiment."
+      },
+      "final": {
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2,
+          3,
+          5
+        ],
+        "reason": "[1] and [3] identify news as source and name all three targets. [2] and [5] substantiate the count of three experimental target domains, though neither enumerates them."
+      },
+      "adjudication": "The actual fifth excerpt explicitly says the authors evaluate their framework on three target domains; it supports the stated count, even though it does not name the domains."
+    },
+    "f9d6e83332fe169c4769": {
+      "first_review": {
+        "verdict": "partial",
+        "supporting_citations": [
+          1,
+          2
+        ],
+        "reason": "[2] specifies all available paired text per target language, no external text, and the RNNLM architecture. [1] supports separate training and the character dictionary over 15 languages. The response identifies the type of data but omits its annotated corpus name, BABEL."
+      },
+      "second_review": {
+        "verdict": "full",
+        "supporting_citations": [
+          1,
+          2
+        ],
+        "reason": "The official BABEL corpus name describes the collection. Excerpt 2 directly specifies the language model data as paired target-language text and excludes external text. It corroborates the character model and separate training; 1 gives the pooled dictionary."
+      },
+      "final": {
+        "verdict": "partial",
+        "supporting_citations": [
+          1,
+          2
+        ],
+        "reason": "[2] specifies all available paired text per target language, no external text, and the RNNLM architecture. [1] supports separate training and the character dictionary over 15 languages. The response identifies the type of data but omits its annotated corpus name, BABEL."
+      },
+      "adjudication": "Same as the other answer to the BABEL question: credit substantive paired-text facts, flag omission of the dataset name in both."
+    }
+  }
+}

@@ -1,0 +1,339 @@
+{
+  "arm": "2048",
+  "source": {
+    "packages/knowledge/citation_qa.py": "1968f8581b9954c4565ba3361b7a52965c8f048d8d092cb9e0ada42a6ec5daf8",
+    "apps/api/routes/citation_qa.py": "f818f3a8928bd7213317d4b21913824755f2276a32f64223926fecd0ba54cfdc",
+    "apps/api/schemas/citation_qa.py": "b9bfa5fcea10c45be4a33cf408a2546114f2e7800ff7d93c371cf51a048453c8",
+    "packages/model_gateway/adapters/litellm/adapter.py": "e768ea18574984723642b03f59e2385f12eeca09091f8485254dda46b0c6d6af",
+    "packages/model_gateway/gateway.py": "c6d02969e16ef7f825644b247c79e23905e39a2740ba936587f5401b696e9d92",
+    "packages/model_gateway/contracts.py": "6c6507db40e667883706e59c130cabba97827482a92fd6802fe489339475cda1",
+    "packages/model_gateway/errors.py": "600b6c85e4f50b353a7a5bba456df8d4fca63c3bbc8ead8c92478023b3a23349",
+    "packages/knowledge/retrieval.py": "83b29728707cac0f26b0a8edaf7d2e0e3a9ea33467f6975b17eae3a3233a88e7"
+  },
+  "model": "deepseek-v4.1-flash-1017",
+  "profile": "174e5ef9-418e-4fa2-861e-499956058c10",
+  "snapshot": "986d92ba-b119-4418-b869-bd07081f49ad",
+  "snapshot_hash": "e972dfef136f6f067c8f12a81554433b5b6ca4b84c9b34fd1e3d8919c94cfb2b",
+  "documents": 5183,
+  "chunks": 9189,
+  "protocol_sha256": "07b5e6d650830647e787b7205c79c63a58157df5dbfe2d9565caab21c10ab63e",
+  "endpoint": "POST /api/v1/knowledge/query",
+  "rows": [
+    {
+      "id": "620",
+      "state": "returned",
+      "utc": "2026-11-14T02:41:36.731325+00:00",
+      "http": 200,
+      "elapsed_s": 25.3,
+      "answer": "The evidence is consistent with this claim in the context of pancreatic cancer. In a mouse model of pancreatic ductal adenocarcinoma, tumors were poorly perfused and poorly vascularized. Coadministration of IPI-926, a drug that depletes tumor-associated stromal tissue by inhibiting Hedgehog signaling, together with gemcitabine produced a transient increase in intratumoral vascular density and intratumoral gemcitabine concentration, leading to transient stabilization of disease [1]. This supports the idea that stromal depletion accompanied by increased vessel density can improve chemotherapy delivery and efficacy, though the effect reported was transient [1]. The other provided evidence does not address this relationship: one study concerns pulmonary vascular lesions in idiopathic pulmonary fibrosis without chemotherapy [6], and the remaining studies concern other aspects of chemotherapy or anticoagulation [2][3][4][5].",
+      "insufficient": false,
+      "citations": [
+        {
+          "number": 1,
+          "source": "20888849",
+          "ordinal": 0,
+          "chunk_id": "607e80dd69b2da77178dab1db6ec6ea54bc8acdbe2e2cf0c02020ff4ebc8f5cf",
+          "revision": "446b5d3d-b16b-5dd3-ae45-c9057c1cd173",
+          "excerpt": "Inhibition of Hedgehog signaling enhances delivery of chemotherapy in a mouse model of pancreatic cancer.\n\nPancreatic ductal adenocarcinoma (PDA) is among the most lethal human cancers in part because it is insensitive to many chemotherapeutic drugs. Studying a mouse model of PDA that is refractory to the clinically used drug gemcitabine, we found that the tumors in this model were poorly perfused and poorly vascularized, properties that are shared with human PDA. We tested whether the delivery and efficacy of gemcitabine in the mice could be improved by coadministration of IPI-926, a drug that depletes tumor-associated stromal tissue by inhibition of the Hedgehog cellular signaling pathway. The combination therapy produced a transient increase in intratumoral vascular density and intratumoral concentration of gemcitabine, leading to transient stabilization of disease. Thus, inefficient drug delivery may be an important contributor to chemoresistance in pancreatic cancer.",
+          "chunk_text_sha256": "2e72271403923bc11883404d4d175776f2e88ce0439dd121ca7eb0db22351d04",
+          "excerpt_sha256": "2e72271403923bc11883404d4d175776f2e88ce0439dd121ca7eb0db22351d04",
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 986,
+          "locator": {
+            "type": "text_range",
+            "char_end": 986,
+            "char_start": 0
+          }
+        },
+        {
+          "number": 2,
+          "source": "9929089",
+          "ordinal": 0,
+          "chunk_id": "b54a654db8b17d7c20780a057578afd058c9149b9712cd223f9b4409fb7c9fa2",
+          "revision": "133951e5-f7c5-580c-ad18-a3cad921c869",
+          "excerpt": "Subsequent chemotherapy reverses acquired tyrosine kinase inhibitor resistance and restores response to tyrosine kinase inhibitor in advanced non-small-cell lung cancer\n\nBACKGROUND Patients with advanced or metastatic non-small cell lung cancer (NSCLC) can develop acquired resistance to epidermal growth factor receptor tyrosine kinase inhibitors (TKIs) erlotinib and gefitinib. Here, we report the successful treatment with alternating chemotherapy and TKIs of two cases of advanced NSCLC who developed resistance to TKI. CASE PRESENTATION Two patients with advanced or metastatic NSCLC were treated with palliative chemotherapy followed by erlotinib/gefitinib. When TKI therapy failed, two cycles of chemotherapy were provided, which were followed by re-challenge with erlotinib or gefitinib. CONCLUSION NSCLC patients with acquired TKI resistance should be managed aggressively whenever possible. Subsequent chemotherapy and target treatment is one of the reasonable choices for those with an initial dramatic clinical response with erlotinib/gefitinib treatment. Further studies are warranted to substantiate the association of erlotinib /gefitinib treatment with the efficacy of NSCLC patients",
+          "chunk_text_sha256": "b50b8f83f4b3e4b2402e9442ea035d0d8ac16759e6b88ba3c60c2ca6fff56d4b",
+          "excerpt_sha256": "b50b8f83f4b3e4b2402e9442ea035d0d8ac16759e6b88ba3c60c2ca6fff56d4b",
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1199,
+          "locator": {
+            "type": "text_range",
+            "char_end": 1200,
+            "char_start": 0
+          }
+        },
+        {
+          "number": 3,
+          "source": "15946643",
+          "ordinal": 0,
+          "chunk_id": "fce06d2446b61a1402ec2bdde9628e59ff35add11f8d70202f48159257c3655f",
+          "revision": "c96136ea-131a-5714-a58b-ccb23d6cf409",
+          "excerpt": "A CXCL1 Paracrine Network Links Cancer Chemoresistance and Metastasis\n\nMetastasis and chemoresistance in cancer are linked phenomena, but the molecular basis for this link is unknown. We uncovered a network of paracrine signals between carcinoma, myeloid, and endothelial cells that drives both processes in breast cancer. Cancer cells that overexpress CXCL1 and 2 by transcriptional hyperactivation or 4q21 amplification are primed for survival in metastatic sites. CXCL1/2 attract CD11b(+)Gr1(+) myeloid cells into the tumor, which produce chemokines including S100A8/9 that enhance cancer cell survival. Although chemotherapeutic agents kill cancer cells, these treatments trigger a parallel stromal reaction leading to TNF-α production by endothelial and other stromal cells. TNF-α via NF-kB heightens the CXCL1/2 expression in cancer cells, thus amplifying the CXCL1/2-S100A8/9 loop and causing chemoresistance. CXCR2 blockers break this cycle, augmenting the efficacy of chemotherapy against breast tumors and particularly against metastasis. This network of endothelial-carcinoma-myeloid signaling interactions provides a mechanism linking chemoresistance and metastasis, with opportunities fo",
+          "chunk_text_sha256": "eb0caca0fe89fc5769f4f9a7eb29010c7966c8c495df952963936540b4c2f036",
+          "excerpt_sha256": "eb0caca0fe89fc5769f4f9a7eb29010c7966c8c495df952963936540b4c2f036",
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1200,
+          "locator": {
+            "type": "text_range",
+            "char_end": 1200,
+            "char_start": 0
+          }
+        },
+        {
+          "number": 4,
+          "source": "14973286",
+          "ordinal": 1,
+          "chunk_id": "28ec87cb61ddd1b371496ffa12142913d9ec45966a2497f88c97b9297a00719f",
+          "revision": "974628e4-cd23-552c-a3e6-688b6657ce83",
+          "excerpt": "d 4.9% (95% CI, 2.5%-7.4%) in patients without cancer, for a hazard ratio of 2.2 (95% CI, 1.2-4.1). Recurrence and bleeding were both related to cancer severity and occurred predominantly during the first month of anticoagulant therapy but could not be explained by sub- or overanticoagulation. Cancer patients with venous thrombosis are more likely to develop recurrent thromboembolic complications and major bleeding during anticoagulant treatment than those without malignancy. These risks correlate with the extent of cancer. Possibilities for improvement using the current paradigms of anticoagulation seem limited and new treatment strategies should be developed.",
+          "chunk_text_sha256": "f49ac44d38e32f4cc99d22add7e5eca495ffae3b3885bfde0e02265c34de4f16",
+          "excerpt_sha256": "f49ac44d38e32f4cc99d22add7e5eca495ffae3b3885bfde0e02265c34de4f16",
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 669,
+          "locator": {
+            "type": "text_range",
+            "char_end": 1669,
+            "char_start": 1000
+          }
+        },
+        {
+          "number": 5,
+          "source": "195680777",
+          "ordinal": 0,
+          "chunk_id": "fddeea7ff6696b24d921e44033285799424d322f8510ba5409b82ac7276671e5",
+          "revision": "26d0d881-ec47-5a5a-b94a-d84d7fbaf445",
+          "excerpt": "Comparisons between different polychemotherapy regimens for early breast cancer: meta-analyses of long-term outcome among 100,000 women in 123 randomised trials.\n\nBACKGROUND Moderate differences in efficacy between adjuvant chemotherapy regimens for breast cancer are plausible, and could affect treatment choices. We sought any such differences. METHODS We undertook individual-patient-data meta-analyses of the randomised trials comparing: any taxane-plus-anthracycline-based regimen versus the same, or more, non-taxane chemotherapy (n=44,000); one anthracycline-based regimen versus another (n=7000) or versus cyclophosphamide, methotrexate, and fluorouracil (CMF; n=18,000); and polychemotherapy versus no chemotherapy (n=32,000). The scheduled dosages of these three drugs and of the anthracyclines doxorubicin (A) and epirubicin (E) were used to define standard CMF, standard 4AC, and CAF and CEF. Log-rank breast cancer mortality rate ratios (RRs) are reported. FINDINGS In trials adding four separate cycles of a taxane to a fixed anthracycline-based control regimen, extending treatment duration, breast cancer mortality was reduced (RR 0·86, SE 0·04, two-sided significance [2p]=0·0005). I",
+          "chunk_text_sha256": "9796f6d29001072ec73f58614c01b36c3e629cb0470315d496e6a0088abd43df",
+          "excerpt_sha256": "9796f6d29001072ec73f58614c01b36c3e629cb0470315d496e6a0088abd43df",
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1200,
+          "locator": {
+            "type": "text_range",
+            "char_end": 1200,
+            "char_start": 0
+          }
+        },
+        {
+          "number": 6,
+          "source": "25175997",
+          "ordinal": 0,
+          "chunk_id": "a7d065f5c2f04b37cc27e00b7257f5ddb77ffc217cc7b95e8dc46c7299a3c314",
+          "revision": "2e04bedd-0d71-5196-9ea3-a844e0c2a8e4",
+          "excerpt": "Pulmonary vascular lesions in end-stage idiopathic pulmonary fibrosis: Histopathologic study on lung explant specimens and correlations with pulmonary hemodynamics.\n\nIn patients presenting with idiopathic pulmonary fibrosis (IPF), modifications of pulmonary vessels are well defined in fibrotic areas but have not been accurately assessed in the intervening patches of preserved lung. Moreover, the relation between pulmonary vessel lesions and pulmonary hemodynamics is not well known. We therefore designed a retrospective study on lung explant specimens from 26 patients with a firm diagnosis of IPF who had undergone lung transplantation. Our aim was to (1) describe the vascular lesions, especially in preserved lung areas, and (2) correlate them with pulmonary hemodynamics. In dense fibrotic zones, thickening of the arterial and venous wall with severe luminal narrowing was present in each patient. In architecturally preserved lung zones, occlusion of venules and small pulmonary veins was observed in 65% of the patients, although there were only mild changes of muscular pulmonary arteries. We found a significant positive correlation between the macroscopic extent of lung fibrosis and m",
+          "chunk_text_sha256": "41b093a6b054607c0149f870ba8fb77963178774e055394b849c16e4e63b6a91",
+          "excerpt_sha256": "41b093a6b054607c0149f870ba8fb77963178774e055394b849c16e4e63b6a91",
+          "excerpt_start_in_chunk": 0,
+          "excerpt_end_in_chunk": 1200,
+          "locator": {
+            "type": "text_range",
+            "char_end": 1200,
+            "char_start": 0
+          }
+        }
+      ],
+      "events": [
+        {
+          "kind": "retrieval",
+          "snapshot": "986d92ba-b119-4418-b869-bd07081f49ad",
+          "candidate": [
+            {
+              "source": "7986878",
+              "ordinal": 1,
+              "chunk_id": "4bce0ede90ef6e481fa36d715e272c469cb113882742ee5ddd92bbeed7b6ba9a"
+            },
+            {
+              "source": "25175997",
+              "ordinal": 0,
+              "chunk_id": "a7d065f5c2f04b37cc27e00b7257f5ddb77ffc217cc7b95e8dc46c7299a3c314"
+            },
+            {
+              "source": "4460880",
+              "ordinal": 1,
+              "chunk_id": "7cb52fd2d01fd529a5a27915d67bb43464b55f3dc7892f3822c3a2bf6de2aebb"
+            },
+            {
+              "source": "9929089",
+              "ordinal": 0,
+              "chunk_id": "b54a654db8b17d7c20780a057578afd058c9149b9712cd223f9b4409fb7c9fa2"
+            },
+            {
+              "source": "195680777",
+              "ordinal": 0,
+              "chunk_id": "fddeea7ff6696b24d921e44033285799424d322f8510ba5409b82ac7276671e5"
+            },
+            {
+              "source": "20888849",
+              "ordinal": 0,
+              "chunk_id": "607e80dd69b2da77178dab1db6ec6ea54bc8acdbe2e2cf0c02020ff4ebc8f5cf"
+            },
+            {
+              "source": "34338075",
+              "ordinal": 1,
+              "chunk_id": "ab4382000719d8fe953b13503e5ae45840673d1c6add275150091d8a3514d0b9"
+            },
+            {
+              "source": "5500086",
+              "ordinal": 0,
+              "chunk_id": "47cb8fcddad39d78041f73903cc6f445ca3468cefd8bd7cc53b4f663940ffbe5"
+            },
+            {
+              "source": "13464392",
+              "ordinal": 1,
+              "chunk_id": "92c9aa80c961666c599823dbc29dd396505a3b1de64a7e250831935ddc14c6ab"
+            },
+            {
+              "source": "2522977",
+              "ordinal": 1,
+              "chunk_id": "ab90c6c92f64b24774f6519dbdb35baccd3799338365cd4103030dca1c667175"
+            },
+            {
+              "source": "24974080",
+              "ordinal": 1,
+              "chunk_id": "0821200a087a269333d8efb22c7edae3ed29c829f80bf80a3b636c18da78921d"
+            },
+            {
+              "source": "19510470",
+              "ordinal": 0,
+              "chunk_id": "7175d3ae99ee7a791def309ed67eb11de28331bf8b91a6c5d093e372ffdf8a3f"
+            },
+            {
+              "source": "6374918",
+              "ordinal": 1,
+              "chunk_id": "a9cde9253086526e66e344d5ff15d2a86f2bf7049f0267af210335a81df23a97"
+            },
+            {
+              "source": "7821634",
+              "ordinal": 0,
+              "chunk_id": "b07b3ca638912b677fdf78798389f97d1ad47be680c4c64e17f65367275dd99c"
+            },
+            {
+              "source": "23036207",
+              "ordinal": 1,
+              "chunk_id": "43849513b8fd053ea19352770330a03b117a2d4a332cafcbf506124d9b4b83e9"
+            },
+            {
+              "source": "15946643",
+              "ordinal": 0,
+              "chunk_id": "fce06d2446b61a1402ec2bdde9628e59ff35add11f8d70202f48159257c3655f"
+            },
+            {
+              "source": "601033",
+              "ordinal": 1,
+              "chunk_id": "2992a7a5e5452338d642c419976f2f51ea4020e978c1b93ba402ca477bda32ce"
+            },
+            {
+              "source": "9588931",
+              "ordinal": 0,
+              "chunk_id": "3eae0fab05d71c9410ebb541843a3e0cb8c9e4db3f8943b8eeb949baf24d6e89"
+            },
+            {
+              "source": "14973286",
+              "ordinal": 1,
+              "chunk_id": "28ec87cb61ddd1b371496ffa12142913d9ec45966a2497f88c97b9297a00719f"
+            },
+            {
+              "source": "6421792",
+              "ordinal": 0,
+              "chunk_id": "734c7d0c1ce25776698021c996f7b0553b7ef44fc19225b1b3ff928841c3530d"
+            }
+          ],
+          "reranked": [
+            {
+              "source": "20888849",
+              "ordinal": 0,
+              "chunk_id": "607e80dd69b2da77178dab1db6ec6ea54bc8acdbe2e2cf0c02020ff4ebc8f5cf"
+            },
+            {
+              "source": "9929089",
+              "ordinal": 0,
+              "chunk_id": "b54a654db8b17d7c20780a057578afd058c9149b9712cd223f9b4409fb7c9fa2"
+            },
+            {
+              "source": "15946643",
+              "ordinal": 0,
+              "chunk_id": "fce06d2446b61a1402ec2bdde9628e59ff35add11f8d70202f48159257c3655f"
+            },
+            {
+              "source": "14973286",
+              "ordinal": 1,
+              "chunk_id": "28ec87cb61ddd1b371496ffa12142913d9ec45966a2497f88c97b9297a00719f"
+            },
+            {
+              "source": "195680777",
+              "ordinal": 0,
+              "chunk_id": "fddeea7ff6696b24d921e44033285799424d322f8510ba5409b82ac7276671e5"
+            },
+            {
+              "source": "25175997",
+              "ordinal": 0,
+              "chunk_id": "a7d065f5c2f04b37cc27e00b7257f5ddb77ffc217cc7b95e8dc46c7299a3c314"
+            }
+          ],
+          "times_ms": {
+            "dense": 853.591,
+            "sparse": 71.14,
+            "fusion": 0.475,
+            "rerank": 20859.476
+          },
+          "total_ms": 22175.167
+        },
+        {
+          "kind": "reader",
+          "prompt_sha256": "ca06a529a7b78d4df2a0d18b5f59f07ec14725fe12d639fa1578a14ca0613e4a",
+          "chunks": [
+            {
+              "source": "20888849",
+              "ordinal": 0,
+              "chunk_id": "607e80dd69b2da77178dab1db6ec6ea54bc8acdbe2e2cf0c02020ff4ebc8f5cf"
+            },
+            {
+              "source": "9929089",
+              "ordinal": 0,
+              "chunk_id": "b54a654db8b17d7c20780a057578afd058c9149b9712cd223f9b4409fb7c9fa2"
+            },
+            {
+              "source": "15946643",
+              "ordinal": 0,
+              "chunk_id": "fce06d2446b61a1402ec2bdde9628e59ff35add11f8d70202f48159257c3655f"
+            },
+            {
+              "source": "14973286",
+              "ordinal": 1,
+              "chunk_id": "28ec87cb61ddd1b371496ffa12142913d9ec45966a2497f88c97b9297a00719f"
+            },
+            {
+              "source": "195680777",
+              "ordinal": 0,
+              "chunk_id": "fddeea7ff6696b24d921e44033285799424d322f8510ba5409b82ac7276671e5"
+            },
+            {
+              "source": "25175997",
+              "ordinal": 0,
+              "chunk_id": "a7d065f5c2f04b37cc27e00b7257f5ddb77ffc217cc7b95e8dc46c7299a3c314"
+            }
+          ]
+        },
+        {
+          "kind": "wire",
+          "max_tokens": 2048,
+          "temperature": 0.0,
+          "model": "deepseek-v4.1-flash-1017",
+          "retry_limit": 0,
+          "enable_thinking": null,
+          "prompt_sha256": "ca06a529a7b78d4df2a0d18b5f59f07ec14725fe12d639fa1578a14ca0613e4a"
+        },
+        {
+          "kind": "response",
+          "elapsed_ms": 3095,
+          "finish_reason": "stop",
+          "content_present": true,
+          "usage": {
+            "input_tokens": 2107,
+            "output_tokens": 352,
+            "total_tokens": 2459
+          }
+        }
+      ]
+    }
+  ]
+}
