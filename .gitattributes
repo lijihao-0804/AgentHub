@@ -11,3 +11,5 @@ tests/unit/test_article_*.py text eol=lf
 benchmarks/public_rag/qa_first_response_*.py text eol=lf
 benchmarks/public_rag/results/published/qa-first-response-20261114/**/*.json text eol=lf
 benchmarks/public_rag/results/published/qa-first-response-20261114/**/*.jsonl text eol=lf
+# An empty unified-diff context line is a literal space; preserve the measured patch bytes.
+benchmarks/public_rag/results/published/qa-first-response-20261114/reader/prompt.patch text eol=lf -whitespace

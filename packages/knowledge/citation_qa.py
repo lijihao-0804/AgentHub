@@ -37,7 +37,6 @@ from packages.knowledge.evidence_records import MAX_EVIDENCE_EXCERPT_CHARS
 from packages.knowledge.retrieval import HybridKnowledgeRetriever
 from packages.model_gateway.contracts import (
     PROVIDER_EGRESS_POLICY_VERSION,
-    AliyunDeepSeekRequestMode,
     CapabilityRequirements,
     ModelMessage,
     ModelRequest,
@@ -356,11 +355,9 @@ def _output_requirements(mode: CitationOutputMode) -> CapabilityRequirements:
 def _request(
     messages: tuple[ModelMessage, ...],
     mode: CitationOutputMode,
-    request_mode: AliyunDeepSeekRequestMode,
 ) -> ModelRequest:
     return ModelRequest(
         messages=messages,
-        request_mode=request_mode,
         response_schema=_OUTPUT_SCHEMA if mode == "JSON_SCHEMA" else None,
         required_capabilities=_output_requirements(mode),
     )
@@ -455,7 +452,6 @@ class CitationQaService:
         superseded_rank_penalty: float = 0.0,
         evidence_projection: str | None = None,
         output_mode: CitationOutputMode = "JSON_SCHEMA",
-        request_mode: AliyunDeepSeekRequestMode = AliyunDeepSeekRequestMode.PROVIDER_DEFAULT,
         retrieval_profile: Mapping[str, int] | None = None,
         model_plan_resolver: Callable[
             [AsyncSession, WorkspaceExecutionContext, UUID],
@@ -487,7 +483,6 @@ class CitationQaService:
         if output_mode not in {"JSON_SCHEMA", "PROMPT_JSON"}:
             raise ValueError("invalid citation output mode")
         self.output_mode = output_mode
-        self.request_mode = request_mode
         self.model_plan_resolver = model_plan_resolver or partial(
             _resolve_model_plan, output_mode=output_mode
         )
@@ -507,7 +502,6 @@ class CitationQaService:
                 {
                     "request_id": context.request_id,
                     "attempt": attempt + 1,
-                    "request_mode": self.request_mode.value,
                     "output_mode": self.output_mode,
                     "output_limit_reached": output_limit_reached,
                 },
@@ -631,7 +625,7 @@ class CitationQaService:
         )
         allowed_ids = frozenset(item.id for item in selected)
         for attempt in range(2):
-            model_request = _request(request_messages, self.output_mode, self.request_mode)
+            model_request = _request(request_messages, self.output_mode)
             _deny_oversized(
                 plan,
                 request_messages,

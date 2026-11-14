@@ -119,10 +119,10 @@ async def test_explicit_prompt_json_uses_strict_local_validation(valid: bool) ->
     )
     response = await _post(
         _app(session, gateway),
-        _payload(session) | {"output_mode": "PROMPT_JSON", "request_mode": "non_thinking"},
+        _payload(session) | {"output_mode": "PROMPT_JSON"},
     )
     [sent] = gateway.requests
-    assert sent.request_mode is AliyunDeepSeekRequestMode.NON_THINKING
+    assert sent.request_mode is AliyunDeepSeekRequestMode.PROVIDER_DEFAULT
     assert sent.response_schema is None
     assert "structured_output" not in sent.required_capabilities.required
     assert '"insufficient_evidence"' in sent.messages[0].content
@@ -148,7 +148,7 @@ async def test_query_requires_concrete_snapshot_and_forbids_extra_fields() -> No
     latest_response = await _post(app, latest)
     extra_response = await _post(app, extra)
     unknown_mode = await _post(app, _payload(session) | {"output_mode": "AUTO"})
-    unknown_request_mode = await _post(app, _payload(session) | {"request_mode": "AUTO"})
+    unknown_request_mode = await _post(app, _payload(session) | {"request_mode": "non_thinking"})
 
     assert latest_response.status_code == 422
     assert extra_response.status_code == 422

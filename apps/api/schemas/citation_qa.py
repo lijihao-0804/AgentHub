@@ -7,7 +7,6 @@ from pydantic import BaseModel, ConfigDict, Field
 from apps.api.schemas.knowledge import RetrievalPlaygroundStages
 from packages.knowledge.contracts import CitationOutputMode
 from packages.knowledge.evidence_records import MAX_EVIDENCE_EXCERPT_CHARS
-from packages.model_gateway.contracts import AliyunDeepSeekRequestMode
 
 
 class CitationQaRequest(BaseModel):
@@ -19,7 +18,6 @@ class CitationQaRequest(BaseModel):
     model_profile_id: UUID
     query: str = Field(min_length=1, max_length=4_000)
     output_mode: CitationOutputMode = "JSON_SCHEMA"
-    request_mode: AliyunDeepSeekRequestMode = AliyunDeepSeekRequestMode.PROVIDER_DEFAULT
 
 
 class CitationQaCitationResponse(BaseModel):
