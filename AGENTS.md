@@ -33,3 +33,10 @@ This repository follows `plan/plan.md` as the product and semantic source of tru
     when historical experiment data is read.
 28. Holdout exposure is an auditable persisted event; development runs must not consume holdout
     exposure.
+
+## Local development workflow (user decision, 2026-11-15)
+
+- The default development location is the original `E:\JAVA\AI+agent\AgentHub` repository. Use topic branches and small, reviewable commits there; do not create another project copy/worktree unless the user requests it. Existing research copies are retained archives.
+- Before changes, inspect HEAD, branch, staged, unstaged, and untracked state. Preserve user WIP and its staging; never bulk-stage unrelated files, stash everything, reset/clean, or overwrite conflicts.
+- Keep product fixes separate from research summaries. Do not commit provider secrets/configuration, raw receipts, third-party source datasets, runtime databases, archives, or caches as part of research integration.
+- The RAG progress entry is `docs/reviews/AGENTHUB_RAG_PROGRESS.md`. Record source SHA, tests, negative results and limitations; a research improvement does not authorize changing defaults, deployment or remote publication.

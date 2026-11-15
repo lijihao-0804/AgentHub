@@ -1,0 +1,24 @@
+{
+  "status": "PASS",
+  "network_requests": 0,
+  "new_provider_requests": 0,
+  "historical_ledgers_byte_unchanged": true,
+  "old_requests": 141,
+  "old_unknown": 2,
+  "old_estimated_or_reserved_microcny": 968524,
+  "reanalysis_byte_equal": {
+    "blind-review-input.json": true,
+    "formal-trace-analysis.json": true,
+    "paired-summary.json": true,
+    "question-failure-matrix.csv": true,
+    "unblinded-assessments.json": true
+  },
+  "new_requests": 112,
+  "new_physical": 112,
+  "new_estimated_microcny": 954522,
+  "cumulative_estimated_or_reserved_microcny": 1923046,
+  "closed_stop": [
+    "CLOSED_FORMAL_PROTOCOL_COMPLETE_NO_MORE_REQUESTS"
+  ],
+  "cost_basis": "Usage-based conservative estimate, not invoice"
+}

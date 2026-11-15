@@ -1,0 +1,48 @@
+{
+  "groups": {
+    "A": {
+      "physical_requests": 24,
+      "total_input_tokens": 94884,
+      "total_output_tokens": 4641,
+      "estimated_microcny": 226896,
+      "median_final_request_input_tokens": 7497.0,
+      "median_final_provider_wall_seconds": 2.2065669000076014,
+      "selector_requests": 0,
+      "selector_input_tokens": 0
+    },
+    "B": {
+      "physical_requests": 24,
+      "total_input_tokens": 96475,
+      "total_output_tokens": 4413,
+      "estimated_microcny": 228254,
+      "median_final_request_input_tokens": 7521.0,
+      "median_final_provider_wall_seconds": 2.55103849999432,
+      "selector_requests": 0,
+      "selector_input_tokens": 0
+    },
+    "C": {
+      "physical_requests": 48,
+      "total_input_tokens": 215460,
+      "total_output_tokens": 4421,
+      "estimated_microcny": 466288,
+      "median_final_request_input_tokens": 3038.5,
+      "median_final_provider_wall_seconds": 2.189535449993855,
+      "selector_requests": 24,
+      "selector_input_tokens": 170085
+    },
+    "D": {
+      "physical_requests": 12,
+      "total_input_tokens": 6560,
+      "total_output_tokens": 1503,
+      "estimated_microcny": 25144,
+      "median_final_request_input_tokens": 502.5,
+      "median_final_provider_wall_seconds": 1.1755865500090295,
+      "selector_requests": 0,
+      "selector_input_tokens": 0
+    }
+  },
+  "source": "receipt-verified usage, peak price estimate; no invoice access",
+  "timing_limit": "Nonstream wall time includes prefill/network/decode; pure decode and TTFT unavailable",
+  "ledger_closed": true,
+  "retention_note": "Aggregate timing only; individual provider receipt metadata stays in sealed local research archive."
+}

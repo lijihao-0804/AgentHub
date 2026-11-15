@@ -1,0 +1,152 @@
+{
+  "kind": "FRESH_POSTGRES_READ_ONLY_RELOAD_REAL_PROVIDER_RUNS",
+  "migration": "0056_auxiliary_run_steps",
+  "new_provider_requests": 0,
+  "rows": [
+    {
+      "id": "R201",
+      "status": "SUCCEEDED",
+      "main_model_steps": 2,
+      "selection_rows": 2,
+      "auxiliary_rows": 2,
+      "input_tokens": 19068,
+      "output_tokens": 342,
+      "auxiliary_input_tokens": 14528,
+      "receipt_totals_match": true,
+      "native_product_cost_unbound": true
+    },
+    {
+      "id": "R202",
+      "status": "SUCCEEDED",
+      "main_model_steps": 2,
+      "selection_rows": 2,
+      "auxiliary_rows": 2,
+      "input_tokens": 18454,
+      "output_tokens": 341,
+      "auxiliary_input_tokens": 13925,
+      "receipt_totals_match": true,
+      "native_product_cost_unbound": true
+    },
+    {
+      "id": "R203",
+      "status": "SUCCEEDED",
+      "main_model_steps": 2,
+      "selection_rows": 2,
+      "auxiliary_rows": 2,
+      "input_tokens": 19402,
+      "output_tokens": 317,
+      "auxiliary_input_tokens": 14695,
+      "receipt_totals_match": true,
+      "native_product_cost_unbound": true
+    },
+    {
+      "id": "R204",
+      "status": "SUCCEEDED",
+      "main_model_steps": 2,
+      "selection_rows": 2,
+      "auxiliary_rows": 2,
+      "input_tokens": 17326,
+      "output_tokens": 497,
+      "auxiliary_input_tokens": 13963,
+      "receipt_totals_match": true,
+      "native_product_cost_unbound": true
+    },
+    {
+      "id": "R206",
+      "status": "SUCCEEDED",
+      "main_model_steps": 2,
+      "selection_rows": 2,
+      "auxiliary_rows": 2,
+      "input_tokens": 18717,
+      "output_tokens": 449,
+      "auxiliary_input_tokens": 14176,
+      "receipt_totals_match": true,
+      "native_product_cost_unbound": true
+    },
+    {
+      "id": "R207",
+      "status": "SUCCEEDED",
+      "main_model_steps": 2,
+      "selection_rows": 2,
+      "auxiliary_rows": 2,
+      "input_tokens": 16161,
+      "output_tokens": 272,
+      "auxiliary_input_tokens": 13728,
+      "receipt_totals_match": true,
+      "native_product_cost_unbound": true
+    },
+    {
+      "id": "R208",
+      "status": "SUCCEEDED",
+      "main_model_steps": 2,
+      "selection_rows": 2,
+      "auxiliary_rows": 2,
+      "input_tokens": 18190,
+      "output_tokens": 326,
+      "auxiliary_input_tokens": 13386,
+      "receipt_totals_match": true,
+      "native_product_cost_unbound": true
+    },
+    {
+      "id": "R209",
+      "status": "SUCCEEDED",
+      "main_model_steps": 2,
+      "selection_rows": 2,
+      "auxiliary_rows": 2,
+      "input_tokens": 18020,
+      "output_tokens": 389,
+      "auxiliary_input_tokens": 14490,
+      "receipt_totals_match": true,
+      "native_product_cost_unbound": true
+    },
+    {
+      "id": "R210",
+      "status": "SUCCEEDED",
+      "main_model_steps": 2,
+      "selection_rows": 2,
+      "auxiliary_rows": 2,
+      "input_tokens": 17797,
+      "output_tokens": 322,
+      "auxiliary_input_tokens": 14315,
+      "receipt_totals_match": true,
+      "native_product_cost_unbound": true
+    },
+    {
+      "id": "R213",
+      "status": "SUCCEEDED",
+      "main_model_steps": 2,
+      "selection_rows": 2,
+      "auxiliary_rows": 2,
+      "input_tokens": 17374,
+      "output_tokens": 455,
+      "auxiliary_input_tokens": 13919,
+      "receipt_totals_match": true,
+      "native_product_cost_unbound": true
+    },
+    {
+      "id": "R214",
+      "status": "SUCCEEDED",
+      "main_model_steps": 2,
+      "selection_rows": 2,
+      "auxiliary_rows": 2,
+      "input_tokens": 16748,
+      "output_tokens": 285,
+      "auxiliary_input_tokens": 14328,
+      "receipt_totals_match": true,
+      "native_product_cost_unbound": true
+    },
+    {
+      "id": "R215",
+      "status": "SUCCEEDED",
+      "main_model_steps": 2,
+      "selection_rows": 2,
+      "auxiliary_rows": 2,
+      "input_tokens": 18203,
+      "output_tokens": 426,
+      "auxiliary_input_tokens": 14632,
+      "receipt_totals_match": true,
+      "native_product_cost_unbound": true
+    }
+  ],
+  "all_receipt_totals_match": true
+}

@@ -1,0 +1,24 @@
+{
+  "source_research_commit": "577b3878985e0500a326a135b8a8db8706a2f90b",
+  "source_formal_execution_commit": "5fcc53ee98d2d9102b14855dbd79396e3ca70dd7",
+  "hash_format": "SHA256 of UTF-8 canonical JSON: sort_keys, compact separators, ensure_ascii=False; CSV represented as ordered DictReader rows",
+  "files": {
+    "paired-summary.json": "2f32485d1c42350465d8e3846ef0c8cd939d98d5adfc34c8dab9be2c6c3986d6",
+    "question-failure-matrix.csv": "871ed2f1da30d79c857df8daa376fb7fb82c7097f6dfe4a5f3f309be036c8432",
+    "real-postgres-reconciliation.json": "ff3ae3d74c3daf773fc03831b11deda448845115871277d722cd5d9acf3af28c",
+    "routing-counterfactual.json": "fa286522f1239c42b22e5a14c758b9c72e245967605aede5d323ab20d0997e1d",
+    "closeout-verification.json": "44f06f2c85dbe0ae246f0478c61ecb148415e1ef3f46ef87b6d33595d1636207",
+    "cost-and-timing-summary.json": "5ce99125fc5da032d294ced0a1f1e3eabc6392c641e9ec32963cd5459512ac5b"
+  },
+  "excluded": [
+    "third-party datasets/source passages",
+    "full model answers and blind bundles",
+    "raw provider receipts/request IDs",
+    "wire payloads",
+    "API configuration/credentials",
+    "database/login state",
+    "runtime ledgers",
+    "model/cache files"
+  ],
+  "scope": "Derived result summaries only. Recalculation is not new model inference or a new independent evaluation."
+}

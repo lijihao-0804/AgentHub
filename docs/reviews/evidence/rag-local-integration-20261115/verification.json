@@ -1,0 +1,69 @@
+{
+  "phase": "Local integration verified before documentation commit; commit identity via git log",
+  "original_head": "c4eb5f45bf87608dbd09713f5f7d0c901e20cc04",
+  "branch": "codex/local-main-synced-20261115",
+  "product_commit_map": {
+    "f32f66ce0c376e39f6b3d338fa9363ddb8354e65": "5b1858ca0b9c892fca62259cd8066985f18db37b",
+    "c3ea72bde3d1232100ed9b6783c324f181e6572c": "b03cc73cdebd8e5e78633ad45015ce7383c7a289"
+  },
+  "research_source_commit": "577b3878985e0500a326a135b8a8db8706a2f90b",
+  "tracked_before": 2421,
+  "untracked_before": 196,
+  "preserved_wip_files": 197,
+  "original_staged_changes": 0,
+  "wip_sha256_unchanged": true,
+  "all_other_original_files_unchanged_except": [
+    "AGENTS.md",
+    "docs/current-state.md",
+    "docs/reviews/README.md",
+    "docs/reviews/rag-research-retention-20261115.md",
+    "packages/agent_runtime/models.py"
+  ],
+  "product_git_blobs_byte_equal_to_validated_fix_checkout": [
+    "docs/reviews/run-step-kinds-acceptance-20261115.md",
+    "migrations/versions/0056_auxiliary_run_steps.py",
+    "packages/agent_runtime/models.py",
+    "tests/integration/test_auxiliary_run_step_migration.py",
+    "tests/support/read_auxiliary_steps_old_checkout.py",
+    "tests/unit/test_run_step_kind_contract.py"
+  ],
+  "working_tree_equality": "Same content after Git CRLF/LF checkout normalization",
+  "documentation_allowlist": [
+    "AGENTS.md",
+    "docs/current-state.md",
+    "docs/reviews/AGENTHUB_RAG_PROGRESS.md",
+    "docs/reviews/README.md",
+    "docs/reviews/agenthub-local-rag-integration-20261115.md",
+    "docs/reviews/evidence/rag-crossversion-r2-20261115/closeout-verification.json",
+    "docs/reviews/evidence/rag-crossversion-r2-20261115/cost-and-timing-summary.json",
+    "docs/reviews/evidence/rag-crossversion-r2-20261115/paired-summary.json",
+    "docs/reviews/evidence/rag-crossversion-r2-20261115/question-failure-matrix.csv",
+    "docs/reviews/evidence/rag-crossversion-r2-20261115/real-postgres-reconciliation.json",
+    "docs/reviews/evidence/rag-crossversion-r2-20261115/retained-manifest.json",
+    "docs/reviews/evidence/rag-crossversion-r2-20261115/routing-counterfactual.json",
+    "docs/reviews/evidence/rag-crossversion-r2-20261115/verify_results.py",
+    "docs/reviews/rag-crossversion-r2-protocol-20261115.md",
+    "docs/reviews/rag-crossversion-r2-reproduce-20261115.md",
+    "docs/reviews/rag-crossversion-r2-result-20261115.md",
+    "docs/reviews/rag-research-retention-20261115.md",
+    "docs/reviews/evidence/rag-local-integration-20261115/verification.json"
+  ],
+  "unit_tests_in_original_directory": {
+    "passed": 43,
+    "new_model_requests": 0
+  },
+  "lint": "Targeted Ruff --no-cache passed",
+  "limitations": [
+    "No full repository CI or new PostgreSQL migration run during integration",
+    "Previous isolated PostgreSQL evidence retained with its original scope",
+    "Existing user HTML has trailing whitespace; kept unchanged",
+    "Initial result helper CSV BOM handling fixed before integration; classifications unchanged",
+    "Initial Ruff cache creation denied by filesystem; standard --no-cache mode succeeded",
+    "Strict working-byte guard first stopped on normal Git LF/CRLF differences before any documentation write; Git blob identity and normalized working content then verified for all 6 files"
+  ],
+  "network_provider_calls": 0,
+  "remote_pushes": 0,
+  "deployments": 0,
+  "business_database_migrations": 0,
+  "production_default_changes": 0
+}

@@ -1,0 +1,195 @@
+{
+  "groups": {
+    "A": {
+      "planned": 12,
+      "observed": 12,
+      "adjudicable": 12,
+      "answer_correct": 10,
+      "evidence_sufficient": 10,
+      "citations_valid": 10,
+      "complete_correct": 10,
+      "wrong_refusal": 1,
+      "reasonable_refusal": 0,
+      "scope_or_unit_error": 2,
+      "unknown": 0,
+      "physical_requests": 24,
+      "input_tokens": 94884,
+      "output_tokens": 4641,
+      "estimated_or_reserved_microcny": 226896,
+      "median_runtime_seconds": 9.256082600004447,
+      "median_delivered_characters": 14013.5
+    },
+    "B": {
+      "planned": 12,
+      "observed": 12,
+      "adjudicable": 12,
+      "answer_correct": 9,
+      "evidence_sufficient": 9,
+      "citations_valid": 9,
+      "complete_correct": 9,
+      "wrong_refusal": 0,
+      "reasonable_refusal": 0,
+      "scope_or_unit_error": 3,
+      "unknown": 0,
+      "physical_requests": 24,
+      "input_tokens": 96475,
+      "output_tokens": 4413,
+      "estimated_or_reserved_microcny": 228254,
+      "median_runtime_seconds": 9.583049050001136,
+      "median_delivered_characters": 14095.5
+    },
+    "C": {
+      "planned": 12,
+      "observed": 12,
+      "adjudicable": 12,
+      "answer_correct": 9,
+      "evidence_sufficient": 9,
+      "citations_valid": 9,
+      "complete_correct": 9,
+      "wrong_refusal": 1,
+      "reasonable_refusal": 0,
+      "scope_or_unit_error": 3,
+      "unknown": 0,
+      "physical_requests": 48,
+      "input_tokens": 215460,
+      "output_tokens": 4421,
+      "estimated_or_reserved_microcny": 466288,
+      "median_runtime_seconds": 11.898893200006569,
+      "median_delivered_characters": 4799.0
+    },
+    "D": {
+      "planned": 12,
+      "observed": 12,
+      "adjudicable": 12,
+      "answer_correct": 9,
+      "evidence_sufficient": 8,
+      "citations_valid": 9,
+      "complete_correct": 8,
+      "wrong_refusal": 2,
+      "reasonable_refusal": 0,
+      "scope_or_unit_error": 2,
+      "unknown": 0,
+      "physical_requests": 12,
+      "input_tokens": 6560,
+      "output_tokens": 1503,
+      "estimated_or_reserved_microcny": 25144,
+      "median_runtime_seconds": 1.3885369499985245,
+      "median_delivered_characters": 377.5
+    }
+  },
+  "comparisons": {
+    "B_vs_A": {
+      "planned_pairs": 12,
+      "adjudicable_pairs": 12,
+      "ids": [
+        "R201",
+        "R202",
+        "R203",
+        "R204",
+        "R206",
+        "R207",
+        "R208",
+        "R209",
+        "R210",
+        "R213",
+        "R214",
+        "R215"
+      ],
+      "wins": 0,
+      "ties": 11,
+      "losses": 1,
+      "paired_difference_pp": -8.333333333333332,
+      "document_group_bootstrap_95ci_pp": [
+        -25.0,
+        0.0
+      ],
+      "bootstrap_seed": 20261115,
+      "bootstrap_replicates": 10000,
+      "new_wrong_refusal_ids": [],
+      "predeclared_further_validation_gate": false,
+      "diagnostic_only": false
+    },
+    "C_vs_B": {
+      "planned_pairs": 12,
+      "adjudicable_pairs": 12,
+      "ids": [
+        "R201",
+        "R202",
+        "R203",
+        "R204",
+        "R206",
+        "R207",
+        "R208",
+        "R209",
+        "R210",
+        "R213",
+        "R214",
+        "R215"
+      ],
+      "wins": 0,
+      "ties": 12,
+      "losses": 0,
+      "paired_difference_pp": 0,
+      "document_group_bootstrap_95ci_pp": [
+        0.0,
+        0.0
+      ],
+      "bootstrap_seed": 20261115,
+      "bootstrap_replicates": 10000,
+      "new_wrong_refusal_ids": [
+        "R201"
+      ],
+      "predeclared_further_validation_gate": false,
+      "diagnostic_only": false
+    },
+    "D_vs_B": {
+      "planned_pairs": 12,
+      "adjudicable_pairs": 12,
+      "ids": [
+        "R201",
+        "R202",
+        "R203",
+        "R204",
+        "R206",
+        "R207",
+        "R208",
+        "R209",
+        "R210",
+        "R213",
+        "R214",
+        "R215"
+      ],
+      "wins": 1,
+      "ties": 9,
+      "losses": 2,
+      "paired_difference_pp": -8.333333333333332,
+      "document_group_bootstrap_95ci_pp": [
+        -33.33333333333333,
+        16.666666666666664
+      ],
+      "bootstrap_seed": 20261115,
+      "bootstrap_replicates": 10000,
+      "new_wrong_refusal_ids": [
+        "R201",
+        "R210"
+      ],
+      "predeclared_further_validation_gate": false,
+      "diagnostic_only": true
+    }
+  },
+  "cost": {
+    "requests": 112,
+    "physical": 112,
+    "new_microcny": 954522,
+    "historical_microcny_with_old_unknown_reserves": 968524,
+    "cumulative_microcny": 1923046,
+    "new_statuses": [
+      [
+        "returned",
+        112
+      ]
+    ],
+    "basis": "Provider usage at official peak prices; not an account invoice"
+  },
+  "limits": "12 source-scoped English financial questions; internal AI peer review"
+}

@@ -1,0 +1,96 @@
+{
+  "kind": "POSTHOC_ZERO_PROVIDER_FIXED_ACTUAL_QUERY_ATTRIBUTION",
+  "selected_question_ids": [
+    "R202",
+    "R203",
+    "R204"
+  ],
+  "selection_rule": "first three IDs with natural A/B delivery difference, independent of scores; unique actual queries replayed one at a time",
+  "selection_used_answer_scores": false,
+  "rows": [
+    {
+      "id": "CF01",
+      "origin_question": "R202",
+      "origin_arm": "A",
+      "query_sha256": "e216014e4ce6c31fbba8753bd80d4af5e5552de944bffbc0034590acfc43549f",
+      "retrieval_source_text_order_equal": true,
+      "candidate_set_equal": true
+    },
+    {
+      "id": "CF02",
+      "origin_question": "R202",
+      "origin_arm": "A",
+      "query_sha256": "4dd42fd82413c0936c5eee0170cb18c92380c1f028a36debb6f470b1f12a325b",
+      "retrieval_source_text_order_equal": true,
+      "candidate_set_equal": true
+    },
+    {
+      "id": "CF03",
+      "origin_question": "R202",
+      "origin_arm": "B",
+      "query_sha256": "037911bdeb4017c03278914191df254d699b1086109b5bde1f134b9b9a758775",
+      "retrieval_source_text_order_equal": true,
+      "candidate_set_equal": true
+    },
+    {
+      "id": "CF04",
+      "origin_question": "R203",
+      "origin_arm": "A",
+      "query_sha256": "2657a0f379f8c1950b6194689e62d4a836a3f648be112f372438c63d05bdc0f0",
+      "retrieval_source_text_order_equal": true,
+      "candidate_set_equal": true
+    },
+    {
+      "id": "CF05",
+      "origin_question": "R203",
+      "origin_arm": "A",
+      "query_sha256": "cf40447a6571071ec7d6fdcfe140a4b1187f6d2359537e126dd3045461d6a35e",
+      "retrieval_source_text_order_equal": true,
+      "candidate_set_equal": false
+    },
+    {
+      "id": "CF06",
+      "origin_question": "R203",
+      "origin_arm": "B",
+      "query_sha256": "d0d275649c33b57119aaf711a41500f3afd33e15d81f6d88bcfb35874857fe63",
+      "retrieval_source_text_order_equal": false,
+      "candidate_set_equal": false
+    },
+    {
+      "id": "CF07",
+      "origin_question": "R204",
+      "origin_arm": "A",
+      "query_sha256": "68644a3909d0a0a51cde938aa2aaac7bfd5f809b46792ef970e6ba2d27684666",
+      "retrieval_source_text_order_equal": true,
+      "candidate_set_equal": true
+    },
+    {
+      "id": "CF08",
+      "origin_question": "R204",
+      "origin_arm": "A",
+      "query_sha256": "98c938d01257a81981516be496aa78a6c56dd630730c75b56c87c1966b004f3c",
+      "retrieval_source_text_order_equal": true,
+      "candidate_set_equal": false
+    },
+    {
+      "id": "CF09",
+      "origin_question": "R204",
+      "origin_arm": "B",
+      "query_sha256": "1e486010be343b3af3add089cb9b28d96040e11e1f1f4727a5f799ba751586e5",
+      "retrieval_source_text_order_equal": true,
+      "candidate_set_equal": true
+    },
+    {
+      "id": "CF10",
+      "origin_question": "R204",
+      "origin_arm": "B",
+      "query_sha256": "977e895cde5ab8cff917640dd7e7650a298f032b05b3f4ee2149a7443aa53706",
+      "retrieval_source_text_order_equal": true,
+      "candidate_set_equal": true
+    }
+  ],
+  "provider_requests": 0,
+  "equal_final_retrieval": 9,
+  "queries": 10,
+  "limit": "One query replayed at a time. Does not reproduce two-query shared admission or establish why the model chose different queries."
+}
