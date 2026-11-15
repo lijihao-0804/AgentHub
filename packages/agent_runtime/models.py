@@ -452,7 +452,7 @@ class RunStep(Base):
         CheckConstraint(
             "kind IN ('PREPARE', 'MODEL', 'TOOL_PROPOSAL', 'POLICY', 'TOOL_EXECUTE', "
             "'OBSERVATION', 'APPROVAL_WAIT', 'ACTION', 'RECONCILIATION', 'SUMMARY', "
-            "'GUARD', 'FINISH')",
+            "'GUARD', 'FINISH', 'EVIDENCE_SELECTION', 'AUXILIARY_MODEL')",
             name="ck_run_steps_kind",
         ),
         UniqueConstraint(
