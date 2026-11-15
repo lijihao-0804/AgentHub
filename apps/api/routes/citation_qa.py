@@ -43,6 +43,8 @@ async def citation_qa(
         retrieval_components=components,
         model_gateway=model_gateway,
         output_mode=payload.output_mode,
+        verify_refusal_consistency=request.app.state.settings.knowledge_qa_contextual_abstention,
+        answer_contract_v1=request.app.state.settings.knowledge_qa_answer_contract_v1,
         max_evidence_chars=request.app.state.settings.knowledge_qa_max_evidence_chars,
         min_rerank_score=request.app.state.settings.knowledge_min_rerank_score,
         superseded_rank_penalty=request.app.state.settings.knowledge_superseded_rank_penalty,

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 from collections.abc import Awaitable, Callable, Mapping
@@ -34,6 +35,11 @@ from packages.knowledge.contracts import (
 )
 from packages.knowledge.evidence_plan import assemble_evidence_plan
 from packages.knowledge.evidence_records import MAX_EVIDENCE_EXCERPT_CHARS
+from packages.knowledge.refusal_consistency import (
+    explicit_abstention,
+    recover_whole_refusal,
+    refuses_requested_comparison,
+)
 from packages.knowledge.retrieval import HybridKnowledgeRetriever
 from packages.model_gateway.contracts import (
     PROVIDER_EGRESS_POLICY_VERSION,
@@ -122,6 +128,22 @@ _PROMPT_JSON_SYSTEM = (
 )
 
 
+def citation_system_prompt(mode: CitationOutputMode, *, answer_contract_v1: bool = False) -> str:
+    base = _SYSTEM_PROMPT if mode == "JSON_SCHEMA" else _PROMPT_JSON_SYSTEM
+    if not answer_contract_v1:
+        return base
+    return base + (
+        "\nSet insufficient_evidence=false for a supported positive or negative answer. "
+        "For a partly answerable request, give each supported part with its citation, "
+        "identify what remains unknown, and keep the flag false. A caveat is not a refusal. "
+        "If no requested part can be answered, set the flag true, briefly identify the "
+        "missing information without adding claims about the source, use no citation "
+        "markers and return citation_ids=[]. Never discard a supported answer or necessary "
+        "condition merely to produce a refusal. For non-refusals every [n] must support "
+        "the specific claim it follows and citation_ids must exactly match the unique markers."
+    )
+
+
 class _CitationQaModelOutput(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -163,6 +185,7 @@ class CitationQaResult:
     insufficient_evidence: bool
     citations: tuple[CitationQaCitation, ...]
     retrieval_trace: RetrievalTrace
+    answer_receipt: CitationAnswerReceipt | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -371,6 +394,7 @@ class _QaFailure(StrEnum):
     CITATION_OUT_OF_RANGE = "citation_out_of_range"
     CITATIONS_ON_REFUSAL = "citations_on_refusal"
     CITATION_MISMATCH = "citation_mismatch"
+    STATE_BODY_CONFLICT = "state_body_conflict"
 
 
 class _InvalidCitationAnswer(AgentHubError):
@@ -381,6 +405,24 @@ class _InvalidCitationAnswer(AgentHubError):
             502,
         )
         self.reason = reason
+
+
+def _parse_model_output(content: str, *, output_limit_reached: bool) -> _CitationQaModelOutput:
+    try:
+        parsed = load_unique_json(content)
+    except (ValueError, TypeError, RecursionError):
+        reason = (
+            "JSON parsing failed at the model output limit."
+            if output_limit_reached
+            else "The response failed strict JSON parsing."
+        )
+        raise _InvalidCitationAnswer(_QaFailure.JSON_PARSE, reason) from None
+    try:
+        return _CitationQaModelOutput.model_validate(parsed, strict=True)
+    except (ValueError, TypeError):
+        raise _InvalidCitationAnswer(
+            _QaFailure.SCHEMA_VALIDATION, "The JSON failed citation schema validation."
+        ) from None
 
 
 def _validate_model_output(
@@ -438,6 +480,108 @@ def _model_gateway_error(error: ModelGatewayError) -> AgentHubError:
     return AgentHubError(error.code.value, "The model provider is unavailable.", 503)
 
 
+def _normalize_validated_answer(
+    query: str,
+    output: _CitationQaModelOutput,
+    citation_ids: tuple[int, ...],
+    *,
+    contextual: bool,
+) -> tuple[str, bool, tuple[int, ...]]:
+    if citation_ids:
+        refusal = explicit_abstention(query, output.answer, contextual=contextual)
+        if refusal is not None:
+            return refusal, True, ()
+    return output.answer, output.insufficient_evidence, citation_ids
+
+
+@dataclass(frozen=True, slots=True)
+class CitationAnswerReceipt:
+    raw_content: str
+    raw_sha256: str
+    answer: str
+    insufficient_evidence: bool
+    citation_ids: tuple[int, ...]
+    rule: str | None
+
+
+def resolve_citation_answer(
+    query: str,
+    content: str,
+    *,
+    visible_ids: frozenset[int] | set[int],
+    output_limit_reached: bool,
+    answer_contract_v1: bool = False,
+    contextual: bool = False,
+) -> CitationAnswerReceipt:
+    """Resolve one provider response; never dispatches a model request."""
+    allowed = frozenset(visible_ids)
+    output = _parse_model_output(content, output_limit_reached=output_limit_reached)
+    rule = None
+    if answer_contract_v1:
+        # Numeric bracket groups are reserved for references. Do not silently
+        # strip a malformed group or a citation present only in the ID array.
+        if not set(output.citation_ids).issubset(allowed):
+            raise _InvalidCitationAnswer(_QaFailure.CITATION_OUT_OF_RANGE, "Unseen citation ID.")
+        canonical_reference = re.compile(r"\[([1-9][0-9]*)\]")
+        markers = set(canonical_reference.findall(output.answer))
+        if re.search(r"\[\s*[+-]?\d", canonical_reference.sub("", output.answer)):
+            raise _InvalidCitationAnswer(_QaFailure.CITATION_MISMATCH, "Invalid citation marker.")
+        if not markers.issubset({str(n) for n in allowed}):
+            raise _InvalidCitationAnswer(
+                _QaFailure.CITATION_OUT_OF_RANGE, "Unseen citation marker."
+            )
+        repair = recover_whole_refusal(query, output.answer)
+        # On ordinary answers a disagreement between the two reference channels
+        # is never repaired. A declared refusal may have redundant references.
+        if repair and (
+            output.insufficient_evidence or markers == {str(n) for n in output.citation_ids}
+        ):
+            answer, rule = repair
+            updated = output.model_copy(
+                update={
+                    "answer": answer,
+                    "citation_ids": [],
+                    "insufficient_evidence": True,
+                }
+            )
+            if updated == output:
+                rule = None
+            output = updated
+        if output.insufficient_evidence and re.match(
+            r"^(?:yes[.,!: ]|是的[，。！]|答案是)", output.answer.strip(), re.I
+        ):
+            raise _InvalidCitationAnswer(
+                _QaFailure.STATE_BODY_CONFLICT,
+                "A declared whole refusal opens with an explicit answer.",
+            )
+        if (
+            not repair
+            and not output.insufficient_evidence
+            and refuses_requested_comparison(query, output.answer)
+        ):
+            raise _InvalidCitationAnswer(
+                _QaFailure.STATE_BODY_CONFLICT,
+                "An explicit refusal of the requested comparison contains attributable facts.",
+            )
+    ids = _validate_model_output(output, evidence_count=len(allowed), visible_ids=allowed)
+    if answer_contract_v1:
+        answer, insufficient = output.answer, output.insufficient_evidence
+    else:
+        answer, insufficient, ids = _normalize_validated_answer(
+            query, output, ids, contextual=contextual
+        )
+        if answer != output.answer or insufficient != output.insufficient_evidence:
+            rule = "legacy_explicit_abstention"
+    return CitationAnswerReceipt(
+        content,
+        hashlib.sha256(content.encode("utf-8")).hexdigest(),
+        answer,
+        insufficient,
+        ids,
+        rule,
+    )
+
+
 class CitationQaService:
     def __init__(
         self,
@@ -452,6 +596,8 @@ class CitationQaService:
         superseded_rank_penalty: float = 0.0,
         evidence_projection: str | None = None,
         output_mode: CitationOutputMode = "JSON_SCHEMA",
+        verify_refusal_consistency: bool = False,
+        answer_contract_v1: bool = False,
         retrieval_profile: Mapping[str, int] | None = None,
         model_plan_resolver: Callable[
             [AsyncSession, WorkspaceExecutionContext, UUID],
@@ -483,6 +629,8 @@ class CitationQaService:
         if output_mode not in {"JSON_SCHEMA", "PROMPT_JSON"}:
             raise ValueError("invalid citation output mode")
         self.output_mode = output_mode
+        self.verify_refusal_consistency = verify_refusal_consistency
+        self.answer_contract_v1 = answer_contract_v1
         self.model_plan_resolver = model_plan_resolver or partial(
             _resolve_model_plan, output_mode=output_mode
         )
@@ -493,6 +641,7 @@ class CitationQaService:
         attempt: int,
         reason: _QaFailure,
         output_limit_reached: bool | None,
+        raw_sha256: str | None = None,
     ) -> None:
         if self.trace_sink is None:
             return
@@ -504,6 +653,7 @@ class CitationQaService:
                     "attempt": attempt + 1,
                     "output_mode": self.output_mode,
                     "output_limit_reached": output_limit_reached,
+                    **({"raw_sha256": raw_sha256} if raw_sha256 else {}),
                 },
             )
             await span.end(status="error", failure_code=reason.value)
@@ -613,9 +763,9 @@ class CitationQaService:
         request_messages = (
             ModelMessage(
                 role="system",
-                content=_SYSTEM_PROMPT
-                if self.output_mode == "JSON_SCHEMA"
-                else _PROMPT_JSON_SYSTEM,
+                content=citation_system_prompt(
+                    self.output_mode, answer_contract_v1=self.answer_contract_v1
+                ),
             ),
             ModelMessage(role="user", content=evidence_prompt or _evidence_prompt(query, selected)),
         )
@@ -651,39 +801,44 @@ class CitationQaService:
                     "MODEL_PROVIDER_UNAVAILABLE", "The model provider is unavailable.", 503
                 ) from None
             try:
-                parsed = load_unique_json(response.content)
-            except (ValueError, TypeError, RecursionError):
-                reason = (
-                    "JSON parsing failed at the model output limit."
-                    if response.finish_reason == "length"
-                    else "The response failed strict JSON parsing."
+                receipt = resolve_citation_answer(
+                    query,
+                    response.content,
+                    visible_ids=allowed_ids,
+                    output_limit_reached=response.finish_reason == "length",
+                    answer_contract_v1=self.answer_contract_v1,
+                    contextual=self.verify_refusal_consistency,
                 )
-                await self._trace_failure(
-                    context, attempt, _QaFailure.JSON_PARSE, response.finish_reason == "length"
-                )
-                raise _InvalidCitationAnswer(_QaFailure.JSON_PARSE, reason) from None
-            try:
-                output = _CitationQaModelOutput.model_validate(parsed, strict=True)
-            except (ValueError, TypeError):
-                await self._trace_failure(
-                    context,
-                    attempt,
-                    _QaFailure.SCHEMA_VALIDATION,
-                    response.finish_reason == "length",
-                )
-                raise _InvalidCitationAnswer(
-                    _QaFailure.SCHEMA_VALIDATION, "The JSON failed citation schema validation."
-                ) from None
-            try:
-                citation_ids = _validate_model_output(
-                    output, evidence_count=len(selected), visible_ids=allowed_ids
-                )
+                if receipt.rule and self.answer_contract_v1 and self.trace_sink is not None:
+                    try:
+                        span = await self.trace_sink.start_span(
+                            "knowledge.qa.output_normalized",
+                            {
+                                "request_id": context.request_id,
+                                "raw_sha256": receipt.raw_sha256,
+                                "rule": receipt.rule,
+                            },
+                        )
+                        await span.end()
+                    except Exception:
+                        pass  # Observability must not change the returned answer.
                 break
             except _InvalidCitationAnswer as exc:
                 await self._trace_failure(
-                    context, attempt, exc.reason, response.finish_reason == "length"
+                    context,
+                    attempt,
+                    exc.reason,
+                    response.finish_reason == "length",
+                    hashlib.sha256(response.content.encode()).hexdigest()
+                    if self.answer_contract_v1
+                    else None,
                 )
                 out_of_range = exc.reason == _QaFailure.CITATION_OUT_OF_RANGE
+                if self.answer_contract_v1 or exc.reason in {
+                    _QaFailure.JSON_PARSE,
+                    _QaFailure.SCHEMA_VALIDATION,
+                }:
+                    raise
                 if attempt or (not out_of_range and self.output_mode != "PROMPT_JSON"):
                     raise
                 correction = _CITATION_CORRECTION if out_of_range else _PROMPT_CITATION_CORRECTION
@@ -709,11 +864,12 @@ class CitationQaService:
                 retrieval_score=by_id[identifier].evidence.retrieval_score,
                 rerank_score=by_id[identifier].evidence.rerank_score,
             )
-            for identifier in citation_ids
+            for identifier in receipt.citation_ids
         )
         return CitationQaResult(
-            answer=output.answer,
-            insufficient_evidence=output.insufficient_evidence,
+            answer=receipt.answer,
+            insufficient_evidence=receipt.insufficient_evidence,
+            answer_receipt=receipt,
             citations=citations,
             retrieval_trace=retrieval.trace,
         )

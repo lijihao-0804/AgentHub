@@ -7,11 +7,7 @@ from typing import Any
 
 from packages.knowledge.contracts import RetrievedEvidence
 
-# The excerpt cap bounds the tool return and the private evidence registry, not
-# the model view: the observation projection is lossless and drops whole
-# records instead of truncating them. It must therefore stay at or above the
-# configured chunk size (default 1200 chars) so a whole chunk can survive this
-# cap; chunks larger than the cap lose only their tail here.
+# Legacy Wiki/citation excerpt limit. Raw search records retain the complete chunk.
 MAX_EVIDENCE_EXCERPT_CHARS = 2_000
 
 
@@ -25,7 +21,7 @@ def evidence_record(item: RetrievedEvidence, *, snapshot_id: str | None = None) 
         "document_id": item.document_id,
         "document_revision_id": item.document_revision_id,
         "locator": dict(item.locator),
-        "snippet": item.text[:MAX_EVIDENCE_EXCERPT_CHARS],
+        "snippet": item.text,
         "document_name": item.metadata.get("document_name"),
         "effective_date": item.metadata.get("effective_date"),
         "superseded": bool(item.metadata.get("superseded", False)),
@@ -76,17 +72,22 @@ class _OverlapTracker:
     """
 
     def __init__(self) -> None:
-        self._spans: dict[str, list[tuple[int, int]]] = {}
+        self._spans: dict[tuple, list[tuple[int, int]]] = {}
 
-    def redundant(self, revision_id: Any, span: tuple[int, int] | None) -> bool:
+    def admit(self, revision_id: Any, locator: Any) -> bool:
+        span = locator_span(locator)
         if span is None or not isinstance(revision_id, str) or not revision_id:
+            return True
+        # Structural PDF offsets restart on each page. Paragraph-relative offsets
+        # from different paragraphs are also incomparable.
+        scope = tuple(locator.get(key) for key in ("page", "paragraph_ordinal"))
+        if any(v is not None and type(v) is not int for v in scope):
+            return True
+        spans = self._spans.setdefault((revision_id, *scope), [])
+        if any(_span_contained(span, other) for other in spans):
             return False
-        return any(_span_contained(span, other) for other in self._spans.get(revision_id, ()))
-
-    def keep(self, revision_id: Any, span: tuple[int, int] | None) -> None:
-        if span is None or not isinstance(revision_id, str) or not revision_id:
-            return
-        self._spans.setdefault(revision_id, []).append(span)
+        spans.append(span)
+        return True
 
 
 def drop_overlapping_evidence(
@@ -104,10 +105,8 @@ def drop_overlapping_evidence(
     tracker = _OverlapTracker()
     kept: list[RetrievedEvidence] = []
     for item in items:
-        span = locator_span(item.locator)
-        if tracker.redundant(item.document_revision_id, span):
+        if not tracker.admit(item.document_revision_id, item.locator):
             continue
-        tracker.keep(item.document_revision_id, span)
         kept.append(item)
     return tuple(kept)
 
@@ -123,15 +122,19 @@ def drop_overlapping_records(
     if len(records) != len(references):
         return list(records), list(references)
     tracker = _OverlapTracker()
+    seen: set[tuple[str, str]] = set()
     kept_records: list[Any] = []
     kept_references: list[Any] = []
     for record, reference in zip(records, references, strict=True):
         if not isinstance(record, Mapping):
             return list(records), list(references)
-        span = locator_span(record.get("locator"))
-        if tracker.redundant(record.get("document_revision_id"), span):
+        identity = (record.get("document_revision_id"), record.get("chunk_id"))
+        if all(isinstance(value, str) and value for value in identity):
+            if identity in seen:
+                continue
+            seen.add(identity)
+        if not tracker.admit(record.get("document_revision_id"), record.get("locator")):
             continue
-        tracker.keep(record.get("document_revision_id"), span)
         kept_records.append(record)
         kept_references.append(reference)
     return kept_records, kept_references

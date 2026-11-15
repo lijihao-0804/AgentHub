@@ -94,6 +94,7 @@ from packages.agent_runtime.summary_service import (
 )
 from packages.agent_runtime.summary_state import SummaryJobStatus
 from packages.agent_runtime.summary_worker import SummaryWorker, frozen_summary_model_spec
+from packages.agent_runtime.support_facts import support_observation, support_system_prompt
 from packages.agent_runtime.wiki_history_evidence import validate_wiki_history_evidence
 from packages.agent_runtime.work_layer import (
     HISTORY_SOURCE_MAX_TURNS,
@@ -140,7 +141,7 @@ from packages.model_gateway.contracts import (
     ModelToolDefinition,
 )
 from packages.model_gateway.errors import ModelGatewayError, ModelGatewayErrorCode
-from packages.model_gateway.gateway import ModelGatewayService
+from packages.model_gateway.gateway import ModelGatewayService, SessionScopedModelGenerator
 from packages.model_gateway.run_budget_adapter import ModelAttemptBudgetError
 from packages.observability.timing import mark_visible_text
 from packages.threads.models import AgentThread, ThreadTurn
@@ -1066,6 +1067,9 @@ class _AgentRunGraph:
                 runtime_policy = "\n\n".join(
                     (_RUNTIME_POLICY, history_hint(turns_dropped_by_window=dropped))
                 )
+            system_prompt = support_system_prompt(
+                spec.system_prompt, spec.runtime, tool_definitions.values()
+            )
             history_plan_metadata = None
             history_checkpoint_binding_value = None
             history_exchange_ids = None
@@ -1088,7 +1092,7 @@ class _AgentRunGraph:
                     conversation=history_conversation,
                     mandatory_messages=(
                         ModelMessage(role="system", content=runtime_policy),
-                        ModelMessage(role="system", content=spec.system_prompt),
+                        ModelMessage(role="system", content=system_prompt),
                         ModelMessage(role="user", content=self.run.input_text),
                     ),
                     memory_messages=memory_messages,
@@ -1175,7 +1179,7 @@ class _AgentRunGraph:
             # unevictable or displace the question being asked.
             messages = [
                 ModelMessage(role="system", content=runtime_policy),
-                ModelMessage(role="system", content=spec.system_prompt),
+                ModelMessage(role="system", content=system_prompt),
                 *memory_messages,
                 *history,
                 ModelMessage(role="user", content=self.run.input_text),
@@ -1687,7 +1691,12 @@ class _AgentRunGraph:
             conversation=conversation,
             mandatory_messages=(
                 ModelMessage("system", _RUNTIME_POLICY),
-                ModelMessage("system", frozen_spec.system_prompt),
+                ModelMessage(
+                    "system",
+                    support_system_prompt(
+                        frozen_spec.system_prompt, frozen_spec.runtime, definitions
+                    ),
+                ),
                 ModelMessage("user", persisted.input_text),
             ),
             memory_messages=(),
@@ -3601,8 +3610,24 @@ class _AgentRunGraph:
                             workspace_id=UUID(self.context.workspace_id),
                         )
                     else:
+                        selection = {}
+                        definition = state.get("tool_definitions", {}).get(call["name"])
+                        if (
+                            call["name"] == "search_knowledge"
+                            and definition is not None
+                            and definition.retrieval_config.get("evidence_set_selector")
+                            == "complementary_v1"
+                            and definition.source_kind.value == "BUILTIN"
+                        ):
+                            selection["selector_binding"] = (
+                                SessionScopedModelGenerator(
+                                    self.service.session_factory, self.service.model_gateway_factory
+                                ),
+                                state["spec"].model_plan,
+                            )
                         result = await self.service.tool_runtime.execute(
                             context=self.context,
+                            **selection,
                             agent_version_id=self.run.agent_version_id,
                             tool_identity=call["name"],
                             arguments=call["arguments"],
@@ -3659,6 +3684,30 @@ class _AgentRunGraph:
                 raise
             finally:
                 self.usage_records = [*state.get("usage_records", []), *auxiliary.records]
+        definitions = state.get("tool_definitions", {})
+        for call, (_, result) in zip(calls, pairs, strict=True):
+            definition = definitions.get(call["name"])
+            # Never copy untrusted MCP result metadata into a business trace.
+            if (
+                call["name"] == "search_knowledge"
+                and definition is not None
+                and definition.retrieval_config.get("evidence_set_selector") == "complementary_v1"
+                and definition.source_kind.value == "BUILTIN"
+                and isinstance(result.data, Mapping)
+            ):
+                for receipt in result.data.get("evidence_selection", []):
+                    await self.step(
+                        "EVIDENCE_SELECTION",
+                        "SUCCEEDED",
+                        {
+                            key: receipt[key]
+                            for key in (
+                                "snapshot_id", "selector", "status", "reason",
+                                "candidate_count", "selected_count", "admitted_count",
+                            )
+                            if key in receipt
+                        },
+                    )
         for attempt in auxiliary.records:
             await self.step(
                 "AUXILIARY_MODEL",
@@ -3668,7 +3717,7 @@ class _AgentRunGraph:
                     "model": attempt["model"],
                     "usage_source": attempt["source"],
                     "attempt_status": attempt["attempt_status"],
-                    "cost_status": "UNKNOWN",
+                    "cost_status": "REPORTED" if attempt.get("cost") is not None else "UNKNOWN",
                     **(attempt["usage"] or {}),
                 },
             )
@@ -3909,6 +3958,11 @@ class _AgentRunGraph:
                     "approval_decision": result.approval_decision,
                     "approval_execution": result.approval_execution,
                 }
+            if (
+                state["runtime"].get("support_answer_policy") == "support_facts_v1"
+                and definition is not None
+            ):
+                payload = support_observation(payload, definition, budget.max_tool_result_tokens)
             payload_text = (
                 json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
                 if rag_evidence_projected

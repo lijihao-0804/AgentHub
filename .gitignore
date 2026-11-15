@@ -61,3 +61,6 @@ Desktop.ini
 # One-off metadata collectors retained locally from the November research survey.
 /benchmarks/_gh_meta.py
 /benchmarks/_research_meta.py
+
+# Local integration inventories, receipts, dependency copies and verification indexes.
+/.review-local/
