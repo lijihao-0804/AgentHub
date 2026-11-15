@@ -132,7 +132,11 @@ class DeepseekV41TextCounter:
                 prompt += "<｜User｜>"
             prompt += message.content
         prompt += "<｜Assistant｜>" + ("<think>" if thinking else "</think>")
-        result = self._tokenizer.encode(prompt, add_special_tokens=False)
+        return self.count_serialized_text(prompt)
+
+    def count_serialized_text(self, text: str) -> int:
+        """Count literal serialized text; callers own any provider-template allowance."""
+        result = self._tokenizer.encode(text, add_special_tokens=False)
         tokens = getattr(result, "ids", None)
         if not isinstance(tokens, (list, tuple)):
             raise ValueError("DEEPSEEK_TOKENIZER_RESULT_INVALID")

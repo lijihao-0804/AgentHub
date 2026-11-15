@@ -57,6 +57,7 @@ class RetrievalQuery:
     # Explicit published opt-in. Selection measures the actual compact model
     # view; callers still receive full source records for citation resolution.
     evidence_projection: str | None = None
+    rerank_method: Literal["sentence_evidence_v1"] | None = None
 
 
 @dataclass(frozen=True)
