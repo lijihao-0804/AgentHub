@@ -45,7 +45,7 @@
 
 最终结果：**2 个 PostgreSQL 集成用例 + 43 个定向单测通过**；Ruff、`git diff --check` 通过。43 项包括新增合同、互补选择产品、辅助计量、定价和观测回归。不是全仓测试，也不是模型质量或实际 API 链路验收；根任务另外执行真实 opt-in canary。
 
-原始最终本机测试输出在工作区 `runs/run_step_acceptance_output.txt`，SHA-256：`5e42120a25ebda105e0a6ca48682d8fd6d503d610f81f81a9e5679c13f2ed87a`，未纳入产品 Git。首次测试夹具错误地读取关闭分支不存在的 selector_binding 导致失败，已改为可选取值；该失败输出留在 `runs/run_step_acceptance_fixture_failure.txt`。初次 localhost 连接等待被终止，测试改用明确的本机 IPv4，不更改服务配置；没有把这些尝试计为通过。
+首版最终本机测试输出保留为工作区 `runs/run_step_acceptance_f32_final.txt`，SHA-256：`5e42120a25ebda105e0a6ca48682d8fd6d503d610f81f81a9e5679c13f2ed87a`，未纳入产品 Git。首次测试夹具错误地读取关闭分支不存在的 selector_binding 导致失败，已改为可选取值；该失败输出留在 `runs/run_step_acceptance_fixture_failure.txt`。初次 localhost 连接等待被终止，测试改用明确的本机 IPv4，不更改服务配置；没有把这些尝试计为通过。
 
 ## 复跑
 
@@ -57,3 +57,18 @@ python -B -m pytest tests/unit/test_run_step_kind_contract.py tests/unit/test_co
 ```
 
 独立库有意保留，不由测试自动删除。迁移可单独作为产品修复候选发 PR；发布前仍应跑正常 CI，生产升级只通过既有部署迁移机制。不能把约束错误消失解释为答案质量提升。
+
+## 追加验收：提交后 Run 用量和旧版读取
+
+首版已经从新 session 读取 RunStep，但对总用量的检查停留在 `read_execute` 返回值。因此不能把首版称为已验证 Run 汇总用量持久化。追加测试补足了这一区别，产品代码未再修改：
+
+1. 确定性替身的 selected / fallback 分支走真实 `read_execute → step → _append_step`，再调用真实 `AgentRunService._complete_run` 完成 Run 与 FINISH 提交。
+2. 提交后创建**全新数据库 session**，重新读取 AgentRun 和 RunStep：两个分支均为 SUCCEEDED；输入 33、输出 5、总计 38 token；汇总测试成本为 0.0003 USD；AUXILIARY_MODEL 的 token 与 cost_status=REPORTED，以及 EVIDENCE_SELECTION 的 selected/fallback 状态均与对应路径一致。成本与 token 来自明确的测试替身，不是实际供应商计费。
+3. 关闭和预算不足分支也完成 Run 提交；原有降级输出一致性、旧行/索引保留和带新类型时安全拒绝 downgrade 的检查仍全部通过。
+4. 测试在独立子进程中切换 `PYTHONPATH` 和 cwd 至真实旧版 `c2240b1b06be4ab4a19f9a60a372a16b1d1c49d4`，核对 HEAD 与实际导入文件位置，然后在 PostgreSQL **READ ONLY** 事务中使用旧 ORM 和 `RunStepResponse` 读取新行。每个隔离库均成功读回 2 条 AUXILIARY_MODEL、3 条 EVIDENCE_SELECTION、2 个带完整用量的已完成 Run。此探针不迁移或写库。
+
+最终两个补验库：`agenthub_step_accept_upgrade_a9d921995125`、`agenthub_step_accept_fresh_e0baded3e0d6`；2 个集成用例通过。输出 `runs/run_step_acceptance_output.txt` SHA-256：`89b1a6f194cd85d42fe23f7fa76c8f63fac62485e789aae173fdf5dbdda333b3`。补验后重跑新增合同和互补/计量 19 项单测通过，Ruff 与差异检查通过。
+
+复跑旧版读回时，另设置 `AGENTHUB_OLD_READ_CHECKOUT` 为实际 c224 checkout，再执行上面的集成测试命令；不设置时只跳过这个可选跨 checkout 探针，不能声称验证过旧版。探针在 `tests/support/read_auxiliary_steps_old_checkout.py`。
+
+**兼容范围：**已证明 c224 代码可读取 0056 中的新行和汇总用量；没有证明旧代码部署、所有 API/UI 或继续生成的完整回退流程。聚合 timeline 仍按前述映射省略这两类。不能把此结果外推为 a2d47 的互补选择支持。若运维需要回退应用，应先关闭互补/辅助选择并停止相关在途写入，保留 0056 schema 及已有记录；已有新类型时本迁移仍拒绝回退数据库，必须另行审查保全方案，不能删记录绕过守门。本补验也不是完整 HTTP 自主 Agent 或实际供应商链路，根任务单独做 canary。

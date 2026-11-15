@@ -6,9 +6,14 @@ Provider calls are replaced by the existing deterministic selector fixture.
 """
 
 import asyncio
+import json
 import os
+import subprocess
+import sys
 from dataclasses import replace
+from decimal import Decimal
 from functools import partial
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import AsyncMock
 from uuid import uuid4
@@ -119,6 +124,10 @@ async def _exercise(factory, mode):
         prepare_resolved=AsyncMock(return_value=gateway)
     )
     graph.service.artifact_recorder = None
+    graph.service.memory_writer = None
+    graph.service._enqueue_memory_extraction = partial(
+        AgentRunService._enqueue_memory_extraction, graph.service
+    )
 
     async def execute(**kwargs):
         data = await search_knowledge(
@@ -152,7 +161,23 @@ async def _exercise(factory, mode):
             "usage_records": [],
         }
     )
+    await AgentRunService._complete_run(
+        graph.service,
+        graph.context,
+        ids[0],
+        status="SUCCEEDED",
+        final_output="Deterministic synthetic completion",
+        failure_code=None,
+        model_step_count=1,
+        tool_call_count=1,
+        usage_records=update["usage_records"],
+        pending_finish={"safe_metadata": {"synthetic": True}},
+    )
+    # This is a fresh session after both the graph step commits and completion
+    # commit. Do not mistake the returned in-memory usage for durable Run totals.
     async with factory() as session:
+        persisted_run = await session.get(AgentRun, ids[0])
+        assert persisted_run.status == "SUCCEEDED"
         steps = list(
             await session.scalars(
                 select(RunStep)
@@ -163,7 +188,7 @@ async def _exercise(factory, mode):
     kinds = [step.kind for step in steps]
     data = update["executed_observations"]["synthetic-call"].data
     if mode == "disabled":
-        assert kinds == ["PREPARE", "TOOL_EXECUTE"]
+        assert kinds == ["PREPARE", "TOOL_EXECUTE", "FINISH"]
         assert "evidence_selection" not in data
         gateway.generate_resolved.assert_not_awaited()
     else:
@@ -178,6 +203,16 @@ async def _exercise(factory, mode):
             gateway.generate_resolved.assert_awaited_once()
             assert receipt["status"] == ("fallback" if mode == "failure" else "selected")
             assert update["usage_records"][0]["usage"]["total_tokens"] == 38
+            assert persisted_run.total_input_tokens == 33
+            assert persisted_run.total_output_tokens == 5
+            assert persisted_run.total_tokens == 38
+            assert persisted_run.total_cost_amount == Decimal(".0003")
+            assert persisted_run.cost_currency == "USD"
+            auxiliary = next(step for step in steps if step.kind == "AUXILIARY_MODEL")
+            assert auxiliary.safe_metadata["total_tokens"] == 38
+            assert auxiliary.safe_metadata["cost_status"] == "REPORTED"
+            selection = next(step for step in steps if step.kind == "EVIDENCE_SELECTION")
+            assert selection.safe_metadata["status"] == receipt["status"]
     return [record["chunk_id"] for record in data["results"]]
 
 
@@ -261,6 +296,28 @@ def test_isolated_postgresql_full_migrations_runtime_and_safe_downgrade(path):
         assert _snapshot(engine) == retained
         assert retained["indexes"] == before["indexes"]
         assert set(before["rows"]).issubset(retained["rows"])
+        old_checkout = os.environ.get("AGENTHUB_OLD_READ_CHECKOUT")
+        if old_checkout:
+            probe = Path("tests/support/read_auxiliary_steps_old_checkout.py").resolve()
+            old_read = subprocess.run(
+                [sys.executable, "-B", str(probe)],
+                cwd=old_checkout,
+                check=True,
+                capture_output=True,
+                text=True,
+                env=dict(
+                    os.environ,
+                    PYTHONPATH=str(Path(old_checkout).resolve()),
+                    AGENTHUB_READBACK_DATABASE_URL=url.set(
+                        drivername="postgresql+asyncpg"
+                    ).render_as_string(hide_password=False),
+                ),
+            )
+            readback = json.loads(old_read.stdout)
+            assert readback["commit"] == "c2240b1b06be4ab4a19f9a60a372a16b1d1c49d4"
+            assert readback["auxiliary_rows"] == 2 and readback["selection_rows"] == 3
+            assert readback["completed_usage_runs"] == 2
+            print("old_checkout_readback=" + json.dumps(readback, sort_keys=True))
         print(f"isolated_database={name}; migration_path={path}; provider_requests=0")
     finally:
         engine.dispose()
