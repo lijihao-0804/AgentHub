@@ -109,6 +109,7 @@ _RUNTIME_KEYS = frozenset(DEFAULT_RUNTIME_CONFIG) | {
     "context_budget_sources",
     "history_policy",
     "summary_policy",
+    "support_answer_policy",
 }
 # Validated on their own terms: neither is a step count. ``max_cost_micro_usd``
 # is the one runtime key that may be ``None``; ``memory`` is a block of booleans
@@ -121,6 +122,7 @@ _RUNTIME_SCALAR_KEYS = _RUNTIME_KEYS - {
     "max_cost_micro_usd",
     "memory",
     "summary_policy",
+    "support_answer_policy",
 }
 _CONTEXT_BUDGET_KEYS = frozenset(DEFAULT_RUNTIME_CONFIG["context_budget"])
 _MEMORY_KEYS = frozenset(
@@ -1375,6 +1377,11 @@ def _validate_runtime_config(
             raise AgentHubError(
                 "INVALID_CONTEXT_POLICY", "The context policy is invalid.", 422
             ) from None
+    support_policy = value.get("support_answer_policy")
+    if support_policy is None:
+        result.pop("support_answer_policy", None)
+    elif support_policy != "support_facts_v1":
+        raise AgentHubError("INVALID_AGENT_CONFIG", "The support answer policy is invalid.", 422)
     history_policy = value.get("history_policy")
     if history_policy is None:
         result.pop("history_policy", None)
