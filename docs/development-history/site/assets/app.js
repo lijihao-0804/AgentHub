@@ -8,7 +8,9 @@ function fetchJson(url) {
   if (!jsonInflight.has(url)) {
     jsonInflight.set(
       url,
-      fetch(url).then(res => {
+      document.getElementById(url)
+        ? Promise.resolve().then(() => JSON.parse(document.getElementById(url).textContent))
+        : fetch(url).then(res => {
         if (!res.ok) throw new Error('HTTP ' + res.status + ' loading ' + url);
         return res.json();
       })
@@ -96,7 +98,7 @@ async function ensureHistoryData() {
 }
 
 const frames = new Map(), ready = new Set();
-let current = 'learn', currentScope = 'all', ticket = 0, lastHistory = 'global-directory', chapterId = 'start', library = 'curriculum', tocObserver, saveTimer, bookMounted = false;
+let current = 'learn', currentScope = 'all', ticket = 0, lastHistory = 'recent', chapterId = 'start', library = 'curriculum', tocObserver, saveTimer, bookMounted = false;
 const storage = {
   get(key, otherwise) { try { return JSON.parse(localStorage.getItem('agenthub-book-' + key)) ?? otherwise; } catch { return otherwise; } },
   set(key, val) { try { localStorage.setItem('agenthub-book-' + key, JSON.stringify(val)); } catch {} }
@@ -114,6 +116,7 @@ function active() {
   if (!learn) $('historyView').value = current;
 }
 function pauseFrames() {
+  $('recentHistory').hidden = true;
   stopLearningAnimations();
   for (const e of frames.values()) {
     e.frame.contentWindow.archiveApp?.pause?.();
@@ -129,7 +132,7 @@ window.archiveFrameState = function (app, view, scope) {
 
 window.archiveNavigate = async function (route, scope = 'all') {
   if (route === 'learn') { openChapter(chapterId); return; }
-  const valid = ['global-directory', 'global-git', 'full-tree', 'full-point', 'full-flow', 'full-boundaries', 'sample-tree', 'sample-graph', 'sample-flow'];
+  const valid = ['recent', 'global-directory', 'global-git', 'full-tree', 'full-point', 'full-flow', 'full-boundaries', 'sample-tree', 'sample-graph', 'sample-flow'];
   if (!valid.includes(route)) route = 'global-directory';
   preservePosition();
   const ownTicket = ++ticket;
@@ -140,6 +143,15 @@ window.archiveNavigate = async function (route, scope = 'all') {
   $('loading').textContent = '正在按需加载开发历程视图数据…';
   $('loading').hidden = false;
   pauseFrames();
+  if (route === 'recent') {
+    const recent = await fetchJson('./data/recent-history.json');
+    if (ownTicket !== ticket) return;
+    $('recentArticle').innerHTML = '<header><h1>' + E(recent.title) + '</h1><p class="chapter-summary">' + E(recent.summary) + '</p></header>' + recent.html;
+    $('loading').hidden = true;
+    $('recentHistory').hidden = false;
+    $('recentHistory').scrollTop = 0;
+    return;
+  }
   await ensureHistoryData();
   if (ownTicket !== ticket) return;
   const split = route.indexOf('-'), app = route.slice(0, split), view = route.slice(split + 1);
@@ -573,7 +585,7 @@ async function list() {
     if (category !== lastCategory) { lastCategory = category; label = '<div class="category">' + E(category) + '</div>'; }
     return label + '<button data-chapter="' + E(c.id) + '" title="' + E(c.title) + '" class="' + (c.id === chapterId ? 'active' : '') + '" ' + (c.id === chapterId ? 'aria-current="page"' : '') + '><span class="chapter-number">' + (library === 'curriculum' ? String(i + 1).padStart(2, '0') : '文') + '</span><span>' + E(c.nav || c.title) + '</span>' + (read.has(c.id) ? '<span class="check" aria-label="已读">✓</span>' : '') + '</button>';
   }).join('') || '<p class="empty">没有找到相关内容，试试问题或函数名。</p>';
-  $('chapterList').setAttribute('aria-label', (q ? '搜索结果 ' + count + ' 篇：' : '') + (library === 'curriculum' ? '学习目录' : '原始资料目录'));
+  $('chapterList').setAttribute('aria-label', (q ? '搜索结果 ' + count + ' 篇：' : '') + (library === 'curriculum' ? '学习目录' : '实测与复盘目录'));
   $('tabCurriculum').setAttribute('aria-pressed', String(library === 'curriculum'));
   $('tabOriginals').setAttribute('aria-pressed', String(library === 'originals'));
   $('libraryHint').hidden = library !== 'originals';
@@ -604,6 +616,7 @@ function introBody(c) {
 }
 
 async function openChapter(id, anchor, fromClick = false) {
+  if (Object.hasOwn(manifest.chapterAliases, id)) { id = manifest.chapterAliases[id]; anchor = null; }
   const validChap = manifest.chapters.some(x => x.id === id);
   const validOrig = manifest.originals.some(x => x.id === id);
   if (!validChap && !validOrig) id = 'start';
@@ -631,15 +644,20 @@ async function openChapter(id, anchor, fromClick = false) {
 
   const idx = manifest.chapters.findIndex(x => x.id === c.id);
   const intro = readerDepth === 'intro' && c.lesson;
-  const body = intro ? introBody(c) : (c.lesson ? '<p class="case-transition deep-case-note"><strong>本章场景主线：</strong>' + E(c.lesson.caseNote) + '</p>' : '') + c.html;
+  let body = intro ? introBody(c) : (c.lesson ? '<p class="case-transition deep-case-note"><strong>本章场景主线：</strong>' + E(c.lesson.caseNote) + '</p>' : '') + c.html;
+  if (c.discussion) {
+    body += '<section class="recall-card"><h2>面试追问</h2>' + c.discussion.map(item =>
+      '<details><summary>' + E(item.question) + '</summary><p>' + E(item.answer) + '</p></details>'
+    ).join('') + '</section>';
+  }
   const plain = body.replace(/<[^>]*>/g, '').length, mins = Math.max(1, Math.round(plain / 420));
-  $('chapterPosition').textContent = idx >= 0 ? (c.reference ? '专题进阶' : '核心主线') + ' · ' + (intro ? '通俗导读' : '深入源码') : '原始资料 · ' + c.category;
-  $('chapterArticle').innerHTML = '<header><div class="lesson-label"><span>' + (idx >= 0 ? 'AgentHub 架构精读' : '原始档案保留') + '</span><span>约 ' + mins + ' 分钟阅读</span></div><h1>' + E(intro ? c.lesson.title : c.title) + '</h1><p class="chapter-summary">' + E(intro ? c.lesson.summary : c.summary) + '</p></header>' + body + (intro ? '' : sourceButtons(c));
+  $('chapterPosition').textContent = idx >= 0 ? (c.reference ? '专题进阶' : '核心主线') + ' · ' + (intro ? '通俗导读' : '深入源码') : '实测与复盘 · ' + c.category;
+  $('chapterArticle').innerHTML = '<header><div class="lesson-label"><span>' + (idx >= 0 ? 'AgentHub 架构精读' : '专题记录') + '</span><span>约 ' + mins + ' 分钟阅读</span></div><h1>' + E(intro ? c.lesson.title : c.title) + '</h1><p class="chapter-summary">' + E(intro ? c.lesson.summary : c.summary) + '</p></header>' + body + (intro ? '' : sourceButtons(c));
 
   const art = $('chapterArticle');
   art.querySelectorAll('img[data-asset]').forEach(img => {
     const file = manifest.assetFiles[img.dataset.asset];
-    if (file) { img.loading = 'lazy'; img.src = './assets/media/' + file; }
+    if (file) { img.loading = 'lazy'; img.src = window.archiveMedia?.[file] || './assets/media/' + file; }
   });
   art.querySelectorAll('table').forEach(table => {
     if (table.parentElement.classList.contains('table-wrap')) return;
@@ -951,7 +969,7 @@ async function bootArchive() {
   } catch (err) {
     $('learning').hidden = true;
     $('loading').hidden = false;
-    $('loading').innerHTML = location.protocol === 'file:'
+    $('loading').innerHTML = location.protocol === 'file:' && !document.getElementById('./data/manifest.json')
       ? '<div style="max-width:560px;padding:24px;line-height:1.8;text-align:center;"><strong>按需分片版需要通过 HTTP 服务打开</strong><p>检测到当前使用 <code>file://</code> 本地文件协议，浏览器会拦截 <code>fetch(./data/...)</code>。请在 <code>site</code> 目录执行 <code>python -m http.server 8080</code> 后访问 <code>http://localhost:8080</code>，或直接部署至静态网站/CDN；若需无服务器离线打开，请使用上一级目录的单文件 <code>index.html</code>。</p></div>'
       : '<div style="max-width:560px;padding:24px;line-height:1.8;text-align:center;"><strong>加载档案索引失败</strong><p>' + E(err?.message || String(err)) + '</p></div>';
   }

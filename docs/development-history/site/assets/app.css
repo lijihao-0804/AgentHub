@@ -1222,3 +1222,6 @@ body.compact-reading .chapter-article {
     animation: none !important;
   }
 }
+
+.recent-history{height:100%;overflow:auto;background:var(--paper)}
+.recent-history .chapter-article{max-width:900px;margin:0 auto;padding:clamp(20px,5vw,64px)}
