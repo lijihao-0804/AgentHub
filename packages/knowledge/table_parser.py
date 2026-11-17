@@ -102,36 +102,35 @@ def _table_blocks(
     headers: dict[int, str] = {}
     carried: list[_PositionedCell] = []
     cell_count = 0
-    last_row = 0
-    for last_row, (source_cells, row_locator) in enumerate(rows, start=1):
-        if last_row > MAX_STRUCTURED_BLOCKS or len(source_cells) > _MAX_COLUMNS:
+    for row_number, (source_cells, row_locator) in enumerate(rows, start=1):
+        if row_number > MAX_STRUCTURED_BLOCKS or len(source_cells) > _MAX_COLUMNS:
             raise structure_limit()
-        positioned = [cell for cell in carried if cell.row_end >= last_row]
+        positioned = [cell for cell in carried if cell.row_end >= row_number]
         occupied = {col for cell in positioned for col in range(cell.column, cell.column_end + 1)}
         column = 1
         for source in source_cells:
             while column in occupied:
                 column += 1
-            cell = _PositionedCell(source, last_row, column)
+            cell = _PositionedCell(source, row_number, column)
             if cell.column_end > _MAX_COLUMNS or cell.row_end > MAX_STRUCTURED_BLOCKS:
                 raise structure_limit()
             if any(col in occupied for col in range(column, cell.column_end + 1)):
                 raise DocumentParseError("PARSE_FAILED", "The table has overlapping merged cells.")
             positioned.append(cell)
             column = cell.column_end + 1
-        carried = [cell for cell in positioned if cell.row_end > last_row]
+        carried = [cell for cell in positioned if cell.row_end > row_number]
         cell_count += len(positioned)
         if cell_count > MAX_TABLE_CELLS:
             raise structure_limit()
         if not any(cell.cell.text.strip() for cell in positioned):
             continue
         positioned.sort(key=lambda cell: cell.column)
-        is_header = bool(positioned) and all(cell.cell.is_header for cell in positioned)
+        is_header = all(cell.cell.is_header for cell in positioned)
         yield _row_block(
             positioned,
             headers,
             is_header=is_header,
-            locator={**locator, **row_locator, "row": last_row},
+            locator={**locator, **row_locator, "row": row_number},
             max_chars=max_chars,
         )
         if is_header:
@@ -142,7 +141,9 @@ def _table_blocks(
         raise DocumentParseError("PARSE_FAILED", "A merged cell extends past the table.")
 
 
-def _delimited_rows(text: str, delimiter: str, max_chars: int):
+def _delimited_rows(
+    text: str, delimiter: str, max_chars: int
+) -> Iterator[tuple[list[_Cell], dict[str, int]]]:
     reader = csv.reader(io.StringIO(text, newline=""), delimiter=delimiter, strict=True)
     first_record = True
     line_start = 1
@@ -235,6 +236,8 @@ class _HTMLTable(HTMLParser):
             self.fragments = []
         elif self.fragments is not None and tag in {"br", "p", "div"}:
             self.fragments.append(" ")
+        elif self.fragments is not None and tag == "img":
+            self.fragments.append(dict(attrs).get("alt") or "")
 
     def handle_data(self, data: str) -> None:
         if self.fragments is not None and self.ignored_tag is None:
@@ -251,6 +254,8 @@ class _HTMLTable(HTMLParser):
             self._end_row()
         elif tag == "thead":
             self.in_header = False
+        elif self.fragments is not None and tag in {"p", "div"}:
+            self.fragments.append(" ")
         elif tag == "table":
             if not self.in_table:
                 raise _bad_html()

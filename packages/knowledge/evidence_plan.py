@@ -40,8 +40,17 @@ _ROUTES = {"AUTO", "WIKI", "RAG", "HYBRID"}
 _STATUSES = {"SUCCESS", "INSUFFICIENT_EVIDENCE", "CONFLICT", "DEGRADED"}
 _ID = re.compile(r"(?:[A-Za-z][A-Za-z0-9_]{0,31})?[1-9][0-9]*\Z")
 _LOCATOR_POSITIONS = {
-    "page", "char_start", "char_end", "paragraph_ordinal", "start", "end",
-    "block_index", "part_index", "row", "column_start", "column_end",
+    "page",
+    "char_start",
+    "char_end",
+    "paragraph_ordinal",
+    "start",
+    "end",
+    "block_index",
+    "part_index",
+    "row",
+    "column_start",
+    "column_end",
 }
 
 
