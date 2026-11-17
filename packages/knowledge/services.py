@@ -11,9 +11,11 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from packages.control_plane.audit import append_audit
+from packages.core.config.settings import Settings, get_settings
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.knowledge.blob_store import BlobStore, BlobStoreError
+from packages.knowledge.chunking_policy import ChunkingPolicy, ChunkingStrategy
 from packages.knowledge.models import (
     Document,
     DocumentRevision,
@@ -35,10 +37,13 @@ class KnowledgeService:
         *,
         context: WorkspaceExecutionContext,
         name: str,
+        chunking_strategy: ChunkingStrategy = ChunkingStrategy.FIXED,
     ) -> KnowledgeBase:
         self._require_permission(context, "knowledge_create")
         workspace_id = self._workspace_id(context)
-        knowledge_base = KnowledgeBase(workspace_id=workspace_id, name=name.strip())
+        knowledge_base = KnowledgeBase(
+            workspace_id=workspace_id, name=name.strip(), chunking_strategy=chunking_strategy
+        )
         session.add(knowledge_base)
         await session.flush()
         append_audit(
@@ -81,6 +86,8 @@ class KnowledgeService:
         document_id: UUID | None = None,
         blob_store: BlobStore,
         queue: IngestionQueue,
+        chunking_strategy: ChunkingStrategy | None = None,
+        settings: Settings | None = None,
     ) -> tuple[Document, DocumentRevision, IngestionJob]:
         self._require_permission(
             context, "knowledge_edit" if document_id is not None else "knowledge_create"
@@ -94,6 +101,10 @@ class KnowledgeService:
         )
         if knowledge_base is None:
             self._not_found()
+        strategy = chunking_strategy or knowledge_base.chunking_strategy or ChunkingStrategy.FIXED
+        policy = ChunkingPolicy.resolve(
+            ChunkingStrategy(strategy), media_type, settings or get_settings()
+        )
 
         document: Document | None = None
         if document_id is not None:
@@ -141,6 +152,9 @@ class KnowledgeService:
                 blob_key=stored_blob.blob_key,
                 media_type=media_type,
                 file_size=stored_blob.size_bytes,
+                chunking_strategy=policy.strategy,
+                chunk_size_chars=policy.size_chars,
+                chunk_overlap_chars=policy.overlap_chars,
             )
             session.add(revision)
             await session.flush()

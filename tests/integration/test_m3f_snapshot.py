@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import os
 from collections.abc import AsyncIterator
 from dataclasses import dataclass
@@ -12,15 +13,18 @@ import pytest
 import pytest_asyncio
 from alembic import command
 from alembic.config import Config
+from qdrant_client import QdrantClient
 from sqlalchemy import select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from apps.api.app import create_app
 from apps.api.dependencies import get_db_session
+from apps.api.knowledge_dependencies import get_ingestion_queue, get_retrieval_components
+from apps.worker.tasks.knowledge import _process_knowledge_ingestion
 from packages.control_plane.models import Organization, OrganizationMembership, User, Workspace
 from packages.core.auth.security import issue_access_token
-from packages.core.config.settings import Settings
+from packages.core.config.settings import Settings, get_settings
 from packages.core.database import create_database
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import (
@@ -28,6 +32,13 @@ from packages.core.execution_context.models import (
     PrincipalContext,
     WorkspaceExecutionContext,
 )
+from packages.knowledge.adapters.fakes import (
+    DeterministicFakeDenseEmbedder,
+    DeterministicFakeReranker,
+    DeterministicFakeSparseEncoder,
+)
+from packages.knowledge.adapters.qdrant import QdrantVectorIndex
+from packages.knowledge.composition import RetrievalComponents
 from packages.knowledge.models import (
     Document,
     DocumentChunk,
@@ -61,6 +72,7 @@ def async_database_url(database_url: str) -> str:
 def migrated_database() -> None:
     previous = os.environ.get("AGENTHUB_DATABASE_URL")
     os.environ["AGENTHUB_DATABASE_URL"] = TEST_DATABASE_URL
+    get_settings.cache_clear()
     try:
         command.upgrade(Config(str(Path("alembic.ini"))), "head")
         yield
@@ -69,6 +81,7 @@ def migrated_database() -> None:
             os.environ.pop("AGENTHUB_DATABASE_URL", None)
         else:
             os.environ["AGENTHUB_DATABASE_URL"] = previous
+        get_settings.cache_clear()
 
 
 @pytest_asyncio.fixture
@@ -228,6 +241,91 @@ async def _snapshot_items(
                 .order_by(KnowledgeSnapshotItem.document_id)
             )
         )
+
+
+@pytest.mark.asyncio
+async def test_layout_upload_to_frozen_preview_and_retrieval(
+    db_factory: async_sessionmaker[AsyncSession], tmp_path: Path
+) -> None:
+    bundle = await _seed_bundle(db_factory)
+    settings = Settings(
+        testing=True,
+        database_url=async_database_url(TEST_DATABASE_URL),
+        blob_root=str(tmp_path),
+        knowledge_dense_vector_size=8,
+    )
+    index = QdrantVectorIndex(
+        url="", collection_name="layout", dense_vector_size=8, client=QdrantClient(":memory:")
+    )
+    components = RetrievalComponents(
+        DeterministicFakeDenseEmbedder(8),
+        DeterministicFakeSparseEncoder(),
+        DeterministicFakeReranker(),
+        index,
+    )
+    queued: list[UUID] = []
+
+    class LocalQueue:
+        async def enqueue(self, job_id: UUID) -> None:
+            queued.append(job_id)
+
+    app = create_app(settings)
+    app.state.db_session_factory = db_factory
+    app.dependency_overrides[get_ingestion_queue] = LocalQueue
+    app.dependency_overrides[get_retrieval_components] = lambda: components
+    token = issue_access_token(bundle.user_id, settings)
+    base = f"/api/v1/workspaces/{bundle.workspace_id}/knowledge-bases"
+    ocr = [{"type": "text", "text": "第二页 2026", "page_idx": 1, "bbox": [57, 352, 321, 578]}]
+    try:
+        async with httpx.AsyncClient(
+            transport=httpx.ASGITransport(app=app),
+            base_url="http://test",
+            headers={"Authorization": f"Bearer {token}"},
+        ) as client:
+            kb = await client.post(
+                base, json={"name": "layout", "chunking_strategy": "adaptive_v1"}
+            )
+            assert kb.status_code == 201, kb.text
+            path = f"{base}/{kb.json()['id']}"
+            for filename, body, mime in [
+                ("scan.json", json.dumps(ocr, ensure_ascii=False).encode(), "application/json"),
+                ("orders.csv", b"order,total\ninvoice,1001", "text/csv"),
+            ]:
+                upload = await client.post(
+                    f"{path}/documents", files={"file": (filename, body, mime)}
+                )
+                assert upload.status_code == 202, upload.text
+                assert upload.json()["revision"]["chunking_strategy"] == "adaptive_v1"
+                job_id = UUID(upload.json()["ingestion_job"]["id"])
+                assert queued.pop() == job_id
+                await _process_knowledge_ingestion(
+                    job_id, settings, indexing_factory=lambda _: components
+                )
+            snapshot = await client.post(f"{path}/snapshots")
+            assert snapshot.status_code == 201, snapshot.text
+            assert snapshot.json()["item_count"] == 2
+            snapshot_id = snapshot.json()["id"]
+            preview = await client.get(f"{path}/snapshots/{snapshot_id}/chunks")
+            assert preview.status_code == 200, preview.text
+            chunks = preview.json()["items"]
+            line = next(item for item in chunks if "2026" in item["text"])
+            assert line["locator"]["page"] == 2
+            assert line["locator"]["bbox"] == ocr[0]["bbox"]
+            row = next(item for item in chunks if "1001" in item["text"])
+            assert row["locator"]["type"] == "table_row"
+            result = await client.post(
+                f"{path}/retrieval/playground",
+                json={
+                    "query": "invoice 1001",
+                    "knowledge_snapshot_id": snapshot_id,
+                },
+            )
+            assert result.status_code == 200, result.text
+            evidence = next(x for x in result.json()["evidence"] if "1001" in x["snippet"])
+            assert evidence["chunk_id"] == row["chunk_id"]
+            assert evidence["locator"] == row["locator"]
+    finally:
+        index.close()
 
 
 @pytest.mark.asyncio

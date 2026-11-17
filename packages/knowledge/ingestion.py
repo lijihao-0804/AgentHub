@@ -13,8 +13,9 @@ from sqlalchemy import and_, or_, select, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from packages.core.config.settings import Settings
+from packages.core.config.settings import Settings, get_settings
 from packages.knowledge.chunking import ChunkCandidate
+from packages.knowledge.chunking_policy import ChunkingPolicy, ChunkingStrategy
 from packages.knowledge.models import (
     DocumentChunk,
     DocumentRevision,
@@ -43,6 +44,7 @@ class ClaimedIngestionJob:
     lease_token: str
     stage: str
     attempt_count: int
+    chunking_policy: ChunkingPolicy | None
 
 
 @dataclass(frozen=True)
@@ -70,6 +72,7 @@ async def claim_ingestion_job(
     *,
     job_id: UUID,
     lease_seconds: int,
+    settings: Settings | None = None,
 ) -> ClaimedIngestionJob | None:
     now = _now()
     lease_token = secrets.token_urlsafe(32)[:64]
@@ -99,41 +102,55 @@ async def claim_ingestion_job(
             next_attempt_at=None,
             updated_at=now,
         )
-        .returning(IngestionJob.id)
+        .returning(IngestionJob)
     )
-    if result.scalar_one_or_none() is None:
-        await session.rollback()
-        return None
-
-    job = await session.scalar(select(IngestionJob).where(IngestionJob.id == job_id))
+    job = result.scalar_one_or_none()
     if job is None:
         await session.rollback()
         return None
-    await session.execute(
-        update(DocumentRevision)
-        .where(DocumentRevision.id == job.document_revision_id)
-        .values(ingestion_status=RevisionIngestionStatus.PROCESSING)
-    )
-    await session.commit()
 
-    record = await session.execute(
-        select(IngestionJob, DocumentRevision)
-        .join(DocumentRevision, DocumentRevision.id == IngestionJob.document_revision_id)
-        .where(IngestionJob.id == job_id)
+    revision = await session.scalar(
+        select(DocumentRevision)
+        .where(DocumentRevision.id == job.document_revision_id)
+        .with_for_update()
     )
-    claimed_job, revision = record.one()
+    if revision is None:
+        await session.rollback()
+        return None
+    revision.ingestion_status = RevisionIngestionStatus.PROCESSING
+    if revision.chunking_strategy is None and job.stage in (
+        IngestionStage.PARSING, IngestionStage.CHUNKING
+    ):
+        # An upload queued before the migration used the worker's fixed window.
+        # Freeze it on the first claim, before parsing can be retried. Never
+        # infer parameters for historical chunks already being embedded/indexed.
+        legacy = ChunkingPolicy.resolve(
+            ChunkingStrategy.FIXED, revision.media_type, settings or get_settings()
+        )
+        revision.chunking_strategy = legacy.strategy
+        revision.chunk_size_chars = legacy.size_chars
+        revision.chunk_overlap_chars = legacy.overlap_chars
+    policy = None
+    if revision.chunking_strategy is not None:
+        assert revision.chunk_size_chars is not None and revision.chunk_overlap_chars is not None
+        policy = ChunkingPolicy(
+            ChunkingStrategy(revision.chunking_strategy),
+            revision.chunk_size_chars,
+            revision.chunk_overlap_chars,
+        )
     claimed = ClaimedIngestionJob(
-        id=claimed_job.id,
-        workspace_id=claimed_job.workspace_id,
-        knowledge_base_id=claimed_job.knowledge_base_id,
-        document_revision_id=claimed_job.document_revision_id,
+        id=job.id,
+        workspace_id=job.workspace_id,
+        knowledge_base_id=job.knowledge_base_id,
+        document_revision_id=job.document_revision_id,
         blob_key=revision.blob_key,
         media_type=revision.media_type,
-        lease_token=claimed_job.lease_token or lease_token,
-        stage=claimed_job.stage,
-        attempt_count=claimed_job.attempt_count,
+        lease_token=lease_token,
+        stage=job.stage,
+        attempt_count=job.attempt_count,
+        chunking_policy=policy,
     )
-    await session.rollback()
+    await session.commit()
     return claimed
 
 

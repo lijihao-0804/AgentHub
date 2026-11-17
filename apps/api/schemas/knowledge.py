@@ -5,11 +5,14 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from packages.knowledge.chunking_policy import ChunkingStrategy
+
 
 class KnowledgeBaseCreateRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     name: str = Field(min_length=1, max_length=200)
+    chunking_strategy: ChunkingStrategy = ChunkingStrategy.FIXED
 
 
 class KnowledgeBaseResponse(BaseModel):
@@ -18,6 +21,7 @@ class KnowledgeBaseResponse(BaseModel):
     id: UUID
     workspace_id: UUID
     name: str
+    chunking_strategy: ChunkingStrategy = ChunkingStrategy.FIXED
     created_at: datetime
 
 
@@ -61,6 +65,9 @@ class DocumentRevisionResponse(BaseModel):
     original_filename: str
     media_type: str
     file_size: int
+    chunking_strategy: ChunkingStrategy | None = None
+    chunk_size_chars: int | None = None
+    chunk_overlap_chars: int | None = None
     lifecycle_status: str
     ingestion_status: str
     created_at: datetime
@@ -112,6 +119,7 @@ class SnapshotChunkResponse(BaseModel):
     document_revision_id: UUID
     ordinal: int
     text: str
+    locator: dict[str, object]
     truncated: bool
 
 

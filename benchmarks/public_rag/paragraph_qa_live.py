@@ -62,12 +62,12 @@ from packages.core.config.settings import Settings
 from packages.core.database import create_database
 from packages.knowledge.blob_store import LocalBlobStore
 from packages.knowledge.chunking import normalize_chunk_text
+from packages.knowledge.chunking_policy import ChunkingStrategy
 from packages.knowledge.composition import production_retrieval_components
 from packages.knowledge.models import DocumentChunk, DocumentRevision, IngestionJob
 from packages.knowledge.retrieval import SessionScopedKnowledgeRetriever
 from packages.knowledge.services import KnowledgeService
 from packages.knowledge.snapshots import KnowledgeSnapshotService
-from packages.knowledge.structural_chunking import build_structural_chunks
 from packages.model_gateway.adapters.litellm import LiteLLMProviderAdapter
 from packages.model_gateway.configured_route import load_route
 from packages.model_gateway.credentials import ProviderCredentialCipher
@@ -301,6 +301,8 @@ async def prepare():
                         knowledge_base_id=kb.id,
                         filename=paper_id.replace("/", "_") + ".md",
                         media_type="text/markdown",
+                        chunking_strategy=ChunkingStrategy(ARMS[arm]["builder"]),
+                        settings=settings_for(infrastructure, arm),
                         chunks=uploaded(),
                         blob_store=LocalBlobStore(settings.blob_root),
                         queue=queue,
@@ -309,7 +311,6 @@ async def prepare():
                     job.id,
                     settings_for(infrastructure, arm),
                     indexing_factory=lambda _: components,
-                    chunk_builder=build_structural_chunks if arm == "structural" else None,
                 )
                 async with factory() as db:
                     stored_job = await db.get(IngestionJob, job.id)

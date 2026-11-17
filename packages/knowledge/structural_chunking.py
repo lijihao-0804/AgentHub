@@ -9,14 +9,17 @@ they never change the locator coordinate space.
 
 from __future__ import annotations
 
-import hashlib
 import re
 from dataclasses import dataclass
 from typing import Any
 from uuid import UUID
 
-from packages.core.canonical.json_hash import canonical_json_hash
-from packages.knowledge.chunking import ChunkCandidate, normalize_chunk_text
+from packages.knowledge.chunking import (
+    ChunkCandidate,
+    chunk_candidate,
+    normalize_chunk_text,
+    source_slice_locator,
+)
 from packages.knowledge.parser import ParsedBlock, ParsedDocument
 
 _PARAGRAPH_BREAK = re.compile(r"(?:\r\n|\r|\n)[ \t]*(?:\r\n|\r|\n)")
@@ -265,12 +268,19 @@ def _append_bounded_pieces(
 ) -> None:
     cursor = span.start
     end = span.end
+    # A slice of an NFC-normalized string is still NFC. Avoid normalizing
+    # every remaining suffix of a long, already normalized source paragraph.
+    source = block.text[span.start : end]
+    normalized_source = source == normalize_chunk_text(source)
     while cursor < end:
         remaining = _trim_span(block.text, cursor, end)
         cursor, end = remaining.start, remaining.end
         if remaining.empty:
             return
-        if _normalized_length(block.text, _Span(cursor, end)) <= chunk_size_chars:
+        remaining_length = (
+            end - cursor if normalized_source else _normalized_length(block.text, remaining)
+        )
+        if remaining_length <= chunk_size_chars:
             piece_end = end
         else:
             safe_end = _largest_hard_prefix_end(block.text, cursor, end, chunk_size_chars)
@@ -336,33 +346,15 @@ def _append_candidate(
     if len(text) > chunk_size_chars:
         raise RuntimeError("structural splitter produced an oversized chunk")
 
-    content_hash = hashlib.sha256(text.encode("utf-8")).hexdigest()
-    ordinal = len(candidates)
-    chunk_id = canonical_json_hash(
-        {
-            "document_revision_id": str(document_revision_id),
-            "ordinal": ordinal,
-            "normalized_content_hash": content_hash,
-        }
-    )
     candidates.append(
-        ChunkCandidate(
-            chunk_id=chunk_id,
-            ordinal=ordinal,
-            normalized_content_hash=content_hash,
-            text=text,
-            locator=_candidate_locator(block, span),
+        chunk_candidate(
+            document_revision_id, len(candidates), text, _candidate_locator(block, span)
         )
     )
 
 
 def _candidate_locator(block: ParsedBlock, span: _Span) -> dict[str, Any]:
-    locator = dict(block.locator)
-    existing_start = locator.get("char_start", 0)
-    base = existing_start if type(existing_start) is int and existing_start >= 0 else 0
-    locator["char_start"] = base + span.start
-    locator["char_end"] = base + span.end
-    return locator
+    return source_slice_locator(block, span.start, span.end)
 
 
 def _paragraph_spans(text: str) -> tuple[_Span, ...]:

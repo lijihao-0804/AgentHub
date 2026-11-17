@@ -126,6 +126,7 @@ class KnowledgeSnapshotService:
                     "document_revision_id": row.document_revision_id,
                     "ordinal": row.ordinal,
                     "text": row.text[:4096],
+                    "locator": row.locator,
                     "truncated": len(row.text) > 4096,
                 }
                 for row in rows

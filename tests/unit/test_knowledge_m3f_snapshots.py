@@ -67,10 +67,12 @@ async def test_snapshot_preview_is_frozen_paginated_and_bounded():
                 document_revision_id=uuid4(),
                 ordinal=0,
                 text="a" * 5000,
+                locator={"type": "page", "page": 7},
             )
         ]
     )
     result = await service.preview_chunks(session, context, kb, snapshot, limit=1, offset=10)
+    assert result["items"][0]["locator"] == {"type": "page", "page": 7}
     service.resolve_snapshot.assert_awaited_once_with(session, context, kb, snapshot)
     assert result["offset"] == 10 and result["total"] == 12
     assert len(result["items"][0]["text"]) == 4096

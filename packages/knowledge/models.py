@@ -64,12 +64,19 @@ class KnowledgeBase(Base):
             ondelete="CASCADE",
         ),
         UniqueConstraint("workspace_id", "id", name="uq_knowledge_bases_workspace_id"),
+        CheckConstraint(
+            "chunking_strategy IN ('fixed_v1', 'structural_v1', 'adaptive_v1')",
+            name="ck_knowledge_bases_chunking_strategy",
+        ),
         Index("ix_knowledge_bases_workspace_id", "workspace_id"),
     )
 
     id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), primary_key=True, default=uuid4)
     workspace_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
     name: Mapped[str] = mapped_column(String(200), nullable=False)
+    chunking_strategy: Mapped[str] = mapped_column(
+        String(20), nullable=False, server_default="fixed_v1"
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
@@ -163,6 +170,17 @@ class DocumentRevision(Base):
             "ingestion_status IN ('PENDING', 'PROCESSING', 'READY', 'FAILED')",
             name="ck_document_revisions_ingestion_status",
         ),
+        CheckConstraint(
+            "(chunking_strategy IS NULL AND chunk_size_chars IS NULL"
+            " AND chunk_overlap_chars IS NULL)"
+            " OR (chunking_strategy IS NOT NULL"
+            " AND chunking_strategy IN ('fixed_v1', 'structural_v1', 'adaptive_v1')"
+            " AND chunk_size_chars IS NOT NULL AND chunk_size_chars > 0"
+            " AND chunk_overlap_chars IS NOT NULL AND chunk_overlap_chars >= 0"
+            " AND chunk_overlap_chars < chunk_size_chars"
+            " AND (chunking_strategy = 'fixed_v1' OR chunk_overlap_chars = 0))",
+            name="ck_document_revisions_chunking_policy",
+        ),
         Index("ix_document_revisions_workspace_kb", "workspace_id", "knowledge_base_id"),
         Index("ix_document_revisions_document_status", "document_id", "ingestion_status"),
     )
@@ -176,6 +194,11 @@ class DocumentRevision(Base):
     blob_key: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
     media_type: Mapped[str] = mapped_column(String(127), nullable=False)
     file_size: Mapped[int] = mapped_column(Integer, nullable=False)
+    # Historical revisions predate policy recording. Their indexed evidence
+    # remains authoritative; its original settings cannot be inferred.
+    chunking_strategy: Mapped[str | None] = mapped_column(String(20))
+    chunk_size_chars: Mapped[int | None] = mapped_column(Integer)
+    chunk_overlap_chars: Mapped[int | None] = mapped_column(Integer)
     lifecycle_status: Mapped[str] = mapped_column(
         String(16), nullable=False, server_default=RevisionLifecycleStatus.ACTIVE
     )

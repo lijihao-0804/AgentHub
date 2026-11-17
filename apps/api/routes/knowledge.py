@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import AsyncIterator
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, File, Query, Request, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, Query, Request, UploadFile, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -33,6 +33,7 @@ from apps.api.schemas.knowledge import (
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.knowledge.blob_store import LocalBlobStore
+from packages.knowledge.chunking_policy import ChunkingStrategy
 from packages.knowledge.composition import RetrievalComponents
 from packages.knowledge.contracts import RetrievalQuery, RetrievalResult
 from packages.knowledge.models import DocumentChunk, KnowledgeSnapshotItem
@@ -56,6 +57,7 @@ playground_context = Depends(get_agent_run_workspace_context)
 queue_dependency = Depends(get_ingestion_queue)
 retrieval_components_dependency = Depends(get_retrieval_components)
 upload_file_dependency = File(...)
+upload_strategy_form = Form(default=None)
 
 
 async def _load_trace_metadata(
@@ -201,7 +203,7 @@ async def create_knowledge_base(
 ) -> KnowledgeBaseResponse:
     del workspace_id
     knowledge_base = await KnowledgeService().create_knowledge_base(
-        session, context=context, name=payload.name
+        session, context=context, name=payload.name, chunking_strategy=payload.chunking_strategy
     )
     return KnowledgeBaseResponse.model_validate(knowledge_base, from_attributes=True)
 
@@ -304,6 +306,7 @@ async def upload_document(
     knowledge_base_id: UUID,
     request: Request,
     file: UploadFile = upload_file_dependency,
+    chunking_strategy: ChunkingStrategy | None = upload_strategy_form,
     context: WorkspaceExecutionContext = context_dependency,
     session: AsyncSession = db_session_dependency,
     queue: IngestionQueue = queue_dependency,
@@ -326,6 +329,8 @@ async def upload_document(
         filename=filename,
         media_type=media_type,
         chunks=_guarded_chunks(file, first_chunk, policy),
+        chunking_strategy=chunking_strategy,
+        settings=settings,
         blob_store=LocalBlobStore(settings.blob_root),
         queue=queue,
     )
@@ -343,6 +348,7 @@ async def upload_revision(
     document_id: UUID,
     request: Request,
     file: UploadFile = upload_file_dependency,
+    chunking_strategy: ChunkingStrategy | None = upload_strategy_form,
     context: WorkspaceExecutionContext = context_dependency,
     session: AsyncSession = db_session_dependency,
     queue: IngestionQueue = queue_dependency,
@@ -365,6 +371,8 @@ async def upload_revision(
         filename=filename,
         media_type=media_type,
         chunks=_guarded_chunks(file, first_chunk, policy),
+        chunking_strategy=chunking_strategy,
+        settings=settings,
         document_id=document_id,
         blob_store=LocalBlobStore(settings.blob_root),
         queue=queue,

@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
-from collections.abc import Callable, Mapping, Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, replace
 from itertools import batched
 from uuid import UUID
@@ -16,7 +16,6 @@ from packages.core.config.settings import Settings, get_settings
 from packages.core.database import create_database
 from packages.knowledge.adapters.celery_queue import CeleryIngestionQueue
 from packages.knowledge.blob_store import BlobStoreError, LocalBlobStore
-from packages.knowledge.chunking import ChunkCandidate, build_deterministic_chunks
 from packages.knowledge.composition import (
     RetrievalComponents,
     RetrievalComponentsFactory,
@@ -277,7 +276,6 @@ async def _process_knowledge_ingestion(
     *,
     indexing_factory: IndexingComponentsFactory | None = None,
     trace_sink: TraceSink | None = None,
-    chunk_builder: Callable[..., tuple[ChunkCandidate, ...]] | None = None,
 ) -> None:
     engine, factory = create_database(settings.database_url)
     try:
@@ -286,6 +284,7 @@ async def _process_knowledge_ingestion(
                 session,
                 job_id=job_id,
                 lease_seconds=settings.knowledge_ingestion_lease_seconds,
+                settings=settings,
             )
         if claim is None:
             return
@@ -333,11 +332,12 @@ async def _process_knowledge_ingestion(
                             stale = True
                     if not stale:
                         try:
-                            chunks = (chunk_builder or build_deterministic_chunks)(
+                            assert claim.chunking_policy is not None
+                            chunks = await asyncio.to_thread(
+                                claim.chunking_policy.build,
                                 claim.document_revision_id,
                                 parsed,
-                                chunk_size_chars=settings.knowledge_chunk_size_chars,
-                                chunk_overlap_chars=settings.knowledge_chunk_overlap_chars,
+                                media_type=claim.media_type,
                             )
                             if not chunks:
                                 raise DocumentParseError(
