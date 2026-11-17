@@ -1,4 +1,4 @@
-"""Rehearse the 0056/0057 boundary in a fresh, loopback-only test database."""
+"""Rehearse 0056/0057 in a fresh loopback test DB; cleanup is the default."""
 
 import asyncio
 import os
@@ -110,6 +110,13 @@ def test_upgrade_preserves_legacy_decisions_and_downgrade_refuses_to_erase_deleg
             )
     finally:
         engine.dispose()
-        with admin_engine.connect() as conn:
-            conn.exec_driver_sql(f'DROP DATABASE "{name}"')
-        admin_engine.dispose()
+        try:
+            if os.environ.get("AGENTHUB_KEEP_APPROVAL_MIGRATION_TEST_DB") == "1":
+                # An explicitly retained test DB can be inspected on hosts
+                # that cannot signal PostgreSQL's checkpointer for DROP.
+                print(f"retained_test_database={name}; revision_boundary=0056/0057")
+            else:
+                with admin_engine.connect() as conn:
+                    conn.exec_driver_sql(f'DROP DATABASE "{name}"')
+        finally:
+            admin_engine.dispose()
