@@ -4,6 +4,19 @@
  * locales must always expose the same key set.
  */
 export const enUS = {
+  approvalPreference: {
+    title: "My approval preferences", level: "Approve on my behalf", MANUAL: "Manual approval",
+    LOW: "Up to low risk", MEDIUM: "Up to medium risk", ceiling: "Your role allows: {level}.",
+    denials: "Maximum automatic denials before human review",
+    limitHint: "For the same tool revision and arguments, the next request goes to a human after this many automatic denials. Set 0 to send the first one.",
+    sensitive: "Sensitive actions always require an authorized reviewer.",
+    save: "Save preferences", delegated: "Decided by your delegated policy",
+    saved: "Your approval preferences are saved.",
+    SENSITIVE_OPERATION: "This action requires human review.",
+    DENIAL_LIMIT_REACHED: "The automatic denial limit was reached.",
+    IDENTITY_CEILING: "The requester's current role requires human review.",
+    ABOVE_LEVEL: "This action exceeds the requester's chosen risk limit.",
+  },
   snapshotPreview: { open: "Preview frozen chunks", permission: "Knowledge content permission is required.", error: "Could not load snapshot chunks.", retry: "Retry", total: "Chunks", empty: "No chunks in this snapshot.", truncated: "Preview limited to 4096 characters.", previous: "Previous", next: "Next" },
   handoffLifecycle: {
     title: "Human handoff", hint: "The original summary is retained. Closing a handoff does not approve or resume agent actions.",
@@ -1010,6 +1023,9 @@ export const enUS = {
     locator: {
       page: "Page {page}",
       pageRange: "Pages {start}–{end}",
+      tableRow: "Row {row}, columns {start}–{end}",
+      tableRange: "Table {table}, rows {start}–{end}",
+      block: "Block {number}",
       textRange: "Characters {start}–{end}",
     },
   },
@@ -1609,6 +1625,13 @@ export const enUS = {
     },
   },
   knowledge: {
+    chunking: "Chunking strategy",
+    chunkingFromBase: "Use knowledge base setting ({strategy})",
+    chunkingDefault: "Use knowledge base setting",
+    fixed_v1: "Fixed-length chunks",
+    structural_v1: "Group paragraphs",
+    adaptive_v1: "Adapt to document structure",
+    uploadFormats: "Upload PDF, TXT, Markdown, UTF-8 CSV/TSV with headers, or MinerU content-list JSON. For scans, run scripts/convert-scan.ps1 on Windows and upload the resulting JSON.",
     usedByTitle: "Agents using this knowledge base",
     usedByEyebrow: "Relations",
     usedByPinned: "PINNED · snapshot {snapshot}…",

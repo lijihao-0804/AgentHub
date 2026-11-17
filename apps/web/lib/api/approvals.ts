@@ -1,6 +1,27 @@
-import { apiRequest, ApiError } from "@/lib/api/client";
+import { apiRequest, ApiError, type AuthInput } from "@/lib/api/client";
 
 export { ApiError as ApprovalApiError };
+
+export const delegationLevels = ["MANUAL", "LOW", "MEDIUM"] as const;
+export type DelegationLevel = typeof delegationLevels[number];
+export type ApprovalPreference = {
+  level: DelegationLevel;
+  effective_level: DelegationLevel;
+  identity_ceiling: DelegationLevel;
+  max_auto_denials: number;
+};
+
+function preferenceUrl(auth: AuthInput) {
+  return `/api/v1/workspaces/${encodeURIComponent(auth.workspaceId)}/approval-preferences/me`;
+}
+
+export function getApprovalPreference(auth: AuthInput) {
+  return apiRequest<ApprovalPreference>(preferenceUrl(auth), auth.accessToken);
+}
+
+export function saveApprovalPreference(auth: AuthInput, body: Pick<ApprovalPreference, "level" | "max_auto_denials">) {
+  return apiRequest<ApprovalPreference>(preferenceUrl(auth), auth.accessToken, { method: "PUT", body });
+}
 
 export type Approval = {
   id: string;
@@ -13,6 +34,8 @@ export type Approval = {
   canonical_arguments: Record<string, unknown>;
   canonical_args_hash: string;
   decision_status: string;
+  decision_source?: "HUMAN" | "DELEGATED" | null;
+  routing_reason?: string | null;
   execution_status: string;
   requested_by: string;
   decided_by: string | null;

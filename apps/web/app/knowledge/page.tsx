@@ -6,6 +6,7 @@ import { useCallback, useDeferredValue, useEffect, useState, type FormEvent } fr
 import { EmptyState, ErrorState, InlineError, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
 import { CatalogEmptyNotice, CatalogPageHeader, CatalogToolbar } from "@/components/catalog/catalog-layout";
 import HashValue from "@/components/evaluation/hash-value";
+import ChunkingSelect, { selectedChunking } from "@/components/knowledge/chunking-select";
 import { useFrontendSession } from "@/components/providers/session-provider";
 import { useWorkspaceData, useWorkspaceMutation } from "@/hooks/use-workspace-data";
 import { errorHintKey, type AuthInput } from "@/lib/api/client";
@@ -76,7 +77,8 @@ export default function KnowledgeBasesPage() {
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!canCreate) return;
-    const result = await mutation.run((auth) => createKnowledgeBase(auth, { name: name.trim() }));
+    const strategy = selectedChunking(event.currentTarget);
+    const result = await mutation.run((auth) => createKnowledgeBase(auth, { name: name.trim(), chunking_strategy: strategy }));
     if (result) {
       setName("");
       setShowForm(false);
@@ -127,6 +129,7 @@ export default function KnowledgeBasesPage() {
               {t("knowledge.baseName")}
               <input value={name} onChange={(event) => setName(event.target.value)} maxLength={200} />
             </label>
+            <ChunkingSelect />
             <InlineError error={mutation.error} fallback={t("errors.requestFailed")} />
             <div className="form-actions">
               <button

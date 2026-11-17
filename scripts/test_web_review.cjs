@@ -66,7 +66,63 @@ function elements(node, predicate, result = []) {
 }
 const tick = () => new Promise((resolve) => setImmediate(resolve));
 
+async function testIngestionAndPreferences() {
+  const auth = { workspaceId: 'team/a', accessToken: 'token' };
+  const calls = [];
+  const client = { apiRequest: (...args) => calls.push(args), apiUpload: (...args) => calls.push(args) };
+  const preferences = load('lib/api/approvals.ts', { '@/lib/api/client': client });
+  await preferences.getApprovalPreference(auth);
+  await preferences.saveApprovalPreference(auth, { level: 'LOW', max_auto_denials: 0 });
+  assert.deepEqual(calls[0], ['/api/v1/workspaces/team%2Fa/approval-preferences/me', 'token']);
+  assert.deepEqual(calls[1], [...calls[0], { method: 'PUT', body: { level: 'LOW', max_auto_denials: 0 } }]);
+  let preference = { level: 'MANUAL', effective_level: 'MANUAL', identity_ceiling: 'MANUAL', max_auto_denials: 2 };
+  const writes = [];
+  const prefHarness = harness({
+    '@/lib/api/approvals': {
+      ...preferences, saveApprovalPreference: async (_, next) => { writes.push(next); return { ...preference, ...next }; },
+    },
+    '@/hooks/use-workspace-data': {
+      useWorkspaceData: () => ({ data: preference, reload() {} }),
+      useWorkspaceMutation: () => ({ run: (update) => update(auth) }),
+    },
+  });
+  const Panel = load('components/approvals/personal-preference.tsx', prefHarness.mocks).default;
+  const renderPanel = () => prefHarness.render(Panel);
+  renderPanel().props.onToggle({ currentTarget: { open: true } });
+  const formProps = () => elements(renderPanel(), node => typeof node.type === 'function' && !!node.props.preference)[0];
+  let form = formProps();
+  // PreferenceForm closes over prefHarness's hook implementations.
+  const renderForm = () => prefHarness.render(form.type, form.props);
+  prefHarness.states.length = 0;
+  let view = renderForm();
+  assert.deepEqual(elements(view, node => node.type === 'option').map(node => node.props.value), ['MANUAL']);
+  preference = { ...preference, identity_ceiling: 'MEDIUM' };
+  form = { type: form.type, props: { preference, onSaved() {} } };
+  prefHarness.states.length = 0;
+  view = renderForm();
+  elements(view, node => node.type === 'select')[0].props.onChange({ target: { value: 'LOW' } });
+  view = renderForm();
+  elements(view, node => node.type === 'input')[0].props.onChange({ target: { value: '11' } });
+  await renderForm().props.onSubmit({ preventDefault() {} });
+  assert.equal(writes.length, 0);
+  elements(renderForm(), node => node.type === 'input')[0].props.onChange({ target: { value: '0' } });
+  await renderForm().props.onSubmit({ preventDefault() {} });
+  assert.deepEqual(writes, [{ level: 'LOW', max_auto_denials: 0 }]);
+  const knowledge = load('lib/api/knowledge.ts', { '@/lib/api/client': client });
+  const file = new Blob(['name,total\norder,1001'], { type: 'text/csv' });
+  await knowledge.uploadDocument(auth, 'kb', file);
+  await knowledge.uploadDocumentRevision(auth, 'kb', 'doc', file, 'adaptive_v1');
+  assert.equal(calls[2][2].has('chunking_strategy'), false);
+  assert.equal(calls[3][2].get('chunking_strategy'), 'adaptive_v1');
+  const { formatLocator } = load('lib/format/locator.ts');
+  const labels = (key, values) => Object.values(values).join(',');
+  assert.equal(formatLocator({ type: 'table_row', page: 2, block_index: 0, row: 3, column_start: 1, column_end: 4 }, labels), '2 · 1 · 3,1,4');
+  assert.equal(formatLocator({ type: 'text_range', table_index: 2, row_start: 3, row_end: 5 }, labels), '2,3,5');
+  console.log('PASS personal delegation scope, revision strategy inheritance and table citation labels');
+}
+
 async function main() {
+  await testIngestionAndPreferences();
   const { autoBreadcrumbs } = load('components/layout/breadcrumbs.tsx');
   const trialRun = '12345678-1234-4234-8234-123456789abc';
   assert.deepEqual(autoBreadcrumbs(`/evaluations/runs/${trialRun}`, String), [

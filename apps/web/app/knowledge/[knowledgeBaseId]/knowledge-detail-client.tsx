@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState, type FormEvent } from "react"
 
 import Breadcrumbs from "@/components/layout/breadcrumbs";
 import SnapshotPreview from "@/components/knowledge/snapshot-preview";
+import ChunkingSelect, { selectedChunking } from "@/components/knowledge/chunking-select";
 import HashValue from "@/components/evaluation/hash-value";
 import { EmptyState, ErrorState, InlineError, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
 import StatusBadge from "@/components/ui/status-badge";
@@ -170,7 +171,8 @@ export default function KnowledgeBaseDetailClient({ knowledgeBaseId }: { knowled
     const file = fileInputRef.current?.files?.[0];
     if (!file) return;
     setNotice(null);
-    const result = await documentMutation.run((auth) => uploadDocument(auth, knowledgeBaseId, file));
+    const strategy = selectedChunking(event.currentTarget);
+    const result = await documentMutation.run((auth) => uploadDocument(auth, knowledgeBaseId, file, strategy));
     if (result) {
       if (fileInputRef.current) fileInputRef.current.value = "";
       setNotice(t("knowledge.uploadAccepted"));
@@ -183,9 +185,10 @@ export default function KnowledgeBaseDetailClient({ knowledgeBaseId }: { knowled
     const file = revisionInputRef.current?.files?.[0];
     if (!file || !selectedDocumentId) return;
     const documentId = selectedDocumentId;
+    const strategy = selectedChunking(event.currentTarget);
     setNotice(null);
     const result = await documentMutation.run((auth) =>
-      uploadDocumentRevision(auth, knowledgeBaseId, documentId, file),
+      uploadDocumentRevision(auth, knowledgeBaseId, documentId, file, strategy),
     );
     if (result) {
       if (revisionInputRef.current) revisionInputRef.current.value = "";
@@ -252,12 +255,14 @@ export default function KnowledgeBaseDetailClient({ knowledgeBaseId }: { knowled
       {tab === "documents" && (
         <>
           <Panel ariaLabel={t("knowledge.documents")} title={t("knowledge.documents")}>
-            <form className="eval-form" onSubmit={submitUpload} noValidate>
+            <form key={`${sessionId}:${scope}`} className="eval-form" onSubmit={submitUpload} noValidate>
               <p className="eval-form-title">{t("knowledge.uploadDocument")}</p>
               <label>
                 {t("knowledge.file")}
-                <input type="file" ref={fileInputRef} />
+                <input type="file" accept=".pdf,.txt,.md,.csv,.tsv,.json" ref={fileInputRef} />
               </label>
+              <p className="state-hint">{t("knowledge.uploadFormats")}</p>
+              <ChunkingSelect inherit baseStrategy={base?.chunking_strategy} />
               <InlineError error={documentMutation.error} fallback={t("errors.requestFailed")} />
               <div className="form-actions">
                 <button type="submit" className="button button-primary" disabled={documentMutation.pending}>
@@ -349,12 +354,14 @@ export default function KnowledgeBaseDetailClient({ knowledgeBaseId }: { knowled
               title={t("knowledge.revisions")}
               eyebrow={selectedDocument?.name ?? ""}
             >
-              <form className="eval-form" onSubmit={submitRevision} noValidate>
+              <form key={`${sessionId}:${scope}:${selectedDocumentId}`} className="eval-form" onSubmit={submitRevision} noValidate>
                 <p className="eval-form-title">{t("knowledge.uploadRevision")}</p>
                 <label>
                   {t("knowledge.file")}
-                  <input type="file" ref={revisionInputRef} />
+                  <input type="file" accept=".pdf,.txt,.md,.csv,.tsv,.json" ref={revisionInputRef} />
                 </label>
+                <p className="state-hint">{t("knowledge.uploadFormats")}</p>
+                <ChunkingSelect inherit baseStrategy={base?.chunking_strategy} />
                 <div className="form-actions">
                   <button type="submit" className="button button-primary" disabled={documentMutation.pending}>
                     {t("knowledge.upload")}
@@ -394,6 +401,7 @@ export default function KnowledgeBaseDetailClient({ knowledgeBaseId }: { knowled
                           <td data-label={t("knowledge.revision")}>#{entry.revision.revision_number}</td>
                           <td data-label={t("knowledge.fileName")}>
                             <code>{entry.revision.original_filename}</code>
+                            {entry.revision.chunking_strategy && <small className="state-hint">{t(`knowledge.${entry.revision.chunking_strategy}`)}</small>}
                           </td>
                           <td data-label={t("knowledge.lifecycle")}>
                             <StatusBadge status={entry.revision.lifecycle_status} />

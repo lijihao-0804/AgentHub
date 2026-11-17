@@ -14,8 +14,16 @@ type Translate = (key: MessageKey, values?: Record<string, string | number>) => 
  */
 export function formatLocator(locator: Record<string, unknown> | null, t: Translate): string {
   if (!locator) return "—";
+  const place = [];
+  if (typeof locator.page === "number") place.push(t("playground.locator.page", { page: locator.page }));
+  if (typeof locator.block_index === "number") place.push(t("playground.locator.block", { number: locator.block_index + 1 }));
+  if (locator.type === "table_row" && typeof locator.row === "number" &&
+      typeof locator.column_start === "number" && typeof locator.column_end === "number") {
+    place.push(t("playground.locator.tableRow", { row: locator.row, start: locator.column_start, end: locator.column_end }));
+    return place.join(" · ");
+  }
   if (locator.type === "page") {
-    return t("playground.locator.page", { page: String(locator.page) });
+    return place.join(" · ") || JSON.stringify(locator);
   }
   if (locator.type === "page_range") {
     return t("playground.locator.pageRange", {
@@ -24,6 +32,9 @@ export function formatLocator(locator: Record<string, unknown> | null, t: Transl
     });
   }
   if (locator.type === "text_range") {
+    if (typeof locator.table_index === "number" && typeof locator.row_start === "number" && typeof locator.row_end === "number") {
+      return t("playground.locator.tableRange", { table: locator.table_index, start: locator.row_start, end: locator.row_end });
+    }
     return t("playground.locator.textRange", {
       start: String(locator.char_start),
       end: String(locator.char_end),

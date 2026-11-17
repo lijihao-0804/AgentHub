@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useDeferredValue, useEffect, useRef, useState } from "react";
 
 import StatusBadge from "@/components/ui/status-badge";
+import PersonalApprovalPreference from "@/components/approvals/personal-preference";
 import { EmptyState, ErrorState, InlineError, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
 import {
   CatalogEmptyNotice,
@@ -295,6 +296,8 @@ export default function ApprovalsPage() {
         }
       />
 
+      <PersonalApprovalPreference key={`${workspaceId}:${sessionId}`} />
+
       <CatalogStatStrip
         items={[
           { label: copy.inboxTotal, value: total === null ? (loading ? copy.loading : copy.unavailable) : formatCount(total) },
@@ -409,6 +412,13 @@ export default function ApprovalsPage() {
                   <div className="approval-state-block">
                     <span className="approval-state-label">{t("approvals.card.decision")}</span>
                     <StatusBadge status={approval.decision_status} />
+                    {approval.decision_source === "DELEGATED" && (
+                      <span className="approval-state-meta">{t("approvalPreference.delegated")}</span>
+                    )}
+                    {(approval.routing_reason === "SENSITIVE_OPERATION" || approval.routing_reason === "DENIAL_LIMIT_REACHED" ||
+                      approval.routing_reason === "IDENTITY_CEILING" || approval.routing_reason === "ABOVE_LEVEL") && (
+                      <span className="approval-state-meta">{t(`approvalPreference.${approval.routing_reason}`)}</span>
+                    )}
                     <span className="approval-state-meta">
                       {approval.decided_by
                         ? t("approvals.card.decidedBy", { time: decidedAt, user: approval.decided_by })

@@ -2,6 +2,19 @@ import type { MessageSchema } from "@/i18n/locales/en-US";
 
 /** Simplified Chinese dictionary. Must mirror the en-US key set exactly. */
 export const zhCN: MessageSchema = {
+  approvalPreference: {
+    title: "我的审批设置", level: "替我审批", MANUAL: "人工审批",
+    LOW: "最高低风险", MEDIUM: "最高中风险", ceiling: "当前身份可选上限为{level}。",
+    denials: "转人工前最多自动拒绝次数",
+    limitHint: "同一工具版本和参数达到该次数后，下次请求转人工。设为 0 时首次就转人工。",
+    sensitive: "敏感操作始终由具备权限的审批人确认。",
+    save: "保存审批设置", delegated: "由委托策略决定",
+    saved: "审批设置已保存。",
+    SENSITIVE_OPERATION: "此操作敏感，须由审批人确认。",
+    DENIAL_LIMIT_REACHED: "已达到自动拒绝上限，转交人工审批。",
+    IDENTITY_CEILING: "申请人当前身份需要人工审批。",
+    ABOVE_LEVEL: "此操作超过申请人设置的风险上限。",
+  },
   snapshotPreview: { open: "预览冻结分片", permission: "需要知识正文读取权限。", error: "无法加载快照分片。", retry: "重试", total: "分片数", empty: "此快照没有分片。", truncated: "预览最多显示 4096 个字符。", previous: "上一页", next: "下一页" },
   handoffLifecycle: {
     title: "人工接管", hint: "原始摘要会保留。关闭接管不会批准或恢复智能体动作。",
@@ -999,6 +1012,9 @@ export const zhCN: MessageSchema = {
     locator: {
       page: "第 {page} 页",
       pageRange: "第 {start}–{end} 页",
+      tableRow: "第 {row} 行，第 {start}–{end} 列",
+      tableRange: "表 {table}，第 {start}–{end} 行",
+      block: "第 {number} 块",
       textRange: "第 {start}–{end} 字符",
     },
   },
@@ -1596,6 +1612,13 @@ export const zhCN: MessageSchema = {
     },
   },
   knowledge: {
+    chunking: "切块策略",
+    chunkingFromBase: "沿用知识库设置（{strategy}）",
+    chunkingDefault: "沿用知识库设置",
+    fixed_v1: "固定长度",
+    structural_v1: "按段落切分",
+    adaptive_v1: "按文档结构切分",
+    uploadFormats: "支持 PDF、TXT、Markdown、含表头的 UTF-8 CSV/TSV 和 MinerU 内容列表 JSON。扫描件可在 Windows 上运行 scripts/convert-scan.ps1，再上传生成的 JSON。",
     usedByTitle: "使用此知识库的智能体",
     usedByEyebrow: "关联",
     usedByPinned: "固定快照 · 快照 {snapshot}…",

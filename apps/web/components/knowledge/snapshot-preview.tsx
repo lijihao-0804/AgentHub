@@ -5,6 +5,7 @@ import { useFrontendSession } from "@/components/providers/session-provider";
 import { useWorkspaceData } from "@/hooks/use-workspace-data";
 import { useI18n } from "@/i18n/provider";
 import { previewSnapshotChunks } from "@/lib/api/knowledge";
+import { formatLocator } from "@/lib/format/locator";
 
 export default function SnapshotPreview(props: { knowledgeBaseId: string; snapshotId: string }) {
   const { sessionId } = useFrontendSession();
@@ -32,6 +33,7 @@ export function SnapshotChunkPreview({ knowledgeBaseId, snapshotId }: { knowledg
         {page.data.items.length === 0 && <p>{t("snapshotPreview.empty")}</p>}
         {page.data.items.map((item) => <article key={item.chunk_id} style={{ minWidth: 0, overflowWrap: "anywhere" }}>
           <p><code>{item.chunk_id}</code> · <code>{item.document_revision_id}</code></p>
+          {item.locator && <p>{formatLocator(item.locator, t)}</p>}
           <pre style={{ whiteSpace: "pre-wrap", overflowWrap: "anywhere", maxHeight: "20rem", overflow: "auto" }}>{item.text}</pre>
           {item.truncated && <p>{t("snapshotPreview.truncated")}</p>}
         </article>)}

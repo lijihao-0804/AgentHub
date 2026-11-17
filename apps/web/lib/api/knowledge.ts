@@ -9,10 +9,13 @@ import { listItems } from "@/lib/api/tenancy";
  * simulates progress.
  */
 
+export type ChunkingStrategy = "fixed_v1" | "structural_v1" | "adaptive_v1";
+
 export type KnowledgeBase = {
   id: string;
   workspace_id: string;
   name: string;
+  chunking_strategy?: ChunkingStrategy;
   created_at: string;
 };
 
@@ -40,6 +43,7 @@ export type DocumentRevision = {
   revision_number: number;
   original_filename: string;
   media_type: string;
+  chunking_strategy?: ChunkingStrategy | null;
   file_size: number;
   lifecycle_status: string;
   ingestion_status: string;
@@ -82,7 +86,7 @@ export type KnowledgeSnapshot = {
 export type SnapshotChunkPage = {
   workspace_id: string; knowledge_base_id: string; snapshot_id: string;
   total: number; offset: number; limit: number;
-  items: { chunk_id: string; document_revision_id: string; ordinal: number; text: string; truncated: boolean }[];
+  items: { chunk_id: string; document_revision_id: string; ordinal: number; text: string; truncated: boolean; locator?: Record<string, unknown> }[];
 };
 
 export async function previewSnapshotChunks(input: AuthInput, kb: string, snapshot: string, offset: number): Promise<SnapshotChunkPage> {
@@ -91,7 +95,8 @@ export async function previewSnapshotChunks(input: AuthInput, kb: string, snapsh
       payload.offset !== offset || payload.limit !== 10 || !Number.isInteger(payload.total) || (payload.total as number) < 0 ||
       !Array.isArray(payload.items) || payload.items.length > 10 || !payload.items.every((item: unknown) => isRecord(item) &&
         typeof item.chunk_id === "string" && typeof item.document_revision_id === "string" && Number.isInteger(item.ordinal) &&
-        typeof item.text === "string" && item.text.length <= 4096 && typeof item.truncated === "boolean")) {
+        typeof item.text === "string" && item.text.length <= 4096 && typeof item.truncated === "boolean" &&
+        (item.locator === undefined || isRecord(item.locator)))) {
     throw new ApiError("INVALID_RESPONSE", "Invalid snapshot preview response.", 502);
   }
   return payload as SnapshotChunkPage;
@@ -110,10 +115,10 @@ export async function listKnowledgeBases(input: AuthInput): Promise<KnowledgeBas
   return listItems<KnowledgeBase>(payload);
 }
 
-export function createKnowledgeBase(input: AuthInput, body: { name: string }): Promise<KnowledgeBase> {
+export function createKnowledgeBase(input: AuthInput, body: { name: string; chunking_strategy?: ChunkingStrategy }): Promise<KnowledgeBase> {
   return apiRequest<KnowledgeBase>(knowledgeBase(input.workspaceId), input.accessToken, {
     method: "POST",
-    body: { name: body.name },
+    body,
   });
 }
 
@@ -128,18 +133,23 @@ export async function listDocuments(
   return listItems<KnowledgeDocument>(payload);
 }
 
-/** Uploads a new document. The backend field name is `file`. */
+function documentForm(file: File, strategy?: ChunkingStrategy) {
+  const data = new FormData();
+  data.append("file", file);
+  if (strategy) data.append("chunking_strategy", strategy);
+  return data;
+}
+
 export function uploadDocument(
   input: AuthInput,
   knowledgeBaseId: string,
   file: File,
+  strategy?: ChunkingStrategy,
 ): Promise<DocumentUploadResult> {
-  const formData = new FormData();
-  formData.append("file", file);
   return apiUpload<DocumentUploadResult>(
     `${kbPath(input.workspaceId, knowledgeBaseId)}/documents`,
     input.accessToken,
-    formData,
+    documentForm(file, strategy),
   );
 }
 
@@ -148,13 +158,12 @@ export function uploadDocumentRevision(
   knowledgeBaseId: string,
   documentId: string,
   file: File,
+  strategy?: ChunkingStrategy,
 ): Promise<DocumentUploadResult> {
-  const formData = new FormData();
-  formData.append("file", file);
   return apiUpload<DocumentUploadResult>(
     `${kbPath(input.workspaceId, knowledgeBaseId)}/documents/${encodeURIComponent(documentId)}/revisions`,
     input.accessToken,
-    formData,
+    documentForm(file, strategy),
   );
 }
 
