@@ -1,5 +1,7 @@
 # AgentHub RAG 进度与成果入口
 
+2026-11-17 从 `fafe4aba` 增加 Windows 离线 OCR（`32c0df1`）、布局与表格导入（`baf2caf`、`30f7ff4`）和修订级切块（`8c84de4`）。QASPER 训练集 72 题的单篇文章 BM25 前六命中为固定 28、段落 30、自适应 27。两种可选策略分别丢失原先命中的 9、10 题，继续默认固定窗口。本轮外部模型请求为 0。测试覆盖真实 PostgreSQL、上传、worker 重投、冻结证据与检索入口。实现、复现命令与指标口径见[交付和验收](document-ingestion-and-delegation-20261117.md)，逐题变动见[配对结果](evidence/chunk-strategy-replay-20261117.json)。
+
 2026-11-16 本地主线整合收录运行时修复（`0ad18de`）、旧版本读回验证（`debdb84`）与研究摘要（`97708fd`）。学习入口见[开发历程](../development-history/index.html#view=recent)。
 
 2026-11-15 记录。本轮成果已选择性整合回原项目 `E:\JAVA\AI+agent\AgentHub`，当前本地开发分支 `codex/local-main-synced-20261115`。今后默认在原目录使用主题分支和小提交，不另开项目副本；历史研究副本仅保留。未推送、未部署、未切默认，业务库未迁移。
