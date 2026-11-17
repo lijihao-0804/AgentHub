@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from packages.approvals.delegation import DelegationLevel
 from packages.control_plane.rbac import APPROVE_ACTION
 from packages.core.execution_context.models import WorkspaceExecutionContext
 
@@ -26,6 +27,8 @@ class ApprovalResponse(BaseModel):
     execution_status: str
     requested_by: UUID
     decided_by: UUID | None
+    decision_source: Literal["HUMAN", "DELEGATED"] | None = None
+    routing_reason: str | None = None
     decided_at: datetime | None
     claimed_at: datetime | None
     executed_at: datetime | None
@@ -66,3 +69,15 @@ class ApprovalDenyRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     reason: str | None = Field(default=None, max_length=500)
+
+
+class ApprovalPreferencesRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    level: DelegationLevel
+    max_auto_denials: int = Field(ge=0, le=10, strict=True)
+
+
+class ApprovalPreferencesResponse(ApprovalPreferencesRequest):
+    model_config = ConfigDict(extra="forbid", from_attributes=True)
+    identity_ceiling: DelegationLevel
+    effective_level: DelegationLevel

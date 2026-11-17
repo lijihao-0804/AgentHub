@@ -145,9 +145,10 @@ from packages.model_gateway.gateway import ModelGatewayService, SessionScopedMod
 from packages.model_gateway.run_budget_adapter import ModelAttemptBudgetError
 from packages.observability.timing import mark_visible_text
 from packages.threads.models import AgentThread, ThreadTurn
-from packages.tools.actions import ActionExecutionStatus
+from packages.tools.actions import ActionExecutionResult, ActionExecutionStatus
 from packages.tools.contracts import (
     ToolDefinition,
+    ToolEffect,
     ToolResult,
     ToolResultStatus,
     ToolSourceKind,
@@ -337,7 +338,6 @@ class _AgentRunGraph:
             edges=(
                 ("__START__", "prepare"),
                 ("read_execute", "observation"),
-                ("action_execute", "observation"),
                 ("finish", "__END__"),
             ),
             conditional_edges={
@@ -346,6 +346,7 @@ class _AgentRunGraph:
                 "model": self.after_model,
                 "tool_proposal": self.after_proposal,
                 "policy": self.after_policy,
+                "action_execute": self.after_actions,
                 "observation": self.after_observation,
             },
             checkpointer=checkpointer,
@@ -3187,10 +3188,36 @@ class _AgentRunGraph:
                         arguments=call["arguments"],
                         input_schema=definition.input_schema,
                         proposal_ordinal=state.get("model_round_count", 0) * 1000 + index,
+                        definition=definition,
                     )
                 except ValueError:
                     await self.step("POLICY", "FAILED", {"error_code": "TOOL_ARGUMENT_INVALID"})
                     return {"failure_code": "TOOL_ARGUMENT_INVALID"}
+                if getattr(approval, "decision_source", None) == "DELEGATED":
+                    # A committed delegated decision has no human checkpoint to
+                    # consume on replay. Execution still requires the usual claim.
+                    await self._emit(
+                        AgentEventType.APPROVAL_RESOLVED,
+                        {
+                            "approval_id": str(approval.id),
+                            "decision_status": approval.decision_status,
+                            "execution_status": approval.execution_status,
+                            "failure_code": approval.failure_code,
+                        },
+                    )
+                    if approval.decision_status == ApprovalDecisionStatus.APPROVED:
+                        action_calls.append({"call": call, "approval_id": str(approval.id)})
+                    elif approval.decision_status == ApprovalDecisionStatus.DENIED:
+                        pre_observations[call_id] = ToolResult.failure(
+                            "TOOL_APPROVAL_DENIED",
+                            "The action was not approved.",
+                            **_approval_state_facts(approval),
+                        )
+                    else:
+                        raise AgentHubError(
+                            "APPROVAL_DECISION_INVALID", "The delegated decision is invalid.", 409
+                        )
+                    continue
                 await self.step(
                     "APPROVAL_WAIT",
                     "WAITING",
@@ -3334,10 +3361,24 @@ class _AgentRunGraph:
         return {
             "pending_tool_calls": allowed,
             "pre_observations": pre_observations,
+            "executed_observations": {},
             "action_calls": action_calls,
         }
 
     async def action_execute(self, state: AgentRunState) -> dict[str, Any]:
+        # Governed reads may use the same billed selector as ordinary reads.
+        # Preserve its usage even if another action in this batch stops the run.
+        with capture_auxiliary_model_calls(
+            allow_unpriced=state.get("runtime", {}).get("max_cost_micro_usd") is None
+        ) as auxiliary:
+            try:
+                update = await self._execute_claimed_tools(state)
+            finally:
+                self.usage_records = [*state.get("usage_records", []), *auxiliary.records]
+        await self._record_auxiliary_attempts(auxiliary.records)
+        return {**update, "usage_records": self.usage_records}
+
+    async def _execute_claimed_tools(self, state: AgentRunState) -> dict[str, Any]:
         stopped = await self._stop_if_requested()
         if stopped is not None:
             return stopped
@@ -3419,7 +3460,7 @@ class _AgentRunGraph:
                         "failure_code": span_failure_code,
                     }
                 self.context = current_context
-                if not self._action_permissions_intact(definition):
+                if not self._action_permissions_intact(definition, approval):
                     span_status = "error"
                     span_failure_code = "RUN_ACTOR_ACCESS_REVOKED"
                     return {
@@ -3476,7 +3517,7 @@ class _AgentRunGraph:
                         "run_status": "NEEDS_ATTENTION",
                         "failure_code": span_failure_code,
                     }
-                if not self._action_permissions_intact(definition):
+                if not self._action_permissions_intact(definition, approval):
                     span_status = "error"
                     span_failure_code = "RUN_ACTOR_ACCESS_REVOKED"
                     return {
@@ -3484,12 +3525,27 @@ class _AgentRunGraph:
                         "run_status": "NEEDS_ATTENTION",
                         "failure_code": span_failure_code,
                     }
-                result = await self.service.action_runtime.execute(
-                    self.context,
-                    definition,
-                    dict(claimed.canonical_arguments),
-                    idempotency_key=claimed.idempotency_key,
-                )
+                if definition.effect is ToolEffect.READ:
+                    read = await self._execute_published_read(
+                        state,
+                        {**call, "arguments": claimed.canonical_arguments},
+                        approval_claim=(self.run.id, approval_id),
+                    )
+                    result = (
+                        ActionExecutionResult.succeeded(read.data)
+                        if read.status is ToolResultStatus.SUCCESS
+                        else ActionExecutionResult.failed(
+                            read.error_code or "TOOL_EXECUTION_FAILED",
+                            read.safe_message or "The read failed.",
+                        )
+                    )
+                else:
+                    result = await self.service.action_runtime.execute(
+                        self.context,
+                        definition,
+                        dict(claimed.canonical_arguments),
+                        idempotency_key=claimed.idempotency_key,
+                    )
                 if result.status is ActionExecutionStatus.UNKNOWN_OUTCOME:
                     completed = await self.service.approval_service.complete_execution(
                         self.context,
@@ -3574,13 +3630,45 @@ class _AgentRunGraph:
         )
         return {"executed_observations": executed, "action_calls": []}
 
-    def _action_permissions_intact(self, definition: ToolDefinition) -> bool:
+    def _action_permissions_intact(self, definition: ToolDefinition, approval: Approval) -> bool:
         """Recheck the run actor immediately before a claimed action executes."""
 
         required = {"agent_run", "workspace_read", "tool_run"}
+        if getattr(approval, "decision_source", None) == "DELEGATED":
+            required.add("approve_action")
+            if definition.effect.value == "WRITE":
+                required.add("run_action")
         if definition.identity in RAG_EVIDENCE_TOOL_IDENTITIES:
             required.add("knowledge_run")
         return required.issubset(self.context.permissions)
+
+    async def _execute_published_read(self, state, call, *, approval_claim=None):
+        selection = {}
+        definition = state.get("tool_definitions", {}).get(call["name"])
+        if (
+            call["name"] == "search_knowledge"
+            and definition is not None
+            and definition.retrieval_config.get("evidence_set_selector") == "complementary_v1"
+            and definition.source_kind is ToolSourceKind.BUILTIN
+        ):
+            selection["selector_binding"] = (
+                SessionScopedModelGenerator(
+                    self.service.session_factory, self.service.model_gateway_factory
+                ),
+                state["spec"].model_plan,
+            )
+        if approval_claim is not None:
+            selection["approval_claim"] = approval_claim
+        return await self.service.tool_runtime.execute(
+            context=self.context,
+            agent_version_id=self.run.agent_version_id,
+            tool_identity=call["name"],
+            arguments=call["arguments"],
+            tool_call_id=call["tool_call_id"],
+            effective_snapshot_refs=tuple(state.get("effective_knowledge_snapshots", [])),
+            effective_wiki_publications=tuple(state.get("effective_wiki_publications", [])),
+            **selection,
+        )
 
     async def read_execute(self, state: AgentRunState) -> dict[str, Any]:
         stopped = await self._stop_if_requested()
@@ -3610,35 +3698,7 @@ class _AgentRunGraph:
                             workspace_id=UUID(self.context.workspace_id),
                         )
                     else:
-                        selection = {}
-                        definition = state.get("tool_definitions", {}).get(call["name"])
-                        if (
-                            call["name"] == "search_knowledge"
-                            and definition is not None
-                            and definition.retrieval_config.get("evidence_set_selector")
-                            == "complementary_v1"
-                            and definition.source_kind.value == "BUILTIN"
-                        ):
-                            selection["selector_binding"] = (
-                                SessionScopedModelGenerator(
-                                    self.service.session_factory, self.service.model_gateway_factory
-                                ),
-                                state["spec"].model_plan,
-                            )
-                        result = await self.service.tool_runtime.execute(
-                            context=self.context,
-                            **selection,
-                            agent_version_id=self.run.agent_version_id,
-                            tool_identity=call["name"],
-                            arguments=call["arguments"],
-                            tool_call_id=call["tool_call_id"],
-                            effective_snapshot_refs=tuple(
-                                state.get("effective_knowledge_snapshots", [])
-                            ),
-                            effective_wiki_publications=tuple(
-                                state.get("effective_wiki_publications", [])
-                            ),
-                        )
+                        result = await self._execute_published_read(state, call)
                 except AgentHubError as error:
                     result = ToolResult.failure(error.code, error.message)
                 except Exception:
@@ -3708,19 +3768,7 @@ class _AgentRunGraph:
                             if key in receipt
                         },
                     )
-        for attempt in auxiliary.records:
-            await self.step(
-                "AUXILIARY_MODEL",
-                "SUCCEEDED" if attempt["attempt_status"] == "SUCCEEDED" else "FAILED",
-                {
-                    "provider": attempt["provider"],
-                    "model": attempt["model"],
-                    "usage_source": attempt["source"],
-                    "attempt_status": attempt["attempt_status"],
-                    "cost_status": "REPORTED" if attempt.get("cost") is not None else "UNKNOWN",
-                    **(attempt["usage"] or {}),
-                },
-            )
+        await self._record_auxiliary_attempts(auxiliary.records)
         await self.step(
             "TOOL_EXECUTE",
             "SUCCEEDED",
@@ -3752,7 +3800,25 @@ class _AgentRunGraph:
         await self._record_artifacts(
             calls, observations, model_round=state.get("model_round_count", 0)
         )
-        return {"executed_observations": observations, "usage_records": self.usage_records}
+        return {
+            "executed_observations": {**state.get("executed_observations", {}), **observations},
+            "usage_records": self.usage_records,
+        }
+
+    async def _record_auxiliary_attempts(self, records):
+        for attempt in records:
+            await self.step(
+                "AUXILIARY_MODEL",
+                "SUCCEEDED" if attempt["attempt_status"] == "SUCCEEDED" else "FAILED",
+                {
+                    "provider": attempt["provider"],
+                    "model": attempt["model"],
+                    "usage_source": attempt["source"],
+                    "attempt_status": attempt["attempt_status"],
+                    "cost_status": "REPORTED" if attempt.get("cost") is not None else "UNKNOWN",
+                    **(attempt["usage"] or {}),
+                },
+            )
 
     async def _record_artifacts(
         self,
@@ -4101,6 +4167,13 @@ class _AgentRunGraph:
         if state.get("action_calls"):
             return "action_execute"
         return "read_execute"
+
+    def after_actions(self, state: AgentRunState) -> str:
+        if state.get("pending_tool_calls") and not (
+            state.get("failure_code") or state.get("run_status")
+        ):
+            return "read_execute"
+        return "observation"
 
     def after_observation(self, state: AgentRunState) -> str:
         return "finish" if state.get("failure_code") else "model"

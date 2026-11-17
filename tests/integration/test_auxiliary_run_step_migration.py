@@ -272,11 +272,11 @@ def test_isolated_postgresql_full_migrations_runtime_and_safe_downgrade(path):
             await db_engine.dispose()
 
     try:
-        _migrate(url, "0055_support_records" if path == "upgrade" else "head")
+        _migrate(url, "0055_support_records" if path == "upgrade" else "0056_auxiliary_run_steps")
         asyncio.run(with_factory(_seed_history))
         before = _snapshot(engine)
         if path == "upgrade":
-            _migrate(url, "head")
+            _migrate(url, "0056_auxiliary_run_steps")
         after = _snapshot(engine)
         assert after["version"] == "0056_auxiliary_run_steps"
         assert after["rows"] == before["rows"] and after["indexes"] == before["indexes"]
@@ -285,7 +285,7 @@ def test_isolated_postgresql_full_migrations_runtime_and_safe_downgrade(path):
         reverted = _snapshot(engine)
         assert reverted["rows"] == before["rows"] and reverted["indexes"] == before["indexes"]
         assert "AUXILIARY_MODEL" not in reverted["constraint"]
-        _migrate(url, "head")
+        _migrate(url, "0056_auxiliary_run_steps")
         outputs = {}
         for mode in ("disabled", "selected", "failure", "budget"):
             outputs[mode] = asyncio.run(with_factory(partial(_exercise, mode=mode)))

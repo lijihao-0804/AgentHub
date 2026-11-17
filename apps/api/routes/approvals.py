@@ -4,21 +4,52 @@ from typing import Literal
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query, Request, status
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from apps.api.agent_runtime_dependencies import get_production_agent_run_service
+from apps.api.dependencies import get_db_session
 from apps.api.knowledge_dependencies import get_workspace_context
 from apps.api.schemas.approvals import (
     ApprovalDecisionResponse,
     ApprovalDenyRequest,
     ApprovalListResponse,
+    ApprovalPreferencesRequest,
+    ApprovalPreferencesResponse,
     ApprovalResponse,
 )
 from packages.agent_runtime.runtime import AgentRunService
 from packages.approvals import ApprovalDecisionStatus, ApprovalService
+from packages.approvals.delegation import read_preferences, write_preferences
 from packages.core.execution_context.models import WorkspaceExecutionContext
 
 router = APIRouter(prefix="/api/v1/workspaces/{workspace_id}", tags=["approvals"])
 context_dependency = Depends(get_workspace_context)
+session_dependency = Depends(get_db_session)
+
+
+@router.get("/approval-preferences/me", response_model=ApprovalPreferencesResponse)
+async def get_approval_preferences(
+    workspace_id: UUID,
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = session_dependency,
+) -> ApprovalPreferencesResponse:
+    del workspace_id
+    return ApprovalPreferencesResponse.model_validate(await read_preferences(session, context))
+
+
+@router.put("/approval-preferences/me", response_model=ApprovalPreferencesResponse)
+async def set_approval_preferences(
+    workspace_id: UUID,
+    payload: ApprovalPreferencesRequest,
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = session_dependency,
+) -> ApprovalPreferencesResponse:
+    del workspace_id
+    return ApprovalPreferencesResponse.model_validate(
+        await write_preferences(
+            session, context, level=payload.level, max_auto_denials=payload.max_auto_denials
+        )
+    )
 
 
 def _approval_service(request: Request) -> ApprovalService:

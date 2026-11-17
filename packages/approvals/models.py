@@ -9,6 +9,7 @@ from uuid import UUID, uuid4
 from sqlalchemy import (
     CheckConstraint,
     DateTime,
+    ForeignKey,
     ForeignKeyConstraint,
     Index,
     Integer,
@@ -22,6 +23,39 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
 from packages.core.database import Base
+
+
+class ApprovalPreference(Base):
+    """One user's standing instructions in one workspace; absence means manual."""
+
+    __tablename__ = "approval_preferences"
+    __table_args__ = (
+        CheckConstraint("level IN ('MANUAL','LOW','MEDIUM')", name="ck_approval_preference_level"),
+        CheckConstraint("max_auto_denials BETWEEN 0 AND 10", name="ck_approval_preference_limit"),
+    )
+    workspace_id: Mapped[UUID] = mapped_column(
+        ForeignKey("workspaces.id", ondelete="CASCADE"), primary_key=True
+    )
+    user_id: Mapped[UUID] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    level: Mapped[str] = mapped_column(String(8), nullable=False)
+    max_auto_denials: Mapped[int] = mapped_column(Integer, nullable=False)
+
+
+class PersonalApprovalRun(Base):
+    """Created only for ordinary runs whose actor opted in before starting."""
+
+    __tablename__ = "personal_approval_runs"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["workspace_id", "run_id"],
+            ["agent_runs.workspace_id", "agent_runs.id"],
+            ondelete="CASCADE",
+        ),
+    )
+    workspace_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), primary_key=True)
+    run_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), primary_key=True)
 
 
 class Approval(Base):
@@ -68,6 +102,19 @@ class Approval(Base):
         ),
         Index("ix_approvals_workspace_decision", "workspace_id", "decision_status"),
         Index("ix_approvals_workspace_run", "workspace_id", "run_id"),
+        Index(
+            "ix_approvals_denial_history",
+            "workspace_id",
+            "requested_by",
+            "tool_revision_id",
+            "canonical_args_hash",
+            "decided_at",
+        ),
+        CheckConstraint(
+            "(decision_source IN ('HUMAN','DELEGATED') AND "
+            "decision_status IN ('APPROVED','DENIED')) OR decision_source IS NULL",
+            name="ck_approvals_decision_source",
+        ),
         Index("ix_approvals_workspace_execution", "workspace_id", "execution_status"),
         Index(
             "ix_approvals_workspace_pending_expiry",
@@ -94,6 +141,8 @@ class Approval(Base):
     )
     requested_by: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
     decided_by: Mapped[UUID | None] = mapped_column(SQLUuid(as_uuid=True))
+    decision_source: Mapped[str | None] = mapped_column(String(16))
+    routing_reason: Mapped[str | None] = mapped_column(String(32))
     decided_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     claimed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     executed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
@@ -113,4 +162,4 @@ class Approval(Base):
     )
 
 
-__all__ = ["Approval"]
+__all__ = ["Approval", "ApprovalPreference", "PersonalApprovalRun"]

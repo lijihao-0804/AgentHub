@@ -147,7 +147,7 @@ def _action_graph(approval: SimpleNamespace, action_result: ActionExecutionResul
         _load_resume_approval=load_resume_approval,
         _authoritative_run_context=authoritative_context,
     )
-    graph._action_permissions_intact = lambda _definition: True
+    graph._action_permissions_intact = lambda _definition, _approval: True
     return graph, calls, completed
 
 

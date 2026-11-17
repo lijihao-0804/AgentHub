@@ -410,6 +410,7 @@ class ToolRuntime:
         effective_snapshot_refs: tuple[Mapping[str, Any], ...] | None = None,
         effective_wiki_publications: tuple[Mapping[str, Any], ...] | None = None,
         selector_binding: SelectorBinding | None = None,
+        approval_claim: tuple[UUID, UUID] | None = None,
     ) -> ToolResult:
         if "tool_run" not in context.permissions:
             raise AgentHubError("FORBIDDEN", "You do not have permission.", 403)
@@ -429,6 +430,7 @@ class ToolRuntime:
         definition: ToolDefinition | None = None
         decision: ToolPolicyDecision | None = None
         result: ToolResult | None = None
+        claimed_read = False
         try:
             if not isinstance(arguments, Mapping):
                 result = ToolResult.failure(
@@ -449,6 +451,31 @@ class ToolRuntime:
                             _strict_input_schema(definition.input_schema)
                         )
                         validator.validate(dict(arguments))
+                        if approval_claim is not None and definition.effect is ToolEffect.READ:
+                            # A flag from a caller or tool arguments can never substitute
+                            # for the exact business claim made by the running graph.
+                            from packages.approvals.models import Approval
+
+                            run_id, approval_id = approval_claim
+                            claimed_read = (
+                                await session.scalar(
+                                    select(Approval.id).where(
+                                        Approval.id == approval_id,
+                                        Approval.run_id == run_id,
+                                        Approval.workspace_id
+                                        == _uuid(context.workspace_id, field="workspace_id"),
+                                        Approval.requested_by
+                                        == _uuid(context.user_id, field="user_id"),
+                                        Approval.agent_version_id == version_uuid,
+                                        Approval.tool_revision_id == definition.revision_id,
+                                        Approval.tool_identity == tool_identity,
+                                        Approval.canonical_args_hash
+                                        == canonical_json_hash(dict(arguments)),
+                                        Approval.decision_status == "APPROVED",
+                                        Approval.execution_status == "CLAIMED",
+                                    )
+                                )
+                            ) is not None
                     except (ValidationError, SchemaError):
                         result = ToolResult.failure(
                             "TOOL_ARGUMENT_INVALID", "The tool arguments are invalid."
@@ -458,7 +485,10 @@ class ToolRuntime:
 
                 if result is None and definition is not None:
                     decision = ToolPolicy.decide(definition)
-                    if decision is ToolPolicyDecision.REQUIRE_APPROVAL:
+                    if (
+                        approval_claim is not None
+                        or decision is ToolPolicyDecision.REQUIRE_APPROVAL
+                    ) and not claimed_read:
                         result = ToolResult.failure(
                             "TOOL_APPROVAL_NOT_AVAILABLE",
                             "This tool requires approval before execution.",

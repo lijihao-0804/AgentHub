@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from datetime import UTC, datetime, timedelta
 from typing import Any
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from sqlalchemy import func, select, update
 from sqlalchemy.exc import IntegrityError
@@ -18,10 +18,17 @@ from packages.approvals.contracts import (
     canonicalize_arguments,
     compute_logical_action_id,
 )
-from packages.approvals.models import Approval
+from packages.approvals.delegation import (
+    lock_preferences,
+    locked_actor_permissions,
+    route_new_approval,
+)
+from packages.approvals.models import Approval, PersonalApprovalRun
 from packages.control_plane.audit import append_audit
 from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
+from packages.tools.contracts import ToolDefinition
+from packages.tools.runtime import PublishedToolResolver
 
 
 class ApprovalService:
@@ -48,6 +55,7 @@ class ApprovalService:
         input_schema: Mapping[str, Any],
         proposal_ordinal: int,
         expires_at: datetime | None = None,
+        definition: ToolDefinition | None = None,
     ) -> Approval:
         workspace_id = _workspace_uuid(context)
         requested_by = _user_uuid(context)
@@ -62,6 +70,22 @@ class ApprovalService:
         if expires_at is None:
             expires_at = datetime.now(UTC) + timedelta(seconds=self.ttl_seconds)
         async with self.session_factory() as session:
+            run = await session.scalar(
+                select(AgentRun)
+                .where(
+                    AgentRun.workspace_id == workspace_id,
+                    AgentRun.id == run_id,
+                    AgentRun.agent_version_id == agent_version_id,
+                    AgentRun.created_by == requested_by,
+                )
+                .with_for_update()
+            )
+            if run is None:
+                raise AgentHubError(
+                    "APPROVAL_RUN_MISMATCH",
+                    "The proposal does not belong to this run actor and version.",
+                    409,
+                )
             existing = await session.scalar(
                 select(Approval).where(
                     Approval.workspace_id == workspace_id,
@@ -71,6 +95,7 @@ class ApprovalService:
             if existing is not None:
                 return existing
             approval = Approval(
+                id=uuid4(),
                 workspace_id=workspace_id,
                 run_id=run_id,
                 agent_version_id=agent_version_id,
@@ -83,6 +108,36 @@ class ApprovalService:
                 expires_at=expires_at,
                 idempotency_key=logical_action_id,
             )
+            if (
+                definition is not None
+                and await session.get(PersonalApprovalRun, (workspace_id, run_id)) is not None
+            ):
+                if (
+                    definition.revision_id != tool_revision_id
+                    or definition.identity != tool_identity
+                ):
+                    raise AgentHubError(
+                        "APPROVAL_TOOL_MISMATCH",
+                        "The proposal does not match its tool revision.",
+                        409,
+                    )
+                if expires_at > datetime.now(UTC) and run.status == "RUNNING":
+                    frozen = await PublishedToolResolver(session).resolve(
+                        workspace_id=workspace_id,
+                        agent_version_id=agent_version_id,
+                        tool_identity=tool_identity,
+                    )
+                    if (
+                        frozen.revision_id != tool_revision_id
+                        or frozen.spec_hash != definition.spec_hash
+                    ):
+                        raise AgentHubError(
+                            "APPROVAL_TOOL_MISMATCH",
+                            "The proposal does not match its published binding.",
+                            409,
+                        )
+                    canonicalize_arguments(arguments, frozen.input_schema)
+                    await route_new_approval(session, context, approval, frozen)
             session.add(approval)
             try:
                 await session.commit()
@@ -234,7 +289,13 @@ class ApprovalService:
                 raise AgentHubError("APPROVAL_NOT_FOUND", "The approval was not found.", 404)
             if approval.decision_status != ApprovalDecisionStatus.PENDING:
                 return approval
-            now = datetime.now(UTC)
+            if approval.routing_reason is not None:
+                if "approve_action" not in await locked_actor_permissions(session, context):
+                    raise AgentHubError(
+                        "FORBIDDEN", "You do not have permission to decide approvals.", 403
+                    )
+                await lock_preferences(session, workspace_id, approval.requested_by)
+            now = await session.scalar(select(func.clock_timestamp()))
             if approval.expires_at is not None and approval.expires_at <= now:
                 approval.decision_status = ApprovalDecisionStatus.EXPIRED.value
                 approval.decided_at = now
@@ -258,6 +319,7 @@ class ApprovalService:
                     "SELF_APPROVAL_FORBIDDEN", "You cannot approve your own action.", 403
                 )
             approval.decision_status = decision.value
+            approval.decision_source = "HUMAN"
             approval.decided_by = user_id
             approval.decided_at = now
             # This is the durable resume outbox. Delivery may be repeated;
@@ -275,6 +337,7 @@ class ApprovalService:
                 "logical_action_id": approval.logical_action_id,
                 "tool_identity": approval.tool_identity,
                 "decision": decision.value,
+                "decision_source": "HUMAN",
             }
             # A denial is stronger with the human's words attached; the audit
             # log is the durable place for it, not the approval row itself.

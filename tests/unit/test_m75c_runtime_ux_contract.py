@@ -38,6 +38,8 @@ def test_approval_response_fields_are_reused_without_a_playground_schema() -> No
         "execution_status",
         "requested_by",
         "decided_by",
+        "decision_source",
+        "routing_reason",
         "decided_at",
         "claimed_at",
         "executed_at",

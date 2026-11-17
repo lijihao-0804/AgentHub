@@ -61,7 +61,8 @@ from packages.agent_runtime.work_layer import (
     ThreadContextProvider,
 )
 from packages.approvals import ApprovalExecutionStatus, ApprovalService
-from packages.approvals.models import Approval
+from packages.approvals.models import Approval, ApprovalPreference, PersonalApprovalRun
+from packages.control_plane.models import User
 from packages.control_plane.services import TenantService
 from packages.core.canonical.json_hash import canonical_json_hash
 from packages.core.config.settings import get_settings
@@ -896,6 +897,11 @@ class AgentRunService:
             user_id=str(run.created_by),
         )
         async with self.session_factory() as session:
+            active = await session.scalar(select(User.is_active).where(User.id == run.created_by))
+            if not active:
+                raise AgentHubError(
+                    "RUN_ACTOR_ACCESS_REVOKED", "The original run actor is no longer active.", 403
+                )
             return (
                 await TenantService().get_workspace_access(
                     session,
@@ -1676,6 +1682,13 @@ class AgentRunService:
             turn_agent_run_id = turn.agent_run_id if turn is not None else None
             session.add(run)
             try:
+                # Formal experiments and pre-existing runs never adopt a user's
+                # mutable preference. Opt-in belongs to a new ordinary run.
+                if execution_overrides is None:
+                    preference = await session.get(ApprovalPreference, (workspace_id, created_by))
+                    if preference is not None and preference.level != "MANUAL":
+                        await session.flush()
+                        session.add(PersonalApprovalRun(workspace_id=workspace_id, run_id=run.id))
                 if execution_overrides is not None and execution_overrides.case_budget is not None:
                     await session.flush()
                     await execution_overrides.case_budget.create_run_account(session, run)
