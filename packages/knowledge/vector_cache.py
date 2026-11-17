@@ -149,8 +149,9 @@ async def resolve_document_vectors(
         # that winner (even if its own batch produced a slightly different float).
         async with factory() as session, session.begin():
             await session.execute(
-                insert(Cache.__table__).on_conflict_do_nothing(),
-                sorted(rows, key=lambda row: row["text_hash"]),
+                insert(Cache.__table__)
+                .values(sorted(rows, key=lambda row: row["text_hash"]))
+                .on_conflict_do_nothing(),
             )
             winners = await read(session, missing)
             if len(winners) != len(missing):

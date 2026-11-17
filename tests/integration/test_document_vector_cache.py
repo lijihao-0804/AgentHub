@@ -66,6 +66,25 @@ async def test_exact_text_workspace_and_independent_encoder_namespaces(db_factor
     assert sparse.call_args.args == (inputs,)
 
 
+async def test_full_index_batch_round_trips_and_reuses_every_vector(db_factory, tmp_path):
+    workspace = await _workspace(db_factory, tmp_path)
+    texts = [f"第 {index} 段正文" for index in range(62)]
+    texts.extend([texts[0], texts[-1]])
+    expected = {
+        text: tuple((position + axis) / 2048 for axis in range(1024))
+        for position, text in enumerate(texts[:62])
+    }
+    encode = Mock(side_effect=lambda batch: [expected[text] for text in batch])
+    kwargs = dict(modality="dense", fingerprint="c" * 64, dimension=1024)
+    first = await resolve_document_vectors(db_factory, workspace, texts, encode, **kwargs)
+    assert first == tuple(expected[text] for text in texts)
+    encode.assert_called_once_with(texts[:62])
+    encode.reset_mock()
+    second = await resolve_document_vectors(db_factory, workspace, texts, encode, **kwargs)
+    assert second == first
+    encode.assert_not_called()
+
+
 @pytest.mark.parametrize("corrupt", [False, True])
 async def test_concurrent_first_writes_and_repairs_return_one_winner(db_factory, tmp_path, corrupt):
     workspace = await _workspace(db_factory, tmp_path)
