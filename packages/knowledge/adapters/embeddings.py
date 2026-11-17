@@ -4,9 +4,12 @@ from __future__ import annotations
 
 import math
 from collections.abc import Sequence
+from functools import cached_property
 from threading import Lock
 from typing import Any
 
+from packages.core.canonical.json_hash import canonical_json_hash
+from packages.knowledge.adapters.encoder_identity import dense_model_identity, inference_precision
 from packages.knowledge.contracts import KnowledgeProviderError
 
 
@@ -38,6 +41,34 @@ class BgeM3DenseEmbedder:
     @property
     def dimension(self) -> int:
         return self.expected_dimension
+
+    @cached_property
+    def _loaded_identity(self) -> str | None:
+        try:
+            return dense_model_identity(self._model)
+        except Exception:
+            # Unsupported model implementations can still encode without reuse.
+            return None
+
+    def document_cache_fingerprint(self) -> str | None:
+        model = self._load_model()
+        with self._load_lock:
+            identity = self._loaded_identity
+        if identity is None:
+            return None
+        try:
+            return canonical_json_hash(
+                {
+                    "encoder": "sentence-transformer-encode-document-v1",
+                    "model": identity,
+                    "normalize_embeddings": True,
+                    "batch_size": self.batch_size,
+                    "dimension": self.expected_dimension,
+                    "inference": inference_precision(model.device),
+                }
+            )
+        except Exception:
+            return None
 
     def _load_model(self) -> Any:
         if self._model is not None:

@@ -5,9 +5,13 @@ from __future__ import annotations
 import math
 from collections import Counter
 from collections.abc import Sequence
+from functools import cached_property
+from platform import python_version
 from threading import Lock
 from typing import Any
 
+from packages.core.canonical.json_hash import canonical_json_hash
+from packages.knowledge.adapters.encoder_identity import tokenizer_identity
 from packages.knowledge.contracts import KnowledgeProviderError, SparseEncoding
 
 
@@ -16,6 +20,27 @@ class BgeM3SparseEncoder:
         self.model_name = model_name
         self._tokenizer: Any | None = None
         self._load_lock = Lock()
+
+    @cached_property
+    def _loaded_identity(self) -> str | None:
+        try:
+            return canonical_json_hash(
+                {
+                    "encoder": "bge-token-count-one-plus-ln-v1",
+                    "tokenizer": tokenizer_identity(self._tokenizer),
+                    "python": python_version(),
+                    "add_special_tokens": True,
+                    "exclude_special_ids": True,
+                    "truncation": True,
+                }
+            )
+        except Exception:
+            return None
+
+    def document_cache_fingerprint(self) -> str | None:
+        self._load_tokenizer()
+        with self._load_lock:
+            return self._loaded_identity
 
     def _load_tokenizer(self) -> Any:
         if self._tokenizer is not None:
