@@ -389,3 +389,24 @@ class KnowledgeSnapshotItem(Base):
     knowledge_base_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), primary_key=True)
     document_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), primary_key=True)
     document_revision_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), primary_key=True)
+
+
+class DocumentVectorCache(Base):
+    """Disposable document encodings; never stores revision IDs, locators or text."""
+
+    __tablename__ = "document_vector_cache"
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["workspace_id"], ["workspaces.id"], ondelete="CASCADE",
+            name="fk_document_vector_cache_workspace",
+        ),
+        CheckConstraint(
+            "modality IN ('dense', 'sparse')", name="ck_document_vector_cache_modality"
+        ),
+    )
+    workspace_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), primary_key=True)
+    modality: Mapped[str] = mapped_column(String(6), primary_key=True)
+    encoder_fingerprint: Mapped[str] = mapped_column(String(64), primary_key=True)
+    text_hash: Mapped[str] = mapped_column(String(64), primary_key=True)
+    vector: Mapped[bytes] = mapped_column(nullable=False)
+    vector_sha256: Mapped[bytes] = mapped_column(nullable=False)

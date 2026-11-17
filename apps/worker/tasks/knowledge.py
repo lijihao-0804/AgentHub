@@ -25,6 +25,7 @@ from packages.knowledge.contracts import (
     DenseEmbedder,
     KnowledgeProviderError,
     SparseEncoder,
+    SparseEncoding,
     VectorIndex,
     VectorRecord,
     provider_error_is_retryable,
@@ -43,6 +44,7 @@ from packages.knowledge.ingestion import (
 from packages.knowledge.models import DocumentChunk, IngestionStage
 from packages.knowledge.parser import DocumentParseError, ProcessDocumentParser
 from packages.knowledge.point_ids import deterministic_point_id
+from packages.knowledge.vector_cache import encoder_fingerprint, resolve_document_vectors
 from packages.observability import NoopTraceSink, ProductionTraceSink
 from packages.observability.contracts import TraceSink, TraceSpan
 
@@ -191,6 +193,15 @@ def _vector_records(
     texts = [chunk.text for chunk in chunks]
     dense_vectors = dense.embed_documents(texts)
     sparse_vectors = sparse.encode_documents(texts)
+    return _assemble_records(claim, chunks, dense_vectors, sparse_vectors)
+
+
+def _assemble_records(
+    claim: ClaimedIngestionJob,
+    chunks: Sequence[DocumentChunk],
+    dense_vectors: Sequence[Sequence[float]],
+    sparse_vectors: Sequence[SparseEncoding],
+) -> tuple[VectorRecord, ...]:
     if len(dense_vectors) != len(chunks) or len(sparse_vectors) != len(chunks):
         raise KnowledgeProviderError(
             "INVALID_PROVIDER_RESULT",
@@ -222,6 +233,7 @@ async def _index_claim(
     dense: DenseEmbedder,
     sparse: SparseEncoder,
     index: VectorIndex,
+    cache_enabled: bool = True,
 ) -> _IndexingOutcome:
     chunks = await _load_chunks(factory, claim.document_revision_id)
     if not chunks:
@@ -233,13 +245,24 @@ async def _index_claim(
             0,
         )
 
-    # Embeddings are intentionally recomputed for both EMBEDDING and INDEXING.
-    # PostgreSQL remains the durable textual source; deterministic Qdrant upsert
-    # makes a retry after a worker crash safe and idempotent.
     point_count = 0
     try:
+        dense_key = await asyncio.to_thread(encoder_fingerprint, dense) if cache_enabled else None
+        sparse_key = await asyncio.to_thread(encoder_fingerprint, sparse) if cache_enabled else None
         for batch in batched(chunks, _INDEX_BATCH_SIZE):
-            records = await asyncio.to_thread(_vector_records, claim, batch, dense, sparse)
+            if dense_key is None and sparse_key is None:
+                records = await asyncio.to_thread(_vector_records, claim, batch, dense, sparse)
+            else:
+                texts = [chunk.text for chunk in batch]
+                dense_vectors = await resolve_document_vectors(
+                    factory, claim.workspace_id, texts, dense.embed_documents,
+                    modality="dense", fingerprint=dense_key, dimension=dense.dimension,
+                )
+                sparse_vectors = await resolve_document_vectors(
+                    factory, claim.workspace_id, texts, sparse.encode_documents,
+                    modality="sparse", fingerprint=sparse_key,
+                )
+                records = _assemble_records(claim, batch, dense_vectors, sparse_vectors)
             if point_count == 0:
                 if claim.stage == IngestionStage.EMBEDDING:
                     async with factory() as session:
@@ -371,6 +394,7 @@ async def _process_knowledge_ingestion(
                         dense=components.dense,
                         sparse=components.sparse,
                         index=components.index,
+                        cache_enabled=settings.knowledge_vector_cache_enabled,
                     )
                     terminal_error = outcome.terminal_error
                     retryable_error = outcome.retryable_error
@@ -384,11 +408,10 @@ async def _process_knowledge_ingestion(
                 )
             except DocumentParseError as exc:
                 terminal_error = (exc.code, exc.message)
-        except SQLAlchemyError:
+        except SQLAlchemyError as exc:
             logger.warning(
                 "knowledge_ingestion_database_failure",
-                extra={"job_id": str(job_id)},
-                exc_info=True,
+                extra={"job_id": str(job_id), "exception_type": type(exc).__name__},
             )
             retryable_error = (
                 "DATABASE_TEMPORARY_FAILURE",

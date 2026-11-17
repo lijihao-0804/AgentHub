@@ -2432,6 +2432,8 @@ deterministic chunk ids
 deterministic Qdrant point ids
 ```
 
+每项修订保留自己的 chunk ID、Qdrant point、原文定位和快照成员关系。向量值可在同一工作区按编码器实际收到的 UTF-8 文本及编码配置指纹复用。稠密和稀疏编码分别判断；无法确立指纹的编码器自行计算。缓存写入和命中均须完成当前修订的索引流程才能将其标为 READY。
+
 ### M3-C Retrieval
 
 ```text

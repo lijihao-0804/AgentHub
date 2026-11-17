@@ -9,6 +9,15 @@ import pytest
 
 from packages.knowledge.adapters.embeddings import BgeM3DenseEmbedder
 from packages.knowledge.adapters.sparse import BgeM3SparseEncoder
+from packages.knowledge.vector_cache import encoder_fingerprint
+
+
+def test_optional_adapter_identity_failure_disables_reuse() -> None:
+    class UnidentifiedEncoder:
+        def document_cache_fingerprint(self) -> str:
+            raise RuntimeError("runtime identity unavailable")
+
+    assert encoder_fingerprint(UnidentifiedEncoder()) is None
 
 
 def _save_tokenizer(directory: Path, max_length: int) -> None:

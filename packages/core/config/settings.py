@@ -47,6 +47,7 @@ class Settings(BaseSettings):
     knowledge_dense_vector_size: int = Field(default=1024, ge=1, le=4096)
     knowledge_embedding_model: str = "BAAI/bge-m3"
     knowledge_embedding_device: str = "auto"
+    knowledge_vector_cache_enabled: bool = True
     knowledge_embedding_batch_size: int = Field(default=8, ge=1, le=128)
     knowledge_reranker_model: str = "BAAI/bge-reranker-v2-m3"
     knowledge_reranker_device: str = "auto"
