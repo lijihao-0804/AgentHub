@@ -4,7 +4,7 @@ import json
 import sys
 from pathlib import Path
 
-from packages.knowledge.parser import _parse_content, _ParserFailure
+from packages.knowledge.parser import DocumentParseError, _parse_content
 
 
 def main() -> None:
@@ -26,7 +26,7 @@ def main() -> None:
                 {"text": block.text, "locator": block.locator} for block in parsed.blocks
             ],
         }
-    except _ParserFailure as exc:
+    except DocumentParseError as exc:
         result = {"ok": False, "code": exc.code, "message": exc.message}
     except Exception:
         result = {

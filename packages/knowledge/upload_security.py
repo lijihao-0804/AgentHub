@@ -1,4 +1,4 @@
-"""Streaming upload validation for the deliberately small M3 file baseline."""
+"""Streaming upload validation for knowledge documents and parser result imports."""
 
 from __future__ import annotations
 
@@ -19,13 +19,18 @@ class UploadSecurityPolicy:
     max_file_size_bytes: int = 10 * 1024 * 1024
 
 
-ALLOWED_EXTENSIONS = {".pdf", ".txt", ".md"}
 _GENERIC_MEDIA_TYPES = {"", "application/octet-stream"}
+# First value is the canonical media type persisted on the revision and dispatched
+# by the worker. Browsers use different MIME aliases for delimited text.
 _MEDIA_TYPES_BY_EXTENSION = {
-    ".pdf": {"application/pdf", *_GENERIC_MEDIA_TYPES},
-    ".txt": {"text/plain", *_GENERIC_MEDIA_TYPES},
-    ".md": {"text/markdown", "text/plain", *_GENERIC_MEDIA_TYPES},
+    ".pdf": ("application/pdf",),
+    ".txt": ("text/plain",),
+    ".md": ("text/markdown", "text/plain"),
+    ".csv": ("text/csv", "application/vnd.ms-excel", "text/plain", "application/csv"),
+    ".tsv": ("text/tab-separated-values", "text/plain"),
+    ".json": ("application/json",),
 }
+ALLOWED_EXTENSIONS = frozenset(_MEDIA_TYPES_BY_EXTENSION)
 
 
 def validate_original_filename(filename: str | None) -> str:
@@ -48,13 +53,10 @@ def validate_original_filename(filename: str | None) -> str:
 def validate_declared_media_type(filename: str, media_type: str | None) -> str:
     extension = PurePath(filename).suffix.lower()
     normalized = (media_type or "").split(";", 1)[0].strip().lower()
-    if normalized not in _MEDIA_TYPES_BY_EXTENSION[extension]:
+    allowed = _MEDIA_TYPES_BY_EXTENSION[extension]
+    if normalized not in allowed and normalized not in _GENERIC_MEDIA_TYPES:
         raise UploadSecurityError("INVALID_FILE", "The uploaded media type is invalid.")
-    if extension == ".pdf":
-        return "application/pdf"
-    if extension == ".md":
-        return "text/markdown"
-    return "text/plain"
+    return allowed[0]
 
 
 def validate_content_signature(filename: str, prefix: bytes) -> None:
@@ -69,7 +71,10 @@ def validate_content_signature(filename: str, prefix: bytes) -> None:
                 # end in the middle of a multi-byte code point at that boundary,
                 # so leave a trailing partial sequence buffered rather than
                 # treating it as malformed UTF-8.
-                codecs.getincrementaldecoder("utf-8")().decode(prefix, final=False)
+                decoded = codecs.getincrementaldecoder("utf-8-sig")().decode(prefix, final=False)
+                if extension == ".json":
+                    first = decoded.lstrip(" \r\n\t")[:1]
+                    valid = not first or first in {"[", "{"}
             except UnicodeDecodeError:
                 valid = False
     if not valid:

@@ -17,7 +17,9 @@ from packages.core.execution_context.models import (
     PrincipalContext,
     WorkspaceExecutionContext,
 )
+from packages.knowledge.blob_store import LocalBlobStore
 from packages.knowledge.models import Document, DocumentRevision, IngestionJob, KnowledgeBase
+from packages.knowledge.parser import ProcessDocumentParser
 from packages.knowledge.upload_security import validate_content_signature
 
 
@@ -138,6 +140,8 @@ async def _post_upload(
         ("../escape.txt", b"safe", "text/plain", "PATH_TRAVERSAL"),
         ("notes.txt", b"safe", "application/pdf", "INVALID_FILE"),
         ("broken.pdf", b"not a pdf", "application/pdf", "INVALID_FILE"),
+        ("report.json", b"not json", "application/json", "INVALID_FILE"),
+        ("table.csv", b"%PDF-1.7", "application/pdf", "INVALID_FILE"),
     ],
 )
 async def test_hostile_uploads_fail_before_persistence(
@@ -220,3 +224,51 @@ def test_text_prefix_accepts_an_incomplete_trailing_utf8_sequence() -> None:
     content = b"a" * 65_535 + "🙂".encode()
 
     validate_content_signature("boundary.txt", content[:65_536])
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("filename", "content", "declared", "canonical", "expected"),
+    [
+        (
+            "records.CSV",
+            b"Area,Rate\r\nWest,42\r\n",
+            "application/vnd.ms-excel",
+            "text/csv",
+            "Area: West | Rate: 42",
+        ),
+        (
+            "records.tsv",
+            b"Area\tRate\nWest\t42\n",
+            "application/octet-stream",
+            "text/tab-separated-values",
+            "Area: West | Rate: 42",
+        ),
+        (
+            "scan_content_list.json",
+            b'[{"type":"text","page_idx":1,"text":"recognized"}]',
+            "application/json",
+            "application/json",
+            "recognized",
+        ),
+    ],
+)
+async def test_structured_upload_dispatches_the_persisted_blob_to_its_parser(
+    filename: str, content: bytes, declared: str, canonical: str, expected: str
+) -> None:
+    response, session, queue, blob_root = await _post_upload(
+        filename=filename, content=content, media_type=declared
+    )
+    try:
+        assert response.status_code == 202, response.text
+        assert queue.calls == 1
+        revision = next(item for item in session.added if isinstance(item, DocumentRevision))
+        assert revision.media_type == canonical
+        chunks = LocalBlobStore(blob_root).read(revision.blob_key)
+        raw = b"".join([part async for part in chunks])
+        assert raw == content
+        parser = ProcessDocumentParser(timeout_seconds=10, max_pdf_pages=10, max_parsed_chars=100)
+        result = await parser.parse(raw, media_type=revision.media_type)
+        assert result.blocks[-1].text == expected
+    finally:
+        shutil.rmtree(blob_root, ignore_errors=True)

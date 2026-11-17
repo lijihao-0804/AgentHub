@@ -78,9 +78,10 @@ class _OverlapTracker:
         span = locator_span(locator)
         if span is None or not isinstance(revision_id, str) or not revision_id:
             return True
-        # Structural PDF offsets restart on each page. Paragraph-relative offsets
-        # from different paragraphs are also incomparable.
-        scope = tuple(locator.get(key) for key in ("page", "paragraph_ordinal"))
+        # Offsets restart for pages, layout blocks, their captions/footnotes,
+        # and individual table rows. Windows are only comparable within one source unit.
+        coordinates = ("page", "paragraph_ordinal", "block_index", "part_index", "row")
+        scope = tuple(locator.get(key) for key in coordinates)
         if any(v is not None and type(v) is not int for v in scope):
             return True
         spans = self._spans.setdefault((revision_id, *scope), [])

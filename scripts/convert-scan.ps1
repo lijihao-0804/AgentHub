@@ -93,7 +93,7 @@ for ($i = 0; $i -lt $pageCount; $i++) {
         foreach ($line in $result.Lines) {
             if ([string]::IsNullOrWhiteSpace($line.Text) -or $line.Words.Count -eq 0) { continue }
             $charCount += $line.Text.Length
-            if ($charCount -gt 2000000 -or $blocks.Count -ge 50000) { throw 'OCR result exceeds the document limits.' }
+            if ($charCount -gt 2000000 -or $blocks.Count -ge 20000) { throw 'OCR result exceeds the document limits.' }
             $left, $top, $right, $bottom = $width, $height, 0, 0
             foreach ($word in $line.Words) {
                 $box = $word.BoundingRect

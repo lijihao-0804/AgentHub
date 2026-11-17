@@ -39,7 +39,10 @@ _PAYLOAD_FIELDS = _LEGACY_PAYLOAD_FIELDS | _SERVER_STATE_FIELDS
 _ROUTES = {"AUTO", "WIKI", "RAG", "HYBRID"}
 _STATUSES = {"SUCCESS", "INSUFFICIENT_EVIDENCE", "CONFLICT", "DEGRADED"}
 _ID = re.compile(r"(?:[A-Za-z][A-Za-z0-9_]{0,31})?[1-9][0-9]*\Z")
-_LOCATOR_POSITIONS = {"page", "char_start", "char_end", "paragraph_ordinal", "start", "end"}
+_LOCATOR_POSITIONS = {
+    "page", "char_start", "char_end", "paragraph_ordinal", "start", "end",
+    "block_index", "part_index", "row", "column_start", "column_end",
+}
 
 
 def model_evidence_locator(value: Mapping) -> dict:
@@ -51,7 +54,7 @@ def model_evidence_locator(value: Mapping) -> dict:
                 raise ValueError("invalid evidence position")
             result[key] = value[key]
     if "type" in value:
-        if value["type"] not in {"page", "text_range"}:
+        if value["type"] not in {"page", "text_range", "table_row"}:
             raise ValueError("unsupported positional locator type")
         result["type"] = value["type"]
     return result
