@@ -1,0 +1,675 @@
+{
+  "worker_base_commit": "6d2b731b028fee8fd9efe170a57f676fe5252c74",
+  "sources": {
+    "old": {
+      "commit": "3a9490343b1b5e7828316e3c1db7411cf6291451",
+      "blob_sha256": {
+        "docs/learning/03-domain-model-lifecycle.md": "9b69aedcbc0960e0c4e053b1a52d681945d92fe584c2cea2c03bed2094cebdfb",
+        "docs/learning/05-durability-events.md": "a496e0997760ef2e8d575dad219e3845bf7f74e82d23526a4bb7a9ea1830aa18"
+      }
+    },
+    "new": {
+      "commit": "8510ccdf420990c0884cc455f0af89068c4ca51f",
+      "blob_sha256": {
+        "docs/learning/03-domain-model-lifecycle.md": "ea19322793789cf300df3194b280b8be5f4ce5e3d5076a00a938f11a8280ee17",
+        "docs/learning/05-durability-events.md": "d527bcb4627e36cdd08af0e57293fe9a63f59a87ea44aac469abb34f41fed3cf"
+      }
+    }
+  },
+  "fingerprints": {
+    "dense": "a117c101a1bdcf1154105c1f29041c9423d930b9680aaf6cdec0074b05be7c3e",
+    "sparse": "fae9dbb393dd52fb10962508f9386e5740d09ce1f8f5694dc6c98d3d027f56a0"
+  },
+  "first_fingerprint_seconds_after_model_warmup": {
+    "dense": 1.46891,
+    "sparse": 0.64845
+  },
+  "runtime": {
+    "torch": "2.14.0+cu130",
+    "transformers": "4.57.6",
+    "sentence-transformers": "5.7.0",
+    "qdrant-client": "1.13.3",
+    "asyncpg": "0.31.0"
+  },
+  "device": "cuda",
+  "batch_size": 4,
+  "embedding_snapshot": "5617a9f61b028005a4858fdac845db406aefb181",
+  "reranker_snapshot": "953dc6f6f85a1b2dbfca4c34a2796e7dde08d41e",
+  "chunking": "structural_v1",
+  "chunk_overlap_chars": 0,
+  "chunk_size_chars": 1200,
+  "qdrant": "in-process SDK local mode; unique instance per arm",
+  "top_k": 5,
+  "probes": [
+    {
+      "name": "retained_content",
+      "path": "docs/learning/03-domain-model-lifecycle.md",
+      "query": "为什么只保留 K1 的 hash 无法再次装载历史实验的证据？",
+      "expected": {
+        "old": "不能从摘要反推出原文",
+        "new": "不能从摘要反推出原文"
+      }
+    },
+    {
+      "name": "sse_replay",
+      "path": "docs/learning/05-durability-events.md",
+      "query": "实时队列有容量限制时，慢消费者怎么补回错过的事件？",
+      "expected": {
+        "old": "慢消费者可能丢帧",
+        "new": "慢消费者会退出 live 队列转持久补播"
+      }
+    },
+    {
+      "name": "run_lease",
+      "path": "docs/learning/05-durability-events.md",
+      "query": "过期的数据库 Run lease 会怎样处理，是否允许夺取并重放图？",
+      "expected": {
+        "new": "过期执行权进入 NEEDS_ATTENTION"
+      }
+    },
+    {
+      "name": "wiki_drift",
+      "path": "docs/learning/03-domain-model-lifecycle.md",
+      "query": "Wiki publication 丢失或漂移，运行恢复时如何处理？",
+      "expected": {
+        "new": "WIKI_PUBLICATION_UNAVAILABLE"
+      }
+    }
+  ],
+  "timing_boundary": "Warm-model wall seconds from multipart upload through worker READY, including the parser subprocess, SQL and vector upsert acknowledgement. Excludes broker transit, snapshot creation, query time and model/fingerprint warmup.",
+  "execution": "Local ASGI production knowledge router with injected workspace authorization and inline job delivery, standalone PostgreSQL and in-process Qdrant. Each arm uses a fresh workspace, knowledge base and vector collection.",
+  "summary": {
+    "max_common_hit_score_delta": {
+      "retrieval": 0.0,
+      "rerank": 0.00390625
+    },
+    "full_queries_with_adjacent_exact_rerank_tie": 7,
+    "identical_rankings": 30,
+    "compared_rankings": 32,
+    "full_old_seconds": {
+      "trials": [
+        2.86735,
+        2.01767,
+        2.18351,
+        1.99601
+      ],
+      "median": 2.10059
+    },
+    "full_new_seconds": {
+      "trials": [
+        2.31499,
+        2.02875,
+        1.9025400000000001,
+        1.90869
+      ],
+      "median": 1.96872
+    },
+    "cache_old_seconds": {
+      "trials": [
+        2.06222,
+        2.0881,
+        2.03692,
+        2.03573
+      ],
+      "median": 2.04957
+    },
+    "cache_new_seconds": {
+      "trials": [
+        1.36715,
+        1.39519,
+        1.38405,
+        1.32406
+      ],
+      "median": 1.3756
+    }
+  },
+  "orders": [
+    [
+      "full",
+      "cache"
+    ],
+    [
+      "cache",
+      "full"
+    ],
+    [
+      "full",
+      "cache"
+    ],
+    [
+      "cache",
+      "full"
+    ]
+  ],
+  "documents": {
+    "old": [
+      {
+        "path": "docs/learning/03-domain-model-lifecycle.md",
+        "chunks": 63,
+        "exact_previous_revision": 0,
+        "manifest_sha256": "b3701e38900b9046e56c7cdb0ec3371271f39689528833133d483a9b21646c8d",
+        "moved_exact": 0,
+        "full": {
+          "dense_inputs": 63,
+          "sparse_inputs": 63,
+          "seconds_by_trial": [
+            1.64179,
+            0.99649,
+            0.95897,
+            0.99247
+          ]
+        },
+        "cache": {
+          "dense_inputs": 62,
+          "sparse_inputs": 62,
+          "seconds_by_trial": [
+            1.07441,
+            0.99419,
+            1.02615,
+            1.03401
+          ]
+        }
+      },
+      {
+        "path": "docs/learning/05-durability-events.md",
+        "chunks": 65,
+        "exact_previous_revision": 0,
+        "manifest_sha256": "4561b479140896a83129eb57fb2d36a339230dc933fa23d4422e0306b30e3690",
+        "moved_exact": 0,
+        "full": {
+          "dense_inputs": 65,
+          "sparse_inputs": 65,
+          "seconds_by_trial": [
+            1.22556,
+            1.02118,
+            1.22454,
+            1.00354
+          ]
+        },
+        "cache": {
+          "dense_inputs": 60,
+          "sparse_inputs": 60,
+          "seconds_by_trial": [
+            0.98781,
+            1.09391,
+            1.01077,
+            1.00172
+          ]
+        }
+      }
+    ],
+    "new": [
+      {
+        "path": "docs/learning/03-domain-model-lifecycle.md",
+        "chunks": 64,
+        "exact_previous_revision": 53,
+        "manifest_sha256": "4edba816b2d4e266c0a10bd3664027218c5fa202d05edda298b7bfdf09da915b",
+        "moved_exact": 52,
+        "full": {
+          "dense_inputs": 64,
+          "sparse_inputs": 64,
+          "seconds_by_trial": [
+            1.16478,
+            0.99788,
+            0.95113,
+            0.94134
+          ]
+        },
+        "cache": {
+          "dense_inputs": 11,
+          "sparse_inputs": 11,
+          "seconds_by_trial": [
+            0.65011,
+            0.68224,
+            0.65451,
+            0.65213
+          ]
+        }
+      },
+      {
+        "path": "docs/learning/05-durability-events.md",
+        "chunks": 68,
+        "exact_previous_revision": 51,
+        "manifest_sha256": "0197aaab28e21673c585237728a65cdf7d133a2ee7aa4ff343d32b014e0612db",
+        "moved_exact": 50,
+        "full": {
+          "dense_inputs": 68,
+          "sparse_inputs": 68,
+          "seconds_by_trial": [
+            1.15021,
+            1.03087,
+            0.95141,
+            0.96735
+          ]
+        },
+        "cache": {
+          "dense_inputs": 16,
+          "sparse_inputs": 16,
+          "seconds_by_trial": [
+            0.71704,
+            0.71295,
+            0.72954,
+            0.67193
+          ]
+        }
+      }
+    ]
+  },
+  "query_checks": {
+    "old/retained_content": {
+      "exact_order_by_pair": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "full": {
+        "gold_applicable": true,
+        "gold_rank_by_trial": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "first_pair_gold_citation": {
+          "path": "docs/learning/03-domain-model-lifecycle.md",
+          "chars": [
+            8636,
+            8707
+          ],
+          "ordinal": 45,
+          "sha256": "c738366f7ff7eeb1c2e7da359c367178e17e74009be6112ad760fda7ec04ff2e"
+        }
+      },
+      "cache": {
+        "gold_applicable": true,
+        "gold_rank_by_trial": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "first_pair_gold_citation": {
+          "path": "docs/learning/03-domain-model-lifecycle.md",
+          "chars": [
+            8636,
+            8707
+          ],
+          "ordinal": 45,
+          "sha256": "c738366f7ff7eeb1c2e7da359c367178e17e74009be6112ad760fda7ec04ff2e"
+        }
+      }
+    },
+    "old/sse_replay": {
+      "exact_order_by_pair": [
+        true,
+        false,
+        false,
+        true
+      ],
+      "full": {
+        "gold_applicable": true,
+        "gold_rank_by_trial": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "first_pair_gold_citation": {
+          "path": "docs/learning/05-durability-events.md",
+          "chars": [
+            8939,
+            9051
+          ],
+          "ordinal": 47,
+          "sha256": "dc4472e194c01da77869df61646b9fa9a1557ed2cb89190fbfe179349d4008b2"
+        }
+      },
+      "cache": {
+        "gold_applicable": true,
+        "gold_rank_by_trial": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "first_pair_gold_citation": {
+          "path": "docs/learning/05-durability-events.md",
+          "chars": [
+            8939,
+            9051
+          ],
+          "ordinal": 47,
+          "sha256": "dc4472e194c01da77869df61646b9fa9a1557ed2cb89190fbfe179349d4008b2"
+        }
+      }
+    },
+    "old/run_lease": {
+      "exact_order_by_pair": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "full": {
+        "gold_applicable": false,
+        "gold_rank_by_trial": [
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "cache": {
+        "gold_applicable": false,
+        "gold_rank_by_trial": [
+          null,
+          null,
+          null,
+          null
+        ]
+      }
+    },
+    "old/wiki_drift": {
+      "exact_order_by_pair": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "full": {
+        "gold_applicable": false,
+        "gold_rank_by_trial": [
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "cache": {
+        "gold_applicable": false,
+        "gold_rank_by_trial": [
+          null,
+          null,
+          null,
+          null
+        ]
+      }
+    },
+    "new/retained_content": {
+      "exact_order_by_pair": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "full": {
+        "gold_applicable": true,
+        "gold_rank_by_trial": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "first_pair_gold_citation": {
+          "path": "docs/learning/03-domain-model-lifecycle.md",
+          "chars": [
+            9556,
+            9627
+          ],
+          "ordinal": 46,
+          "sha256": "c738366f7ff7eeb1c2e7da359c367178e17e74009be6112ad760fda7ec04ff2e"
+        }
+      },
+      "cache": {
+        "gold_applicable": true,
+        "gold_rank_by_trial": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "first_pair_gold_citation": {
+          "path": "docs/learning/03-domain-model-lifecycle.md",
+          "chars": [
+            9556,
+            9627
+          ],
+          "ordinal": 46,
+          "sha256": "c738366f7ff7eeb1c2e7da359c367178e17e74009be6112ad760fda7ec04ff2e"
+        }
+      }
+    },
+    "new/sse_replay": {
+      "exact_order_by_pair": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "full": {
+        "gold_applicable": true,
+        "gold_rank_by_trial": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "first_pair_gold_citation": {
+          "path": "docs/learning/05-durability-events.md",
+          "chars": [
+            10078,
+            10265
+          ],
+          "ordinal": 50,
+          "sha256": "a60a39bb75e9d62e7930584f86984ac329ce4188ba6538c1f81bf01a29c3b1c0"
+        }
+      },
+      "cache": {
+        "gold_applicable": true,
+        "gold_rank_by_trial": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "first_pair_gold_citation": {
+          "path": "docs/learning/05-durability-events.md",
+          "chars": [
+            10078,
+            10265
+          ],
+          "ordinal": 50,
+          "sha256": "a60a39bb75e9d62e7930584f86984ac329ce4188ba6538c1f81bf01a29c3b1c0"
+        }
+      }
+    },
+    "new/run_lease": {
+      "exact_order_by_pair": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "full": {
+        "gold_applicable": true,
+        "gold_rank_by_trial": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "first_pair_gold_citation": {
+          "path": "docs/learning/05-durability-events.md",
+          "chars": [
+            3205,
+            3425
+          ],
+          "ordinal": 15,
+          "sha256": "433b460f226388b169f2cdc6c1fe05a69803e73d538df0f3ddbf24487994629b"
+        }
+      },
+      "cache": {
+        "gold_applicable": true,
+        "gold_rank_by_trial": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "first_pair_gold_citation": {
+          "path": "docs/learning/05-durability-events.md",
+          "chars": [
+            3205,
+            3425
+          ],
+          "ordinal": 15,
+          "sha256": "433b460f226388b169f2cdc6c1fe05a69803e73d538df0f3ddbf24487994629b"
+        }
+      }
+    },
+    "new/wiki_drift": {
+      "exact_order_by_pair": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "full": {
+        "gold_applicable": true,
+        "gold_rank_by_trial": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "first_pair_gold_citation": {
+          "path": "docs/learning/03-domain-model-lifecycle.md",
+          "chars": [
+            9386,
+            9554
+          ],
+          "ordinal": 45,
+          "sha256": "384f354e0aab845cf690ce6abfb382fb8ceba0dd9ac7e7b12639e321af74fb60"
+        }
+      },
+      "cache": {
+        "gold_applicable": true,
+        "gold_rank_by_trial": [
+          1,
+          1,
+          1,
+          1
+        ],
+        "first_pair_gold_citation": {
+          "path": "docs/learning/03-domain-model-lifecycle.md",
+          "chars": [
+            9386,
+            9554
+          ],
+          "ordinal": 45,
+          "sha256": "384f354e0aab845cf690ce6abfb382fb8ceba0dd9ac7e7b12639e321af74fb60"
+        }
+      }
+    }
+  },
+  "verified_citations": 320,
+  "observed_ranking_differences": [
+    {
+      "pair": 2,
+      "query": "old/sse_replay",
+      "full": [
+        [
+          "docs/learning/05-durability-events.md",
+          47
+        ],
+        [
+          "docs/learning/05-durability-events.md",
+          34
+        ],
+        [
+          "docs/learning/05-durability-events.md",
+          4
+        ],
+        [
+          "docs/learning/03-domain-model-lifecycle.md",
+          44
+        ],
+        [
+          "docs/learning/05-durability-events.md",
+          25
+        ]
+      ],
+      "cache": [
+        [
+          "docs/learning/05-durability-events.md",
+          47
+        ],
+        [
+          "docs/learning/05-durability-events.md",
+          34
+        ],
+        [
+          "docs/learning/05-durability-events.md",
+          4
+        ],
+        [
+          "docs/learning/05-durability-events.md",
+          25
+        ],
+        [
+          "docs/learning/05-durability-events.md",
+          24
+        ]
+      ]
+    },
+    {
+      "pair": 3,
+      "query": "old/sse_replay",
+      "full": [
+        [
+          "docs/learning/05-durability-events.md",
+          47
+        ],
+        [
+          "docs/learning/05-durability-events.md",
+          34
+        ],
+        [
+          "docs/learning/05-durability-events.md",
+          4
+        ],
+        [
+          "docs/learning/05-durability-events.md",
+          25
+        ],
+        [
+          "docs/learning/05-durability-events.md",
+          24
+        ]
+      ],
+      "cache": [
+        [
+          "docs/learning/05-durability-events.md",
+          47
+        ],
+        [
+          "docs/learning/05-durability-events.md",
+          34
+        ],
+        [
+          "docs/learning/05-durability-events.md",
+          4
+        ],
+        [
+          "docs/learning/03-domain-model-lifecycle.md",
+          44
+        ],
+        [
+          "docs/learning/05-durability-events.md",
+          25
+        ]
+      ]
+    }
+  ]
+}
