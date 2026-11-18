@@ -163,6 +163,9 @@ def adjudicate(directory, packet_dir, judgments, ledger):
             comparisons=subgroup_pairs(base, candidate, common, strata),
             new_correct=[q for q in common if candidate[q]["strict"] and not base[q]["strict"]],
             lost_correct=[q for q in common if base[q]["strict"] and not candidate[q]["strict"]],
+            previously_supported_now_without_supported_answer=[
+                q for q in common if base[q]["support"] and not candidate[q]["support"]
+            ],
             lost_support_on_assertions=[
                 q
                 for q in common
