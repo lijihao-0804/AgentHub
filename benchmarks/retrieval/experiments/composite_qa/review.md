@@ -1,0 +1,9 @@
+# Reading the blinded review packets
+
+Use the original question and the released gold answer or annotated facets to judge the factual value. Check scope, subject, requested quantity, all requested parts and additional claims. An alternative wording that means the same thing receives credit. A sufficient explicit negative statement counts as an answer. For an unanswerable question, a valid structured refusal receives value credit. An unsupported assertion about what happened receives none.
+
+For each valid asserted answer, mark support only when the actual numbered `cited_excerpts` support every material claim. Judge both the entity link and the requested fact on a multi-hop question. A shorter citation than the official annotated paragraph can suffice. The six presented passages explain failures but only the cited excerpts can earn support. A proper refusal makes no factual claim and carries no citations; use false for its inapplicable support flag and exclude it from the asserted-answer citation denominator.
+
+Judge the language of the model's own reply against the question. An unambiguous proper name, number or copied answer value can be language-neutral. A full sentence in the other language, including an otherwise correct refusal, fails the language check. A structurally invalid or missing output receives zero for value, support and language. Strict credit requires a valid reply, correct content and appropriate language, as well as citation support on an asserted answer.
+
+Read one shuffled packet per unique combination of question, source evidence, response and actual cited excerpts. Keep the arm, stage and old results hidden while deciding. Store one record per UID with boolean `value`, `support` and `language`. The publication step joins these labels to the responses, separately retains deterministic screening results and reconciles the per-cohort costs to the physical ledger. The reviewers are internal AI reviewers.

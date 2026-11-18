@@ -1,0 +1,376 @@
+{
+  "historical_scoring_commit": "85563aebcc3f9e9ee302bec951fdff71a6977c2e",
+  "freeze_sha256": "2f32241f7fc1173524e5fff9a25e1108b5bb0edc96b8652a70637a8a8efc969e",
+  "scope": "2026-11-18 previous settled bilingual-refusal run, candidate arm. Frozen candidate prompt is the new preflight; historical judgments are not new responses. First physical request of the new campaign ended UNKNOWN. No current answer is scored here.",
+  "evidence_sha256_definition": "Historical digest_json([presented records in order with id, doc_id, chunk_id, locator, text; serialized user prompt]); canonical compact sorted-key UTF-8 JSON. User/system fields compare complete first request message objects.",
+  "rows": [
+    {
+      "id": "R092",
+      "archived_candidate": {
+        "first": {
+          "state": "invalid",
+          "invalid_reason": "citation_mismatch",
+          "strict_pass": false
+        },
+        "final": {
+          "state": "answer",
+          "invalid_reason": null,
+          "strict_pass": true
+        }
+      },
+      "confirmed_archived_attempts": 2,
+      "archived_evidence_sha256": "837e3cb3215f9a5a4d33f629e5c8c2e9774ae7cf41428192a2aa176701e5ad51",
+      "frozen_candidate_evidence_sha256": "837e3cb3215f9a5a4d33f629e5c8c2e9774ae7cf41428192a2aa176701e5ad51",
+      "equal_evidence": true,
+      "equal_first_user_message": true,
+      "equal_first_system_message": false,
+      "frozen_candidate_first_request_sha256": "8c0407500a9a4ea280072c06698a814fdad90cabaa8fd547d635414a9ae26671",
+      "current_scored_answers": 0
+    },
+    {
+      "id": "B006",
+      "archived_candidate": {
+        "first": {
+          "state": "invalid",
+          "invalid_reason": "citation_mismatch",
+          "strict_pass": false
+        },
+        "final": {
+          "state": "answer",
+          "invalid_reason": null,
+          "strict_pass": true
+        }
+      },
+      "confirmed_archived_attempts": 2,
+      "archived_evidence_sha256": "f0e9e5f696e689436f1387ac5a18ff64ce6cb5e99013cdf9e6d145b5e03b7e5e",
+      "frozen_candidate_evidence_sha256": "f0e9e5f696e689436f1387ac5a18ff64ce6cb5e99013cdf9e6d145b5e03b7e5e",
+      "equal_evidence": true,
+      "equal_first_user_message": true,
+      "equal_first_system_message": false,
+      "frozen_candidate_first_request_sha256": "86ae517b0548ec5ea3e28752daa66f3715464a24a5168e7018eca71d8b83d9be",
+      "current_scored_answers": 0
+    },
+    {
+      "id": "W01",
+      "archived_candidate": {
+        "first": {
+          "state": "answer",
+          "invalid_reason": null,
+          "strict_pass": true
+        },
+        "final": {
+          "state": "answer",
+          "invalid_reason": null,
+          "strict_pass": true
+        }
+      },
+      "confirmed_archived_attempts": 1,
+      "archived_evidence_sha256": "59da30c064c782d39cc35ed0c887c8d686f04f6f48a4cc1ce2190e02184927e2",
+      "frozen_candidate_evidence_sha256": "59da30c064c782d39cc35ed0c887c8d686f04f6f48a4cc1ce2190e02184927e2",
+      "equal_evidence": true,
+      "equal_first_user_message": true,
+      "equal_first_system_message": false,
+      "frozen_candidate_first_request_sha256": "0f1f75d565e33404bad8f045705c6d91f8f0ddcc9f621275c0e69bbff8b85546",
+      "current_scored_answers": 0
+    },
+    {
+      "id": "W02",
+      "archived_candidate": {
+        "first": {
+          "state": "answer",
+          "invalid_reason": null,
+          "strict_pass": true
+        },
+        "final": {
+          "state": "answer",
+          "invalid_reason": null,
+          "strict_pass": true
+        }
+      },
+      "confirmed_archived_attempts": 1,
+      "archived_evidence_sha256": "e67caa6853db4806872a4ca68fb0e3a8d366608fec7b6ea8a5123aa04a231d38",
+      "frozen_candidate_evidence_sha256": "e67caa6853db4806872a4ca68fb0e3a8d366608fec7b6ea8a5123aa04a231d38",
+      "equal_evidence": true,
+      "equal_first_user_message": true,
+      "equal_first_system_message": false,
+      "frozen_candidate_first_request_sha256": "ad1dd2eeb0bf43f4b7a1324659a3c3fa9221c1de7c7b0d417949d6df0480d698",
+      "current_scored_answers": 0
+    },
+    {
+      "id": "W03",
+      "archived_candidate": {
+        "first": {
+          "state": "answer",
+          "invalid_reason": null,
+          "strict_pass": true
+        },
+        "final": {
+          "state": "answer",
+          "invalid_reason": null,
+          "strict_pass": true
+        }
+      },
+      "confirmed_archived_attempts": 1,
+      "archived_evidence_sha256": "eea1bca0fe84718885f69908c679f818be9181f46521359b78c002b0fc7bd9a9",
+      "frozen_candidate_evidence_sha256": "eea1bca0fe84718885f69908c679f818be9181f46521359b78c002b0fc7bd9a9",
+      "equal_evidence": true,
+      "equal_first_user_message": true,
+      "equal_first_system_message": false,
+      "frozen_candidate_first_request_sha256": "ea506a803444be9faf906d256214abc96860d688e87025386df56c3599316913",
+      "current_scored_answers": 0
+    },
+    {
+      "id": "W04",
+      "archived_candidate": {
+        "first": {
+          "state": "answer",
+          "invalid_reason": null,
+          "strict_pass": true
+        },
+        "final": {
+          "state": "answer",
+          "invalid_reason": null,
+          "strict_pass": true
+        }
+      },
+      "confirmed_archived_attempts": 1,
+      "archived_evidence_sha256": "42b3581c4346b3d1dbbc58f5a66b76f3419a22448ee102bd83b33a98db28c2f7",
+      "frozen_candidate_evidence_sha256": "42b3581c4346b3d1dbbc58f5a66b76f3419a22448ee102bd83b33a98db28c2f7",
+      "equal_evidence": true,
+      "equal_first_user_message": true,
+      "equal_first_system_message": false,
+      "frozen_candidate_first_request_sha256": "b91fcaff270ca4a11155b1fddf327d3857d8cc0ce8f133a7add22f18785a244f",
+      "current_scored_answers": 0
+    },
+    {
+      "id": "W05",
+      "archived_candidate": {
+        "first": {
+          "state": "answer",
+          "invalid_reason": null,
+          "strict_pass": true
+        },
+        "final": {
+          "state": "answer",
+          "invalid_reason": null,
+          "strict_pass": true
+        }
+      },
+      "confirmed_archived_attempts": 1,
+      "archived_evidence_sha256": "721bcfaa4777edf9c73edcb5dc1603e54202684daf6a3cab463564414655e7ba",
+      "frozen_candidate_evidence_sha256": "721bcfaa4777edf9c73edcb5dc1603e54202684daf6a3cab463564414655e7ba",
+      "equal_evidence": true,
+      "equal_first_user_message": true,
+      "equal_first_system_message": false,
+      "frozen_candidate_first_request_sha256": "994629450f87b954da3b2d78c63b5980bb41c230e2ff44153e92c2422a901e79",
+      "current_scored_answers": 0
+    },
+    {
+      "id": "W06",
+      "archived_candidate": {
+        "first": {
+          "state": "answer",
+          "invalid_reason": null,
+          "strict_pass": true
+        },
+        "final": {
+          "state": "answer",
+          "invalid_reason": null,
+          "strict_pass": true
+        }
+      },
+      "confirmed_archived_attempts": 1,
+      "archived_evidence_sha256": "d73edca7f5e42851d8e87288c1b8dbcaaae0142953e70a457a27da85d6f42a36",
+      "frozen_candidate_evidence_sha256": "63f148dc1edf26b37286980a493089673b8dc89c61f263ef82045584000affde",
+      "equal_evidence": false,
+      "equal_first_user_message": false,
+      "equal_first_system_message": false,
+      "frozen_candidate_first_request_sha256": "4a2e084b6972f30396f65e798aaeefc1fa33a3fd57ba91cf80110a1af2fb29fd",
+      "current_scored_answers": 0
+    },
+    {
+      "id": "W07",
+      "archived_candidate": {
+        "first": {
+          "state": "answer",
+          "invalid_reason": null,
+          "strict_pass": true
+        },
+        "final": {
+          "state": "answer",
+          "invalid_reason": null,
+          "strict_pass": true
+        }
+      },
+      "confirmed_archived_attempts": 1,
+      "archived_evidence_sha256": "cb0d7a71ab663b93f5337b7ffc8f313d0540e51270fe4f959fbbc926240cb943",
+      "frozen_candidate_evidence_sha256": "a8b4b8da7a77fe1aef8e3bddf1dc1c0d30e35451cc0c9f29822297ea909e832b",
+      "equal_evidence": false,
+      "equal_first_user_message": false,
+      "equal_first_system_message": false,
+      "frozen_candidate_first_request_sha256": "d0cf13543ff0fc08923cbe3ebcee563c4f848b903518cf2a217d2cde45df8bfe",
+      "current_scored_answers": 0
+    },
+    {
+      "id": "W08",
+      "archived_candidate": {
+        "first": {
+          "state": "answer",
+          "invalid_reason": null,
+          "strict_pass": true
+        },
+        "final": {
+          "state": "answer",
+          "invalid_reason": null,
+          "strict_pass": true
+        }
+      },
+      "confirmed_archived_attempts": 1,
+      "archived_evidence_sha256": "4e6517ee20a76ee7baf6a36194e07b6b4664c48bc3308a22dfe5747033251071",
+      "frozen_candidate_evidence_sha256": "4e6517ee20a76ee7baf6a36194e07b6b4664c48bc3308a22dfe5747033251071",
+      "equal_evidence": true,
+      "equal_first_user_message": true,
+      "equal_first_system_message": false,
+      "frozen_candidate_first_request_sha256": "44565c42d3123d8ab696357d887e3c7d46024ad770f6edc0e6dd8dfbd8d2c0ee",
+      "current_scored_answers": 0
+    },
+    {
+      "id": "W09",
+      "archived_candidate": {
+        "first": {
+          "state": "answer",
+          "invalid_reason": null,
+          "strict_pass": true
+        },
+        "final": {
+          "state": "answer",
+          "invalid_reason": null,
+          "strict_pass": true
+        }
+      },
+      "confirmed_archived_attempts": 1,
+      "archived_evidence_sha256": "3dd1e339ba72f1ad63716e7a840ce246b028e8e4e0aa87d94b023183aeafcefb",
+      "frozen_candidate_evidence_sha256": "3dd1e339ba72f1ad63716e7a840ce246b028e8e4e0aa87d94b023183aeafcefb",
+      "equal_evidence": true,
+      "equal_first_user_message": true,
+      "equal_first_system_message": false,
+      "frozen_candidate_first_request_sha256": "715fdd4643375cf683c09641f83a5ab216c62113306d5e9b8eb6dc97179322c4",
+      "current_scored_answers": 0
+    },
+    {
+      "id": "W10",
+      "archived_candidate": {
+        "first": {
+          "state": "answer",
+          "invalid_reason": null,
+          "strict_pass": true
+        },
+        "final": {
+          "state": "answer",
+          "invalid_reason": null,
+          "strict_pass": true
+        }
+      },
+      "confirmed_archived_attempts": 1,
+      "archived_evidence_sha256": "4fb66226fc2ae4bd8e968995dae8b3b932d7eeeb458397ad98a63967f75eaedb",
+      "frozen_candidate_evidence_sha256": "4fb66226fc2ae4bd8e968995dae8b3b932d7eeeb458397ad98a63967f75eaedb",
+      "equal_evidence": true,
+      "equal_first_user_message": true,
+      "equal_first_system_message": false,
+      "frozen_candidate_first_request_sha256": "f431030aa8c0dc8122e5399ec4ebb97d7c54130f47c34dc909c69fd612cacd82",
+      "current_scored_answers": 0
+    },
+    {
+      "id": "W11",
+      "archived_candidate": {
+        "first": {
+          "state": "refusal",
+          "invalid_reason": null,
+          "strict_pass": true
+        },
+        "final": {
+          "state": "refusal",
+          "invalid_reason": null,
+          "strict_pass": true
+        }
+      },
+      "confirmed_archived_attempts": 1,
+      "archived_evidence_sha256": "515a3cbfc66721d20f1334aea33e3cbe39d38816e90840e7a1c5d77b3dec8011",
+      "frozen_candidate_evidence_sha256": "515a3cbfc66721d20f1334aea33e3cbe39d38816e90840e7a1c5d77b3dec8011",
+      "equal_evidence": true,
+      "equal_first_user_message": true,
+      "equal_first_system_message": false,
+      "frozen_candidate_first_request_sha256": "4345b3eb417079398c4d7aeb4b7f8cdd3cdee604261fad30d4034f606e8c3b5f",
+      "current_scored_answers": 0
+    },
+    {
+      "id": "W12",
+      "archived_candidate": {
+        "first": {
+          "state": "refusal",
+          "invalid_reason": null,
+          "strict_pass": true
+        },
+        "final": {
+          "state": "refusal",
+          "invalid_reason": null,
+          "strict_pass": true
+        }
+      },
+      "confirmed_archived_attempts": 1,
+      "archived_evidence_sha256": "5d8f8395ee8c3d88d0f92cc0c48755d1a7dbb2790c5af4db47a837722197e7b1",
+      "frozen_candidate_evidence_sha256": "f3eaf2b52cd858ab0391a0c9ed1914d6607a3f2c59a62a1a8e494707754ea4c0",
+      "equal_evidence": false,
+      "equal_first_user_message": false,
+      "equal_first_system_message": false,
+      "frozen_candidate_first_request_sha256": "cb852d0240193c953b9ff3ea6429c34752b7a82e37d4f6272acf908687aa3c43",
+      "current_scored_answers": 0
+    },
+    {
+      "id": "W13",
+      "archived_candidate": {
+        "first": {
+          "state": "refusal",
+          "invalid_reason": null,
+          "strict_pass": true
+        },
+        "final": {
+          "state": "refusal",
+          "invalid_reason": null,
+          "strict_pass": true
+        }
+      },
+      "confirmed_archived_attempts": 1,
+      "archived_evidence_sha256": "f8eccbd0eb4f9d5a849414b4dd7916b8aec911c044870eb31afdda80d5450a3c",
+      "frozen_candidate_evidence_sha256": "f8eccbd0eb4f9d5a849414b4dd7916b8aec911c044870eb31afdda80d5450a3c",
+      "equal_evidence": true,
+      "equal_first_user_message": true,
+      "equal_first_system_message": false,
+      "frozen_candidate_first_request_sha256": "9c03df7c91a4ebae5179e7ed54da7304c3509db84546668d7d4d6677eeca8dce",
+      "current_scored_answers": 0
+    },
+    {
+      "id": "W14",
+      "archived_candidate": {
+        "first": {
+          "state": "refusal",
+          "invalid_reason": null,
+          "strict_pass": true
+        },
+        "final": {
+          "state": "refusal",
+          "invalid_reason": null,
+          "strict_pass": true
+        }
+      },
+      "confirmed_archived_attempts": 1,
+      "archived_evidence_sha256": "739242a35a325d8d5c52c86481cdf20614a7ad8269b5b2ef74a7a5075fd89b24",
+      "frozen_candidate_evidence_sha256": "739242a35a325d8d5c52c86481cdf20614a7ad8269b5b2ef74a7a5075fd89b24",
+      "equal_evidence": true,
+      "equal_first_user_message": true,
+      "equal_first_system_message": false,
+      "frozen_candidate_first_request_sha256": "fddfec25fdd4a1f2b00cf52e7c0dab42d488c9058271c33d57fe731b3d8df264",
+      "current_scored_answers": 0
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "state": "CLOSED_NEEDS_ATTENTION",
+  "source_commit": "c49d1c2a870b46681ebaef737d39993c9dd600ec",
+  "private_freeze_sha256": "2f32241f7fc1173524e5fff9a25e1108b5bb0edc96b8652a70637a8a8efc969e",
+  "private_ledger_sha256": "e3ffc69de21b0a2d9584dbd1457ab4484d34ba74b8fc8f03b652736092b8f6f5",
+  "model": "deepseek-v4.1-flash-1017",
+  "region": "cn-beijing",
+  "planned": {"fresh_pairs":24,"R":100,"B":100,"W":14,"http_requests":262,"max_wire_attempts":524,"preflight_exclusions":0,"max_cny":"7.309156"},
+  "offline_preflight": {
+    "paired_question_count":238,
+    "logical_requests_verified":476,
+    "verified_raw_attempts_including_forced_corrections":952,
+    "external_calls":0,
+    "fresh_candidate_source_unions":6,
+    "historical_candidate_and_current_main_messages_identical":214,
+    "historical_control_messages_compared":{"R":100,"B":100},
+    "historical_control_messages_identical":200,
+    "historical_W_user_message_identical":11,
+    "historical_W_user_message_changed":["W06","W07","W12"],
+    "initial_job_exit":1,
+    "initial_job_limit":"The 524-call guard initially counted offline attempts. Its first 48 fresh and 200 R logical requests were retained. The incomplete B attempt was retained privately and excluded from the verified set.",
+    "remaining_B_and_W_job_exit":0
+  },
+  "paid_execution": {
+    "job_exit":1,
+    "reserved_wire_attempts":1,
+    "confirmed_provider_receipts":0,
+    "unknown_outcomes":1,
+    "unknown_input_bound":8507,
+    "unconfirmed_reservation_cny":"0.019062",
+    "receipt_confirmed_cost_cny":"0",
+    "actual_charge_cny":null,
+    "actual_usage_tokens":null,
+    "provider_http_status":null,
+    "model_output_available":false,
+    "api_status":503,
+    "api_error_code":"MODEL_PROVIDER_UNAVAILABLE",
+    "affected_case":"2hop__75213_24779/baseline",
+    "undispatched_logical_requests":261,
+    "scorable_live_answers":0,
+    "historical_live_regressions_assessed":0,
+    "retry_count":0
+  },
+  "local_recovery": {
+    "known_trace_files":"Production stdout, stderr, job events and status, private wire ledger, and empty fresh logical exchange file.",
+    "database_audit_rows":{"document_revision_upload":480,"knowledge_base_create":24,"matching_failed_request":0},
+    "database_response_or_usage_rows":{"run_steps":0,"run_budget_attempts":0,"agent_run_events":0,"case_budget_response_observations":0,"thread_summary_responses":0},
+    "confirmed_cause":"The pre-fix meter calls raise_for_status() before HTTPX attaches the request. A successful raw transport response reproduces this instrumentation failure. The original physical response status and whether it reached this failure point remain unknown.",
+    "provider_contact_during_recovery":false
+  },
+  "decision":"No live performance or regression claim. First attempt permanently closed as UNKNOWN; no replay."
+}
