@@ -215,6 +215,24 @@ def measure(case, arms, *, historical=False):
         deduped = [by_id[chunk_id] for chunk_id in arms["baseline"]["deduped"]]
         result["after_overlap"] = coverage(deduped, sources, gold)
         result["min_retained_chunks_for_all_gold"] = minimum_pool_chunks(deduped, sources, gold)
+        fused = {cid: n for n, cid in enumerate(stage_ids(arms["baseline"], "fused"), 1)}
+        kept = set(arms["baseline"]["deduped"])
+        result["gold_hops"] = [
+            {
+                "original_paragraph": step["paragraph_support_idx"],
+                "matching_chunks": [
+                    {
+                        "fused_rank": fused[r["chunk_id"]],
+                        "rerank": rank,
+                        "retained_after_overlap": r["chunk_id"] in kept,
+                        "chars": [r["locator"]["char_start"], r["locator"]["char_end"]],
+                    }
+                    for rank, r in enumerate(pool, 1)
+                    if r["source_id"] == f"{case['id']}::paragraph::{step['paragraph_support_idx']}"
+                ],
+            }
+            for step in case["question_decomposition"]
+        ]
     fullpool = {r["chunk_id"]: i for i, r in enumerate(pool, 1)}
     for arm, row in arms.items():
         selected = row["selected"]
