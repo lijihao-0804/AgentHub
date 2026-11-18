@@ -220,13 +220,14 @@ class DocumentChunk(Base):
             ondelete="CASCADE",
         ),
         ForeignKeyConstraint(
-            ["workspace_id", "knowledge_base_id", "document_revision_id"],
+            ["workspace_id", "knowledge_base_id", "document_id", "document_revision_id"],
             [
                 "document_revisions.workspace_id",
                 "document_revisions.knowledge_base_id",
+                "document_revisions.document_id",
                 "document_revisions.id",
             ],
-            name="fk_document_chunks_revision_workspace",
+            name="fk_document_chunks_document_revision",
             ondelete="CASCADE",
         ),
         UniqueConstraint("chunk_id", name="uq_document_chunks_chunk_id"),
