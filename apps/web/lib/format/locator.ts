@@ -31,7 +31,7 @@ export function formatLocator(locator: Record<string, unknown> | null, t: Transl
       end: String(locator.end_page),
     });
   }
-  if (locator.type === "text_range") {
+  if (locator.type === "text_range" || locator.type === "source_union") {
     if (typeof locator.table_index === "number" && typeof locator.row_start === "number" && typeof locator.row_end === "number") {
       return t("playground.locator.tableRange", { table: locator.table_index, start: locator.row_start, end: locator.row_end });
     }

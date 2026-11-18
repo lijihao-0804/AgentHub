@@ -1,4 +1,24 @@
-import { apiRequest, ApiError } from "@/lib/api/client";
+import { apiRequest, ApiError, type AuthInput } from "@/lib/api/client";
+
+type CitedBlock = { chunk_id: string; locator: Record<string, unknown>; excerpt: string };
+export type SnapshotAnswer = {
+  answer: string;
+  insufficient_evidence: boolean;
+  citations: (CitedBlock & {
+    id: number; source: string; document_id: string; document_revision_id: string;
+    components?: CitedBlock[];
+  })[];
+};
+
+export function askSnapshot(auth: AuthInput, kb: string, snapshot: string, profile: string, query: string) {
+  return apiRequest<SnapshotAnswer>("/api/v1/knowledge/query", auth.accessToken, {
+    method: "POST",
+    body: {
+      workspace_id: auth.workspaceId, knowledge_base_id: kb, knowledge_snapshot_id: snapshot,
+      model_profile_id: profile, query, output_mode: "PROMPT_JSON",
+    },
+  });
+}
 
 export class RetrievalPlaygroundError extends Error {
   code: string;

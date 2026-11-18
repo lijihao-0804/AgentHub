@@ -16,6 +16,7 @@ import { useFrontendSession } from "@/components/providers/session-provider";
 import { useWorkspaceData } from "@/hooks/use-workspace-data";
 import Select from "@/components/ui/select";
 import { useI18n } from "@/i18n/provider";
+import CitationAnswer from "@/components/knowledge/citation-answer";
 
 type PageState = "initial" | "loading" | "success" | "empty" | "error";
 
@@ -274,6 +275,10 @@ export default function RetrievalPlaygroundPage() {
           </button>
         </div>
       </form>
+      {knowledgeBaseId && snapshotId && (
+        <CitationAnswer key={`${sessionId}:${workspaceId}:${knowledgeBaseId}:${snapshotId}`}
+          knowledgeBaseId={knowledgeBaseId} snapshotId={snapshotId} query={query.trim()} />
+      )}
 
       {knowledgeBases.error && (
         <ErrorState
