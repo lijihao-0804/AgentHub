@@ -100,6 +100,7 @@ def _table_blocks(
     max_chars: int,
 ) -> Iterator[ParsedBlock]:
     headers: dict[int, str] = {}
+    previous_header: dict[int, _PositionedCell] = {}
     carried: list[_PositionedCell] = []
     cell_count = 0
     for row_number, (source_cells, row_locator) in enumerate(rows, start=1):
@@ -125,7 +126,11 @@ def _table_blocks(
         if not any(cell.cell.text.strip() for cell in positioned):
             continue
         positioned.sort(key=lambda cell: cell.column)
-        is_header = all(cell.cell.is_header for cell in positioned)
+        # A blank corner td often spans the two column-header tiers.
+        is_header = all(
+            cell.cell.is_header or (cell.column == 1 and not cell.cell.text.strip())
+            for cell in positioned
+        )
         yield _row_block(
             positioned,
             headers,
@@ -134,9 +139,29 @@ def _table_blocks(
             max_chars=max_chars,
         )
         if is_header:
+            next_headers = {}
+            next_positions = {}
+            derived_chars = 0
             for cell in positioned:
+                parent = previous_header.get(cell.column)
+                label = cell.cell.text
+                if parent and parent.column <= cell.column and cell.column_end <= parent.column_end:
+                    inherited = headers[cell.column]
+                    if parent == cell:
+                        label = inherited  # a rowspan carried from the preceding tier
+                    elif parent.cell.colspan > cell.cell.colspan and inherited and label:
+                        # One wide heading may fan out into many large synthesized labels.
+                        derived_chars += len(inherited) + 3 + len(label)
+                        if derived_chars > max_chars:
+                            raise text_limit()
+                        label = f"{inherited} / {label}"
                 for col in range(cell.column, cell.column_end + 1):
-                    headers[col] = cell.cell.text
+                    next_headers[col] = label
+                    next_positions[col] = cell
+            headers = next_headers
+            previous_header = next_positions
+        else:
+            previous_header.clear()
     if carried:
         raise DocumentParseError("PARSE_FAILED", "A merged cell extends past the table.")
 

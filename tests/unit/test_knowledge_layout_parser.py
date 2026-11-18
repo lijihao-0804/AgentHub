@@ -92,7 +92,7 @@ def test_mineru_flat_and_file_parse_envelope_keep_order_geometry_and_merged_cell
     assert header1.locator["cells"][1]["column_end"] == 3
     assert _cell_values(header2) == ["Region", "Q1", "Q2"]
     assert _cell_values(west) == ["West", "10", "12"]
-    assert more.text == "Region: West | Q1: A&B Ltd | Q2: 21"
+    assert more.text == "Region: West | Revenue / Q1: A&B Ltd | Revenue / Q2: 21"
     assert more.locator["cells"][0]["row"] == 3
     assert (more.locator["page"], more.locator["block_index"], more.locator["row"]) == (3, 1, 4)
     assert more.locator["bbox"] == [10, 20, 400, 600]
@@ -103,6 +103,43 @@ def test_mineru_flat_and_file_parse_envelope_keep_order_geometry_and_merged_cell
         eq.locator["block_index"],
     ] == [2, 3, 4]
     assert "example.invalid" not in str(parsed.blocks)
+
+
+def test_group_headers_qualify_repeated_fields_and_reset_after_data() -> None:
+    table = (
+        '<table><tr><td rowspan="2"></td><th colspan="2">2025</th>'
+        '<th colspan="2">2026</th></tr>'
+        "<tr><th>Net</th><th>Gross</th><th>Net</th><th>Gross</th></tr>"
+        '<tr><th scope="row">East</th><td>2</td><td>3</td><td>4</td><td>5</td></tr>'
+        '<tr><th>Name</th><th colspan="2">New group</th></tr>'
+        '<tr><td>West</td><td colspan="2">6</td><td>7</td></tr></table>'
+    )
+    result = _parse(_json([{"page_idx": 3, "type": "table", "table_body": table}]))
+    east, west = result.blocks[2], result.blocks[4]
+    assert east.text == "East | 2025 / Net: 2 | 2025 / Gross: 3 | 2026 / Net: 4 | 2026 / Gross: 5"
+    assert _cell_values(east) == ["East", "2", "3", "4", "5"]
+    assert east.locator["page"] == 4 and east.locator["cells"][3]["column"] == 4
+    assert west.text == "Name: West | New group: 6 | 7"
+
+
+def test_cross_group_merged_value_has_no_invented_label() -> None:
+    table = (
+        '<table><tr><th colspan="2">Assets</th><th colspan="2">Liabilities</th></tr>'
+        "<tr><th>Q1</th><th>Q2</th><th>Q1</th><th>Q2</th></tr>"
+        '<tr><td>1</td><td colspan="2">undivided</td><td>4</td></tr></table>'
+    )
+    row = _parse(_json([{"page_idx": 0, "type": "table", "table_body": table}])).blocks[-1]
+    assert row.text == "Assets / Q1: 1 | undivided | Liabilities / Q2: 4"
+    assert (row.locator["cells"][1]["column"], row.locator["cells"][1]["column_end"]) == (2, 3)
+
+
+def test_wide_group_header_cannot_amplify_past_the_text_limit() -> None:
+    from packages.knowledge.table_parser import html_table_blocks
+
+    table = "<table><tr><th colspan='4'>Wide</th></tr><tr>" + "<th>X</th>" * 4 + "</tr></table>"
+    with pytest.raises(DocumentParseError) as caught:
+        list(html_table_blocks(table, {}, max_chars=26))
+    assert caught.value.code == "RESOURCE_LIMIT_EXCEEDED"
 
 
 @pytest.mark.parametrize(
