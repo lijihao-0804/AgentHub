@@ -1,0 +1,57 @@
+{
+  "eligible": [
+    {
+      "id": "2hop__37658_68056",
+      "legal_options": 13,
+      "best_full": 1,
+      "first_full": 1,
+      "best_visible": 2,
+      "first_visible": 2
+    },
+    {
+      "id": "2hop__287642_42734",
+      "legal_options": 14,
+      "best_full": 2,
+      "first_full": 2,
+      "best_visible": 2,
+      "first_visible": 2
+    },
+    {
+      "id": "2hop__161005_489272",
+      "legal_options": 13,
+      "best_full": 2,
+      "first_full": 1,
+      "best_visible": 2,
+      "first_visible": 1
+    },
+    {
+      "id": "2hop__54013_93263",
+      "legal_options": 14,
+      "best_full": 2,
+      "first_full": 2,
+      "best_visible": 2,
+      "first_visible": 2
+    },
+    {
+      "id": "2hop__224187_88123",
+      "legal_options": 14,
+      "best_full": 2,
+      "first_full": 2,
+      "best_visible": 2,
+      "first_visible": 2
+    },
+    {
+      "id": "2hop__435776_81382",
+      "legal_options": 14,
+      "best_full": 1,
+      "first_full": 1,
+      "best_visible": 2,
+      "first_visible": 1
+    }
+  ],
+  "pool_complete_but_no_slot": [
+    "2hop__75213_24779",
+    "2hop__767960_92444",
+    "2hop__136704_91206"
+  ]
+}
