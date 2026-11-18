@@ -215,7 +215,7 @@ def parse_frozen_agent_spec(
     memory_value = runtime_value.get("memory", _DEFAULT_MEMORY)
     if not isinstance(memory_value, Mapping):
         raise _invalid_binding()
-    allowed_memory_keys = set(_DEFAULT_MEMORY) | {"max_memory_tokens", "selection_policy"}
+    allowed_memory_keys = set(_DEFAULT_MEMORY) | {"max_memory_tokens", "selection_policy", "scope"}
     if schema_version in {3, 4, 5}:
         allowed_memory_keys.add("max_memory_tokens_source")
     if not set(memory_value).issubset(allowed_memory_keys):
@@ -226,6 +226,10 @@ def parse_frozen_agent_spec(
         if not isinstance(value, bool):
             raise _invalid_binding()
         memory[key] = value
+    if "scope" in memory_value:
+        if memory_value["scope"] not in ("USER", "AGENT") or not memory["long_term_memory"]:
+            raise _invalid_binding()
+        memory["scope"] = memory_value["scope"]
     max_memory_tokens = memory_value.get("max_memory_tokens")
     if max_memory_tokens is not None and (
         isinstance(max_memory_tokens, bool)

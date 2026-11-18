@@ -66,6 +66,7 @@ async def _seed_run(
     agent_id: UUID,
     *,
     input_text: str = "Release day is Friday",
+    memory_scope: str | None = None,
     max_attempts: int = 1,
     fallback: bool = False,
 ) -> tuple[AgentRun, UUID]:
@@ -116,6 +117,8 @@ async def _seed_run(
             "tools": [],
             "runtime": {"memory": {"long_term_memory": True}},
         }
+        if memory_scope:
+            resolved["runtime"]["memory"]["scope"] = memory_scope
         if fallback:
             alternate = ModelProfile(
                 workspace_id=workspace_id,
@@ -387,13 +390,17 @@ async def test_running_job_with_candidates_records_without_model_call(
     assert adapter.calls == 0
     rows = await _memory_rows(db_factory, workspace_id, agent_id)
     assert len(rows) == 1 and rows[0].salience == 1
+    assert rows[0].owner_user_id is None
     assert (await _job(db_factory, workspace_id, run.id)).status == "COMPLETED"
 
 
 @pytest.mark.asyncio
-async def test_new_job_sends_once_and_redelivery_never_sends_again(db_factory, monkeypatch) -> None:
+@pytest.mark.parametrize("scope", [None, "USER", "AGENT"])
+async def test_new_job_sends_once_and_redelivery_never_sends_again(
+    db_factory, monkeypatch, scope
+) -> None:
     workspace_id, agent_id = await _seed_workspace(db_factory)
-    run, _ = await _seed_run(db_factory, workspace_id, agent_id)
+    run, _ = await _seed_run(db_factory, workspace_id, agent_id, memory_scope=scope)
     adapter = _RecordingAdapter(
         '{"memories": [{"content": "release day is Friday", '
         '"kind": "PREFERENCE", "evidence": "Release day is Friday"}]}'
@@ -426,7 +433,30 @@ async def test_new_job_sends_once_and_redelivery_never_sends_again(db_factory, m
     assert adapter.calls == 1
     rows = await _memory_rows(db_factory, workspace_id, agent_id)
     assert len(rows) == 1 and rows[0].salience == 1
+    assert rows[0].owner_user_id == (run.created_by if scope == "USER" else None)
     assert (await _job(db_factory, workspace_id, run.id)).status == "COMPLETED"
+
+    # A fresh turn in a different thread now resolves the stored item and
+    # replays the same row from its persisted, hashed selection.
+    from types import SimpleNamespace
+
+    from packages.agent_runtime.frozen import parse_frozen_agent_spec
+    from packages.agent_runtime.runtime import _AgentRunGraph
+
+    later, _ = await _seed_run(db_factory, workspace_id, agent_id)
+    async with db_factory() as session:
+        version = await session.get(AgentVersion, later.agent_version_id)
+        spec = parse_frozen_agent_spec(version.resolved_spec, workspace_id=workspace_id)
+    graph = _AgentRunGraph.__new__(_AgentRunGraph)
+    graph.run = later
+    graph.service = SimpleNamespace(memory_selector=SqlAlchemyMemoryStore(db_factory),
+                                    session_factory=db_factory)
+    first, _ = await graph._memories(spec, workspace_id=workspace_id, agent_id=agent_id)
+    replay, _ = await graph._memories(spec, workspace_id=workspace_id, agent_id=agent_id)
+    assert first == replay and "release day is Friday" in first[0].content
+    async with db_factory() as session:
+        persisted = await session.get(AgentRun, later.id)
+        assert persisted.effective_memory_snapshot["memory_ids"] == [str(rows[0].id)]
 
 
 @pytest.mark.asyncio

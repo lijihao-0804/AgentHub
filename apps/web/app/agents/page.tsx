@@ -27,6 +27,7 @@ const EMPTY_FORM = {
   system_prompt: "",
   model_profile_id: "",
   knowledge_binding_mode: "LATEST" as KnowledgeBindingMode,
+  memoryScope: "USER" as "USER" | "AGENT" | "OFF",
   max_attempts: "",
   max_steps: "",
   max_tool_calls: "",
@@ -150,6 +151,9 @@ function AgentCatalog() {
     event.preventDefault();
     if (!canCreate) return;
     const runtimeConfig = {
+      memory: form.memoryScope === "OFF"
+        ? { long_term_memory: false }
+        : { long_term_memory: true, scope: form.memoryScope },
       ...(form.max_steps ? { max_steps: Number(form.max_steps) } : {}),
       ...(form.max_tool_calls ? { max_tool_calls: Number(form.max_tool_calls) } : {}),
     };
@@ -161,7 +165,7 @@ function AgentCatalog() {
         model_profile_id: form.model_profile_id,
         knowledge_binding_mode: form.knowledge_binding_mode,
         ...(form.max_attempts ? { model_retry_policy: { max_attempts: Number(form.max_attempts) } } : {}),
-        ...(Object.keys(runtimeConfig).length > 0 ? { runtime_config: runtimeConfig } : {}),
+        runtime_config: runtimeConfig,
       }),
     );
     if (result) {
@@ -296,6 +300,20 @@ function AgentCatalog() {
                   ]}
                 />
                 <span className="state-hint">{t("agents.bindingModeHint")}</span>
+              </label>
+              <label>
+                {t("agents.memoryScope")}
+                <Select
+                  value={form.memoryScope}
+                  onChange={(next) => setForm((current) => ({
+                    ...current, memoryScope: next === "AGENT" || next === "OFF" ? next : "USER",
+                  }))}
+                  options={[
+                    { value: "USER", label: t("agents.memoryPrivate") },
+                    { value: "AGENT", label: t("agents.memoryShared") },
+                    { value: "OFF", label: t("agents.memoryOff") },
+                  ]}
+                />
               </label>
             </div>
             <label>

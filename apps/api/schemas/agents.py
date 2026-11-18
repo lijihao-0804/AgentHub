@@ -47,16 +47,17 @@ class ContextBudgetRequest(BaseModel):
 class MemoryConfigRequest(BaseModel):
     """Per-agent memory switches.
 
-    Both default off, and the whole block is dropped from the published spec
-    when neither is on, so an agent that never asks for memory publishes the
-    same bytes it published before this field existed. ``selection_policy`` is
-    an explicit opt-in inside long-term memory; leaving it out preserves the
+    Creating a draft without this block enables user-scoped long-term memory.
+    An explicit empty block disables both features. Historical published
+    versions without a scope retain their original shared or disabled behavior.
+    ``selection_policy`` is an explicit opt-in inside long-term memory. Leaving it out preserves the
     legacy selector output unchanged.
     """
 
     model_config = ConfigDict(extra="forbid")
 
     thread_history_search: bool = False
+    scope: Literal["USER", "AGENT"] | None = None
     long_term_memory: bool = False
     max_memory_tokens: int | None = Field(default=None, ge=1, strict=True)
     max_memory_tokens_source: Literal["UNSET", "DEFAULT", "CUSTOM"] | None = None
@@ -303,6 +304,7 @@ class AgentMemoryResponse(BaseModel):
     content: str
     kind: Literal["FACT", "PREFERENCE", "DECISION", "CONSTRAINT"]
     status: Literal["ACTIVE", "SUPERSEDED", "INVALIDATED"]
+    owner_user_id: UUID | None = None
     superseded_by_id: UUID | None
     salience: int
     provenance: dict[str, Any]

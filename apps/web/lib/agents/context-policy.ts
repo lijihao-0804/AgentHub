@@ -65,6 +65,7 @@ export type RuntimeLimitDraft = {
 export type MemoryDraft = {
   thread_history_search: boolean;
   long_term_memory: boolean;
+  scope?: "USER" | "AGENT";
   selection_policy: "" | "lexical_overlap_v1";
 };
 
@@ -121,6 +122,7 @@ export function defaultMemoryDraft(): MemoryDraft {
   return {
     thread_history_search: false,
     long_term_memory: false,
+    scope: "USER",
     selection_policy: "",
   };
 }
@@ -131,6 +133,7 @@ export function memoryDraftFromConfig(
   return {
     thread_history_search: memory?.thread_history_search === true,
     long_term_memory: memory?.long_term_memory === true,
+    scope: memory?.scope ?? (memory?.long_term_memory ? "AGENT" : "USER"),
     selection_policy:
       memory?.selection_policy === "lexical_overlap_v1"
         ? "lexical_overlap_v1"
@@ -453,7 +456,9 @@ export function mergeRuntimeConfigDraft({
     } else {
       delete memory.selection_policy;
     }
+    if (memoryDraft.long_term_memory && memoryDraft.scope) memory.scope = memoryDraft.scope;
     if (!memoryDraft.long_term_memory) {
+      delete memory.scope;
       delete memory.max_memory_tokens;
       delete memory.max_memory_tokens_source;
     }

@@ -119,6 +119,7 @@ export type MemorySelectionPolicy = "lexical_overlap_v1";
 export type MemoryConfig = {
   thread_history_search?: boolean;
   long_term_memory?: boolean;
+  scope?: "USER" | "AGENT";
   max_memory_tokens?: number | null;
   max_memory_tokens_source?: ConfigurationSource | null;
   selection_policy?: MemorySelectionPolicy | null;
@@ -535,6 +536,7 @@ export type AgentMemory = {
   content: string;
   kind: AgentMemoryKind;
   status: AgentMemoryStatus;
+  owner_user_id?: string | null;
   superseded_by_id: string | null;
   salience: number;
   provenance: Record<string, unknown>;

@@ -79,17 +79,8 @@ MAX_CONTEXT_BUDGET: dict[str, int] = {
 
 # Memory is opt-in per agent, and every flag defaults off.
 #
-# Off by default is not timidity. Both flags change what the model is given
-# without the operator asking for it on this turn: one lets the agent reach back
-# into a thread the window already dropped, the other lets facts written during
-# an earlier run reappear in this one. An agent whose behaviour was measured
-# without either must keep behaving that way until someone decides otherwise,
-# and an A/B between memory on and memory off is only constructible if off is a
-# real, published state rather than the absence of a decision.
-#
-# The block is also omitted from the published spec entirely when every flag is
-# false, so turning nothing on leaves the resolved spec byte-identical to what
-# the same draft produced before this key existed.
+# Defaults for omitted fields in existing drafts and immutable versions. New
+# drafts receive a user-scoped policy explicitly at creation.
 DEFAULT_MEMORY_CONFIG: dict[str, bool] = {
     "thread_history_search": False,
     "long_term_memory": False,

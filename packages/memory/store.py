@@ -96,7 +96,13 @@ class SqlAlchemyMemoryStore:
     # -- read ------------------------------------------------------------
 
     async def select(
-        self, *, workspace_id: UUID, agent_id: UUID, query: str, limit: int
+        self,
+        *,
+        workspace_id: UUID,
+        agent_id: UUID,
+        query: str,
+        limit: int,
+        owner_user_id: UUID | None = None,
     ) -> tuple[SelectedMemory, ...]:
         if limit <= 0:
             return ()
@@ -109,6 +115,7 @@ class SqlAlchemyMemoryStore:
                     .where(
                         WorkspaceMemory.workspace_id == workspace_id,
                         WorkspaceMemory.agent_id == agent_id,
+                        WorkspaceMemory.owner_user_id == owner_user_id,
                         WorkspaceMemory.status == ACTIVE,
                         or_(
                             WorkspaceMemory.expires_at.is_(None),
@@ -133,6 +140,8 @@ class SqlAlchemyMemoryStore:
         *,
         workspace_id: UUID,
         memory_ids: tuple[UUID, ...],
+        agent_id: UUID | None = None,
+        owner_user_id: UUID | None = None,
         memory_content_hashes: dict[UUID | str, str] | None = None,
     ) -> tuple[SelectedMemory, ...]:
         """Re-read a frozen selection, in the order it was frozen.
@@ -155,6 +164,8 @@ class SqlAlchemyMemoryStore:
                     select(WorkspaceMemory).where(
                         WorkspaceMemory.workspace_id == workspace_id,
                         WorkspaceMemory.id.in_(memory_ids),
+                        WorkspaceMemory.owner_user_id == owner_user_id,
+                        *((WorkspaceMemory.agent_id == agent_id,) if agent_id else ()),
                     )
                 )
             ).all()
@@ -266,6 +277,7 @@ class SqlAlchemyMemoryStore:
         thread_id: UUID | None,
         source_run_id: UUID | None,
         candidates: tuple[MemoryCandidate, ...],
+        owner_user_id: UUID | None = None,
     ) -> tuple[UUID, ...]:
         """Write the surviving candidates and return what was created.
 
@@ -330,6 +342,7 @@ class SqlAlchemyMemoryStore:
                         select(WorkspaceMemory).where(
                             WorkspaceMemory.workspace_id == workspace_id,
                             WorkspaceMemory.agent_id == agent_id,
+                            WorkspaceMemory.owner_user_id == owner_user_id,
                             WorkspaceMemory.status == ACTIVE,
                             WorkspaceMemory.content_hash.in_(
                                 [content_hash(item.content) for item in accepted]
@@ -362,6 +375,7 @@ class SqlAlchemyMemoryStore:
                     id=uuid4(),
                     workspace_id=workspace_id,
                     agent_id=agent_id,
+                    owner_user_id=owner_user_id,
                     thread_id=thread_id,
                     source_run_id=source_run_id,
                     content=candidate.content,
@@ -393,6 +407,7 @@ class SqlAlchemyMemoryStore:
                         select(WorkspaceMemory).where(
                             WorkspaceMemory.workspace_id == workspace_id,
                             WorkspaceMemory.agent_id == agent_id,
+                            WorkspaceMemory.owner_user_id == owner_user_id,
                             WorkspaceMemory.status == ACTIVE,
                             WorkspaceMemory.content_hash == digest,
                         )

@@ -9,7 +9,8 @@ absent rather than as forbidden.
 Reading shared agent memory requires the existing ``agent_run`` or
 ``agent_edit`` permission. ``workspace_read`` alone is intentionally not
 enough because memory content is operational context, not general workspace
-metadata. Invalidation and reactivation still require ``agent_edit``.
+metadata. Users can invalidate or reactivate their own private entries. Shared
+entries require ``agent_edit`` to modify.
 
 Nothing here deletes. ``invalidate`` is how a human says "stop using this", and
 the row stays so that a run which already used it still explains itself.
@@ -20,7 +21,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from uuid import UUID
 
-from sqlalchemy import func, select, update
+from sqlalchemy import func, or_, select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -86,6 +87,10 @@ class MemoryAdminService:
         conditions = [
             WorkspaceMemory.workspace_id == workspace_id,
             WorkspaceMemory.agent_id == agent_id,
+            or_(
+                WorkspaceMemory.owner_user_id.is_(None),
+                WorkspaceMemory.owner_user_id == UUID(context.user_id),
+            ),
         ]
         if status is not None:
             conditions.append(WorkspaceMemory.status == status)
@@ -129,10 +134,12 @@ class MemoryAdminService:
         agent_id: UUID,
         memory_id: UUID,
     ) -> WorkspaceMemory:
-        self._require_permission(context, "agent_edit")
+        self._require_any_permission(context, "agent_run", "agent_edit")
         memory = await self._require_memory(
             session, context, agent_id=agent_id, memory_id=memory_id
         )
+        if memory.owner_user_id is None:
+            self._require_permission(context, "agent_edit")
         if memory.status == INVALIDATED:
             return memory
         await session.execute(
@@ -155,10 +162,12 @@ class MemoryAdminService:
         agent_id: UUID,
         memory_id: UUID,
     ) -> WorkspaceMemory:
-        self._require_permission(context, "agent_edit")
+        self._require_any_permission(context, "agent_run", "agent_edit")
         memory = await self._require_memory(
             session, context, agent_id=agent_id, memory_id=memory_id
         )
+        if memory.owner_user_id is None:
+            self._require_permission(context, "agent_edit")
         if memory.status != INVALIDATED:
             raise AgentHubError(
                 "MEMORY_NOT_INVALIDATED",
@@ -213,6 +222,10 @@ class MemoryAdminService:
             select(WorkspaceMemory).where(
                 WorkspaceMemory.workspace_id == workspace_id,
                 WorkspaceMemory.agent_id == agent_id,
+                or_(
+                    WorkspaceMemory.owner_user_id.is_(None),
+                    WorkspaceMemory.owner_user_id == UUID(context.user_id),
+                ),
                 WorkspaceMemory.id == memory_id,
             )
         )

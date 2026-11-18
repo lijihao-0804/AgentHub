@@ -32,13 +32,23 @@ logger = logging.getLogger(__name__)
 # sending the whole thing would make a background job cost as much as the run.
 MAX_PROMPT_INPUT = 2_000
 
-EXTRACTION_SYSTEM_PROMPT = (
+SHARED_MEMORY_INSTRUCTIONS = (
     "You extract durable shared workspace memories from one user's message.\n"
     "\n"
     "Remember ONLY team, project, or workflow statements that will still be true "
     "and useful in a different conversation next week: shared preferences, "
     "project constraints, decisions, and durable operational facts. This is "
     "workspace-scoped memory, not personal user memory.\n"
+)
+
+PRIVATE_MEMORY_INSTRUCTIONS = (
+    "Extract durable work preferences, project constraints and decisions that "
+    "this user explicitly stated for future conversations with this agent. "
+    "Keep only facts useful beyond this turn. Exclude credentials, secrets, "
+    "health information and other sensitive personal information.\n"
+)
+
+EXTRACTION_FORMAT = (
     "\n"
     "Do NOT remember: anything specific to this one question, any assistant "
     "answer or reasoning, greetings, temporary state, guesses, personal profile "
@@ -61,6 +71,9 @@ EXTRACTION_SYSTEM_PROMPT = (
 )
 
 
+EXTRACTION_SYSTEM_PROMPT = SHARED_MEMORY_INSTRUCTIONS + EXTRACTION_FORMAT
+
+
 @dataclass(frozen=True, slots=True)
 class TurnForExtraction:
     user_input: str
@@ -74,10 +87,11 @@ def _excerpt(value: str, limit: int) -> str:
     return value if len(value) <= limit else value[: limit - 1] + "…"
 
 
-def extraction_request(turn: TurnForExtraction) -> ModelRequest:
+def extraction_request(turn: TurnForExtraction, *, private: bool = False) -> ModelRequest:
+    instructions = PRIVATE_MEMORY_INSTRUCTIONS if private else SHARED_MEMORY_INSTRUCTIONS
     return ModelRequest(
         messages=(
-            ModelMessage(role="system", content=EXTRACTION_SYSTEM_PROMPT),
+            ModelMessage(role="system", content=instructions + EXTRACTION_FORMAT),
             ModelMessage(
                 role="user",
                 content=json.dumps(

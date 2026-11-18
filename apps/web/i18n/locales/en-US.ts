@@ -1856,16 +1856,18 @@ export const enUS = {
     toolsHint: "Bindings are saved as a complete collection.",
     runtimeHint: "Leave a field blank to fall back to the server default.",
     memoryTitle: "Memory",
-    memoryHint:
-      "Off for every agent until you turn it on here. Long-term memory is shared operational context for this agent within the workspace, not a personal profile. Turning a switch on changes behaviour, so it changes the published spec hash; leaving both off publishes exactly what this agent published before memory existed.",
+    memoryHint: "New agents use separate long-term memory for each user. Publishing a scope change selects a different memory pool for that version. Existing entries keep their visibility.",
     memoryThreadSearch: "Let the agent search earlier turns of the conversation",
-    memoryLongTerm: "Let the agent use shared workspace memory",
+    memoryLongTerm: "Enable long-term memory across conversations",
+    memoryOff: "Long-term memory off",
+    memoryScope: "Long-term memory visibility",
+    memoryPrivate: "Private to each user of this agent",
+    memoryShared: "Shared among workspace users of this agent",
     memoryThreadSearchHint:
       "Only the most recent turns are replayed into each run. With conversation search on, the agent gets a tool that looks up the turns the window dropped instead of answering that it does not remember. It reads only this agent's own threads, and has no effect on single-shot Playground runs.",
     memory: {
-      hint: "Shared project and workflow context this agent kept from earlier workspace conversations. Memory is written asynchronously after a turn has answered, so a new memory may take a moment to appear; a successful run does not guarantee that a memory was created.",
-      disabledHint:
-        "Long-term memory is off for this agent, so nothing new will be written. Anything listed below was learned while it was on, and is still shown so past runs remain explainable.",
+      hint: "Each run reads the memory pool chosen in its published agent version. Private entries are visible only to their owner. Answers and conversation history retain their workspace permissions. A background worker saves eligible statements after a turn.",
+      disabledHint: "Long-term memory is off in this draft. Published versions keep their own settings. You can still review or invalidate earlier entries.",
       search: "Search",
       searchPlaceholder: "A phrase from the memory",
       statusFilter: "Status",

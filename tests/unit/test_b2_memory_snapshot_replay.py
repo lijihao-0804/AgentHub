@@ -50,11 +50,14 @@ class _RecordingSelector:
         self.load_calls: list[tuple[UUID, ...]] = []
         self.load_hashes: list[dict[UUID, str] | None] = []
 
-    async def select(self, *, workspace_id, agent_id, query, limit):  # noqa: ANN001
+    async def select(self, *, workspace_id, agent_id, query, limit, owner_user_id=None):  # noqa: ANN001
         self.select_calls += 1
         return self._memories[:limit]
 
-    async def load(self, *, workspace_id, memory_ids, memory_content_hashes=None):  # noqa: ANN001
+    async def load(
+        self, *, workspace_id, memory_ids, memory_content_hashes=None,
+        agent_id=None, owner_user_id=None,
+    ):  # noqa: ANN001
         self.load_calls.append(tuple(memory_ids))
         self.load_hashes.append(memory_content_hashes)
         by_id = {item.id: item for item in self._memories}
@@ -238,7 +241,10 @@ async def test_a_memory_invalidated_after_the_run_started_is_still_replayed() ->
 @pytest.mark.asyncio
 async def test_hash_mismatch_fails_closed_with_stable_error() -> None:
     class _BrokenSelector(_RecordingSelector):
-        async def load(self, *, workspace_id, memory_ids, memory_content_hashes=None):
+        async def load(
+            self, *, workspace_id, memory_ids, memory_content_hashes=None,
+            agent_id=None, owner_user_id=None,
+        ):
             raise MemorySnapshotIntegrityError("hash mismatch")
 
     memory = _some(1)[0]
@@ -291,7 +297,10 @@ async def test_hash_aware_snapshot_never_retries_as_id_only() -> None:
     calls: list[dict | None] = []
 
     class _StrictSelector(_RecordingSelector):
-        async def load(self, *, workspace_id, memory_ids, memory_content_hashes=None):  # noqa: ANN001
+        async def load(
+            self, *, workspace_id, memory_ids, memory_content_hashes=None,
+            agent_id=None, owner_user_id=None,
+        ):  # noqa: ANN001
             calls.append(memory_content_hashes)
             if memory_content_hashes is None:
                 raise AssertionError("hashed snapshots must never use the ID-only path")

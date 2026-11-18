@@ -305,6 +305,8 @@ async def _extract_owned_memories(
             if not spec.runtime.get("memory", {}).get("long_term_memory", False):
                 await finish(status="SKIPPED")
                 return
+            private = spec.runtime["memory"].get("scope") == "USER"
+            owner_user_id = run.created_by if private else None
             turn = TurnForExtraction(user_input=run.input_text)
             agent_id = version.agent_id
             thread_id = run.thread_id
@@ -345,7 +347,7 @@ async def _extract_owned_memories(
             stored_payload = persisted_job.candidate_payload
 
         if stored_payload is None:
-            request = extraction_request(turn)
+            request = extraction_request(turn, private=owner_user_id is not None)
             admitted = ContextBudgetPolicy(
                 spec, ContextBudgetConfig(**spec.runtime["context_budget"])
             ).admit(
@@ -437,6 +439,7 @@ async def _extract_owned_memories(
             thread_id=thread_id,
             source_run_id=run_id,
             candidates=candidates,
+            owner_user_id=owner_user_id,
         )
         logger.info(
             "memory_extraction_completed",

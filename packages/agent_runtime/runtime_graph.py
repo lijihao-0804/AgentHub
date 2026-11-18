@@ -449,6 +449,10 @@ class _AgentRunGraph:
             return [], None
         if selector is None:
             return [], None
+        private = memory_config.get("scope") == "USER"
+        owner_user_id = self.run.created_by if private else None
+        if private and not isinstance(owner_user_id, UUID):
+            raise AgentHubError("AGENT_RUN_FORBIDDEN", "Private memory requires a run owner.", 403)
         selection_policy = memory_config.get("selection_policy")
         if (
             selection_policy is not None
@@ -499,10 +503,16 @@ class _AgentRunGraph:
                     selected = await selector.load(
                         workspace_id=workspace_id,
                         memory_ids=memory_ids,
+                        agent_id=agent_id, owner_user_id=owner_user_id,
                         memory_content_hashes=dict(memory_hashes),
                     )
                 else:
-                    selected = await selector.load(workspace_id=workspace_id, memory_ids=memory_ids)
+                    selected = await selector.load(
+                        workspace_id=workspace_id,
+                        memory_ids=memory_ids,
+                        agent_id=agent_id,
+                        owner_user_id=owner_user_id,
+                    )
             except MemorySnapshotIntegrityError as error:
                 raise AgentHubError(
                     "AGENT_MEMORY_SNAPSHOT_INTEGRITY_ERROR",
@@ -515,6 +525,7 @@ class _AgentRunGraph:
                 agent_id=agent_id,
                 query=self.run.input_text,
                 limit=MAX_INJECTED_MEMORIES,
+                owner_user_id=owner_user_id,
             )
             try:
                 selected = apply_memory_selection_policy(
@@ -546,7 +557,7 @@ class _AgentRunGraph:
             }
         if not selected:
             return [], metadata
-        return [_memory_message(selected)], metadata
+        return [_memory_message(selected, private=private)], metadata
 
     async def _freeze_memory_snapshot(
         self, selected: tuple[SelectedMemory, ...], *, workspace_id: UUID

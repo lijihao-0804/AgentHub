@@ -352,3 +352,65 @@ async def test_postgres_collision_savepoint_preserves_siblings(db_factory) -> No
         await winner_engine.dispose()
         await writer_engine.dispose()
         await observer_engine.dispose()
+
+
+@pytest.mark.asyncio
+async def test_private_memory_isolation_replay_and_owner_cleanup(db_factory) -> None:
+    from types import SimpleNamespace
+
+    from packages.core.errors.exceptions import AgentHubError
+    from packages.memory.service import MemoryAdminService
+
+    workspace_id, agent_id = await _seed_workspace(db_factory)
+    foreign_workspace, foreign_agent = await _seed_workspace(db_factory)
+    store = SqlAlchemyMemoryStore(db_factory)
+    admin = MemoryAdminService()
+    owner, colleague = uuid4(), uuid4()
+    candidate = MemoryCandidate(content="Release day is Friday", kind="FACT")
+    record = dict(
+        workspace_id=workspace_id,
+        agent_id=agent_id,
+        thread_id=None,
+        source_run_id=None,
+        candidates=(candidate,),
+    )
+    query = dict(workspace_id=workspace_id, agent_id=agent_id, query="release", limit=8)
+    own, other, shared = [
+        (await store.record(**record, owner_user_id=user))[0] for user in (owner, colleague, None)
+    ]
+    assert len({own, other, shared}) == 3
+    for user, expected in ((owner, own), (colleague, other), (None, shared)):
+        assert [item.id for item in await store.select(**query, owner_user_id=user)] == [expected]
+    for keys in ({"agent_id": foreign_agent}, {"workspace_id": foreign_workspace}):
+        assert not await store.select(**(query | keys), owner_user_id=owner)
+    with pytest.raises(MemorySnapshotIntegrityError):
+        await store.load(
+            workspace_id=workspace_id,
+            agent_id=agent_id,
+            owner_user_id=colleague,
+            memory_ids=(own,),
+            memory_content_hashes={own: content_hash(candidate.content)},
+        )
+    context = SimpleNamespace(
+        workspace_id=str(workspace_id), user_id=str(owner), permissions={"agent_run"}
+    )
+    async with db_factory() as session:
+        page = await admin.list_for_agent(session, context, agent_id=agent_id)
+        assert page.total == 2 and {row.id for row in page.items} == {own, shared}
+        for memory_id, status in ((other, 404), (shared, 403)):
+            with pytest.raises(AgentHubError) as denied:
+                await admin.invalidate(session, context, agent_id=agent_id, memory_id=memory_id)
+            assert denied.value.status_code == status
+        await admin.invalidate(session, context, agent_id=agent_id, memory_id=own)
+        assert not await store.select(**query, owner_user_id=owner)
+        assert [
+            item.id
+            for item in await store.load(
+                workspace_id=workspace_id,
+                agent_id=agent_id,
+                owner_user_id=owner,
+                memory_ids=(own,),
+            )
+        ] == [own]
+        await admin.reactivate(session, context, agent_id=agent_id, memory_id=own)
+        assert [item.id for item in await store.select(**query, owner_user_id=owner)] == [own]

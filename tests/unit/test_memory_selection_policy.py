@@ -202,12 +202,15 @@ class _RecordingSelector:
         self.select_calls = 0
         self.load_calls: list[tuple[UUID, ...]] = []
 
-    async def select(self, *, workspace_id, agent_id, query, limit):  # noqa: ANN001
+    async def select(self, *, workspace_id, agent_id, query, limit, owner_user_id=None):  # noqa: ANN001
         del workspace_id, agent_id, query
         self.select_calls += 1
         return self.memories[:limit]
 
-    async def load(self, *, workspace_id, memory_ids, memory_content_hashes=None):  # noqa: ANN001
+    async def load(
+        self, *, workspace_id, memory_ids, memory_content_hashes=None,
+        agent_id=None, owner_user_id=None,
+    ):  # noqa: ANN001
         del workspace_id, memory_content_hashes
         self.load_calls.append(tuple(memory_ids))
         by_id = {item.id: item for item in self.memories}

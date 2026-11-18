@@ -534,7 +534,8 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
    * by the backend when an identical memory has since become active.
    */
   async function overrideMemory(memoryId: string, next: "INVALIDATE" | "REACTIVATE") {
-    if (cannotPublish) return;
+    const entry = memoryList.find((item) => item.id === memoryId);
+    if (!entry || (cannotPublish && !entry.owner_user_id)) return;
     setNotice(null);
     const result = await memoryMutation.run((auth) =>
       next === "INVALIDATE"
@@ -1081,6 +1082,22 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
                 />
                 {t("agents.memoryLongTerm")}
               </label>
+              {memory.long_term_memory && (
+                <label>
+                  {t("agents.memoryScope")}
+                  <Select
+                    value={memory.scope ?? "USER"}
+                    onChange={(value) => setMemory((current) => ({
+                      ...current, scope: value === "AGENT" ? "AGENT" : "USER",
+                    }))}
+                    disabled={agentMutation.pending || cannotPublish}
+                    options={[
+                      { value: "USER", label: t("agents.memoryPrivate") },
+                      { value: "AGENT", label: t("agents.memoryShared") },
+                    ]}
+                  />
+                </label>
+              )}
             </div>
             <label>
               {memorySelectionCopy.label}
@@ -1251,6 +1268,7 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
                       <tr key={item.id}>
                         <td className="memory-content" data-label={t("agents.memory.content")}>
                           {item.content}
+                          <small className="state-hint">{t(item.owner_user_id ? "agents.memoryPrivate" : "agents.memoryShared")}</small>
                         </td>
                         <td data-label={t("agents.memory.kindColumn")}>
                           {t(MEMORY_KIND_LABEL[item.kind])}
@@ -1282,7 +1300,7 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
                             <button
                               type="button"
                               className="button button-ghost"
-                              disabled={memoryMutation.pending || cannotPublish}
+                              disabled={memoryMutation.pending || (!item.owner_user_id && cannotPublish)}
                               onClick={() => overrideMemory(item.id, "REACTIVATE")}
                             >
                               {t("agents.memory.reactivate")}
@@ -1291,7 +1309,7 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
                             <button
                               type="button"
                               className="button button-ghost"
-                              disabled={memoryMutation.pending || cannotPublish || item.status === "SUPERSEDED"}
+                              disabled={memoryMutation.pending || (!item.owner_user_id && cannotPublish) || item.status === "SUPERSEDED"}
                               onClick={() => overrideMemory(item.id, "INVALIDATE")}
                             >
                               {t("agents.memory.invalidate")}

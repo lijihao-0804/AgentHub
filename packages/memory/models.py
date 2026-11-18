@@ -2,9 +2,8 @@
 
 One row is one short statement an agent learned about the work it does for a
 workspace: a preference, a constraint, a decision. It is scoped to
-``(workspace_id, agent_id)`` -- never to a thread -- because outliving the
-thread is the entire point; the thread it was learned in is kept only as
-provenance.
+a workspace and agent. A populated owner_user_id adds a private user partition.
+A null owner denotes the shared agent partition. Threads identify provenance.
 
 Nothing here is ever hard-deleted. "Why does it still remember that?" and "why
 did it stop remembering that?" are both questions an operator has to be able to
@@ -171,7 +170,16 @@ class WorkspaceMemory(Base):
             "agent_id",
             "content_hash",
             unique=True,
-            postgresql_where=text("status = 'ACTIVE'"),
+            postgresql_where=text("status = 'ACTIVE' AND owner_user_id IS NULL"),
+        ),
+        Index(
+            "uq_workspace_memories_private_hash",
+            "workspace_id",
+            "agent_id",
+            "owner_user_id",
+            "content_hash",
+            unique=True,
+            postgresql_where=text("status = 'ACTIVE' AND owner_user_id IS NOT NULL"),
         ),
         Index("ix_workspace_memories_agent", "workspace_id", "agent_id", "status"),
         Index("ix_workspace_memories_run", "workspace_id", "source_run_id"),
@@ -182,6 +190,7 @@ class WorkspaceMemory(Base):
     agent_id: Mapped[UUID] = mapped_column(SQLUuid(as_uuid=True), nullable=False)
     thread_id: Mapped[UUID | None] = mapped_column(SQLUuid(as_uuid=True))
     source_run_id: Mapped[UUID | None] = mapped_column(SQLUuid(as_uuid=True))
+    owner_user_id: Mapped[UUID | None] = mapped_column(SQLUuid(as_uuid=True))
     content: Mapped[str] = mapped_column(Text, nullable=False)
     content_hash: Mapped[str] = mapped_column(String(64), nullable=False)
     kind: Mapped[str] = mapped_column(String(16), nullable=False, server_default="FACT")

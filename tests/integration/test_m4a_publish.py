@@ -288,6 +288,8 @@ async def test_m4a_publish_freezes_model_snapshot_tool_and_hash(
         version = await session.get(AgentVersion, published.id)
 
         assert version is not None
+        assert version.resolved_spec["runtime"]["memory"]["scope"] == "USER"
+        assert version.resolved_spec["runtime"]["memory"]["max_memory_tokens"] > 0
         assert published.version_number == 1
         assert version.resolved_spec_hash == canonical_json_hash(version.resolved_spec)
         assert version.resolved_spec["model"]["provider"] == "deepseek"
@@ -634,3 +636,32 @@ async def test_m4a_publish_rejects_non_executable_tool_revision(
             await AgentPublishService().publish(session, base["context"], agent.id)
 
         assert raised.value.code == "TOOL_REVISION_INVALID"
+
+
+@pytest.mark.asyncio
+async def test_memory_scope_changes_only_new_versions(db_factory) -> None:
+    async with db_factory() as session:
+        base = await create_base(session, f"memory-scope-{uuid4()}")
+        service = AgentPublishService()
+        context = base["context"]
+        agent = await service.create_draft(
+            session, context, name="Scoped memory", system_prompt="Answer questions.",
+            model_profile_id=base["profile_id"],
+        )
+        first = await service.publish(session, context, agent.id)
+        for memory, expected in (
+            ({"long_term_memory": True, "scope": "AGENT"}, "AGENT"),
+            ({"long_term_memory": False}, None),
+            ({"long_term_memory": True}, "USER"),
+        ):
+            await service.update_draft(
+                session, context, agent.id, {"runtime_config": {"memory": memory}}
+            )
+            published = await service.publish(session, context, agent.id)
+            latest = await session.get(AgentVersion, published.id)
+            frozen = latest.resolved_spec["runtime"].get("memory", {})
+            assert frozen.get("scope") == expected
+            assert frozen.get("long_term_memory", False) == (expected is not None)
+        original = await session.get(AgentVersion, first.id)
+        assert original.resolved_spec["runtime"]["memory"]["scope"] == "USER"
+        assert canonical_json_hash(original.resolved_spec) == first.resolved_spec_hash

@@ -255,6 +255,7 @@ function runHelperRegression(helper) {
   assert.deepEqual(helper.memoryDraftFromConfig(experimentMerged.memory), {
     thread_history_search: true,
     long_term_memory: true,
+    scope: "AGENT",
     selection_policy: "lexical_overlap_v1",
   });
   assert.deepEqual(
@@ -266,6 +267,7 @@ function runHelperRegression(helper) {
     {
       thread_history_search: true,
       long_term_memory: true,
+      scope: "AGENT",
       selection_policy: "",
     },
     "historical memory without selection_policy must stay on the legacy strategy",
@@ -315,6 +317,22 @@ function runHelperRegression(helper) {
     max_retrieval_tokens: "",
     max_tool_result_tokens: "",
   };
+  assert.equal(helper.memoryDraftFromConfig(undefined).scope, "USER");
+  for (const scope of ["USER", "AGENT"]) {
+    const draft = helper.memoryDraftFromConfig({ long_term_memory: true, scope });
+    assert.equal(draft.scope, scope);
+    const changed = helper.mergeRuntimeConfigDraft({
+      currentRuntime: experimentRuntime, runtimeDraft: emptyRuntimeDraft,
+      memoryDraft: draft, contextDraft: customDraft,
+    });
+    assert.equal(changed.memory.scope, scope);
+    const off = helper.mergeRuntimeConfigDraft({
+      currentRuntime: changed, runtimeDraft: emptyRuntimeDraft,
+      memoryDraft: { ...draft, long_term_memory: false }, contextDraft: customDraft,
+    });
+    assert.equal(off.memory?.scope, undefined);
+  }
+
   const explicitClears = helper.mergeRuntimeConfigDraft({
     currentRuntime,
     runtimeDraft: emptyRuntimeDraft,

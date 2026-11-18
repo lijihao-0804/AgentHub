@@ -68,7 +68,13 @@ class MemoryCandidate:
 
 class MemorySelector(Protocol):
     async def select(
-        self, *, workspace_id: UUID, agent_id: UUID, query: str, limit: int
+        self,
+        *,
+        workspace_id: UUID,
+        agent_id: UUID,
+        query: str,
+        limit: int,
+        owner_user_id: UUID | None = None,
     ) -> tuple[SelectedMemory, ...]:
         """Rank the agent's active memories against the question being asked."""
 
@@ -77,6 +83,8 @@ class MemorySelector(Protocol):
         *,
         workspace_id: UUID,
         memory_ids: tuple[UUID, ...],
+        agent_id: UUID | None = None,
+        owner_user_id: UUID | None = None,
         memory_content_hashes: Mapping[UUID | str, str] | None = None,
     ) -> tuple[SelectedMemory, ...]:
         """Re-read an earlier selection by id, preserving the given order."""

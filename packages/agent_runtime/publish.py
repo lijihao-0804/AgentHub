@@ -128,6 +128,7 @@ _CONTEXT_BUDGET_KEYS = frozenset(DEFAULT_RUNTIME_CONFIG["context_budget"])
 _MEMORY_KEYS = frozenset(
     (
         *DEFAULT_MEMORY_CONFIG,
+        "scope",
         "max_memory_tokens",
         "max_memory_tokens_source",
         "selection_policy",
@@ -197,6 +198,10 @@ class AgentPublishService:
         repository = SqlAlchemyModelGatewayRepository(session)
         if await repository.get_model_profile(context, model_profile_id) is None:
             raise _model_profile_unavailable()
+        initial_runtime = dict(runtime_config or {})
+        initial_memory = initial_runtime.setdefault("memory", {"long_term_memory": True})
+        if isinstance(initial_memory, Mapping) and initial_memory.get("long_term_memory"):
+            initial_runtime["memory"] = {"scope": "USER", **initial_memory}
         agent = Agent(
             workspace_id=workspace_id,
             name=name.strip(),
@@ -210,7 +215,7 @@ class AgentPublishService:
                 retrieval_config or {},
                 settings=self.settings,
             ),
-            runtime_config=_validate_runtime_config(runtime_config or {}),
+            runtime_config=_validate_runtime_config(initial_runtime),
         )
         session.add(agent)
         try:
@@ -289,6 +294,16 @@ class AgentPublishService:
             proposed["retrieval_config"],
             settings=self.settings,
         )
+        if "runtime_config" in values:
+            updated_runtime = dict(proposed["runtime_config"])
+            updated_memory = updated_runtime.get("memory")
+            if isinstance(updated_memory, Mapping) and updated_memory.get("long_term_memory"):
+                prior = (agent.runtime_config or {}).get("memory", {})
+                prior_scope = (
+                    prior.get("scope", "AGENT") if prior.get("long_term_memory") else "USER"
+                )
+                updated_runtime["memory"] = {"scope": prior_scope, **updated_memory}
+            proposed["runtime_config"] = updated_runtime
         proposed["runtime_config"] = _validate_runtime_config(
             proposed["runtime_config"], legacy_stored="runtime_config" not in values
         )
@@ -1325,6 +1340,10 @@ def _validate_runtime_config(
         not isinstance(item, bool) for key, item in memory.items() if key in DEFAULT_MEMORY_CONFIG
     ):
         raise AgentHubError("INVALID_AGENT_CONFIG", "The runtime config is invalid.", 422)
+    if "scope" in memory and (
+        memory["scope"] not in ("USER", "AGENT") or not memory["long_term_memory"]
+    ):
+        raise AgentHubError("INVALID_AGENT_CONFIG", "The memory scope is invalid.", 422)
     memory_tokens = memory.get("max_memory_tokens")
     if memory_tokens is not None and (
         isinstance(memory_tokens, bool) or not isinstance(memory_tokens, int) or memory_tokens < 1
