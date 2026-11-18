@@ -14,22 +14,35 @@ from packages.knowledge.models import DocumentChunk, DocumentRevision
 from tests.integration.test_auxiliary_run_step_migration import _migrate
 from tests.integration.test_document_lifecycle import _seed
 
-ADMIN = os.environ.get("AGENTHUB_TEST_ADMIN_DATABASE_URL", "")
+ADMIN = os.environ.get("AGENTHUB_CHUNK_MIGRATION_ADMIN_URL") or os.environ.get(
+    "AGENTHUB_TEST_ADMIN_DATABASE_URL", ""
+)
 pytestmark = [
     pytest.mark.integration,
     pytest.mark.skipif(not ADMIN, reason="Local admin URL required"),
 ]
 
 
-def test_chunk_revision_pair_and_migration():
+@pytest.fixture
+def private_database():
     admin = make_url(ADMIN).set(drivername="postgresql+psycopg", database="postgres")
     assert admin.host in {"localhost", "127.0.0.1", "::1"}
-    name = "agenthub_chunk_pair_" + uuid4().hex[:12]
+    name = "agenthub_chunk_pair_" + uuid4().hex
     server = create_engine(admin, isolation_level="AUTOCOMMIT")
-    with server.connect() as conn:
-        conn.exec_driver_sql(f'CREATE DATABASE "{name}"')
-    server.dispose()
-    url = admin.set(database=name)
+    try:
+        with server.connect() as conn:
+            conn.exec_driver_sql(f'CREATE DATABASE "{name}"')
+        try:
+            yield admin.set(database=name)
+        finally:
+            with server.connect() as conn:
+                conn.exec_driver_sql(f'DROP DATABASE "{name}" WITH (FORCE)')
+    finally:
+        server.dispose()
+
+
+def test_chunk_revision_pair_and_migration(private_database):
+    url = private_database
     old = "0060_private_memory"
     new = "0061_chunk_document_revision"
     _migrate(url, old)
