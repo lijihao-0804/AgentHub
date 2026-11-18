@@ -1,0 +1,1221 @@
+{
+  "stage": "development",
+  "groups": {
+    "fresh": {
+      "arms": {
+        "baseline": {
+          "questions": 48,
+          "distinct_qids": 48,
+          "model_path_calls": 59,
+          "corrections": 11,
+          "cost_at_full_receipt_rates_cny": "0.07130308",
+          "raw_first_model_declared_refusal": 18,
+          "raw_first_cited_refusals": 11,
+          "first": {
+            "strict": {
+              "n": 31,
+              "denominator": 48,
+              "percent": 64.58
+            },
+            "correct_refusals": {
+              "n": 7,
+              "denominator": 24,
+              "percent": 29.17
+            },
+            "false_refusals": {
+              "n": 0,
+              "denominator": 24,
+              "percent": 0.0
+            },
+            "citation_support": {
+              "n": 28,
+              "denominator": 30,
+              "percent": 93.33
+            },
+            "supported_answerable": 24,
+            "invalid_reasons": {
+              "citations_on_refusal": 11
+            },
+            "unanswerable_substantive_answers": 6
+          },
+          "final": {
+            "strict": {
+              "n": 42,
+              "denominator": 48,
+              "percent": 87.5
+            },
+            "correct_refusals": {
+              "n": 18,
+              "denominator": 24,
+              "percent": 75.0
+            },
+            "false_refusals": {
+              "n": 0,
+              "denominator": 24,
+              "percent": 0.0
+            },
+            "citation_support": {
+              "n": 28,
+              "denominator": 30,
+              "percent": 93.33
+            },
+            "supported_answerable": 24,
+            "invalid_reasons": {},
+            "unanswerable_substantive_answers": 6
+          }
+        },
+        "candidate": {
+          "questions": 48,
+          "distinct_qids": 48,
+          "model_path_calls": 48,
+          "corrections": 0,
+          "cost_at_full_receipt_rates_cny": "0.06133224",
+          "raw_first_model_declared_refusal": 7,
+          "raw_first_cited_refusals": 0,
+          "first": {
+            "strict": {
+              "n": 30,
+              "denominator": 48,
+              "percent": 62.5
+            },
+            "correct_refusals": {
+              "n": 7,
+              "denominator": 24,
+              "percent": 29.17
+            },
+            "false_refusals": {
+              "n": 0,
+              "denominator": 24,
+              "percent": 0.0
+            },
+            "citation_support": {
+              "n": 37,
+              "denominator": 41,
+              "percent": 90.24
+            },
+            "supported_answerable": 23,
+            "invalid_reasons": {},
+            "unanswerable_substantive_answers": 17
+          },
+          "final": {
+            "strict": {
+              "n": 30,
+              "denominator": 48,
+              "percent": 62.5
+            },
+            "correct_refusals": {
+              "n": 7,
+              "denominator": 24,
+              "percent": 29.17
+            },
+            "false_refusals": {
+              "n": 0,
+              "denominator": 24,
+              "percent": 0.0
+            },
+            "citation_support": {
+              "n": 37,
+              "denominator": 41,
+              "percent": 90.24
+            },
+            "supported_answerable": 23,
+            "invalid_reasons": {},
+            "unanswerable_substantive_answers": 17
+          }
+        }
+      },
+      "first": {
+        "gains": [
+          "development/fresh/FP013",
+          "development/fresh/FP016",
+          "development/fresh/FP020",
+          "development/fresh/FP023",
+          "development/fresh/FP045"
+        ],
+        "losses": [
+          "development/fresh/FP004",
+          "development/fresh/FP012",
+          "development/fresh/FP017",
+          "development/fresh/FP024",
+          "development/fresh/FP030",
+          "development/fresh/FP041"
+        ],
+        "correct_refusal_losses": [
+          "development/fresh/FP004",
+          "development/fresh/FP012",
+          "development/fresh/FP024",
+          "development/fresh/FP030",
+          "development/fresh/FP041"
+        ],
+        "supported_answer_to_refusal": []
+      },
+      "final": {
+        "gains": [
+          "development/fresh/FP023"
+        ],
+        "losses": [
+          "development/fresh/FP004",
+          "development/fresh/FP008",
+          "development/fresh/FP009",
+          "development/fresh/FP011",
+          "development/fresh/FP012",
+          "development/fresh/FP017",
+          "development/fresh/FP024",
+          "development/fresh/FP027",
+          "development/fresh/FP030",
+          "development/fresh/FP034",
+          "development/fresh/FP036",
+          "development/fresh/FP041",
+          "development/fresh/FP044"
+        ],
+        "correct_refusal_losses": [
+          "development/fresh/FP004",
+          "development/fresh/FP008",
+          "development/fresh/FP009",
+          "development/fresh/FP011",
+          "development/fresh/FP012",
+          "development/fresh/FP024",
+          "development/fresh/FP027",
+          "development/fresh/FP030",
+          "development/fresh/FP034",
+          "development/fresh/FP036",
+          "development/fresh/FP041",
+          "development/fresh/FP044"
+        ],
+        "supported_answer_to_refusal": []
+      },
+      "answerable_arms": {
+        "baseline": {
+          "questions": 24,
+          "distinct_qids": 24,
+          "model_path_calls": 24,
+          "corrections": 0,
+          "cost_at_full_receipt_rates_cny": "0.02505800",
+          "raw_first_model_declared_refusal": 0,
+          "raw_first_cited_refusals": 0,
+          "first": {
+            "strict": {
+              "n": 24,
+              "denominator": 24,
+              "percent": 100.0
+            },
+            "correct_refusals": {
+              "n": 0,
+              "denominator": 0,
+              "percent": null
+            },
+            "false_refusals": {
+              "n": 0,
+              "denominator": 24,
+              "percent": 0.0
+            },
+            "citation_support": {
+              "n": 24,
+              "denominator": 24,
+              "percent": 100.0
+            },
+            "supported_answerable": 24,
+            "invalid_reasons": {}
+          },
+          "final": {
+            "strict": {
+              "n": 24,
+              "denominator": 24,
+              "percent": 100.0
+            },
+            "correct_refusals": {
+              "n": 0,
+              "denominator": 0,
+              "percent": null
+            },
+            "false_refusals": {
+              "n": 0,
+              "denominator": 24,
+              "percent": 0.0
+            },
+            "citation_support": {
+              "n": 24,
+              "denominator": 24,
+              "percent": 100.0
+            },
+            "supported_answerable": 24,
+            "invalid_reasons": {}
+          }
+        },
+        "candidate": {
+          "questions": 24,
+          "distinct_qids": 24,
+          "model_path_calls": 24,
+          "corrections": 0,
+          "cost_at_full_receipt_rates_cny": "0.02630568",
+          "raw_first_model_declared_refusal": 0,
+          "raw_first_cited_refusals": 0,
+          "first": {
+            "strict": {
+              "n": 23,
+              "denominator": 24,
+              "percent": 95.83
+            },
+            "correct_refusals": {
+              "n": 0,
+              "denominator": 0,
+              "percent": null
+            },
+            "false_refusals": {
+              "n": 0,
+              "denominator": 24,
+              "percent": 0.0
+            },
+            "citation_support": {
+              "n": 23,
+              "denominator": 24,
+              "percent": 95.83
+            },
+            "supported_answerable": 23,
+            "invalid_reasons": {}
+          },
+          "final": {
+            "strict": {
+              "n": 23,
+              "denominator": 24,
+              "percent": 95.83
+            },
+            "correct_refusals": {
+              "n": 0,
+              "denominator": 0,
+              "percent": null
+            },
+            "false_refusals": {
+              "n": 0,
+              "denominator": 24,
+              "percent": 0.0
+            },
+            "citation_support": {
+              "n": 23,
+              "denominator": 24,
+              "percent": 95.83
+            },
+            "supported_answerable": 23,
+            "invalid_reasons": {}
+          }
+        }
+      }
+    },
+    "target": {
+      "arms": {
+        "baseline": {
+          "questions": 7,
+          "distinct_qids": 6,
+          "model_path_calls": 11,
+          "corrections": 4,
+          "cost_at_full_receipt_rates_cny": "0.01243776",
+          "raw_first_model_declared_refusal": 5,
+          "raw_first_cited_refusals": 4,
+          "first": {
+            "strict": {
+              "n": 3,
+              "denominator": 7,
+              "percent": 42.86
+            },
+            "correct_refusals": {
+              "n": 1,
+              "denominator": 5,
+              "percent": 20.0
+            },
+            "false_refusals": {
+              "n": 0,
+              "denominator": 2,
+              "percent": 0.0
+            },
+            "citation_support": {
+              "n": 2,
+              "denominator": 2,
+              "percent": 100.0
+            },
+            "supported_answerable": 2,
+            "invalid_reasons": {
+              "citations_on_refusal": 4
+            },
+            "unanswerable_substantive_answers": 0
+          },
+          "final": {
+            "strict": {
+              "n": 7,
+              "denominator": 7,
+              "percent": 100.0
+            },
+            "correct_refusals": {
+              "n": 5,
+              "denominator": 5,
+              "percent": 100.0
+            },
+            "false_refusals": {
+              "n": 0,
+              "denominator": 2,
+              "percent": 0.0
+            },
+            "citation_support": {
+              "n": 2,
+              "denominator": 2,
+              "percent": 100.0
+            },
+            "supported_answerable": 2,
+            "invalid_reasons": {},
+            "unanswerable_substantive_answers": 0
+          }
+        },
+        "candidate": {
+          "questions": 7,
+          "distinct_qids": 6,
+          "model_path_calls": 8,
+          "corrections": 1,
+          "cost_at_full_receipt_rates_cny": "0.01304096",
+          "raw_first_model_declared_refusal": 3,
+          "raw_first_cited_refusals": 0,
+          "first": {
+            "strict": {
+              "n": 3,
+              "denominator": 7,
+              "percent": 42.86
+            },
+            "correct_refusals": {
+              "n": 2,
+              "denominator": 5,
+              "percent": 40.0
+            },
+            "false_refusals": {
+              "n": 0,
+              "denominator": 2,
+              "percent": 0.0
+            },
+            "citation_support": {
+              "n": 3,
+              "denominator": 3,
+              "percent": 100.0
+            },
+            "supported_answerable": 1,
+            "invalid_reasons": {
+              "citation_mismatch": 1
+            },
+            "unanswerable_substantive_answers": 2
+          },
+          "final": {
+            "strict": {
+              "n": 4,
+              "denominator": 7,
+              "percent": 57.14
+            },
+            "correct_refusals": {
+              "n": 2,
+              "denominator": 5,
+              "percent": 40.0
+            },
+            "false_refusals": {
+              "n": 0,
+              "denominator": 2,
+              "percent": 0.0
+            },
+            "citation_support": {
+              "n": 4,
+              "denominator": 4,
+              "percent": 100.0
+            },
+            "supported_answerable": 2,
+            "invalid_reasons": {},
+            "unanswerable_substantive_answers": 2
+          }
+        }
+      },
+      "first": {
+        "gains": [
+          "development/target/2hop__8556_47169",
+          "development/target/W13-9c03df7c91a4"
+        ],
+        "losses": [
+          "development/target/B006-86ae517b0548",
+          "development/target/W13-f072f8eca461"
+        ],
+        "correct_refusal_losses": [
+          "development/target/W13-f072f8eca461"
+        ],
+        "supported_answer_to_refusal": []
+      },
+      "final": {
+        "gains": [],
+        "losses": [
+          "development/target/B097-3f5975fcd6e8",
+          "development/target/N035",
+          "development/target/W13-f072f8eca461"
+        ],
+        "correct_refusal_losses": [
+          "development/target/B097-3f5975fcd6e8",
+          "development/target/N035",
+          "development/target/W13-f072f8eca461"
+        ],
+        "supported_answer_to_refusal": []
+      },
+      "answerable_arms": {
+        "baseline": {
+          "questions": 2,
+          "distinct_qids": 2,
+          "model_path_calls": 2,
+          "corrections": 0,
+          "cost_at_full_receipt_rates_cny": "0.00166100",
+          "raw_first_model_declared_refusal": 0,
+          "raw_first_cited_refusals": 0,
+          "first": {
+            "strict": {
+              "n": 2,
+              "denominator": 2,
+              "percent": 100.0
+            },
+            "correct_refusals": {
+              "n": 0,
+              "denominator": 0,
+              "percent": null
+            },
+            "false_refusals": {
+              "n": 0,
+              "denominator": 2,
+              "percent": 0.0
+            },
+            "citation_support": {
+              "n": 2,
+              "denominator": 2,
+              "percent": 100.0
+            },
+            "supported_answerable": 2,
+            "invalid_reasons": {}
+          },
+          "final": {
+            "strict": {
+              "n": 2,
+              "denominator": 2,
+              "percent": 100.0
+            },
+            "correct_refusals": {
+              "n": 0,
+              "denominator": 0,
+              "percent": null
+            },
+            "false_refusals": {
+              "n": 0,
+              "denominator": 2,
+              "percent": 0.0
+            },
+            "citation_support": {
+              "n": 2,
+              "denominator": 2,
+              "percent": 100.0
+            },
+            "supported_answerable": 2,
+            "invalid_reasons": {}
+          }
+        },
+        "candidate": {
+          "questions": 2,
+          "distinct_qids": 2,
+          "model_path_calls": 3,
+          "corrections": 1,
+          "cost_at_full_receipt_rates_cny": "0.00208536",
+          "raw_first_model_declared_refusal": 0,
+          "raw_first_cited_refusals": 0,
+          "first": {
+            "strict": {
+              "n": 1,
+              "denominator": 2,
+              "percent": 50.0
+            },
+            "correct_refusals": {
+              "n": 0,
+              "denominator": 0,
+              "percent": null
+            },
+            "false_refusals": {
+              "n": 0,
+              "denominator": 2,
+              "percent": 0.0
+            },
+            "citation_support": {
+              "n": 1,
+              "denominator": 1,
+              "percent": 100.0
+            },
+            "supported_answerable": 1,
+            "invalid_reasons": {
+              "citation_mismatch": 1
+            }
+          },
+          "final": {
+            "strict": {
+              "n": 2,
+              "denominator": 2,
+              "percent": 100.0
+            },
+            "correct_refusals": {
+              "n": 0,
+              "denominator": 0,
+              "percent": null
+            },
+            "false_refusals": {
+              "n": 0,
+              "denominator": 2,
+              "percent": 0.0
+            },
+            "citation_support": {
+              "n": 2,
+              "denominator": 2,
+              "percent": 100.0
+            },
+            "supported_answerable": 2,
+            "invalid_reasons": {}
+          }
+        }
+      }
+    },
+    "fresh_zh": {
+      "arms": {
+        "baseline": {
+          "questions": 24,
+          "distinct_qids": 24,
+          "model_path_calls": 30,
+          "corrections": 6,
+          "cost_at_full_receipt_rates_cny": "0.03781024",
+          "raw_first_model_declared_refusal": 8,
+          "raw_first_cited_refusals": 6,
+          "first": {
+            "strict": {
+              "n": 14,
+              "denominator": 24,
+              "percent": 58.33
+            },
+            "correct_refusals": {
+              "n": 2,
+              "denominator": 12,
+              "percent": 16.67
+            },
+            "false_refusals": {
+              "n": 0,
+              "denominator": 12,
+              "percent": 0.0
+            },
+            "citation_support": {
+              "n": 15,
+              "denominator": 16,
+              "percent": 93.75
+            },
+            "supported_answerable": 12,
+            "invalid_reasons": {
+              "citations_on_refusal": 6
+            },
+            "unanswerable_substantive_answers": 4
+          },
+          "final": {
+            "strict": {
+              "n": 20,
+              "denominator": 24,
+              "percent": 83.33
+            },
+            "correct_refusals": {
+              "n": 8,
+              "denominator": 12,
+              "percent": 66.67
+            },
+            "false_refusals": {
+              "n": 0,
+              "denominator": 12,
+              "percent": 0.0
+            },
+            "citation_support": {
+              "n": 15,
+              "denominator": 16,
+              "percent": 93.75
+            },
+            "supported_answerable": 12,
+            "invalid_reasons": {},
+            "unanswerable_substantive_answers": 4
+          }
+        },
+        "candidate": {
+          "questions": 24,
+          "distinct_qids": 24,
+          "model_path_calls": 24,
+          "corrections": 0,
+          "cost_at_full_receipt_rates_cny": "0.03005692",
+          "raw_first_model_declared_refusal": 4,
+          "raw_first_cited_refusals": 0,
+          "first": {
+            "strict": {
+              "n": 15,
+              "denominator": 24,
+              "percent": 62.5
+            },
+            "correct_refusals": {
+              "n": 4,
+              "denominator": 12,
+              "percent": 33.33
+            },
+            "false_refusals": {
+              "n": 0,
+              "denominator": 12,
+              "percent": 0.0
+            },
+            "citation_support": {
+              "n": 17,
+              "denominator": 20,
+              "percent": 85.0
+            },
+            "supported_answerable": 11,
+            "invalid_reasons": {},
+            "unanswerable_substantive_answers": 8
+          },
+          "final": {
+            "strict": {
+              "n": 15,
+              "denominator": 24,
+              "percent": 62.5
+            },
+            "correct_refusals": {
+              "n": 4,
+              "denominator": 12,
+              "percent": 33.33
+            },
+            "false_refusals": {
+              "n": 0,
+              "denominator": 12,
+              "percent": 0.0
+            },
+            "citation_support": {
+              "n": 17,
+              "denominator": 20,
+              "percent": 85.0
+            },
+            "supported_answerable": 11,
+            "invalid_reasons": {},
+            "unanswerable_substantive_answers": 8
+          }
+        }
+      },
+      "first": {
+        "gains": [
+          "development/fresh/FP016",
+          "development/fresh/FP023",
+          "development/fresh/FP045"
+        ],
+        "losses": [
+          "development/fresh/FP017",
+          "development/fresh/FP041"
+        ],
+        "correct_refusal_losses": [
+          "development/fresh/FP041"
+        ],
+        "supported_answer_to_refusal": []
+      },
+      "final": {
+        "gains": [
+          "development/fresh/FP023"
+        ],
+        "losses": [
+          "development/fresh/FP009",
+          "development/fresh/FP011",
+          "development/fresh/FP017",
+          "development/fresh/FP027",
+          "development/fresh/FP034",
+          "development/fresh/FP041"
+        ],
+        "correct_refusal_losses": [
+          "development/fresh/FP009",
+          "development/fresh/FP011",
+          "development/fresh/FP027",
+          "development/fresh/FP034",
+          "development/fresh/FP041"
+        ],
+        "supported_answer_to_refusal": []
+      },
+      "answerable_arms": {
+        "baseline": {
+          "questions": 12,
+          "distinct_qids": 12,
+          "model_path_calls": 12,
+          "corrections": 0,
+          "cost_at_full_receipt_rates_cny": "0.01304100",
+          "raw_first_model_declared_refusal": 0,
+          "raw_first_cited_refusals": 0,
+          "first": {
+            "strict": {
+              "n": 12,
+              "denominator": 12,
+              "percent": 100.0
+            },
+            "correct_refusals": {
+              "n": 0,
+              "denominator": 0,
+              "percent": null
+            },
+            "false_refusals": {
+              "n": 0,
+              "denominator": 12,
+              "percent": 0.0
+            },
+            "citation_support": {
+              "n": 12,
+              "denominator": 12,
+              "percent": 100.0
+            },
+            "supported_answerable": 12,
+            "invalid_reasons": {}
+          },
+          "final": {
+            "strict": {
+              "n": 12,
+              "denominator": 12,
+              "percent": 100.0
+            },
+            "correct_refusals": {
+              "n": 0,
+              "denominator": 0,
+              "percent": null
+            },
+            "false_refusals": {
+              "n": 0,
+              "denominator": 12,
+              "percent": 0.0
+            },
+            "citation_support": {
+              "n": 12,
+              "denominator": 12,
+              "percent": 100.0
+            },
+            "supported_answerable": 12,
+            "invalid_reasons": {}
+          }
+        },
+        "candidate": {
+          "questions": 12,
+          "distinct_qids": 12,
+          "model_path_calls": 12,
+          "corrections": 0,
+          "cost_at_full_receipt_rates_cny": "0.01274020",
+          "raw_first_model_declared_refusal": 0,
+          "raw_first_cited_refusals": 0,
+          "first": {
+            "strict": {
+              "n": 11,
+              "denominator": 12,
+              "percent": 91.67
+            },
+            "correct_refusals": {
+              "n": 0,
+              "denominator": 0,
+              "percent": null
+            },
+            "false_refusals": {
+              "n": 0,
+              "denominator": 12,
+              "percent": 0.0
+            },
+            "citation_support": {
+              "n": 11,
+              "denominator": 12,
+              "percent": 91.67
+            },
+            "supported_answerable": 11,
+            "invalid_reasons": {}
+          },
+          "final": {
+            "strict": {
+              "n": 11,
+              "denominator": 12,
+              "percent": 91.67
+            },
+            "correct_refusals": {
+              "n": 0,
+              "denominator": 0,
+              "percent": null
+            },
+            "false_refusals": {
+              "n": 0,
+              "denominator": 12,
+              "percent": 0.0
+            },
+            "citation_support": {
+              "n": 11,
+              "denominator": 12,
+              "percent": 91.67
+            },
+            "supported_answerable": 11,
+            "invalid_reasons": {}
+          }
+        }
+      }
+    },
+    "fresh_en": {
+      "arms": {
+        "baseline": {
+          "questions": 24,
+          "distinct_qids": 24,
+          "model_path_calls": 29,
+          "corrections": 5,
+          "cost_at_full_receipt_rates_cny": "0.03349284",
+          "raw_first_model_declared_refusal": 10,
+          "raw_first_cited_refusals": 5,
+          "first": {
+            "strict": {
+              "n": 17,
+              "denominator": 24,
+              "percent": 70.83
+            },
+            "correct_refusals": {
+              "n": 5,
+              "denominator": 12,
+              "percent": 41.67
+            },
+            "false_refusals": {
+              "n": 0,
+              "denominator": 12,
+              "percent": 0.0
+            },
+            "citation_support": {
+              "n": 13,
+              "denominator": 14,
+              "percent": 92.86
+            },
+            "supported_answerable": 12,
+            "invalid_reasons": {
+              "citations_on_refusal": 5
+            },
+            "unanswerable_substantive_answers": 2
+          },
+          "final": {
+            "strict": {
+              "n": 22,
+              "denominator": 24,
+              "percent": 91.67
+            },
+            "correct_refusals": {
+              "n": 10,
+              "denominator": 12,
+              "percent": 83.33
+            },
+            "false_refusals": {
+              "n": 0,
+              "denominator": 12,
+              "percent": 0.0
+            },
+            "citation_support": {
+              "n": 13,
+              "denominator": 14,
+              "percent": 92.86
+            },
+            "supported_answerable": 12,
+            "invalid_reasons": {},
+            "unanswerable_substantive_answers": 2
+          }
+        },
+        "candidate": {
+          "questions": 24,
+          "distinct_qids": 24,
+          "model_path_calls": 24,
+          "corrections": 0,
+          "cost_at_full_receipt_rates_cny": "0.03127532",
+          "raw_first_model_declared_refusal": 3,
+          "raw_first_cited_refusals": 0,
+          "first": {
+            "strict": {
+              "n": 15,
+              "denominator": 24,
+              "percent": 62.5
+            },
+            "correct_refusals": {
+              "n": 3,
+              "denominator": 12,
+              "percent": 25.0
+            },
+            "false_refusals": {
+              "n": 0,
+              "denominator": 12,
+              "percent": 0.0
+            },
+            "citation_support": {
+              "n": 20,
+              "denominator": 21,
+              "percent": 95.24
+            },
+            "supported_answerable": 12,
+            "invalid_reasons": {},
+            "unanswerable_substantive_answers": 9
+          },
+          "final": {
+            "strict": {
+              "n": 15,
+              "denominator": 24,
+              "percent": 62.5
+            },
+            "correct_refusals": {
+              "n": 3,
+              "denominator": 12,
+              "percent": 25.0
+            },
+            "false_refusals": {
+              "n": 0,
+              "denominator": 12,
+              "percent": 0.0
+            },
+            "citation_support": {
+              "n": 20,
+              "denominator": 21,
+              "percent": 95.24
+            },
+            "supported_answerable": 12,
+            "invalid_reasons": {},
+            "unanswerable_substantive_answers": 9
+          }
+        }
+      },
+      "first": {
+        "gains": [
+          "development/fresh/FP013",
+          "development/fresh/FP020"
+        ],
+        "losses": [
+          "development/fresh/FP004",
+          "development/fresh/FP012",
+          "development/fresh/FP024",
+          "development/fresh/FP030"
+        ],
+        "correct_refusal_losses": [
+          "development/fresh/FP004",
+          "development/fresh/FP012",
+          "development/fresh/FP024",
+          "development/fresh/FP030"
+        ],
+        "supported_answer_to_refusal": []
+      },
+      "final": {
+        "gains": [],
+        "losses": [
+          "development/fresh/FP004",
+          "development/fresh/FP008",
+          "development/fresh/FP012",
+          "development/fresh/FP024",
+          "development/fresh/FP030",
+          "development/fresh/FP036",
+          "development/fresh/FP044"
+        ],
+        "correct_refusal_losses": [
+          "development/fresh/FP004",
+          "development/fresh/FP008",
+          "development/fresh/FP012",
+          "development/fresh/FP024",
+          "development/fresh/FP030",
+          "development/fresh/FP036",
+          "development/fresh/FP044"
+        ],
+        "supported_answer_to_refusal": []
+      },
+      "answerable_arms": {
+        "baseline": {
+          "questions": 12,
+          "distinct_qids": 12,
+          "model_path_calls": 12,
+          "corrections": 0,
+          "cost_at_full_receipt_rates_cny": "0.01201700",
+          "raw_first_model_declared_refusal": 0,
+          "raw_first_cited_refusals": 0,
+          "first": {
+            "strict": {
+              "n": 12,
+              "denominator": 12,
+              "percent": 100.0
+            },
+            "correct_refusals": {
+              "n": 0,
+              "denominator": 0,
+              "percent": null
+            },
+            "false_refusals": {
+              "n": 0,
+              "denominator": 12,
+              "percent": 0.0
+            },
+            "citation_support": {
+              "n": 12,
+              "denominator": 12,
+              "percent": 100.0
+            },
+            "supported_answerable": 12,
+            "invalid_reasons": {}
+          },
+          "final": {
+            "strict": {
+              "n": 12,
+              "denominator": 12,
+              "percent": 100.0
+            },
+            "correct_refusals": {
+              "n": 0,
+              "denominator": 0,
+              "percent": null
+            },
+            "false_refusals": {
+              "n": 0,
+              "denominator": 12,
+              "percent": 0.0
+            },
+            "citation_support": {
+              "n": 12,
+              "denominator": 12,
+              "percent": 100.0
+            },
+            "supported_answerable": 12,
+            "invalid_reasons": {}
+          }
+        },
+        "candidate": {
+          "questions": 12,
+          "distinct_qids": 12,
+          "model_path_calls": 12,
+          "corrections": 0,
+          "cost_at_full_receipt_rates_cny": "0.01356548",
+          "raw_first_model_declared_refusal": 0,
+          "raw_first_cited_refusals": 0,
+          "first": {
+            "strict": {
+              "n": 12,
+              "denominator": 12,
+              "percent": 100.0
+            },
+            "correct_refusals": {
+              "n": 0,
+              "denominator": 0,
+              "percent": null
+            },
+            "false_refusals": {
+              "n": 0,
+              "denominator": 12,
+              "percent": 0.0
+            },
+            "citation_support": {
+              "n": 12,
+              "denominator": 12,
+              "percent": 100.0
+            },
+            "supported_answerable": 12,
+            "invalid_reasons": {}
+          },
+          "final": {
+            "strict": {
+              "n": 12,
+              "denominator": 12,
+              "percent": 100.0
+            },
+            "correct_refusals": {
+              "n": 0,
+              "denominator": 0,
+              "percent": null
+            },
+            "false_refusals": {
+              "n": 0,
+              "denominator": 12,
+              "percent": 0.0
+            },
+            "citation_support": {
+              "n": 12,
+              "denominator": 12,
+              "percent": 100.0
+            },
+            "supported_answerable": 12,
+            "invalid_reasons": {}
+          }
+        }
+      }
+    }
+  },
+  "gate_checks": {
+    "fresh_paired_first_and_final_strict_preserved": false,
+    "fresh_correct_refusals_preserved": false,
+    "fresh_supported_answers_never_refused": true,
+    "fresh_supported_answerable_count_preserved": false,
+    "fresh_citation_support_rate_preserved": false,
+    "fresh_corrections_nonincreasing": true,
+    "fresh_previously_supported_answerables_remain_supported": false,
+    "target_paired_first_and_final_strict_preserved": false,
+    "target_correct_refusals_preserved": false,
+    "target_supported_answers_never_refused": true,
+    "target_supported_answerable_count_preserved": false,
+    "target_citation_support_rate_preserved": true,
+    "target_corrections_nonincreasing": true,
+    "target_previously_supported_answerables_remain_supported": false,
+    "zh_first_prior_correct_preserved": false,
+    "zh_final_prior_correct_preserved": false,
+    "en_first_prior_correct_preserved": false,
+    "en_final_prior_correct_preserved": false,
+    "independent_first_strict_net_gain": false,
+    "independent_first_correct_refusals_net_gain": false,
+    "five_named_first_refusals_correct": false,
+    "both_named_positives_strict_with_support": false,
+    "closed_account_reconciled": true
+  },
+  "passes_stage": false,
+  "eligible_for_promotion": false,
+  "account": {
+    "opening_cny": "3.12094384",
+    "historical_locked_ids": 1760,
+    "prior_unknown_locked": 2,
+    "prior_unknown_reserved_cny": "0.04906200",
+    "new_unknown": 0,
+    "new_physical": 115,
+    "new_cost_cny": "0.14567628",
+    "new_cost_units": 14567628,
+    "cumulative_cny": "3.26662012",
+    "remaining_cny": "26.73337988",
+    "prior_stage_live_candidate_invocations_replayed": 0,
+    "new_physical_by_attempt": {
+      "1": {
+        "count": 103,
+        "cost_units": 13360308,
+        "finish_length": 0
+      },
+      "2": {
+        "count": 12,
+        "cost_units": 1207320,
+        "finish_length": 0
+      }
+    },
+    "logical_by_receipt_origin_and_arm": {
+      "live/baseline": {
+        "logical": 48,
+        "logical_model_calls": 59,
+        "corrections": 11,
+        "finish_length": 0,
+        "input_tokens": 30417,
+        "cached_tokens": 2304,
+        "output_tokens": 10786,
+        "logical_model_cost_cny": "0.07130308"
+      },
+      "live/candidate": {
+        "logical": 55,
+        "logical_model_calls": 56,
+        "corrections": 1,
+        "finish_length": 0,
+        "input_tokens": 40386,
+        "cached_tokens": 8960,
+        "output_tokens": 10692,
+        "logical_model_cost_cny": "0.07437320"
+      },
+      "archive/baseline": {
+        "logical": 7,
+        "logical_model_calls": 11,
+        "corrections": 4,
+        "finish_length": 0,
+        "input_tokens": 12588,
+        "cached_tokens": 5888,
+        "output_tokens": 1405,
+        "logical_model_cost_cny": "0.01243776"
+      }
+    },
+    "outcomes_sha": "2612c5da052b1ff8158e9d2dc10ead24455f0d28078086c96c39be244cc4730d",
+    "ledger_sha": "96c5eada52bde0a358c6cbe8350fdb112de138a0a7392e6db16b2469de954614",
+    "freeze_sha": "7b15bcab2752689c1609905d7d5ceeaecdc3ba66ec65e320ea5c95ff4d687370"
+  }
+}
