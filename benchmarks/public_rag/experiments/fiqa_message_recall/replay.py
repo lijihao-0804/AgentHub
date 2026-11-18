@@ -110,8 +110,8 @@ async def run(output):
         raise ValueError("Unexpected test population")
     spec = json.loads(MODEL_PROTOCOL.read_bytes())["model"]
     weights = ROOT.parent / "hf_cache/models--BAAI--bge-reranker-v2-m3/snapshots" / spec["revision"]
-    for name, sha in spec["file_sha256"].items():
-        checked_file(weights, name, sha)
+    for name in spec["file_sha256"]:
+        checked_file(weights, name, spec["file_sha256"])
     model = BgeReranker(
         model_name=str(weights), device="cuda", batch_size=8, max_length=spec["max_length"]
     )
