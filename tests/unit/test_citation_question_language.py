@@ -128,8 +128,8 @@ async def test_distinct_output_contracts_keep_their_existing_prompt(output_mode,
 
 
 def test_experiment_uses_the_product_setting_and_restores_it():
-    settings = Settings(_env_file=None)
-    assert not settings.knowledge_qa_question_language_prompt
+    assert Settings.model_fields["knowledge_qa_question_language_prompt"].default is False
+    settings = Settings(_env_file=None, knowledge_qa_question_language_prompt=False)
     assert expected_prompt("baseline", "谁？") == citation_qa._PROMPT_JSON_SYSTEM
     with policy("candidate", settings=settings):
         assert settings.knowledge_qa_question_language_prompt
@@ -139,7 +139,9 @@ def test_experiment_uses_the_product_setting_and_restores_it():
 @pytest.mark.asyncio
 async def test_empty_chinese_snapshot_has_a_local_response_and_no_model_attempt():
     session, gateway = _FakeSession(chunks=0), _FakeModelGateway("")
-    service = make_service(session, gateway, output_mode="PROMPT_JSON", question_language_prompt=True)
+    service = make_service(
+        session, gateway, output_mode="PROMPT_JSON", question_language_prompt=True
+    )
     response = await _answer(service, session, gateway, query="谁资助了该项目？")
     assert response.answer == citation_qa._REFUSAL_SENTENCES["Chinese"]
     assert response.insufficient_evidence and response.citations == ()
