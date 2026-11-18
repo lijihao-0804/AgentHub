@@ -5,6 +5,7 @@ from __future__ import annotations
 import logging
 import time
 from collections.abc import Mapping
+from decimal import Decimal
 from typing import Any
 
 from packages.observability.contracts import TraceSpan
@@ -19,7 +20,10 @@ def _safe_attributes(attributes: Mapping[str, Any] | None) -> dict[str, Any]:
         normalized = str(key).lower()
         if any(part in normalized for part in _REDACTED_KEY_PARTS):
             continue
-        if isinstance(value, (str, int, float, bool)) or value is None:
+        if key == "estimated_cost" and isinstance(value, Decimal):
+            if value.is_finite() and value >= 0:
+                result[key] = str(value)
+        elif isinstance(value, (str, int, float, bool)) or value is None:
             result[str(key)] = value
         elif isinstance(value, (list, tuple)):
             result[str(key)] = [str(item) for item in value[:32]]

@@ -253,12 +253,19 @@ class ModelGatewayService(ModelGateway):
         fallback_used = False
         provider: str | None = None
         model: str | None = None
+        rejected_response: ModelResponse | None = None
         active_budget_reservation: ModelAttemptBudgetReservation | None = None
         try:
             last_error: ModelGatewayError | None = None
             for profile_index, profile in enumerate(chain):
+                if rejected_response is not None:
+                    await self._trace_empty_before_fallback(
+                        context, chain[profile_index - 1].id, attempt_count, rejected_response
+                    )
+                    rejected_response = None
                 fallback_used = profile_index > 0
                 model = profile.model
+                provider = None
                 credential = (
                     credentials[profile.id]
                     if credentials is not None
@@ -286,7 +293,14 @@ class ModelGatewayService(ModelGateway):
                     try:
                         async with asyncio.timeout(float(profile.timeout_seconds)):
                             response = await self.adapter.complete(profile, credential, request)
-                        _validate_usable_response(response)
+                        try:
+                            _validate_usable_response(response)
+                        except EmptyModelResponseError:
+                            # The provider completed this attempt. Keep its committed
+                            # hold for reconciliation, just as for a usable response.
+                            rejected_response = response
+                            active_budget_reservation = None
+                            raise
                         active_budget_reservation = None
                         await _end_trace_span(
                             span,
@@ -359,12 +373,13 @@ class ModelGatewayService(ModelGateway):
                 await self._mark_unknown_outcome(active_budget_reservation)
             await _end_trace_span(
                 span,
-                attributes=_failure_trace_attributes(
+                attributes=_response_trace_attributes(
                     context,
                     model_profile_id,
                     started=started,
                     attempt_count=attempt_count,
                     fallback_used=fallback_used,
+                    response=rejected_response,
                     provider=provider,
                     model=model,
                 ),
@@ -443,6 +458,7 @@ class ModelGatewayService(ModelGateway):
         fallback_used = False
         provider: str | None = None
         model: str | None = None
+        rejected_response: ModelResponse | None = None
         active_budget_reservation: ModelAttemptBudgetReservation | None = None
         try:
             if prepared is not None:
@@ -460,8 +476,14 @@ class ModelGatewayService(ModelGateway):
                 )
             last_error: ModelGatewayError | None = None
             for profile_index, profile in enumerate(chain):
+                if rejected_response is not None:
+                    await self._trace_empty_before_fallback(
+                        context, chain[profile_index - 1].id, attempt_count, rejected_response
+                    )
+                    rejected_response = None
                 fallback_used = profile_index > 0
                 model = profile.model
+                provider = None
                 credential = (
                     credentials[profile.id]
                     if credentials is not None
@@ -490,7 +512,11 @@ class ModelGatewayService(ModelGateway):
                                 if event.response is not None:
                                     active_budget_reservation = None
                                     final_response = event.response
-                                    _validate_usable_response(final_response)
+                                    try:
+                                        _validate_usable_response(final_response)
+                                    except EmptyModelResponseError:
+                                        rejected_response = final_response
+                                        raise
                                 if event.event_type in {
                                     ModelStreamEventType.MESSAGE_DELTA,
                                     ModelStreamEventType.TOOL_CALL_DELTA,
@@ -597,12 +623,13 @@ class ModelGatewayService(ModelGateway):
                 await self._mark_unknown_outcome(active_budget_reservation)
             await _end_trace_span(
                 span,
-                attributes=_failure_trace_attributes(
+                attributes=_response_trace_attributes(
                     context,
                     model_profile_id,
                     started=started,
                     attempt_count=attempt_count,
                     fallback_used=fallback_used,
+                    response=rejected_response,
                     provider=provider,
                     model=model,
                 ),
@@ -629,6 +656,29 @@ class ModelGatewayService(ModelGateway):
                 failure_code=normalized.code.value,
             )
             raise normalized from None
+
+    async def _trace_empty_before_fallback(
+        self,
+        context: WorkspaceExecutionContext,
+        profile_id: UUID,
+        attempt: int,
+        response: ModelResponse,
+    ) -> None:
+        # The logical span will describe the next profile. Preserve this physical
+        # response's measured usage under the profile that actually incurred it.
+        attrs = _initial_trace_attributes(context, profile_id)
+        span = await _start_trace_span(self.trace_sink, "model.empty_response", attrs)
+        await _end_trace_span(
+            span,
+            attributes={
+                **attrs,
+                **_receipt_trace_attributes(response),
+                "attempt": attempt,
+                "output_limit_reached": response.finish_reason == "length",
+            },
+            status="error",
+            failure_code=ModelGatewayErrorCode.MODEL_BAD_RESPONSE.value,
+        )
 
     async def _reserve_attempt(
         self,
@@ -870,14 +920,21 @@ def _response_trace_attributes(
     attributes = _initial_trace_attributes(context, model_profile_id)
     attributes.update(
         {
-            "provider": response.provider if response is not None else provider,
-            "model": response.model if response is not None else model,
+            "provider": provider,
+            "model": model,
             "latency_ms": round((time.perf_counter() - started) * 1000, 3),
             "attempt_count": attempt_count,
             "fallback_used": fallback_used,
         }
     )
-    if response is not None and response.usage is not None:
+    if response is not None:
+        attributes.update(_receipt_trace_attributes(response))
+    return attributes
+
+
+def _receipt_trace_attributes(response: ModelResponse) -> dict[str, Any]:
+    attributes: dict[str, Any] = {"provider": response.provider, "model": response.model}
+    if response.usage is not None:
         attributes.update(
             {
                 "input_tokens": response.usage.input_tokens,
@@ -886,7 +943,7 @@ def _response_trace_attributes(
                 "cached_tokens": response.usage.cached_tokens,
             }
         )
-    if response is not None and response.cost_estimate is not None:
+    if response.cost_estimate is not None:
         attributes.update(
             {
                 "estimated_cost": response.cost_estimate.amount,

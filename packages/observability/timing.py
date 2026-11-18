@@ -26,6 +26,10 @@ class TimingCapture:
         if self.first_visible_ms is None:
             self.first_visible_ms = (time.perf_counter() - self.started) * 1000
 
+    def count_receipt(self, attributes: Mapping[str, Any]) -> None:
+        self.known_usage_count += int(attributes.get("total_tokens") is not None)
+        self.known_cost_count += int(attributes.get("estimated_cost") is not None)
+
     def projection(self) -> dict[str, Any]:
         return {
             "clock": "process_monotonic",
@@ -83,12 +87,10 @@ class _TimedSpan:
                 if type(attempts) is int and attempts > 0:
                     self.capture.model_calls += 1
                     self.capture.provider_attempt_count += attempts
-                    self.capture.known_usage_count += int(
-                        attributes.get("total_tokens") is not None
-                    )
-                    self.capture.known_cost_count += int(
-                        attributes.get("estimated_cost") is not None
-                    )
+                    self.capture.count_receipt(attributes)
+            elif self.name == "model.empty_response" and attributes is not None:
+                # The logical call already counts this send in its attempt_count.
+                self.capture.count_receipt(attributes)
             self.capture.stages.setdefault(self.name, []).append(
                 (time.perf_counter() - self.started) * 1000
             )

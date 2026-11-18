@@ -28,6 +28,8 @@ from packages.model_gateway.contracts import (
 from packages.model_gateway.errors import ModelGatewayError, ModelGatewayErrorCode
 from packages.model_gateway.gateway import ModelGatewayService
 from packages.model_gateway.models import ModelProfile, ProviderCredential
+from packages.observability.safe import ProductionTraceSink
+from packages.observability.timing import capture_timings
 
 
 class FakeRepository:
@@ -570,6 +572,199 @@ async def test_model_generate_span_contains_only_safe_usage_and_cost_projection(
         "authorization",
     }.intersection(attributes)
     assert "not-for-logs" not in repr(attributes)
+
+
+class _ReceiptAdapter(FakeAdapter):
+    async def stream(self, profile, credential, request):
+        receipt = await self.complete(profile, credential, request)
+        yield ModelStreamEvent(event_type=ModelStreamEventType.COMPLETED, response=receipt)
+
+
+async def _perform_receipted_call(gateway, context, profile_id, operation):
+    if operation == "generate":
+        return await gateway.generate(context, profile_id, request())
+    events = [event async for event in gateway.stream(context, profile_id, request())]
+    return events[-1].response
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("operation", ["generate", "stream"])
+@pytest.mark.parametrize("has_usage", [True, False])
+async def test_completed_empty_response_preserves_only_reported_usage(operation, has_usage):
+    context, profiles, credential = setup_chain()
+    primary = profiles[0]
+    primary.fallback_profile_id = None
+    primary.max_tokens = 256
+    adapter = _ReceiptAdapter()
+    adapter.complete_outcomes = {
+        "primary": [
+            ModelResponse(
+                "",
+                credential.provider,
+                "primary",
+                finish_reason="length",
+                usage=ModelUsage(100, 256, 356, cached_tokens=40) if has_usage else None,
+            )
+        ]
+    }
+    sink = RecordingTraceSink()
+    gateway = ModelGatewayService(FakeRepository([primary], [credential]), adapter, sink)
+
+    with capture_timings() as timing, pytest.raises(ModelGatewayError) as exc:
+        await _perform_receipted_call(gateway, context, primary.id, operation)
+
+    assert exc.value.code == ModelGatewayErrorCode.MODEL_BAD_RESPONSE
+    assert sink.names == ["model.generate"] and adapter.complete_calls == ["primary"]
+    [end] = sink.spans[0].end_calls
+    assert end["status"] == "error"
+    attributes = end["attributes"]
+    counts = {key: value for key, value in attributes.items() if key.endswith("_tokens")}
+    assert counts == (
+        {"input_tokens": 100, "output_tokens": 256, "total_tokens": 356, "cached_tokens": 40}
+        if has_usage
+        else {}
+    )
+    assert "estimated_cost" not in attributes
+    assert (timing.model_calls, timing.provider_attempt_count) == (1, 1)
+    assert (timing.known_usage_count, timing.known_cost_count) == (int(has_usage), 0)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("operation", ["generate", "stream"])
+@pytest.mark.parametrize("fallback_succeeds", [True, False])
+@pytest.mark.parametrize("primary_receipt_metered", [True, False])
+async def test_fallback_keeps_empty_primary_usage_on_its_own_attempt(
+    operation, fallback_succeeds, primary_receipt_metered
+):
+    context, profiles, credential = setup_chain()
+    primary, _ = profiles
+    adapter = _ReceiptAdapter()
+    adapter.complete_outcomes = {
+        "primary": [
+            ModelResponse(
+                "",
+                credential.provider,
+                "primary",
+                finish_reason="stop",
+                usage=ModelUsage(20, 8, 28) if primary_receipt_metered else None,
+                cost_estimate=CostEstimate(Decimal("0.001"), "USD")
+                if primary_receipt_metered
+                else None,
+            )
+        ],
+        "fallback": [
+            response("fallback")
+            if fallback_succeeds
+            else ModelGatewayError(ModelGatewayErrorCode.MODEL_PROVIDER_UNAVAILABLE)
+        ],
+    }
+    sink = RecordingTraceSink()
+    gateway = ModelGatewayService(FakeRepository(profiles, [credential]), adapter, sink)
+
+    with capture_timings() as timing:
+        if fallback_succeeds:
+            final = await _perform_receipted_call(gateway, context, primary.id, operation)
+            assert final == response("fallback")
+        else:
+            with pytest.raises(ModelGatewayError) as exc:
+                await _perform_receipted_call(gateway, context, primary.id, operation)
+            assert exc.value.code == ModelGatewayErrorCode.MODEL_PROVIDER_UNAVAILABLE
+
+    assert adapter.complete_calls == ["primary", "fallback"]
+    assert sink.names == ["model.generate", "model.empty_response"]
+    logical, rejected = [span.end_calls[0] for span in sink.spans]
+    first = rejected["attributes"]
+    assert rejected["status"] == "error"
+    assert first["profile_id"] == str(primary.id)
+    assert (first["model"], first["attempt"]) == ("primary", 1)
+    assert first.get("total_tokens") == (28 if primary_receipt_metered else None)
+    final = logical["attributes"]
+    assert final["model"] == "fallback" and final["attempt_count"] == 2
+    assert final.get("total_tokens") == (2 if fallback_succeeds else None)
+    assert (timing.model_calls, timing.provider_attempt_count) == (1, 2)
+    assert timing.known_usage_count == int(primary_receipt_metered) + int(fallback_succeeds)
+    assert timing.known_cost_count == int(primary_receipt_metered)
+
+
+@pytest.mark.asyncio
+async def test_empty_terminal_receipt_after_visible_text_preserves_usage_without_fallback():
+    class VisibleAdapter(_ReceiptAdapter):
+        async def stream(self, profile, credential, request):
+            yield ModelStreamEvent(event_type=ModelStreamEventType.MESSAGE_DELTA, message_delta="A")
+            async for event in super().stream(profile, credential, request):
+                yield event
+
+    context, profiles, credential = setup_chain()
+    adapter = VisibleAdapter()
+    adapter.complete_outcomes = {
+        "primary": [ModelResponse("", credential.provider, "primary", usage=ModelUsage(18, 2, 20))],
+        "fallback": [response("fallback")],
+    }
+    sink = RecordingTraceSink()
+    gateway = ModelGatewayService(FakeRepository(profiles, [credential]), adapter, sink)
+    visible = []
+
+    with pytest.raises(ModelGatewayError) as exc:
+        async for event in gateway.stream(context, profiles[0].id, request()):
+            visible.append(event.message_delta)
+
+    assert exc.value.code == ModelGatewayErrorCode.MODEL_STREAM_INTERRUPTED
+    assert visible == ["A"] and adapter.complete_calls == ["primary"]
+    assert sink.names == ["model.generate"]
+    [terminal] = sink.spans[0].end_calls
+    assert terminal["status"] == "error" and terminal["attributes"]["total_tokens"] == 20
+
+
+@pytest.mark.asyncio
+async def test_completed_empty_receipt_logs_reported_cost_with_exact_precision(caplog):
+    context, profiles, credential = setup_chain()
+    primary = profiles[0]
+    primary.fallback_profile_id = None
+    amount = Decimal("0.000011203000000001")
+    adapter = _ReceiptAdapter()
+    adapter.complete_outcomes = {
+        "primary": [
+            ModelResponse(
+                "",
+                credential.provider,
+                primary.model,
+                finish_reason="length",
+                usage=ModelUsage(7, 3, 10),
+                cost_estimate=CostEstimate(amount, "USD"),
+            )
+        ]
+    }
+    gateway = ModelGatewayService(
+        FakeRepository([primary], [credential]), adapter, ProductionTraceSink()
+    )
+    with (
+        caplog.at_level(logging.INFO, logger="agenthub.observability"),
+        pytest.raises(ModelGatewayError),
+    ):
+        await gateway.generate(context, primary.id, request())
+    [record] = [r.trace_span for r in caplog.records if hasattr(r, "trace_span")]
+    assert (record["output_tokens"], record["estimated_cost"], record["currency"]) == (
+        3,
+        str(amount),
+        "USD",
+    )
+    assert "not-for-logs" not in repr(record)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("amount", [Decimal("-1"), Decimal("NaN"), Decimal("Infinity")])
+async def test_safe_trace_excludes_invalid_amounts_and_other_decimal_metadata(caplog, amount):
+    with caplog.at_level(logging.INFO, logger="agenthub.observability"):
+        span = await ProductionTraceSink().start_span("model.generate")
+        await span.end(
+            attributes={
+                "estimated_cost": amount,
+                "other_amount": Decimal("2"),
+                "credential": "private",
+            }
+        )
+    [record] = [r.trace_span for r in caplog.records if hasattr(r, "trace_span")]
+    assert not {"estimated_cost", "other_amount", "credential"}.intersection(record)
 
 
 @pytest.mark.asyncio

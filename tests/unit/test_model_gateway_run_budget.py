@@ -21,6 +21,7 @@ from packages.model_gateway.contracts import (
     ModelResponse,
     ModelStreamEvent,
     ModelStreamEventType,
+    ModelUsage,
     ResolvedModelExecutionPlan,
     ResolvedModelExecutionProfile,
     RetryPolicy,
@@ -118,7 +119,7 @@ class RecordingProvider:
     def __init__(self, events: list[tuple[str, str | None]]) -> None:
         self.events = events
         self.complete_outcomes: dict[str, list[ModelResponse | ModelGatewayError]] = {}
-        self.stream_outcomes: dict[str, list[str]] = {}
+        self.stream_outcomes: dict[str, list[str | ModelResponse]] = {}
 
     async def complete(
         self,
@@ -142,6 +143,9 @@ class RecordingProvider:
         del credential, request
         self.events.append(("provider.stream", profile.model))
         outcome = self.stream_outcomes[profile.model].pop(0)
+        if isinstance(outcome, ModelResponse):
+            yield ModelStreamEvent(event_type=ModelStreamEventType.COMPLETED, response=outcome)
+            return
         if outcome == "pre-visible-error":
             raise ModelGatewayError(
                 ModelGatewayErrorCode.MODEL_PROVIDER_UNAVAILABLE,
@@ -554,6 +558,34 @@ async def test_successful_response_keeps_the_reservation_unreconciled() -> None:
         ("reserve", "MAIN_MODEL"),
         ("provider.complete", "primary"),
     ]
+    assert budget.unknown == []
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("operation", ["generate", "stream"])
+async def test_completed_empty_response_keeps_the_reservation_unreconciled(operation):
+    context, repository, profiles = setup_chain()
+    primary = profiles[0]
+    primary.fallback_profile_id = None
+    events = []
+    budget = RecordingAttemptBudget(events)
+    provider = RecordingProvider(events)
+    receipt = ModelResponse(
+        "", "test-provider", "primary", finish_reason="length", usage=ModelUsage(20, 8, 28)
+    )
+    provider.complete_outcomes["primary"] = [receipt]
+    provider.stream_outcomes["primary"] = [receipt]
+    gateway = ModelGatewayService(repository, provider, attempt_budget=budget)
+
+    with pytest.raises(ModelGatewayError) as exc:
+        if operation == "generate":
+            await gateway.generate(context, primary.id, request())
+        else:
+            async for _ in gateway.stream(context, primary.id, request()):
+                pass
+
+    assert exc.value.code == ModelGatewayErrorCode.MODEL_BAD_RESPONSE
+    assert len(budget.reservations) == 1
     assert budget.unknown == []
 
 
