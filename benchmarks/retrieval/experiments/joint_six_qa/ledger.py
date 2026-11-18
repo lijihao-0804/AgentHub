@@ -8,6 +8,7 @@ from decimal import Decimal
 from pathlib import Path
 
 from benchmarks.retrieval.table_header_answers import receipt_cost
+from scripts.aliyun_api_smoke import aliyun_route
 
 from .inputs import (
     EMBED,
@@ -208,6 +209,7 @@ def registration(stage, commit):
         code_commit=commit,
         sources=code(commit),
         model=MODEL,
+        endpoint_sha256=digest(aliyun_route().base_url.rstrip("/")),
         weights=weights(),
         tariff=load(OLD_FREEZE)["tariff"],
         set_sha256=sha(FRESH),
@@ -226,11 +228,13 @@ def registration(stage, commit):
     )
 
 
-def verify(stage, expected_sha):
+def verify(stage, expected_sha, route):
     path = STUDY / (stage + "-freeze.json")
     if not expected_sha or sha(path) != expected_sha:
         raise ValueError("Frozen registration SHA required")
     frozen = load(path)
+    if route.model != MODEL or digest(route.base_url.rstrip("/")) != frozen["endpoint_sha256"]:
+        raise ValueError("Paid QA route differs from the frozen Beijing endpoint")
     if registration(stage, frozen["code_commit"]) != frozen:
         raise ValueError("Registration changed before dispatch")
     earlier = []

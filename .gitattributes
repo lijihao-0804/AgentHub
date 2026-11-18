@@ -13,3 +13,7 @@ benchmarks/public_rag/results/published/qa-first-response-20261114/**/*.json tex
 benchmarks/public_rag/results/published/qa-first-response-20261114/**/*.jsonl text eol=lf
 # An empty unified-diff context line is a literal space; preserve the measured patch bytes.
 benchmarks/public_rag/results/published/qa-first-response-20261114/reader/prompt.patch text eol=lf -whitespace
+# Recreating the joint-selection registration verifies the bytes of these experiment files.
+benchmarks/public_rag/experiments/joint_six_20261118/** text eol=lf
+benchmarks/retrieval/experiments/joint_six_qa/** text eol=lf
+benchmarks/retrieval/experiments/joint_six_review/** text eol=lf

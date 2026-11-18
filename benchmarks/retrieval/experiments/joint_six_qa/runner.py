@@ -258,17 +258,12 @@ async def run(args):
         if groups not in (["smoke"], list(FORMAL)):
             raise ValueError("Dispatch requires the full frozen smoke or formal cohort")
         stage = "smoke" if groups == ["smoke"] else "formal"
-        expected, prior_cost, prior_ids = ledger.verify(stage, args.freeze_sha)
+        route = aliyun_route()
+        expected, prior_cost, prior_ids = ledger.verify(stage, args.freeze_sha, route)
         output = STUDY / ("paid-" + stage)
         output.mkdir(exist_ok=False)
         await check(output)
         save(output / "dispatch-started.json", dict(freeze_sha=args.freeze_sha, groups=groups))
-        route = aliyun_route()
-        if (
-            route.model != MODEL
-            or route.base_url.rstrip("/") != "https://dashscope.aliyuncs.com/compatible-mode/v1"
-        ):
-            raise ValueError("Paid QA route differs from the registered model and region")
     else:
         expected, prior_cost, prior_ids = {}, 0, ()
         route = SimpleNamespace(
