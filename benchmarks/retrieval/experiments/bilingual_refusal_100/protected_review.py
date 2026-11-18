@@ -115,7 +115,7 @@ def evaluate(run, group, dest, output):
     stages = {}
     public = []
     for stage in ("first", "final"):
-        gained, lost = [], []
+        gained, lost, unresolved = [], [], []
         counts = {
             "strict": 0,
             "refusal": 0,
@@ -142,7 +142,9 @@ def evaluate(run, group, dest, output):
             counts["valid"] += uid is not None
             counts["language"] += bool(vote.get("language_match"))
             counts["cited"] += state == "answer"
-            counts["supported_cited"] += state == "answer" and vote["support"]
+            counts["supported_cited"] += state == "answer" and vote.get("support") is True
+            if vote.get("unresolved"):
+                unresolved.append(qid)
             public.append(
                 {
                     "id": qid,
@@ -153,7 +155,7 @@ def evaluate(run, group, dest, output):
                     "review": {k: vote.get(k) for k in ("value", "support", "language_match")},
                 }
             )
-        stages[stage] = {**counts, "gained": gained, "regressed": lost}
+        stages[stage] = {**counts, "gained": gained, "regressed": lost, "unresolved": unresolved}
     dump(
         output,
         {

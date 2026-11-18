@@ -2,6 +2,7 @@
 
 import argparse
 import json
+import re
 from collections import defaultdict
 from pathlib import Path
 
@@ -31,6 +32,64 @@ def dump(path, value):
 def private(path):
     if path.resolve() == SCRATCH or not path.resolve().is_relative_to(SCRATCH):
         raise ValueError("Review packets and private wire files must remain under .scratch.")
+
+
+# Match only complete JSON string characters, including complete escape sequences.
+_STRING_BODY = re.compile(r'(?:[^"\\\x00-\x1f]|\\(?:["\\/bfnrt]|u[0-9a-fA-F]{4}))*')
+
+
+def answer_fragment(content):
+    """Recover only an observed top-level answer string, including an unfinished string prefix."""
+    data = re.sub(r"^```(?:json)?[ \t]*\r?\n", "", content.lstrip(), count=1, flags=re.I).lstrip()
+    if not data.startswith("{"):
+        return ""
+    decoder = json.JSONDecoder()
+    remaining = data[1:].lstrip()
+    found = None
+    while remaining.startswith('"'):
+        try:
+            key, end = decoder.raw_decode(remaining)
+        except ValueError:
+            break
+        remaining = remaining[end:].lstrip()
+        if not remaining.startswith(":"):
+            break
+        remaining = remaining[1:].lstrip()
+        if key == "answer":
+            if found is not None or not remaining.startswith('"'):
+                return ""
+            match = _STRING_BODY.match(remaining, 1)
+            # Delimiters decode the complete observed characters. They are never exposed as text.
+            found = json.loads('"' + match.group() + '"')
+            found = re.split(r"[\ud800-\udfff]", found, maxsplit=1)[0]
+            end = match.end()
+            if not remaining[end:].startswith('"'):
+                break
+            end += 1
+        else:
+            # Skip entire values, so nested answer fields in tool or reasoning data cannot match.
+            try:
+                _, end = decoder.raw_decode(remaining)
+            except ValueError:
+                break
+        remaining = remaining[end:].lstrip()
+        if not remaining.startswith(","):
+            break
+        remaining = remaining[1:].lstrip()
+    return found or ""
+
+
+def blinded_unit(outcome, provider_content=None):
+    unit = {key: outcome[key] for key in ("state", "answer", "citations")}
+    if unit["answer"].strip():
+        return unit
+    if unit["state"] in {"answer", "refusal"}:
+        raise ValueError("A valid answer must carry a visible reply.")
+    if unit["state"] == "invalid" and provider_content:
+        fragment = answer_fragment(provider_content)
+        if fragment.strip():
+            return {**unit, "answer": fragment, "answer_field_fragment": True}
+    return None
 
 
 def packets(run, manifest):
@@ -98,13 +157,11 @@ def packets(run, manifest):
         if packet["visible_evidence"] != visible:
             raise ValueError("Arms of one question were shown different evidence.")
         for stage, outcome in (("first", first_attempts[0]), ("final", final)):
-            if not outcome["answer"].strip():
-                if outcome["state"] in {"answer", "refusal"}:
-                    raise ValueError("A valid answer must carry a visible reply.")
+            unit = blinded_unit(outcome, events[0]["content"] if stage == "first" else None)
+            if unit is None:
                 continue
             # Equivalent answers share a judgment only with identical state, numbered evidence
             # and citation excerpts. Neither arm nor first/final status enters the unit ID.
-            unit = {key: outcome[key] for key in ("state", "answer", "citations")}
             uid = digest_json([case, visible, unit])[:24]
             if packet["outputs"].setdefault(uid, {"uid": uid, **unit}) != {"uid": uid, **unit}:
                 raise ValueError("Blinded unit identifier collision.")
@@ -163,16 +220,33 @@ def apply(run, review, output, manifest=MANIFEST):
     if read_json(review / "mapping-private.json") != mapping:
         raise ValueError("The unblinding key differs from the original evidence and output.")
     verdicts = {}
+    fragment_hashes = {}
+    extra_path = review / "additional-verdicts.json"
+    extra = read_json(extra_path) if extra_path.exists() else {}
     for number, part in enumerate(parts, 1):
         if read_json(review / f"packet-{number}.json") != part:
             raise ValueError("A packet's blinded response or evidence was modified.")
         expected = {unit["uid"] for p in part for unit in p["outputs"]}
+        fragment_hashes.update(
+            {
+                unit["uid"]: text_hash(unit["answer"])
+                for p in part
+                for unit in p["outputs"]
+                if unit.get("answer_field_fragment")
+            }
+        )
         entries = read_json(review / f"verdicts-{number}.json")
+        if entries.keys() & extra.keys():
+            raise ValueError("A supplementary judgment cannot replace an existing decision.")
+        for uid in (expected - entries.keys()) & extra.keys():
+            entries[uid] = extra.pop(uid)
         if set(entries) != expected or verdicts.keys() & entries.keys():
             raise ValueError("Each blinded response must receive exactly its assigned judgment.")
         for decision in entries.values():
             validate_verdict(decision, final=False)
         verdicts.update(entries)
+    if extra:
+        raise ValueError("A supplementary judgment refers to an unknown blinded unit.")
     pending = {uid for uid, v in verdicts.items() if v.get("uncertain")}
     adjudicated = (
         read_json(review / "adjudications.json") if (review / "adjudications.json").exists() else {}
@@ -227,6 +301,8 @@ def apply(run, review, output, manifest=MANIFEST):
                 "unresolved": unresolved,
                 "reason_sha256": text_hash(verdict["reason"]),
             }
+            if uid in fragment_hashes:
+                item["semantic_review"]["visible_answer_fragment_sha256"] = fragment_hashes[uid]
     output.parent.mkdir(parents=True, exist_ok=True)
     with output.open("x", encoding="utf8", newline="\n") as dest:
         for row in automatic:

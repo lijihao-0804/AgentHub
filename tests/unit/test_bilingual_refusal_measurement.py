@@ -6,12 +6,16 @@ from copy import deepcopy
 import httpx
 import pytest
 
+from benchmarks.retrieval.experiments.bilingual_refusal_100 import review
 from benchmarks.retrieval.experiments.bilingual_refusal_100.evidence import (
     observations,
     stage_coverage,
 )
 from benchmarks.retrieval.experiments.bilingual_refusal_100.metrics import summarize
-from benchmarks.retrieval.experiments.bilingual_refusal_100.review import validate_verdict
+from benchmarks.retrieval.experiments.bilingual_refusal_100.review import (
+    blinded_unit,
+    validate_verdict,
+)
 from benchmarks.retrieval.experiments.bilingual_refusal_100.runner import (
     GuardedProviderTransport,
     order,
@@ -182,6 +186,74 @@ def test_blind_review_requires_language_and_justification_for_failures():
     validate_verdict(unresolved, final=True)
     with pytest.raises(ValueError):
         validate_verdict(unresolved, final=False)
+
+
+@pytest.mark.parametrize(
+    ("content", "expected"),
+    [
+        ('{"answer":"The text stops mid-sent', "The text stops mid-sent"),
+        (r'{"answer":"A \"quoted\" word and \u4e2d\u65', 'A "quoted" word and 中'),
+        (r'{"answer":"A\ud83d\ude00\ud83d', "A😀"),
+        (
+            '{"reasoning_content":"private","tool_calls":[{"answer":"private"}],"answer":"visible"',
+            "visible",
+        ),
+        ('```json\n{"answer":"visible fragment', "visible fragment"),
+        ('{"tool_calls":[{"answer":"private"}]}', None),
+        ('{"analysis":{"answer":"hidden', None),
+        ('{"reasoning_content":"thinking about an answer', None),
+        ('some commentary before {"answer":"not a top-level object"}', None),
+        ('{"answer": ["not a text field"]}', None),
+        ('{"answer":"first", "answer":"second"}', None),
+    ],
+)
+def test_invalid_answer_fragment_is_only_used_for_blind_language_review(content, expected):
+    invalid = {"state": "invalid", "answer": "", "citations": []}
+    original = deepcopy(invalid)
+    unit = blinded_unit(invalid, content)
+    assert invalid == original
+    assert blinded_unit(invalid) is None
+    assert blinded_unit({"state": "error", "answer": "", "citations": []}, content) is None
+    if expected is None:
+        assert unit is None
+    else:
+        assert unit == {**original, "answer": expected, "answer_field_fragment": True}
+    parsed = {"state": "refusal", "answer": "Recorded refusal.", "citations": []}
+    assert blinded_unit(parsed, content) == parsed
+
+
+def test_language_only_supplement_preserves_the_automatic_record(monkeypatch, tmp_path):
+    case, doc, events, returned, scorer, covers = recorded()
+    events[0]["content"] = '{"answer":"Visible prefix'
+    returned.update(http=422, body={"error": {"code": "INVALID_MODEL_OUTPUT"}})
+    results = observations(case, doc, events, returned, "system")
+    automatic = project(case, "baseline", events, returned, results, scorer, covers, offline=True)
+    frozen = deepcopy(automatic)
+    unit = blinded_unit(results[0][0], events[0]["content"])
+    mapping = {f"{case['id']}/baseline/first": "unit"}
+    parts = [[{"outputs": [{"uid": "unit", **unit}]}], []]
+    monkeypatch.setattr(review, "private", lambda path: None)
+    monkeypatch.setattr(review, "packets", lambda *args: (parts, mapping, [deepcopy(automatic)]))
+    review.dump(tmp_path / "mapping-private.json", mapping)
+    for n, items in enumerate(parts, 1):
+        review.dump(tmp_path / f"packet-{n}.json", items)
+        review.dump(tmp_path / f"verdicts-{n}.json", {})
+    verdict = {"value": False, "support": False, "language_match": True, "reason": "Readable text."}
+    review.dump(tmp_path / "additional-verdicts.json", {"unit": verdict})
+    output = tmp_path / "reviewed.jsonl"
+    assert review.apply(tmp_path, tmp_path, output)["reviewed_units"] == 1
+    row = review.rows(output)[0]
+    assert row["first"]["scores"]["language_match"] is True
+    assert not row["first"]["scores"]["joint_correct"] and row["first"]["state"] == "invalid"
+    assert row["first"]["answer_sha256"] == frozen["first"]["answer_sha256"]
+    assert row["first"]["wire_output_sha256"] == frozen["first"]["wire_output_sha256"]
+    assert row["first"]["semantic_review"]["visible_answer_fragment_sha256"] == review.text_hash(
+        "Visible prefix"
+    )
+    assert row["final"] == frozen["final"] and automatic == frozen
+    (tmp_path / "verdicts-1.json").write_text(json.dumps({"unit": verdict}), encoding="utf8")
+    with pytest.raises(ValueError, match="cannot replace"):
+        review.apply(tmp_path, tmp_path, tmp_path / "duplicate.jsonl")
 
 
 def test_registered_order_balances_each_stratum_and_the_overall_sample():
