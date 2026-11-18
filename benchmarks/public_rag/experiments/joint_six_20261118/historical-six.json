@@ -1,0 +1,4596 @@
+{
+  "historical_receipt_sha256": "9faa9016122c54488b21816c0de3ed93b014dcce87f0d39b187cd64dc168b113",
+  "historical_matched_sha256": "52e871adf5176d1f93f7c5162b34661da0b4be606b93155543215c83ebc22e55",
+  "registered_queries": 24,
+  "eligible_pool_and_incomplete_message": 6,
+  "ranks": "one-based post-cross-encoder ranks; fused ranks are reported separately",
+  "repair": "swap fixed existing slots with unmodified original reranked chunks; no new unions",
+  "cases": [
+    {
+      "id": "2hop__75213_24779",
+      "gold_indices_in_hop_order": [
+        9,
+        2
+      ],
+      "min_pool_chunks_to_show_both": 3,
+      "all_twenty": [
+        {
+          "idx": 2,
+          "title": "On the Origin of Species",
+          "gold": true,
+          "chars": [
+            0,
+            504
+          ],
+          "original_ranks": [
+            1
+          ],
+          "fused_ranks": [
+            2
+          ],
+          "chunk_ids": [
+            "c9b7ad5f177ea9a59887fab177941c84210ef4981e1b3f4576c1b477dde916dc"
+          ],
+          "rerank_score": 4.83984375
+        },
+        {
+          "idx": 10,
+          "title": "Evolution",
+          "gold": false,
+          "chars": [
+            0,
+            872
+          ],
+          "original_ranks": [
+            2
+          ],
+          "fused_ranks": [
+            5
+          ],
+          "chunk_ids": [
+            "454d793b4c22ffd86751b65e1ef20bbe9d0c498832e3ca679ee039e266aa4c76"
+          ],
+          "rerank_score": 4.37890625
+        },
+        {
+          "idx": 12,
+          "title": "Darwinism",
+          "gold": false,
+          "chars": [
+            0,
+            1145
+          ],
+          "original_ranks": [
+            3
+          ],
+          "fused_ranks": [
+            4
+          ],
+          "chunk_ids": [
+            "f06e0d64c5010e98fcd5162a4a1e2a6790dbdfc7990d93947ded6a9fe581da6c"
+          ],
+          "rerank_score": 3.958984375
+        },
+        {
+          "idx": 17,
+          "title": "Alfred Russel Wallace",
+          "gold": false,
+          "chars": [
+            0,
+            773
+          ],
+          "original_ranks": [
+            4
+          ],
+          "fused_ranks": [
+            8
+          ],
+          "chunk_ids": [
+            "168ad39e91eeef3c989989d1f1814f116e85665b12cea63362ed7ce3f8fd7942"
+          ],
+          "rerank_score": 3.6171875
+        },
+        {
+          "idx": 9,
+          "title": "History of evolutionary thought",
+          "gold": true,
+          "chars": [
+            0,
+            1200
+          ],
+          "original_ranks": [
+            5
+          ],
+          "fused_ranks": [
+            1
+          ],
+          "chunk_ids": [
+            "95070d983d77f77a04645522669bba36c59bba01a69be97aa02decae3c4f5dc9"
+          ],
+          "rerank_score": 3.51953125
+        },
+        {
+          "idx": 5,
+          "title": "Lamarckism",
+          "gold": false,
+          "chars": [
+            0,
+            967
+          ],
+          "original_ranks": [
+            6
+          ],
+          "fused_ranks": [
+            6
+          ],
+          "chunk_ids": [
+            "c1ef38c973cdb7d8ec88e270800342ddcb2e722343116220943f17cf9be2940a"
+          ],
+          "rerank_score": 1.642578125
+        },
+        {
+          "idx": 8,
+          "title": "On the Origin of Species",
+          "gold": false,
+          "chars": [
+            0,
+            1200
+          ],
+          "original_ranks": [
+            7
+          ],
+          "fused_ranks": [
+            12
+          ],
+          "chunk_ids": [
+            "3fd55d291ca67084a5c10f72651ee4cae8211519f80f110ed448b10a1b292812"
+          ],
+          "rerank_score": 0.5791015625
+        },
+        {
+          "idx": 11,
+          "title": "Gene",
+          "gold": false,
+          "chars": [
+            0,
+            675
+          ],
+          "original_ranks": [
+            8
+          ],
+          "fused_ranks": [
+            7
+          ],
+          "chunk_ids": [
+            "eaf1ea8fc2687dd696cefd2cc39b62dadc9a0efcf97a05f7d44b223ffabc5d14"
+          ],
+          "rerank_score": -0.1212158203125
+        },
+        {
+          "idx": 1,
+          "title": "History of evolutionary thought",
+          "gold": false,
+          "chars": [
+            0,
+            1071
+          ],
+          "original_ranks": [
+            9
+          ],
+          "fused_ranks": [
+            10
+          ],
+          "chunk_ids": [
+            "07d8f36b6075894ae89c5183975e12d4797f5f5852d6641f203aef02d35f9459"
+          ],
+          "rerank_score": -0.347900390625
+        },
+        {
+          "idx": 18,
+          "title": "On the Origin of Species",
+          "gold": false,
+          "chars": [
+            0,
+            1124
+          ],
+          "original_ranks": [
+            10
+          ],
+          "fused_ranks": [
+            9
+          ],
+          "chunk_ids": [
+            "a5c456e6105f062241f4d58f692e8f3e4f8c6658731dce71d42454badd09e1b8"
+          ],
+          "rerank_score": -0.8544921875
+        },
+        {
+          "idx": 7,
+          "title": "On the Origin of Species",
+          "gold": false,
+          "chars": [
+            0,
+            768
+          ],
+          "original_ranks": [
+            11
+          ],
+          "fused_ranks": [
+            13
+          ],
+          "chunk_ids": [
+            "006b28ee3d595a851b5e89817eda2d629793c38cabda0abbd729f99a3ac55e3f"
+          ],
+          "rerank_score": -0.89599609375
+        },
+        {
+          "idx": 13,
+          "title": "Sociobiology",
+          "gold": false,
+          "chars": [
+            0,
+            1200
+          ],
+          "original_ranks": [
+            12
+          ],
+          "fused_ranks": [
+            3
+          ],
+          "chunk_ids": [
+            "f2fe5ba612eaee438740580bc71891c7c7f04ef341992f85417146b7f61422b6"
+          ],
+          "rerank_score": -1.212890625
+        },
+        {
+          "idx": 8,
+          "title": "On the Origin of Species",
+          "gold": false,
+          "chars": [
+            1000,
+            1401
+          ],
+          "original_ranks": [
+            13
+          ],
+          "fused_ranks": [
+            18
+          ],
+          "chunk_ids": [
+            "d62e72386890a0b5a3b8ea03f19a5cb00295437ab5ed8d22cfd1034dce5482ec"
+          ],
+          "rerank_score": -2.30078125
+        },
+        {
+          "idx": 4,
+          "title": "Creation and evolution in public education in the United States",
+          "gold": false,
+          "chars": [
+            0,
+            791
+          ],
+          "original_ranks": [
+            14
+          ],
+          "fused_ranks": [
+            11
+          ],
+          "chunk_ids": [
+            "9ad5aacc41782e0a7c5b00fdd8d34e69cc9ee16f49cb5581eb0d02fbfe924158"
+          ],
+          "rerank_score": -2.69140625
+        },
+        {
+          "idx": 9,
+          "title": "History of evolutionary thought",
+          "gold": true,
+          "chars": [
+            1000,
+            1585
+          ],
+          "original_ranks": [
+            15
+          ],
+          "fused_ranks": [
+            15
+          ],
+          "chunk_ids": [
+            "bef9dceed335c00192425ba96ba516de7b3293d5007925f7677f66f64af7f0df"
+          ],
+          "rerank_score": -2.7265625
+        },
+        {
+          "idx": 19,
+          "title": "The Major Transitions in Evolution",
+          "gold": false,
+          "chars": [
+            0,
+            345
+          ],
+          "original_ranks": [
+            16
+          ],
+          "fused_ranks": [
+            14
+          ],
+          "chunk_ids": [
+            "8ca4453f6bb39b239e87e3b40acd3719c5cbe87885af2236df4037af924bd115"
+          ],
+          "rerank_score": -5.1171875
+        },
+        {
+          "idx": 15,
+          "title": "John Scales Avery",
+          "gold": false,
+          "chars": [
+            0,
+            813
+          ],
+          "original_ranks": [
+            17
+          ],
+          "fused_ranks": [
+            16
+          ],
+          "chunk_ids": [
+            "87b3e31dc20de4f948dddf9555e78f7b0c4791f34df5c5b6a20eaa37f330a4b4"
+          ],
+          "rerank_score": -6.3125
+        },
+        {
+          "idx": 6,
+          "title": "Bacteria",
+          "gold": false,
+          "chars": [
+            0,
+            814
+          ],
+          "original_ranks": [
+            18
+          ],
+          "fused_ranks": [
+            17
+          ],
+          "chunk_ids": [
+            "d659ecd07d7c86812f715872acb5e78cbad683e28c4110d127e132bad391f353"
+          ],
+          "rerank_score": -6.61328125
+        },
+        {
+          "idx": 14,
+          "title": "Cadillac Ranch",
+          "gold": false,
+          "chars": [
+            0,
+            610
+          ],
+          "original_ranks": [
+            19
+          ],
+          "fused_ranks": [
+            20
+          ],
+          "chunk_ids": [
+            "3b48780a02b8d70b32b93851046e2189e5d69f41df6c45d6db39a375ecda373f"
+          ],
+          "rerank_score": -6.96484375
+        },
+        {
+          "idx": 0,
+          "title": "Digimon",
+          "gold": false,
+          "chars": [
+            0,
+            511
+          ],
+          "original_ranks": [
+            20
+          ],
+          "fused_ranks": [
+            19
+          ],
+          "chunk_ids": [
+            "620587de833ec00520828b825ae4571f8d258e2b827731f08995ae79198412e7"
+          ],
+          "rerank_score": -8.234375
+        }
+      ],
+      "baseline": {
+        "selected": [
+          {
+            "slot": 1,
+            "idx": 2,
+            "title": "On the Origin of Species",
+            "gold": true,
+            "chars": [
+              0,
+              504
+            ],
+            "original_ranks": [
+              1
+            ],
+            "fused_ranks": [
+              2
+            ],
+            "chunk_ids": [
+              "c9b7ad5f177ea9a59887fab177941c84210ef4981e1b3f4576c1b477dde916dc"
+            ]
+          },
+          {
+            "slot": 2,
+            "idx": 10,
+            "title": "Evolution",
+            "gold": false,
+            "chars": [
+              0,
+              872
+            ],
+            "original_ranks": [
+              2
+            ],
+            "fused_ranks": [
+              5
+            ],
+            "chunk_ids": [
+              "454d793b4c22ffd86751b65e1ef20bbe9d0c498832e3ca679ee039e266aa4c76"
+            ]
+          },
+          {
+            "slot": 3,
+            "idx": 12,
+            "title": "Darwinism",
+            "gold": false,
+            "chars": [
+              0,
+              1145
+            ],
+            "original_ranks": [
+              3
+            ],
+            "fused_ranks": [
+              4
+            ],
+            "chunk_ids": [
+              "f06e0d64c5010e98fcd5162a4a1e2a6790dbdfc7990d93947ded6a9fe581da6c"
+            ]
+          },
+          {
+            "slot": 4,
+            "idx": 17,
+            "title": "Alfred Russel Wallace",
+            "gold": false,
+            "chars": [
+              0,
+              773
+            ],
+            "original_ranks": [
+              4
+            ],
+            "fused_ranks": [
+              8
+            ],
+            "chunk_ids": [
+              "168ad39e91eeef3c989989d1f1814f116e85665b12cea63362ed7ce3f8fd7942"
+            ]
+          },
+          {
+            "slot": 5,
+            "idx": 9,
+            "title": "History of evolutionary thought",
+            "gold": true,
+            "chars": [
+              0,
+              1200
+            ],
+            "original_ranks": [
+              5
+            ],
+            "fused_ranks": [
+              1
+            ],
+            "chunk_ids": [
+              "95070d983d77f77a04645522669bba36c59bba01a69be97aa02decae3c4f5dc9"
+            ]
+          },
+          {
+            "slot": 6,
+            "idx": 5,
+            "title": "Lamarckism",
+            "gold": false,
+            "chars": [
+              0,
+              967
+            ],
+            "original_ranks": [
+              6
+            ],
+            "fused_ranks": [
+              6
+            ],
+            "chunk_ids": [
+              "c1ef38c973cdb7d8ec88e270800342ddcb2e722343116220943f17cf9be2940a"
+            ]
+          }
+        ],
+        "present_fact_slices": [
+          {
+            "idx": 9,
+            "start": 0,
+            "end": 561,
+            "containing_slots": [
+              5
+            ]
+          },
+          {
+            "idx": 2,
+            "start": 163,
+            "end": 295,
+            "containing_slots": [
+              1
+            ]
+          }
+        ],
+        "minimal_atomic_repairs": {
+          "minimum": 1,
+          "options": [
+            {
+              "drop_slots": [
+                2
+              ],
+              "add_ranks": [
+                15
+              ]
+            },
+            {
+              "drop_slots": [
+                3
+              ],
+              "add_ranks": [
+                15
+              ]
+            },
+            {
+              "drop_slots": [
+                4
+              ],
+              "add_ranks": [
+                15
+              ]
+            },
+            {
+              "drop_slots": [
+                6
+              ],
+              "add_ranks": [
+                15
+              ]
+            }
+          ]
+        },
+        "wire_messages_sha256": "cc7dd6ec4adc884a218a6bc95540fbae59bc4ba5bd75a39d92a282dbed614dd2"
+      },
+      "candidate": {
+        "selected": [
+          {
+            "slot": 1,
+            "idx": 2,
+            "title": "On the Origin of Species",
+            "gold": true,
+            "chars": [
+              0,
+              504
+            ],
+            "original_ranks": [
+              1
+            ],
+            "fused_ranks": [
+              2
+            ],
+            "chunk_ids": [
+              "c9b7ad5f177ea9a59887fab177941c84210ef4981e1b3f4576c1b477dde916dc"
+            ]
+          },
+          {
+            "slot": 2,
+            "idx": 10,
+            "title": "Evolution",
+            "gold": false,
+            "chars": [
+              0,
+              872
+            ],
+            "original_ranks": [
+              2
+            ],
+            "fused_ranks": [
+              5
+            ],
+            "chunk_ids": [
+              "454d793b4c22ffd86751b65e1ef20bbe9d0c498832e3ca679ee039e266aa4c76"
+            ]
+          },
+          {
+            "slot": 3,
+            "idx": 12,
+            "title": "Darwinism",
+            "gold": false,
+            "chars": [
+              0,
+              1145
+            ],
+            "original_ranks": [
+              3
+            ],
+            "fused_ranks": [
+              4
+            ],
+            "chunk_ids": [
+              "f06e0d64c5010e98fcd5162a4a1e2a6790dbdfc7990d93947ded6a9fe581da6c"
+            ]
+          },
+          {
+            "slot": 4,
+            "idx": 17,
+            "title": "Alfred Russel Wallace",
+            "gold": false,
+            "chars": [
+              0,
+              773
+            ],
+            "original_ranks": [
+              4
+            ],
+            "fused_ranks": [
+              8
+            ],
+            "chunk_ids": [
+              "168ad39e91eeef3c989989d1f1814f116e85665b12cea63362ed7ce3f8fd7942"
+            ]
+          },
+          {
+            "slot": 5,
+            "idx": 9,
+            "title": "History of evolutionary thought",
+            "gold": true,
+            "chars": [
+              0,
+              1200
+            ],
+            "original_ranks": [
+              5
+            ],
+            "fused_ranks": [
+              1
+            ],
+            "chunk_ids": [
+              "95070d983d77f77a04645522669bba36c59bba01a69be97aa02decae3c4f5dc9"
+            ]
+          },
+          {
+            "slot": 6,
+            "idx": 5,
+            "title": "Lamarckism",
+            "gold": false,
+            "chars": [
+              0,
+              967
+            ],
+            "original_ranks": [
+              6
+            ],
+            "fused_ranks": [
+              6
+            ],
+            "chunk_ids": [
+              "c1ef38c973cdb7d8ec88e270800342ddcb2e722343116220943f17cf9be2940a"
+            ]
+          }
+        ],
+        "present_fact_slices": [
+          {
+            "idx": 9,
+            "start": 0,
+            "end": 561,
+            "containing_slots": [
+              5
+            ]
+          },
+          {
+            "idx": 2,
+            "start": 163,
+            "end": 295,
+            "containing_slots": [
+              1
+            ]
+          }
+        ],
+        "minimal_atomic_repairs": {
+          "minimum": 1,
+          "options": [
+            {
+              "drop_slots": [
+                2
+              ],
+              "add_ranks": [
+                15
+              ]
+            },
+            {
+              "drop_slots": [
+                3
+              ],
+              "add_ranks": [
+                15
+              ]
+            },
+            {
+              "drop_slots": [
+                4
+              ],
+              "add_ranks": [
+                15
+              ]
+            },
+            {
+              "drop_slots": [
+                6
+              ],
+              "add_ranks": [
+                15
+              ]
+            }
+          ]
+        },
+        "wire_messages_sha256": "cc7dd6ec4adc884a218a6bc95540fbae59bc4ba5bd75a39d92a282dbed614dd2"
+      }
+    },
+    {
+      "id": "2hop__37658_68056",
+      "gold_indices_in_hop_order": [
+        0,
+        7
+      ],
+      "min_pool_chunks_to_show_both": 3,
+      "all_twenty": [
+        {
+          "idx": 0,
+          "title": "Protestantism",
+          "gold": true,
+          "chars": [
+            0,
+            1200
+          ],
+          "original_ranks": [
+            1
+          ],
+          "fused_ranks": [
+            1
+          ],
+          "chunk_ids": [
+            "21ece1eac176f453c90614a0df72e611e38069e7ddb43dfbfe8e071124d8b323"
+          ],
+          "rerank_score": -1.1845703125
+        },
+        {
+          "idx": 7,
+          "title": "German military administration in occupied France during World War II",
+          "gold": true,
+          "chars": [
+            0,
+            745
+          ],
+          "original_ranks": [
+            2
+          ],
+          "fused_ranks": [
+            11
+          ],
+          "chunk_ids": [
+            "e687ea4bed2974f8fffe22fc921f9c6b53547681f085018538ed40a3ae929725"
+          ],
+          "rerank_score": -2.0703125
+        },
+        {
+          "idx": 2,
+          "title": "Strasbourg",
+          "gold": false,
+          "chars": [
+            0,
+            912
+          ],
+          "original_ranks": [
+            3
+          ],
+          "fused_ranks": [
+            2
+          ],
+          "chunk_ids": [
+            "c912c5827003570c52a1ea85a7e648871982d46e5f992483fdd550f906c08875"
+          ],
+          "rerank_score": -2.255859375
+        },
+        {
+          "idx": 5,
+          "title": "Alsace",
+          "gold": false,
+          "chars": [
+            0,
+            1200
+          ],
+          "original_ranks": [
+            4
+          ],
+          "fused_ranks": [
+            3
+          ],
+          "chunk_ids": [
+            "02cdd96f19d13344f13f8d95d631e1c9d9029b0045bca2b9d458dea768ae242d"
+          ],
+          "rerank_score": -2.349609375
+        },
+        {
+          "idx": 1,
+          "title": "Great power",
+          "gold": false,
+          "chars": [
+            0,
+            774
+          ],
+          "original_ranks": [
+            5
+          ],
+          "fused_ranks": [
+            8
+          ],
+          "chunk_ids": [
+            "1f3bdabcc5d6d89b1770b2cd2c95d8ab3c7a2c39ba389d468157226721cc331e"
+          ],
+          "rerank_score": -3.150390625
+        },
+        {
+          "idx": 5,
+          "title": "Alsace",
+          "gold": false,
+          "chars": [
+            1000,
+            1524
+          ],
+          "original_ranks": [
+            6
+          ],
+          "fused_ranks": [
+            9
+          ],
+          "chunk_ids": [
+            "ccfec66b69facbbdcfb81a4861a358e5d6c135d15f2dd5266213beb1da708dba"
+          ],
+          "rerank_score": -3.58203125
+        },
+        {
+          "idx": 10,
+          "title": "Alsace",
+          "gold": false,
+          "chars": [
+            0,
+            1046
+          ],
+          "original_ranks": [
+            7
+          ],
+          "fused_ranks": [
+            5
+          ],
+          "chunk_ids": [
+            "c4367e3cdb937e7aef1da9274fc058291b0975a9640fd76015a4ef38c0ade339"
+          ],
+          "rerank_score": -3.81640625
+        },
+        {
+          "idx": 15,
+          "title": "Free France",
+          "gold": false,
+          "chars": [
+            0,
+            389
+          ],
+          "original_ranks": [
+            8
+          ],
+          "fused_ranks": [
+            10
+          ],
+          "chunk_ids": [
+            "ed3459f05c644821ac6fa574acb881a281299c2c87820d087a3658f681ef9141"
+          ],
+          "rerank_score": -4.234375
+        },
+        {
+          "idx": 4,
+          "title": "Canon law",
+          "gold": false,
+          "chars": [
+            0,
+            468
+          ],
+          "original_ranks": [
+            9
+          ],
+          "fused_ranks": [
+            6
+          ],
+          "chunk_ids": [
+            "1b0ab6cedd08ed4e9018059a078b861e2d52264c85f906eaf903429f43ece2c3"
+          ],
+          "rerank_score": -5.9296875
+        },
+        {
+          "idx": 16,
+          "title": "Protestantism",
+          "gold": false,
+          "chars": [
+            0,
+            524
+          ],
+          "original_ranks": [
+            10
+          ],
+          "fused_ranks": [
+            4
+          ],
+          "chunk_ids": [
+            "ce2b15fb74dd026a6c65a7de41dd8d46a7fe0b54b40d22253f6a24073908e21d"
+          ],
+          "rerank_score": -6.3828125
+        },
+        {
+          "idx": 3,
+          "title": "Amelungsborn Abbey",
+          "gold": false,
+          "chars": [
+            0,
+            493
+          ],
+          "original_ranks": [
+            11
+          ],
+          "fused_ranks": [
+            12
+          ],
+          "chunk_ids": [
+            "c67896af030c4be483fa7abf6cab20a03dca928817d716c962b920409c999f18"
+          ],
+          "rerank_score": -7.04296875
+        },
+        {
+          "idx": 0,
+          "title": "Protestantism",
+          "gold": true,
+          "chars": [
+            1000,
+            1404
+          ],
+          "original_ranks": [
+            12
+          ],
+          "fused_ranks": [
+            16
+          ],
+          "chunk_ids": [
+            "75fbcbaf8466fd03483be6438c449406426366b3d4c7e6dca2d78e427ff1bebc"
+          ],
+          "rerank_score": -8.4296875
+        },
+        {
+          "idx": 17,
+          "title": "Protestantism",
+          "gold": false,
+          "chars": [
+            0,
+            788
+          ],
+          "original_ranks": [
+            13
+          ],
+          "fused_ranks": [
+            7
+          ],
+          "chunk_ids": [
+            "b06f9454c0c585bc05cfa88bbc8355e113a7342d82fc5ca8b8487d4c87770f3a"
+          ],
+          "rerank_score": -8.7421875
+        },
+        {
+          "idx": 14,
+          "title": "Chapel in the Hills",
+          "gold": false,
+          "chars": [
+            0,
+            331
+          ],
+          "original_ranks": [
+            14
+          ],
+          "fused_ranks": [
+            18
+          ],
+          "chunk_ids": [
+            "c89ddeafb46d7874e4faebfc0e8f5e1b492ba2d8b8a572b0dae6341418b7997a"
+          ],
+          "rerank_score": -9.2734375
+        },
+        {
+          "idx": 13,
+          "title": "George N. H. Peters",
+          "gold": false,
+          "chars": [
+            0,
+            236
+          ],
+          "original_ranks": [
+            15
+          ],
+          "fused_ranks": [
+            20
+          ],
+          "chunk_ids": [
+            "979d0226704cb4ec6f98113a236674eabe6d9d348276b586e118da633c5b2674"
+          ],
+          "rerank_score": -9.671875
+        },
+        {
+          "idx": 12,
+          "title": "Portland Lutheran School",
+          "gold": false,
+          "chars": [
+            0,
+            218
+          ],
+          "original_ranks": [
+            16
+          ],
+          "fused_ranks": [
+            17
+          ],
+          "chunk_ids": [
+            "dadff6c628bf239a1471ba753a984db8571f8f3a4803b45293f6154b736cc4a6"
+          ],
+          "rerank_score": -9.8125
+        },
+        {
+          "idx": 8,
+          "title": "Mount Calvary United Methodist Church (New York City)",
+          "gold": false,
+          "chars": [
+            0,
+            533
+          ],
+          "original_ranks": [
+            17
+          ],
+          "fused_ranks": [
+            14
+          ],
+          "chunk_ids": [
+            "06299fc6601d3cc368296b11e1e2bcead15b008975853c6cca321cbbf8ca4a5e"
+          ],
+          "rerank_score": -10.09375
+        },
+        {
+          "idx": 9,
+          "title": "St Paul's College, Walla Walla",
+          "gold": false,
+          "chars": [
+            0,
+            547
+          ],
+          "original_ranks": [
+            18
+          ],
+          "fused_ranks": [
+            15
+          ],
+          "chunk_ids": [
+            "d445be998c82a2d67725ec41e18fe1bba40a8b160a231385ee3212be91dd66a0"
+          ],
+          "rerank_score": -10.1640625
+        },
+        {
+          "idx": 18,
+          "title": "Ivan Levaï",
+          "gold": false,
+          "chars": [
+            0,
+            334
+          ],
+          "original_ranks": [
+            19
+          ],
+          "fused_ranks": [
+            13
+          ],
+          "chunk_ids": [
+            "a24a6c06ce64fe5ffa3fd05f45368f876c0cc8b4a8a3b7fc6af78e937a858e79"
+          ],
+          "rerank_score": -10.546875
+        },
+        {
+          "idx": 11,
+          "title": "Historic Trinity Lutheran Church",
+          "gold": false,
+          "chars": [
+            0,
+            352
+          ],
+          "original_ranks": [
+            20
+          ],
+          "fused_ranks": [
+            19
+          ],
+          "chunk_ids": [
+            "dd4c5bb7824700457bed971a7f9333d9525df48e7bbdaa10bb7e154d812be043"
+          ],
+          "rerank_score": -10.71875
+        }
+      ],
+      "baseline": {
+        "selected": [
+          {
+            "slot": 1,
+            "idx": 0,
+            "title": "Protestantism",
+            "gold": true,
+            "chars": [
+              0,
+              1200
+            ],
+            "original_ranks": [
+              1
+            ],
+            "fused_ranks": [
+              1
+            ],
+            "chunk_ids": [
+              "21ece1eac176f453c90614a0df72e611e38069e7ddb43dfbfe8e071124d8b323"
+            ]
+          },
+          {
+            "slot": 2,
+            "idx": 7,
+            "title": "German military administration in occupied France during World War II",
+            "gold": true,
+            "chars": [
+              0,
+              745
+            ],
+            "original_ranks": [
+              2
+            ],
+            "fused_ranks": [
+              11
+            ],
+            "chunk_ids": [
+              "e687ea4bed2974f8fffe22fc921f9c6b53547681f085018538ed40a3ae929725"
+            ]
+          },
+          {
+            "slot": 3,
+            "idx": 2,
+            "title": "Strasbourg",
+            "gold": false,
+            "chars": [
+              0,
+              912
+            ],
+            "original_ranks": [
+              3
+            ],
+            "fused_ranks": [
+              2
+            ],
+            "chunk_ids": [
+              "c912c5827003570c52a1ea85a7e648871982d46e5f992483fdd550f906c08875"
+            ]
+          },
+          {
+            "slot": 4,
+            "idx": 5,
+            "title": "Alsace",
+            "gold": false,
+            "chars": [
+              0,
+              1200
+            ],
+            "original_ranks": [
+              4
+            ],
+            "fused_ranks": [
+              3
+            ],
+            "chunk_ids": [
+              "02cdd96f19d13344f13f8d95d631e1c9d9029b0045bca2b9d458dea768ae242d"
+            ]
+          },
+          {
+            "slot": 5,
+            "idx": 1,
+            "title": "Great power",
+            "gold": false,
+            "chars": [
+              0,
+              774
+            ],
+            "original_ranks": [
+              5
+            ],
+            "fused_ranks": [
+              8
+            ],
+            "chunk_ids": [
+              "1f3bdabcc5d6d89b1770b2cd2c95d8ab3c7a2c39ba389d468157226721cc331e"
+            ]
+          },
+          {
+            "slot": 6,
+            "idx": 5,
+            "title": "Alsace",
+            "gold": false,
+            "chars": [
+              1000,
+              1524
+            ],
+            "original_ranks": [
+              6
+            ],
+            "fused_ranks": [
+              9
+            ],
+            "chunk_ids": [
+              "ccfec66b69facbbdcfb81a4861a358e5d6c135d15f2dd5266213beb1da708dba"
+            ]
+          }
+        ],
+        "present_fact_slices": [
+          {
+            "idx": 0,
+            "start": 56,
+            "end": 114,
+            "containing_slots": [
+              1
+            ]
+          },
+          {
+            "idx": 7,
+            "start": 0,
+            "end": 118,
+            "containing_slots": [
+              2
+            ]
+          }
+        ],
+        "minimal_atomic_repairs": {
+          "minimum": 1,
+          "options": [
+            {
+              "drop_slots": [
+                3
+              ],
+              "add_ranks": [
+                12
+              ]
+            },
+            {
+              "drop_slots": [
+                4
+              ],
+              "add_ranks": [
+                12
+              ]
+            },
+            {
+              "drop_slots": [
+                5
+              ],
+              "add_ranks": [
+                12
+              ]
+            },
+            {
+              "drop_slots": [
+                6
+              ],
+              "add_ranks": [
+                12
+              ]
+            }
+          ]
+        },
+        "wire_messages_sha256": "d9f9f34680873df9b5a7f7cf0e4bebfa0af01d210a5bd464bc817f0872be55a5"
+      },
+      "candidate": {
+        "selected": [
+          {
+            "slot": 1,
+            "idx": 0,
+            "title": "Protestantism",
+            "gold": true,
+            "chars": [
+              0,
+              1200
+            ],
+            "original_ranks": [
+              1
+            ],
+            "fused_ranks": [
+              1
+            ],
+            "chunk_ids": [
+              "21ece1eac176f453c90614a0df72e611e38069e7ddb43dfbfe8e071124d8b323"
+            ]
+          },
+          {
+            "slot": 2,
+            "idx": 7,
+            "title": "German military administration in occupied France during World War II",
+            "gold": true,
+            "chars": [
+              0,
+              745
+            ],
+            "original_ranks": [
+              2
+            ],
+            "fused_ranks": [
+              11
+            ],
+            "chunk_ids": [
+              "e687ea4bed2974f8fffe22fc921f9c6b53547681f085018538ed40a3ae929725"
+            ]
+          },
+          {
+            "slot": 3,
+            "idx": 2,
+            "title": "Strasbourg",
+            "gold": false,
+            "chars": [
+              0,
+              912
+            ],
+            "original_ranks": [
+              3
+            ],
+            "fused_ranks": [
+              2
+            ],
+            "chunk_ids": [
+              "c912c5827003570c52a1ea85a7e648871982d46e5f992483fdd550f906c08875"
+            ]
+          },
+          {
+            "slot": 4,
+            "idx": 5,
+            "title": "Alsace",
+            "gold": false,
+            "chars": [
+              0,
+              1524
+            ],
+            "original_ranks": [
+              4,
+              6
+            ],
+            "fused_ranks": [
+              3,
+              9
+            ],
+            "chunk_ids": [
+              "02cdd96f19d13344f13f8d95d631e1c9d9029b0045bca2b9d458dea768ae242d",
+              "ccfec66b69facbbdcfb81a4861a358e5d6c135d15f2dd5266213beb1da708dba"
+            ]
+          },
+          {
+            "slot": 5,
+            "idx": 1,
+            "title": "Great power",
+            "gold": false,
+            "chars": [
+              0,
+              774
+            ],
+            "original_ranks": [
+              5
+            ],
+            "fused_ranks": [
+              8
+            ],
+            "chunk_ids": [
+              "1f3bdabcc5d6d89b1770b2cd2c95d8ab3c7a2c39ba389d468157226721cc331e"
+            ]
+          },
+          {
+            "slot": 6,
+            "idx": 10,
+            "title": "Alsace",
+            "gold": false,
+            "chars": [
+              0,
+              1046
+            ],
+            "original_ranks": [
+              7
+            ],
+            "fused_ranks": [
+              5
+            ],
+            "chunk_ids": [
+              "c4367e3cdb937e7aef1da9274fc058291b0975a9640fd76015a4ef38c0ade339"
+            ]
+          }
+        ],
+        "present_fact_slices": [
+          {
+            "idx": 0,
+            "start": 56,
+            "end": 114,
+            "containing_slots": [
+              1
+            ]
+          },
+          {
+            "idx": 7,
+            "start": 0,
+            "end": 118,
+            "containing_slots": [
+              2
+            ]
+          }
+        ],
+        "minimal_atomic_repairs": {
+          "minimum": 1,
+          "options": [
+            {
+              "drop_slots": [
+                3
+              ],
+              "add_ranks": [
+                12
+              ]
+            },
+            {
+              "drop_slots": [
+                4
+              ],
+              "add_ranks": [
+                12
+              ]
+            },
+            {
+              "drop_slots": [
+                5
+              ],
+              "add_ranks": [
+                12
+              ]
+            },
+            {
+              "drop_slots": [
+                6
+              ],
+              "add_ranks": [
+                12
+              ]
+            }
+          ]
+        },
+        "wire_messages_sha256": "f48972995ecdef174cc1fe51b0d82f7687e5117625165d9eafb2148da0bc1a95"
+      }
+    },
+    {
+      "id": "2hop__767960_92444",
+      "gold_indices_in_hop_order": [
+        5,
+        3
+      ],
+      "min_pool_chunks_to_show_both": 3,
+      "all_twenty": [
+        {
+          "idx": 3,
+          "title": "Baby (Justin Bieber song)",
+          "gold": true,
+          "chars": [
+            0,
+            1200
+          ],
+          "original_ranks": [
+            1
+          ],
+          "fused_ranks": [
+            3
+          ],
+          "chunk_ids": [
+            "58a408118e9c485c93038ea948c5ccff02855660f2040d909bbbd91d1a224a85"
+          ],
+          "rerank_score": -4.046875
+        },
+        {
+          "idx": 5,
+          "title": "Mistletoe (Justin Bieber song)",
+          "gold": true,
+          "chars": [
+            0,
+            733
+          ],
+          "original_ranks": [
+            2
+          ],
+          "fused_ranks": [
+            1
+          ],
+          "chunk_ids": [
+            "552f54f3b32594f8b3e965903822c2db502a0e4e37d33b502ca76791559d3596"
+          ],
+          "rerank_score": -4.953125
+        },
+        {
+          "idx": 15,
+          "title": "List of awards and nominations received by Nicki Minaj",
+          "gold": false,
+          "chars": [
+            0,
+            831
+          ],
+          "original_ranks": [
+            3
+          ],
+          "fused_ranks": [
+            17
+          ],
+          "chunk_ids": [
+            "fe30d0eef7fc143519fb077b3da97b6947c4bfdb65cdd595455b30426912b0fa"
+          ],
+          "rerank_score": -5.7265625
+        },
+        {
+          "idx": 10,
+          "title": "Britain's Got Talent (series 8)",
+          "gold": false,
+          "chars": [
+            0,
+            228
+          ],
+          "original_ranks": [
+            4
+          ],
+          "fused_ranks": [
+            14
+          ],
+          "chunk_ids": [
+            "af9419e6f12599c20903acd35db52b5300b7a69ee415c4f450fe1f62e8133f4b"
+          ],
+          "rerank_score": -5.734375
+        },
+        {
+          "idx": 9,
+          "title": "Ian Jazzi",
+          "gold": false,
+          "chars": [
+            0,
+            451
+          ],
+          "original_ranks": [
+            5
+          ],
+          "fused_ranks": [
+            8
+          ],
+          "chunk_ids": [
+            "529c36539cbf6abd8b6bb62b0609037fed5374832e81f9532843810c2eb51430"
+          ],
+          "rerank_score": -6.1171875
+        },
+        {
+          "idx": 14,
+          "title": "A Christmas Melody",
+          "gold": false,
+          "chars": [
+            0,
+            769
+          ],
+          "original_ranks": [
+            6
+          ],
+          "fused_ranks": [
+            2
+          ],
+          "chunk_ids": [
+            "087f9b0c339f2b5e1549855f8f2434aa66fbd907df30a6eb412cca4d2c6db70e"
+          ],
+          "rerank_score": -6.4296875
+        },
+        {
+          "idx": 19,
+          "title": "Big B (rapper)",
+          "gold": false,
+          "chars": [
+            0,
+            243
+          ],
+          "original_ranks": [
+            7
+          ],
+          "fused_ranks": [
+            6
+          ],
+          "chunk_ids": [
+            "a1a6ca81336cc64f5dc4cc75dbb7d7b981392ff3af8732ace1ff3ee55d2ca64d"
+          ],
+          "rerank_score": -6.45703125
+        },
+        {
+          "idx": 1,
+          "title": "Loser (Beck song)",
+          "gold": false,
+          "chars": [
+            0,
+            1200
+          ],
+          "original_ranks": [
+            8
+          ],
+          "fused_ranks": [
+            4
+          ],
+          "chunk_ids": [
+            "080a59e0f1c9fe57c3dd884f3cc1aea4e57c2a727763d8803f6067fa40dd7579"
+          ],
+          "rerank_score": -6.48046875
+        },
+        {
+          "idx": 8,
+          "title": "Xxplosive",
+          "gold": false,
+          "chars": [
+            0,
+            422
+          ],
+          "original_ranks": [
+            9
+          ],
+          "fused_ranks": [
+            11
+          ],
+          "chunk_ids": [
+            "402aff11230a53a87a97b305eef0930c3baed5c3a1bd0006b8d682b59271e67d"
+          ],
+          "rerank_score": -6.5703125
+        },
+        {
+          "idx": 17,
+          "title": "Crazy Rap",
+          "gold": false,
+          "chars": [
+            0,
+            494
+          ],
+          "original_ranks": [
+            10
+          ],
+          "fused_ranks": [
+            13
+          ],
+          "chunk_ids": [
+            "9ecd357a04ac2ca06ea4d4a05977cd9979ff5fc0a90c9eee2495d95b4953a532"
+          ],
+          "rerank_score": -6.796875
+        },
+        {
+          "idx": 11,
+          "title": "Sing for the Moment",
+          "gold": false,
+          "chars": [
+            0,
+            577
+          ],
+          "original_ranks": [
+            11
+          ],
+          "fused_ranks": [
+            7
+          ],
+          "chunk_ids": [
+            "a65ca44fbfb277c4f6e19ee9980259c555527bf4d2c9efab9dc4ffb1bc3477e8"
+          ],
+          "rerank_score": -6.83984375
+        },
+        {
+          "idx": 6,
+          "title": "Crazy Rap",
+          "gold": false,
+          "chars": [
+            0,
+            505
+          ],
+          "original_ranks": [
+            12
+          ],
+          "fused_ranks": [
+            12
+          ],
+          "chunk_ids": [
+            "cc29eb1543225dce6907d608a8c76d7dc7f984d26c974cf7e54dc8f19354286b"
+          ],
+          "rerank_score": -7.16015625
+        },
+        {
+          "idx": 2,
+          "title": "I Like It (Cardi B, Bad Bunny and J Balvin song)",
+          "gold": false,
+          "chars": [
+            0,
+            298
+          ],
+          "original_ranks": [
+            13
+          ],
+          "fused_ranks": [
+            10
+          ],
+          "chunk_ids": [
+            "06175a6ca41526cbdfc56009f772ce966c9fe35461efb0078bfcadd33cfaeb4b"
+          ],
+          "rerank_score": -7.68359375
+        },
+        {
+          "idx": 3,
+          "title": "Baby (Justin Bieber song)",
+          "gold": true,
+          "chars": [
+            1000,
+            1237
+          ],
+          "original_ranks": [
+            14
+          ],
+          "fused_ranks": [
+            18
+          ],
+          "chunk_ids": [
+            "4c6f66dadd51d49b939d13464cdd432ba607a050ef72236698bfd9f15ed05b5b"
+          ],
+          "rerank_score": -7.76171875
+        },
+        {
+          "idx": 12,
+          "title": "Brasse Vannie Kaap",
+          "gold": false,
+          "chars": [
+            0,
+            389
+          ],
+          "original_ranks": [
+            15
+          ],
+          "fused_ranks": [
+            16
+          ],
+          "chunk_ids": [
+            "9bc95ce875169f6fe963ab83f45a5f7ef8983f0dd2d91743e6bb5f6a0074ad2a"
+          ],
+          "rerank_score": -7.87109375
+        },
+        {
+          "idx": 16,
+          "title": "Let the Heartaches Begin",
+          "gold": false,
+          "chars": [
+            0,
+            517
+          ],
+          "original_ranks": [
+            16
+          ],
+          "fused_ranks": [
+            9
+          ],
+          "chunk_ids": [
+            "e67f591a98cd1eb681b3d4426df95467e3f0eb81fa4ab1a960610b577a70c389"
+          ],
+          "rerank_score": -8.2734375
+        },
+        {
+          "idx": 18,
+          "title": "Hi-Teknology",
+          "gold": false,
+          "chars": [
+            0,
+            317
+          ],
+          "original_ranks": [
+            17
+          ],
+          "fused_ranks": [
+            20
+          ],
+          "chunk_ids": [
+            "4cc45b1b6bf6a1d1c69182e1c4bd2d51d4f5b76a12b2c31fb646d0e585a79ac4"
+          ],
+          "rerank_score": -8.734375
+        },
+        {
+          "idx": 13,
+          "title": "One for My Baby (and One More for the Road)",
+          "gold": false,
+          "chars": [
+            0,
+            238
+          ],
+          "original_ranks": [
+            18
+          ],
+          "fused_ranks": [
+            5
+          ],
+          "chunk_ids": [
+            "1478140097bac0bed0a4c249d84e971495d3d90c546e6608fe86cbeae05831da"
+          ],
+          "rerank_score": -9.1015625
+        },
+        {
+          "idx": 7,
+          "title": "I Still Call Australia Home",
+          "gold": false,
+          "chars": [
+            0,
+            151
+          ],
+          "original_ranks": [
+            19
+          ],
+          "fused_ranks": [
+            19
+          ],
+          "chunk_ids": [
+            "3856f8914159ab96d506e499a04398cae9e0e2c5be7f2407d4f6e0ef07c2eb64"
+          ],
+          "rerank_score": -10.046875
+        },
+        {
+          "idx": 0,
+          "title": "USS Mistletoe (1861)",
+          "gold": false,
+          "chars": [
+            0,
+            251
+          ],
+          "original_ranks": [
+            20
+          ],
+          "fused_ranks": [
+            15
+          ],
+          "chunk_ids": [
+            "a166447e523629ac72d9a60127d9a5dcd7ee11c9522d76415eab9bcb74f6862e"
+          ],
+          "rerank_score": -10.375
+        }
+      ],
+      "candidate": {
+        "selected": [
+          {
+            "slot": 1,
+            "idx": 3,
+            "title": "Baby (Justin Bieber song)",
+            "gold": true,
+            "chars": [
+              0,
+              1200
+            ],
+            "original_ranks": [
+              1
+            ],
+            "fused_ranks": [
+              3
+            ],
+            "chunk_ids": [
+              "58a408118e9c485c93038ea948c5ccff02855660f2040d909bbbd91d1a224a85"
+            ]
+          },
+          {
+            "slot": 2,
+            "idx": 5,
+            "title": "Mistletoe (Justin Bieber song)",
+            "gold": true,
+            "chars": [
+              0,
+              733
+            ],
+            "original_ranks": [
+              2
+            ],
+            "fused_ranks": [
+              1
+            ],
+            "chunk_ids": [
+              "552f54f3b32594f8b3e965903822c2db502a0e4e37d33b502ca76791559d3596"
+            ]
+          },
+          {
+            "slot": 3,
+            "idx": 15,
+            "title": "List of awards and nominations received by Nicki Minaj",
+            "gold": false,
+            "chars": [
+              0,
+              831
+            ],
+            "original_ranks": [
+              3
+            ],
+            "fused_ranks": [
+              17
+            ],
+            "chunk_ids": [
+              "fe30d0eef7fc143519fb077b3da97b6947c4bfdb65cdd595455b30426912b0fa"
+            ]
+          },
+          {
+            "slot": 4,
+            "idx": 10,
+            "title": "Britain's Got Talent (series 8)",
+            "gold": false,
+            "chars": [
+              0,
+              228
+            ],
+            "original_ranks": [
+              4
+            ],
+            "fused_ranks": [
+              14
+            ],
+            "chunk_ids": [
+              "af9419e6f12599c20903acd35db52b5300b7a69ee415c4f450fe1f62e8133f4b"
+            ]
+          },
+          {
+            "slot": 5,
+            "idx": 9,
+            "title": "Ian Jazzi",
+            "gold": false,
+            "chars": [
+              0,
+              451
+            ],
+            "original_ranks": [
+              5
+            ],
+            "fused_ranks": [
+              8
+            ],
+            "chunk_ids": [
+              "529c36539cbf6abd8b6bb62b0609037fed5374832e81f9532843810c2eb51430"
+            ]
+          },
+          {
+            "slot": 6,
+            "idx": 14,
+            "title": "A Christmas Melody",
+            "gold": false,
+            "chars": [
+              0,
+              769
+            ],
+            "original_ranks": [
+              6
+            ],
+            "fused_ranks": [
+              2
+            ],
+            "chunk_ids": [
+              "087f9b0c339f2b5e1549855f8f2434aa66fbd907df30a6eb412cca4d2c6db70e"
+            ]
+          }
+        ],
+        "present_fact_slices": [
+          {
+            "idx": 5,
+            "start": 0,
+            "end": 64,
+            "containing_slots": [
+              2
+            ]
+          },
+          {
+            "idx": 3,
+            "start": 969,
+            "end": 1031,
+            "containing_slots": [
+              1
+            ]
+          }
+        ],
+        "minimal_atomic_repairs": {
+          "minimum": 1,
+          "options": [
+            {
+              "drop_slots": [
+                3
+              ],
+              "add_ranks": [
+                14
+              ]
+            },
+            {
+              "drop_slots": [
+                4
+              ],
+              "add_ranks": [
+                14
+              ]
+            },
+            {
+              "drop_slots": [
+                5
+              ],
+              "add_ranks": [
+                14
+              ]
+            },
+            {
+              "drop_slots": [
+                6
+              ],
+              "add_ranks": [
+                14
+              ]
+            }
+          ]
+        },
+        "wire_messages_sha256": "13f93565486d20023e06fae54c726dac97f2661c085bb3d7a90726b487f3ace8"
+      },
+      "baseline": {
+        "selected": [
+          {
+            "slot": 1,
+            "idx": 3,
+            "title": "Baby (Justin Bieber song)",
+            "gold": true,
+            "chars": [
+              0,
+              1200
+            ],
+            "original_ranks": [
+              1
+            ],
+            "fused_ranks": [
+              3
+            ],
+            "chunk_ids": [
+              "58a408118e9c485c93038ea948c5ccff02855660f2040d909bbbd91d1a224a85"
+            ]
+          },
+          {
+            "slot": 2,
+            "idx": 5,
+            "title": "Mistletoe (Justin Bieber song)",
+            "gold": true,
+            "chars": [
+              0,
+              733
+            ],
+            "original_ranks": [
+              2
+            ],
+            "fused_ranks": [
+              1
+            ],
+            "chunk_ids": [
+              "552f54f3b32594f8b3e965903822c2db502a0e4e37d33b502ca76791559d3596"
+            ]
+          },
+          {
+            "slot": 3,
+            "idx": 15,
+            "title": "List of awards and nominations received by Nicki Minaj",
+            "gold": false,
+            "chars": [
+              0,
+              831
+            ],
+            "original_ranks": [
+              3
+            ],
+            "fused_ranks": [
+              17
+            ],
+            "chunk_ids": [
+              "fe30d0eef7fc143519fb077b3da97b6947c4bfdb65cdd595455b30426912b0fa"
+            ]
+          },
+          {
+            "slot": 4,
+            "idx": 10,
+            "title": "Britain's Got Talent (series 8)",
+            "gold": false,
+            "chars": [
+              0,
+              228
+            ],
+            "original_ranks": [
+              4
+            ],
+            "fused_ranks": [
+              14
+            ],
+            "chunk_ids": [
+              "af9419e6f12599c20903acd35db52b5300b7a69ee415c4f450fe1f62e8133f4b"
+            ]
+          },
+          {
+            "slot": 5,
+            "idx": 9,
+            "title": "Ian Jazzi",
+            "gold": false,
+            "chars": [
+              0,
+              451
+            ],
+            "original_ranks": [
+              5
+            ],
+            "fused_ranks": [
+              8
+            ],
+            "chunk_ids": [
+              "529c36539cbf6abd8b6bb62b0609037fed5374832e81f9532843810c2eb51430"
+            ]
+          },
+          {
+            "slot": 6,
+            "idx": 14,
+            "title": "A Christmas Melody",
+            "gold": false,
+            "chars": [
+              0,
+              769
+            ],
+            "original_ranks": [
+              6
+            ],
+            "fused_ranks": [
+              2
+            ],
+            "chunk_ids": [
+              "087f9b0c339f2b5e1549855f8f2434aa66fbd907df30a6eb412cca4d2c6db70e"
+            ]
+          }
+        ],
+        "present_fact_slices": [
+          {
+            "idx": 5,
+            "start": 0,
+            "end": 64,
+            "containing_slots": [
+              2
+            ]
+          },
+          {
+            "idx": 3,
+            "start": 969,
+            "end": 1031,
+            "containing_slots": [
+              1
+            ]
+          }
+        ],
+        "minimal_atomic_repairs": {
+          "minimum": 1,
+          "options": [
+            {
+              "drop_slots": [
+                3
+              ],
+              "add_ranks": [
+                14
+              ]
+            },
+            {
+              "drop_slots": [
+                4
+              ],
+              "add_ranks": [
+                14
+              ]
+            },
+            {
+              "drop_slots": [
+                5
+              ],
+              "add_ranks": [
+                14
+              ]
+            },
+            {
+              "drop_slots": [
+                6
+              ],
+              "add_ranks": [
+                14
+              ]
+            }
+          ]
+        },
+        "wire_messages_sha256": "13f93565486d20023e06fae54c726dac97f2661c085bb3d7a90726b487f3ace8"
+      }
+    },
+    {
+      "id": "2hop__136704_91206",
+      "gold_indices_in_hop_order": [
+        16,
+        4
+      ],
+      "min_pool_chunks_to_show_both": 2,
+      "all_twenty": [
+        {
+          "idx": 16,
+          "title": "Portrait in Black",
+          "gold": true,
+          "chars": [
+            0,
+            143
+          ],
+          "original_ranks": [
+            1
+          ],
+          "fused_ranks": [
+            6
+          ],
+          "chunk_ids": [
+            "8835260404495c2b9c00c76f213da1e5c3c808f34a4d13ac89668e851fefaa13"
+          ],
+          "rerank_score": 4.4375
+        },
+        {
+          "idx": 10,
+          "title": "Louvre Pyramid",
+          "gold": false,
+          "chars": [
+            0,
+            385
+          ],
+          "original_ranks": [
+            2
+          ],
+          "fused_ranks": [
+            4
+          ],
+          "chunk_ids": [
+            "34bfede6bbadb68096f4ac526923a1226a7e4d86fdad0936162613a05a43c2be"
+          ],
+          "rerank_score": -0.2005615234375
+        },
+        {
+          "idx": 19,
+          "title": "Great Pyramid of Giza",
+          "gold": false,
+          "chars": [
+            0,
+            800
+          ],
+          "original_ranks": [
+            3
+          ],
+          "fused_ranks": [
+            5
+          ],
+          "chunk_ids": [
+            "5948ded913b4294a6a4da3f70664148be3ff453c55044555a35048f055e856e2"
+          ],
+          "rerank_score": -2.443359375
+        },
+        {
+          "idx": 0,
+          "title": "Pyramid of the Sun",
+          "gold": false,
+          "chars": [
+            0,
+            359
+          ],
+          "original_ranks": [
+            4
+          ],
+          "fused_ranks": [
+            3
+          ],
+          "chunk_ids": [
+            "9d4cbc19b4dc545f2da706ec9867451d098f4482362dd50998a56aa67fd3e589"
+          ],
+          "rerank_score": -2.4453125
+        },
+        {
+          "idx": 12,
+          "title": "Giza pyramid complex",
+          "gold": false,
+          "chars": [
+            0,
+            634
+          ],
+          "original_ranks": [
+            5
+          ],
+          "fused_ranks": [
+            17
+          ],
+          "chunk_ids": [
+            "770f6d304aa52dab46d370ceebc2d88494ee88fbe604540dc939aaa6edae0adf"
+          ],
+          "rerank_score": -2.64453125
+        },
+        {
+          "idx": 3,
+          "title": "Great Pyramid of Giza",
+          "gold": false,
+          "chars": [
+            0,
+            598
+          ],
+          "original_ranks": [
+            6
+          ],
+          "fused_ranks": [
+            1
+          ],
+          "chunk_ids": [
+            "97d58e9cc3c8e31599f569420ec902ecf807836488872618014e996148b3edd2"
+          ],
+          "rerank_score": -3.330078125
+        },
+        {
+          "idx": 5,
+          "title": "Luxor Las Vegas",
+          "gold": false,
+          "chars": [
+            0,
+            536
+          ],
+          "original_ranks": [
+            7
+          ],
+          "fused_ranks": [
+            9
+          ],
+          "chunk_ids": [
+            "799b22546c233c3c3ff1d8d5ec489e58a40ba5d6b1521db50827a19e6c341396"
+          ],
+          "rerank_score": -3.826171875
+        },
+        {
+          "idx": 4,
+          "title": "Transamerica Pyramid",
+          "gold": true,
+          "chars": [
+            0,
+            745
+          ],
+          "original_ranks": [
+            8
+          ],
+          "fused_ranks": [
+            8
+          ],
+          "chunk_ids": [
+            "9a09c52acff15ac35e778c279085f2e5a413aba0724449148f177ea43fb693dc"
+          ],
+          "rerank_score": -3.916015625
+        },
+        {
+          "idx": 9,
+          "title": "Portrait of an African Man",
+          "gold": false,
+          "chars": [
+            0,
+            637
+          ],
+          "original_ranks": [
+            9
+          ],
+          "fused_ranks": [
+            2
+          ],
+          "chunk_ids": [
+            "8fe3c799b210320b257b7196d5c6dca7fcfaaa2cb3d1cbe3b444dd9694846f43"
+          ],
+          "rerank_score": -5.48828125
+        },
+        {
+          "idx": 6,
+          "title": "Pyramid of Userkaf",
+          "gold": false,
+          "chars": [
+            0,
+            1019
+          ],
+          "original_ranks": [
+            10
+          ],
+          "fused_ranks": [
+            11
+          ],
+          "chunk_ids": [
+            "941dc8fef61fd0d789c0e96e278dc0d63962c03682751e51124ae1533facd62b"
+          ],
+          "rerank_score": -5.90625
+        },
+        {
+          "idx": 18,
+          "title": "Pyramid of Userkaf",
+          "gold": false,
+          "chars": [
+            0,
+            1200
+          ],
+          "original_ranks": [
+            11
+          ],
+          "fused_ranks": [
+            7
+          ],
+          "chunk_ids": [
+            "cc8c5e442f22f4f52fd89fe75815b6811627dc64bdd39898965b936b1c96c958"
+          ],
+          "rerank_score": -6.65625
+        },
+        {
+          "idx": 14,
+          "title": "Pyramid of Userkaf",
+          "gold": false,
+          "chars": [
+            0,
+            1200
+          ],
+          "original_ranks": [
+            12
+          ],
+          "fused_ranks": [
+            10
+          ],
+          "chunk_ids": [
+            "b00f71e24f1509b5c2873cf14cd432c010d4a31cb65a8790bed2f749eaee1ebd"
+          ],
+          "rerank_score": -6.93359375
+        },
+        {
+          "idx": 17,
+          "title": "Masonic Building (Newton, Massachusetts)",
+          "gold": false,
+          "chars": [
+            0,
+            770
+          ],
+          "original_ranks": [
+            13
+          ],
+          "fused_ranks": [
+            16
+          ],
+          "chunk_ids": [
+            "3080dc2edd0a5abcfd9fbb97f4cc8242236bf9dd7a6b6cffc1ee12d28a8e2573"
+          ],
+          "rerank_score": -7.14453125
+        },
+        {
+          "idx": 7,
+          "title": "Charpentier Pyramid",
+          "gold": false,
+          "chars": [
+            0,
+            392
+          ],
+          "original_ranks": [
+            14
+          ],
+          "fused_ranks": [
+            19
+          ],
+          "chunk_ids": [
+            "fdefc69a1be7c42bc0f966a4fd183b68ac4cc0d5e6441617b93adc33345de3c0"
+          ],
+          "rerank_score": -7.171875
+        },
+        {
+          "idx": 14,
+          "title": "Pyramid of Userkaf",
+          "gold": false,
+          "chars": [
+            1000,
+            1407
+          ],
+          "original_ranks": [
+            15
+          ],
+          "fused_ranks": [
+            14
+          ],
+          "chunk_ids": [
+            "05c902d410757f2b182f84f2e4bbf1389098efac8a4dd94b10b9ec9b0d243f63"
+          ],
+          "rerank_score": -7.86328125
+        },
+        {
+          "idx": 13,
+          "title": "Portrait of a Commander",
+          "gold": false,
+          "chars": [
+            0,
+            380
+          ],
+          "original_ranks": [
+            16
+          ],
+          "fused_ranks": [
+            12
+          ],
+          "chunk_ids": [
+            "90bd38fcdaf00c01a3d17071e55235390963b08d15d78f18b6d630861cc68bef"
+          ],
+          "rerank_score": -7.90625
+        },
+        {
+          "idx": 11,
+          "title": "Food pyramid (nutrition)",
+          "gold": false,
+          "chars": [
+            0,
+            397
+          ],
+          "original_ranks": [
+            17
+          ],
+          "fused_ranks": [
+            20
+          ],
+          "chunk_ids": [
+            "f681f71e6d80c13a609dab36622971aa5ac7b7ad5929cac707877625e49137e9"
+          ],
+          "rerank_score": -9.1640625
+        },
+        {
+          "idx": 2,
+          "title": "Peter Hujar",
+          "gold": false,
+          "chars": [
+            0,
+            125
+          ],
+          "original_ranks": [
+            18
+          ],
+          "fused_ranks": [
+            18
+          ],
+          "chunk_ids": [
+            "86c40ae1750001342e743d44c5dd859a02ab8a1028c806d7839ef40e37fe64fb"
+          ],
+          "rerank_score": -9.328125
+        },
+        {
+          "idx": 15,
+          "title": "Portrait of Madame X",
+          "gold": false,
+          "chars": [
+            0,
+            539
+          ],
+          "original_ranks": [
+            19
+          ],
+          "fused_ranks": [
+            13
+          ],
+          "chunk_ids": [
+            "c4e5262e78915033b38ffcf0f280f94d373cbf50efa453a78e44d1baaf844d4a"
+          ],
+          "rerank_score": -9.6796875
+        },
+        {
+          "idx": 1,
+          "title": "Pyramid of Skulls",
+          "gold": false,
+          "chars": [
+            0,
+            538
+          ],
+          "original_ranks": [
+            20
+          ],
+          "fused_ranks": [
+            15
+          ],
+          "chunk_ids": [
+            "84687b24de971ba69fab5bb2a17151e60254786b2b0481ad2a93c54441c30680"
+          ],
+          "rerank_score": -9.9921875
+        }
+      ],
+      "baseline": {
+        "selected": [
+          {
+            "slot": 1,
+            "idx": 16,
+            "title": "Portrait in Black",
+            "gold": true,
+            "chars": [
+              0,
+              143
+            ],
+            "original_ranks": [
+              1
+            ],
+            "fused_ranks": [
+              6
+            ],
+            "chunk_ids": [
+              "8835260404495c2b9c00c76f213da1e5c3c808f34a4d13ac89668e851fefaa13"
+            ]
+          },
+          {
+            "slot": 2,
+            "idx": 10,
+            "title": "Louvre Pyramid",
+            "gold": false,
+            "chars": [
+              0,
+              385
+            ],
+            "original_ranks": [
+              2
+            ],
+            "fused_ranks": [
+              4
+            ],
+            "chunk_ids": [
+              "34bfede6bbadb68096f4ac526923a1226a7e4d86fdad0936162613a05a43c2be"
+            ]
+          },
+          {
+            "slot": 3,
+            "idx": 19,
+            "title": "Great Pyramid of Giza",
+            "gold": false,
+            "chars": [
+              0,
+              800
+            ],
+            "original_ranks": [
+              3
+            ],
+            "fused_ranks": [
+              5
+            ],
+            "chunk_ids": [
+              "5948ded913b4294a6a4da3f70664148be3ff453c55044555a35048f055e856e2"
+            ]
+          },
+          {
+            "slot": 4,
+            "idx": 0,
+            "title": "Pyramid of the Sun",
+            "gold": false,
+            "chars": [
+              0,
+              359
+            ],
+            "original_ranks": [
+              4
+            ],
+            "fused_ranks": [
+              3
+            ],
+            "chunk_ids": [
+              "9d4cbc19b4dc545f2da706ec9867451d098f4482362dd50998a56aa67fd3e589"
+            ]
+          },
+          {
+            "slot": 5,
+            "idx": 12,
+            "title": "Giza pyramid complex",
+            "gold": false,
+            "chars": [
+              0,
+              634
+            ],
+            "original_ranks": [
+              5
+            ],
+            "fused_ranks": [
+              17
+            ],
+            "chunk_ids": [
+              "770f6d304aa52dab46d370ceebc2d88494ee88fbe604540dc939aaa6edae0adf"
+            ]
+          },
+          {
+            "slot": 6,
+            "idx": 3,
+            "title": "Great Pyramid of Giza",
+            "gold": false,
+            "chars": [
+              0,
+              598
+            ],
+            "original_ranks": [
+              6
+            ],
+            "fused_ranks": [
+              1
+            ],
+            "chunk_ids": [
+              "97d58e9cc3c8e31599f569420ec902ecf807836488872618014e996148b3edd2"
+            ]
+          }
+        ],
+        "present_fact_slices": [
+          {
+            "idx": 16,
+            "start": 0,
+            "end": 58,
+            "containing_slots": [
+              1
+            ]
+          },
+          {
+            "idx": 4,
+            "start": 0,
+            "end": 128,
+            "containing_slots": []
+          }
+        ],
+        "minimal_atomic_repairs": {
+          "minimum": 1,
+          "options": [
+            {
+              "drop_slots": [
+                2
+              ],
+              "add_ranks": [
+                8
+              ]
+            },
+            {
+              "drop_slots": [
+                3
+              ],
+              "add_ranks": [
+                8
+              ]
+            },
+            {
+              "drop_slots": [
+                4
+              ],
+              "add_ranks": [
+                8
+              ]
+            },
+            {
+              "drop_slots": [
+                5
+              ],
+              "add_ranks": [
+                8
+              ]
+            },
+            {
+              "drop_slots": [
+                6
+              ],
+              "add_ranks": [
+                8
+              ]
+            }
+          ]
+        },
+        "wire_messages_sha256": "f162a439048879eee2d4b723ec5973ec0d8d07fbed4b73873270c15fe5444d05"
+      },
+      "candidate": {
+        "selected": [
+          {
+            "slot": 1,
+            "idx": 16,
+            "title": "Portrait in Black",
+            "gold": true,
+            "chars": [
+              0,
+              143
+            ],
+            "original_ranks": [
+              1
+            ],
+            "fused_ranks": [
+              6
+            ],
+            "chunk_ids": [
+              "8835260404495c2b9c00c76f213da1e5c3c808f34a4d13ac89668e851fefaa13"
+            ]
+          },
+          {
+            "slot": 2,
+            "idx": 10,
+            "title": "Louvre Pyramid",
+            "gold": false,
+            "chars": [
+              0,
+              385
+            ],
+            "original_ranks": [
+              2
+            ],
+            "fused_ranks": [
+              4
+            ],
+            "chunk_ids": [
+              "34bfede6bbadb68096f4ac526923a1226a7e4d86fdad0936162613a05a43c2be"
+            ]
+          },
+          {
+            "slot": 3,
+            "idx": 19,
+            "title": "Great Pyramid of Giza",
+            "gold": false,
+            "chars": [
+              0,
+              800
+            ],
+            "original_ranks": [
+              3
+            ],
+            "fused_ranks": [
+              5
+            ],
+            "chunk_ids": [
+              "5948ded913b4294a6a4da3f70664148be3ff453c55044555a35048f055e856e2"
+            ]
+          },
+          {
+            "slot": 4,
+            "idx": 0,
+            "title": "Pyramid of the Sun",
+            "gold": false,
+            "chars": [
+              0,
+              359
+            ],
+            "original_ranks": [
+              4
+            ],
+            "fused_ranks": [
+              3
+            ],
+            "chunk_ids": [
+              "9d4cbc19b4dc545f2da706ec9867451d098f4482362dd50998a56aa67fd3e589"
+            ]
+          },
+          {
+            "slot": 5,
+            "idx": 12,
+            "title": "Giza pyramid complex",
+            "gold": false,
+            "chars": [
+              0,
+              634
+            ],
+            "original_ranks": [
+              5
+            ],
+            "fused_ranks": [
+              17
+            ],
+            "chunk_ids": [
+              "770f6d304aa52dab46d370ceebc2d88494ee88fbe604540dc939aaa6edae0adf"
+            ]
+          },
+          {
+            "slot": 6,
+            "idx": 3,
+            "title": "Great Pyramid of Giza",
+            "gold": false,
+            "chars": [
+              0,
+              598
+            ],
+            "original_ranks": [
+              6
+            ],
+            "fused_ranks": [
+              1
+            ],
+            "chunk_ids": [
+              "97d58e9cc3c8e31599f569420ec902ecf807836488872618014e996148b3edd2"
+            ]
+          }
+        ],
+        "present_fact_slices": [
+          {
+            "idx": 16,
+            "start": 0,
+            "end": 58,
+            "containing_slots": [
+              1
+            ]
+          },
+          {
+            "idx": 4,
+            "start": 0,
+            "end": 128,
+            "containing_slots": []
+          }
+        ],
+        "minimal_atomic_repairs": {
+          "minimum": 1,
+          "options": [
+            {
+              "drop_slots": [
+                2
+              ],
+              "add_ranks": [
+                8
+              ]
+            },
+            {
+              "drop_slots": [
+                3
+              ],
+              "add_ranks": [
+                8
+              ]
+            },
+            {
+              "drop_slots": [
+                4
+              ],
+              "add_ranks": [
+                8
+              ]
+            },
+            {
+              "drop_slots": [
+                5
+              ],
+              "add_ranks": [
+                8
+              ]
+            },
+            {
+              "drop_slots": [
+                6
+              ],
+              "add_ranks": [
+                8
+              ]
+            }
+          ]
+        },
+        "wire_messages_sha256": "f162a439048879eee2d4b723ec5973ec0d8d07fbed4b73873270c15fe5444d05"
+      }
+    },
+    {
+      "id": "2hop__161005_489272",
+      "gold_indices_in_hop_order": [
+        15,
+        14
+      ],
+      "min_pool_chunks_to_show_both": 3,
+      "all_twenty": [
+        {
+          "idx": 13,
+          "title": "Jack Sparrow",
+          "gold": false,
+          "chars": [
+            0,
+            494
+          ],
+          "original_ranks": [
+            1
+          ],
+          "fused_ranks": [
+            2
+          ],
+          "chunk_ids": [
+            "971531833fa17894af7d0a9cd26a14149903ceead12a4b6ddecb5e51f0d1e3f3"
+          ],
+          "rerank_score": 1.880859375
+        },
+        {
+          "idx": 15,
+          "title": "Pirates of the Caribbean: The Curse of the Black Pearl",
+          "gold": true,
+          "chars": [
+            0,
+            1200
+          ],
+          "original_ranks": [
+            2
+          ],
+          "fused_ranks": [
+            1
+          ],
+          "chunk_ids": [
+            "da597722a9832bd44014e609b4e191b24fe1916ff04c19b03d9c648d42c7c82b"
+          ],
+          "rerank_score": 1.5693359375
+        },
+        {
+          "idx": 7,
+          "title": "Pirates of the Caribbean (film series)",
+          "gold": false,
+          "chars": [
+            0,
+            1015
+          ],
+          "original_ranks": [
+            3
+          ],
+          "fused_ranks": [
+            7
+          ],
+          "chunk_ids": [
+            "05c9215c8f5b12badf6ec7866ecde6b6977b90b3b403f7ededc2207a55e7bc36"
+          ],
+          "rerank_score": 0.83544921875
+        },
+        {
+          "idx": 15,
+          "title": "Pirates of the Caribbean: The Curse of the Black Pearl",
+          "gold": true,
+          "chars": [
+            1000,
+            1523
+          ],
+          "original_ranks": [
+            4
+          ],
+          "fused_ranks": [
+            4
+          ],
+          "chunk_ids": [
+            "b9b061f7f639d0dca827c440f24b13c0590e8ed7de8a3f3baa3095885b8a2106"
+          ],
+          "rerank_score": 0.259521484375
+        },
+        {
+          "idx": 2,
+          "title": "Johnny Depp",
+          "gold": false,
+          "chars": [
+            1000,
+            1513
+          ],
+          "original_ranks": [
+            5
+          ],
+          "fused_ranks": [
+            5
+          ],
+          "chunk_ids": [
+            "bc16b48e34f959fb7a1f0ee8517576f4802a3b60558376260d4bf93ae83dc4be"
+          ],
+          "rerank_score": -0.65771484375
+        },
+        {
+          "idx": 3,
+          "title": "Pirates of the Caribbean: The Curse of the Black Pearl",
+          "gold": false,
+          "chars": [
+            0,
+            860
+          ],
+          "original_ranks": [
+            6
+          ],
+          "fused_ranks": [
+            8
+          ],
+          "chunk_ids": [
+            "40537bb3140f4090cd169014ac416f53e1135ce5cb5b0d5bd31317a4b9baa3cc"
+          ],
+          "rerank_score": -0.97314453125
+        },
+        {
+          "idx": 2,
+          "title": "Johnny Depp",
+          "gold": false,
+          "chars": [
+            0,
+            1200
+          ],
+          "original_ranks": [
+            7
+          ],
+          "fused_ranks": [
+            3
+          ],
+          "chunk_ids": [
+            "5237600f44a68269afbea1dec9d331936816117061fc1278717239c30cc3e78f"
+          ],
+          "rerank_score": -1.0322265625
+        },
+        {
+          "idx": 6,
+          "title": "List of SpongeBob SquarePants cast members",
+          "gold": false,
+          "chars": [
+            0,
+            690
+          ],
+          "original_ranks": [
+            8
+          ],
+          "fused_ranks": [
+            19
+          ],
+          "chunk_ids": [
+            "e4989ced6853eeb2f8dc2a76ee0b7f6d3c7d5efa7a63feeb6356f166a198f5ba"
+          ],
+          "rerank_score": -4.43359375
+        },
+        {
+          "idx": 12,
+          "title": "Davy Jones (Pirates of the Caribbean)",
+          "gold": false,
+          "chars": [
+            0,
+            352
+          ],
+          "original_ranks": [
+            9
+          ],
+          "fused_ranks": [
+            15
+          ],
+          "chunk_ids": [
+            "b725c907f7ccb6186882b899d5d2f0cbdc46e8f4ec9e565d4b8ed5c6b1eb1cb4"
+          ],
+          "rerank_score": -4.44921875
+        },
+        {
+          "idx": 11,
+          "title": "Pirates of the Caribbean: Dead Men Tell No Tales",
+          "gold": false,
+          "chars": [
+            0,
+            521
+          ],
+          "original_ranks": [
+            10
+          ],
+          "fused_ranks": [
+            6
+          ],
+          "chunk_ids": [
+            "a7a2c384102d71fef07dcb0c25a70c10858ed61dd74893b187641eba8becb460"
+          ],
+          "rerank_score": -4.62890625
+        },
+        {
+          "idx": 9,
+          "title": "Tia Dalma",
+          "gold": false,
+          "chars": [
+            0,
+            234
+          ],
+          "original_ranks": [
+            11
+          ],
+          "fused_ranks": [
+            13
+          ],
+          "chunk_ids": [
+            "bd1e40aded05084b3c6964b23d961e8f1d1eefc34d2fe58cf1ae119096b3ca58"
+          ],
+          "rerank_score": -5.6484375
+        },
+        {
+          "idx": 10,
+          "title": "Jim (Huckleberry Finn)",
+          "gold": false,
+          "chars": [
+            0,
+            224
+          ],
+          "original_ranks": [
+            12
+          ],
+          "fused_ranks": [
+            9
+          ],
+          "chunk_ids": [
+            "ef14fc986d32b9461e6cce892a8f5f8eceec1e46afd3d82a158dbfcc0ebace6e"
+          ],
+          "rerank_score": -5.67578125
+        },
+        {
+          "idx": 4,
+          "title": "Pirates of the Caribbean",
+          "gold": false,
+          "chars": [
+            0,
+            748
+          ],
+          "original_ranks": [
+            13
+          ],
+          "fused_ranks": [
+            11
+          ],
+          "chunk_ids": [
+            "fd78fc96bbc7b2f0fa23355ccc74fbb01a0b341977e9cbfb1ca5ee87c99c524d"
+          ],
+          "rerank_score": -5.79296875
+        },
+        {
+          "idx": 18,
+          "title": "The Kennedy/Marshall Company",
+          "gold": false,
+          "chars": [
+            0,
+            172
+          ],
+          "original_ranks": [
+            14
+          ],
+          "fused_ranks": [
+            17
+          ],
+          "chunk_ids": [
+            "779cee016d1e974a99ba33fa38ea34355252a9022817a5507af812b6240febe3"
+          ],
+          "rerank_score": -6.13671875
+        },
+        {
+          "idx": 19,
+          "title": "Paul Paddick",
+          "gold": false,
+          "chars": [
+            0,
+            193
+          ],
+          "original_ranks": [
+            15
+          ],
+          "fused_ranks": [
+            10
+          ],
+          "chunk_ids": [
+            "3634bbb48db9808f70549cdb70c5c630ed96606547cb51767b167bff67980620"
+          ],
+          "rerank_score": -6.1640625
+        },
+        {
+          "idx": 14,
+          "title": "Theodora Richards",
+          "gold": true,
+          "chars": [
+            0,
+            189
+          ],
+          "original_ranks": [
+            16
+          ],
+          "fused_ranks": [
+            20
+          ],
+          "chunk_ids": [
+            "771728dc994912e30a736c83eefc3d9199d8ced35e70fc371c29a2f6c582bcc7"
+          ],
+          "rerank_score": -7.91015625
+        },
+        {
+          "idx": 17,
+          "title": "Red Dead Redemption 2",
+          "gold": false,
+          "chars": [
+            0,
+            1111
+          ],
+          "original_ranks": [
+            17
+          ],
+          "fused_ranks": [
+            14
+          ],
+          "chunk_ids": [
+            "6d20a51103a93bb1a2ece3bff08c2b764610ea2bcb655b978f99f4251ad54599"
+          ],
+          "rerank_score": -7.9453125
+        },
+        {
+          "idx": 8,
+          "title": "Grand Theft Auto IV",
+          "gold": false,
+          "chars": [
+            0,
+            677
+          ],
+          "original_ranks": [
+            18
+          ],
+          "fused_ranks": [
+            16
+          ],
+          "chunk_ids": [
+            "1158a8add8ebaaa44ffc5ce9382c68156709df565b298bfbf7e1535c769344cd"
+          ],
+          "rerank_score": -7.9609375
+        },
+        {
+          "idx": 16,
+          "title": "Grand Theft Auto V",
+          "gold": false,
+          "chars": [
+            0,
+            709
+          ],
+          "original_ranks": [
+            19
+          ],
+          "fused_ranks": [
+            12
+          ],
+          "chunk_ids": [
+            "94a355f19d5d596937b7e03553f51f2f876412459c30b318ebb69334ee232ca7"
+          ],
+          "rerank_score": -8.109375
+        },
+        {
+          "idx": 0,
+          "title": "Bileh",
+          "gold": false,
+          "chars": [
+            0,
+            130
+          ],
+          "original_ranks": [
+            20
+          ],
+          "fused_ranks": [
+            18
+          ],
+          "chunk_ids": [
+            "870ebfddfa25f6eff6f921238f7845241c12ba81e7167b1bcb555b705c127a6e"
+          ],
+          "rerank_score": -10.109375
+        }
+      ],
+      "candidate": {
+        "selected": [
+          {
+            "slot": 1,
+            "idx": 13,
+            "title": "Jack Sparrow",
+            "gold": false,
+            "chars": [
+              0,
+              494
+            ],
+            "original_ranks": [
+              1
+            ],
+            "fused_ranks": [
+              2
+            ],
+            "chunk_ids": [
+              "971531833fa17894af7d0a9cd26a14149903ceead12a4b6ddecb5e51f0d1e3f3"
+            ]
+          },
+          {
+            "slot": 2,
+            "idx": 15,
+            "title": "Pirates of the Caribbean: The Curse of the Black Pearl",
+            "gold": true,
+            "chars": [
+              0,
+              1523
+            ],
+            "original_ranks": [
+              2,
+              4
+            ],
+            "fused_ranks": [
+              1,
+              4
+            ],
+            "chunk_ids": [
+              "da597722a9832bd44014e609b4e191b24fe1916ff04c19b03d9c648d42c7c82b",
+              "b9b061f7f639d0dca827c440f24b13c0590e8ed7de8a3f3baa3095885b8a2106"
+            ]
+          },
+          {
+            "slot": 3,
+            "idx": 7,
+            "title": "Pirates of the Caribbean (film series)",
+            "gold": false,
+            "chars": [
+              0,
+              1015
+            ],
+            "original_ranks": [
+              3
+            ],
+            "fused_ranks": [
+              7
+            ],
+            "chunk_ids": [
+              "05c9215c8f5b12badf6ec7866ecde6b6977b90b3b403f7ededc2207a55e7bc36"
+            ]
+          },
+          {
+            "slot": 4,
+            "idx": 2,
+            "title": "Johnny Depp",
+            "gold": false,
+            "chars": [
+              1000,
+              1513
+            ],
+            "original_ranks": [
+              5
+            ],
+            "fused_ranks": [
+              5
+            ],
+            "chunk_ids": [
+              "bc16b48e34f959fb7a1f0ee8517576f4802a3b60558376260d4bf93ae83dc4be"
+            ]
+          },
+          {
+            "slot": 5,
+            "idx": 3,
+            "title": "Pirates of the Caribbean: The Curse of the Black Pearl",
+            "gold": false,
+            "chars": [
+              0,
+              860
+            ],
+            "original_ranks": [
+              6
+            ],
+            "fused_ranks": [
+              8
+            ],
+            "chunk_ids": [
+              "40537bb3140f4090cd169014ac416f53e1135ce5cb5b0d5bd31317a4b9baa3cc"
+            ]
+          },
+          {
+            "slot": 6,
+            "idx": 6,
+            "title": "List of SpongeBob SquarePants cast members",
+            "gold": false,
+            "chars": [
+              0,
+              690
+            ],
+            "original_ranks": [
+              8
+            ],
+            "fused_ranks": [
+              19
+            ],
+            "chunk_ids": [
+              "e4989ced6853eeb2f8dc2a76ee0b7f6d3c7d5efa7a63feeb6356f166a198f5ba"
+            ]
+          }
+        ],
+        "present_fact_slices": [
+          {
+            "idx": 15,
+            "start": 1003,
+            "end": 1096,
+            "containing_slots": [
+              2
+            ]
+          },
+          {
+            "idx": 14,
+            "start": 72,
+            "end": 144,
+            "containing_slots": []
+          }
+        ],
+        "minimal_atomic_repairs": {
+          "minimum": 1,
+          "options": [
+            {
+              "drop_slots": [
+                1
+              ],
+              "add_ranks": [
+                16
+              ]
+            },
+            {
+              "drop_slots": [
+                3
+              ],
+              "add_ranks": [
+                16
+              ]
+            },
+            {
+              "drop_slots": [
+                4
+              ],
+              "add_ranks": [
+                16
+              ]
+            },
+            {
+              "drop_slots": [
+                5
+              ],
+              "add_ranks": [
+                16
+              ]
+            },
+            {
+              "drop_slots": [
+                6
+              ],
+              "add_ranks": [
+                16
+              ]
+            }
+          ]
+        },
+        "wire_messages_sha256": "13d371b218a5193624bf4b503fbbdaf5670e64fe1b6d73911a17fbf0d190c5e1"
+      },
+      "baseline": {
+        "selected": [
+          {
+            "slot": 1,
+            "idx": 13,
+            "title": "Jack Sparrow",
+            "gold": false,
+            "chars": [
+              0,
+              494
+            ],
+            "original_ranks": [
+              1
+            ],
+            "fused_ranks": [
+              2
+            ],
+            "chunk_ids": [
+              "971531833fa17894af7d0a9cd26a14149903ceead12a4b6ddecb5e51f0d1e3f3"
+            ]
+          },
+          {
+            "slot": 2,
+            "idx": 15,
+            "title": "Pirates of the Caribbean: The Curse of the Black Pearl",
+            "gold": true,
+            "chars": [
+              0,
+              1200
+            ],
+            "original_ranks": [
+              2
+            ],
+            "fused_ranks": [
+              1
+            ],
+            "chunk_ids": [
+              "da597722a9832bd44014e609b4e191b24fe1916ff04c19b03d9c648d42c7c82b"
+            ]
+          },
+          {
+            "slot": 3,
+            "idx": 7,
+            "title": "Pirates of the Caribbean (film series)",
+            "gold": false,
+            "chars": [
+              0,
+              1015
+            ],
+            "original_ranks": [
+              3
+            ],
+            "fused_ranks": [
+              7
+            ],
+            "chunk_ids": [
+              "05c9215c8f5b12badf6ec7866ecde6b6977b90b3b403f7ededc2207a55e7bc36"
+            ]
+          },
+          {
+            "slot": 4,
+            "idx": 15,
+            "title": "Pirates of the Caribbean: The Curse of the Black Pearl",
+            "gold": true,
+            "chars": [
+              1000,
+              1523
+            ],
+            "original_ranks": [
+              4
+            ],
+            "fused_ranks": [
+              4
+            ],
+            "chunk_ids": [
+              "b9b061f7f639d0dca827c440f24b13c0590e8ed7de8a3f3baa3095885b8a2106"
+            ]
+          },
+          {
+            "slot": 5,
+            "idx": 2,
+            "title": "Johnny Depp",
+            "gold": false,
+            "chars": [
+              1000,
+              1513
+            ],
+            "original_ranks": [
+              5
+            ],
+            "fused_ranks": [
+              5
+            ],
+            "chunk_ids": [
+              "bc16b48e34f959fb7a1f0ee8517576f4802a3b60558376260d4bf93ae83dc4be"
+            ]
+          },
+          {
+            "slot": 6,
+            "idx": 3,
+            "title": "Pirates of the Caribbean: The Curse of the Black Pearl",
+            "gold": false,
+            "chars": [
+              0,
+              860
+            ],
+            "original_ranks": [
+              6
+            ],
+            "fused_ranks": [
+              8
+            ],
+            "chunk_ids": [
+              "40537bb3140f4090cd169014ac416f53e1135ce5cb5b0d5bd31317a4b9baa3cc"
+            ]
+          }
+        ],
+        "present_fact_slices": [
+          {
+            "idx": 15,
+            "start": 1003,
+            "end": 1096,
+            "containing_slots": [
+              2,
+              4
+            ]
+          },
+          {
+            "idx": 14,
+            "start": 72,
+            "end": 144,
+            "containing_slots": []
+          }
+        ],
+        "minimal_atomic_repairs": {
+          "minimum": 1,
+          "options": [
+            {
+              "drop_slots": [
+                1
+              ],
+              "add_ranks": [
+                16
+              ]
+            },
+            {
+              "drop_slots": [
+                3
+              ],
+              "add_ranks": [
+                16
+              ]
+            },
+            {
+              "drop_slots": [
+                5
+              ],
+              "add_ranks": [
+                16
+              ]
+            },
+            {
+              "drop_slots": [
+                6
+              ],
+              "add_ranks": [
+                16
+              ]
+            }
+          ]
+        },
+        "wire_messages_sha256": "d458e3aa2b73badcb21a1f18ec5827032449cdfa8af6f74fe55afa830bc09c58"
+      }
+    },
+    {
+      "id": "2hop__435776_81382",
+      "gold_indices_in_hop_order": [
+        2,
+        0
+      ],
+      "min_pool_chunks_to_show_both": 3,
+      "all_twenty": [
+        {
+          "idx": 14,
+          "title": "Puerto Rico Highway 149",
+          "gold": false,
+          "chars": [
+            0,
+            720
+          ],
+          "original_ranks": [
+            1
+          ],
+          "fused_ranks": [
+            3
+          ],
+          "chunk_ids": [
+            "d6f8bef229f21d9975f3338195be992739838e3355af19bed7ffdc3fbe3d7f6b"
+          ],
+          "rerank_score": -0.006038665771484375
+        },
+        {
+          "idx": 2,
+          "title": "Arecibo, Puerto Rico",
+          "gold": true,
+          "chars": [
+            0,
+            532
+          ],
+          "original_ranks": [
+            2
+          ],
+          "fused_ranks": [
+            11
+          ],
+          "chunk_ids": [
+            "a72ed955890e3a1ab7e94740b4b135bd7d147f2ef9d4873d970c447777b428f3"
+          ],
+          "rerank_score": -1.79296875
+        },
+        {
+          "idx": 15,
+          "title": "Commonwealth of Nations",
+          "gold": false,
+          "chars": [
+            0,
+            427
+          ],
+          "original_ranks": [
+            3
+          ],
+          "fused_ranks": [
+            1
+          ],
+          "chunk_ids": [
+            "70f448c3ca9079c9667bc9aedb5f918e525289f1f28467ef7a6c9bde5b885e61"
+          ],
+          "rerank_score": -2.7109375
+        },
+        {
+          "idx": 18,
+          "title": "British Empire",
+          "gold": false,
+          "chars": [
+            0,
+            1200
+          ],
+          "original_ranks": [
+            4
+          ],
+          "fused_ranks": [
+            16
+          ],
+          "chunk_ids": [
+            "3f96c5fde57a5814d17ec5e8c3f8f00b6e9a2b067df1a6330a31e1c0f5406ee4"
+          ],
+          "rerank_score": -3.33203125
+        },
+        {
+          "idx": 18,
+          "title": "British Empire",
+          "gold": false,
+          "chars": [
+            1000,
+            1870
+          ],
+          "original_ranks": [
+            5
+          ],
+          "fused_ranks": [
+            5
+          ],
+          "chunk_ids": [
+            "f23a86965869d164f9cfb84c863ce7c55f9cc305d5f50a6390a6f3edabcf5554"
+          ],
+          "rerank_score": -3.599609375
+        },
+        {
+          "idx": 16,
+          "title": "Commonwealth of Nations",
+          "gold": false,
+          "chars": [
+            0,
+            400
+          ],
+          "original_ranks": [
+            6
+          ],
+          "fused_ranks": [
+            2
+          ],
+          "chunk_ids": [
+            "7482819a89e1d442b91b5b32c353e846c34de270deeb9ee3f3458b36ae5e0422"
+          ],
+          "rerank_score": -3.880859375
+        },
+        {
+          "idx": 10,
+          "title": "History of Australia",
+          "gold": false,
+          "chars": [
+            0,
+            392
+          ],
+          "original_ranks": [
+            7
+          ],
+          "fused_ranks": [
+            10
+          ],
+          "chunk_ids": [
+            "70b21aa9a7ea7080575d9991ca9366f50742b1e3dac4e9ccc9ff6b152ffa4d23"
+          ],
+          "rerank_score": -4.125
+        },
+        {
+          "idx": 0,
+          "title": "History of Puerto Rico",
+          "gold": true,
+          "chars": [
+            0,
+            1200
+          ],
+          "original_ranks": [
+            8
+          ],
+          "fused_ranks": [
+            13
+          ],
+          "chunk_ids": [
+            "cbec88cdeb01a73146160f2514b5cdbb899289e8d564d007d0143cad4ab81ba6"
+          ],
+          "rerank_score": -4.58984375
+        },
+        {
+          "idx": 6,
+          "title": "Puerto Rico",
+          "gold": false,
+          "chars": [
+            0,
+            302
+          ],
+          "original_ranks": [
+            9
+          ],
+          "fused_ranks": [
+            7
+          ],
+          "chunk_ids": [
+            "48b7b921060895903148bb90020f3f33513146b817349e8596715846183accac"
+          ],
+          "rerank_score": -5.15234375
+        },
+        {
+          "idx": 1,
+          "title": "List of countries and territories with the Union Jack displayed on their flag",
+          "gold": false,
+          "chars": [
+            0,
+            476
+          ],
+          "original_ranks": [
+            10
+          ],
+          "fused_ranks": [
+            6
+          ],
+          "chunk_ids": [
+            "461af05e4a89ca5c211f9cc63e080ba35873e235521da23fc50d471fab9ac093"
+          ],
+          "rerank_score": -5.5390625
+        },
+        {
+          "idx": 4,
+          "title": "Bogotá",
+          "gold": false,
+          "chars": [
+            0,
+            585
+          ],
+          "original_ranks": [
+            11
+          ],
+          "fused_ranks": [
+            15
+          ],
+          "chunk_ids": [
+            "7fa5dc38a829c04316bcffbba7b3cebe128576957aa79f8624880a631265b19d"
+          ],
+          "rerank_score": -5.64453125
+        },
+        {
+          "idx": 17,
+          "title": "Puerto Rico",
+          "gold": false,
+          "chars": [
+            0,
+            368
+          ],
+          "original_ranks": [
+            12
+          ],
+          "fused_ranks": [
+            8
+          ],
+          "chunk_ids": [
+            "686f1b509f0bb0c6a41030f65fc372f13d08c3fccd1061dc67ed64525dfbaa62"
+          ],
+          "rerank_score": -5.71875
+        },
+        {
+          "idx": 3,
+          "title": "Minsk Voivodeship",
+          "gold": false,
+          "chars": [
+            0,
+            548
+          ],
+          "original_ranks": [
+            13
+          ],
+          "fused_ranks": [
+            4
+          ],
+          "chunk_ids": [
+            "3ab821e943f889540205bebee5b0c29d5059bcc431cac94c4667f96ef3300e27"
+          ],
+          "rerank_score": -5.75390625
+        },
+        {
+          "idx": 19,
+          "title": "Union territory",
+          "gold": false,
+          "chars": [
+            0,
+            331
+          ],
+          "original_ranks": [
+            14
+          ],
+          "fused_ranks": [
+            20
+          ],
+          "chunk_ids": [
+            "04a574df151beece3f5b79268bab3930634e9b922317ce14dd487b8e50806e8a"
+          ],
+          "rerank_score": -6.9921875
+        },
+        {
+          "idx": 11,
+          "title": "New East Prussia",
+          "gold": false,
+          "chars": [
+            0,
+            333
+          ],
+          "original_ranks": [
+            15
+          ],
+          "fused_ranks": [
+            9
+          ],
+          "chunk_ids": [
+            "797933052e5cdf69c528e66f16932cfab30dbe10d8cdbe7a2f1fa7a2d201c9f5"
+          ],
+          "rerank_score": -7.3203125
+        },
+        {
+          "idx": 9,
+          "title": "Alice Springs Correctional Centre",
+          "gold": false,
+          "chars": [
+            0,
+            423
+          ],
+          "original_ranks": [
+            16
+          ],
+          "fused_ranks": [
+            12
+          ],
+          "chunk_ids": [
+            "73f03c70d1d45034dfdda78bde8e2d6be22739e53de9f1524e31f75be565d91f"
+          ],
+          "rerank_score": -7.6328125
+        },
+        {
+          "idx": 5,
+          "title": "Paea",
+          "gold": false,
+          "chars": [
+            0,
+            317
+          ],
+          "original_ranks": [
+            17
+          ],
+          "fused_ranks": [
+            14
+          ],
+          "chunk_ids": [
+            "e1b589f0984d36ba99583c9a8933e8a781dc966281b2ada51e137a810644d3c2"
+          ],
+          "rerank_score": -8.3046875
+        },
+        {
+          "idx": 8,
+          "title": "Vilnius County",
+          "gold": false,
+          "chars": [
+            0,
+            267
+          ],
+          "original_ranks": [
+            18
+          ],
+          "fused_ranks": [
+            17
+          ],
+          "chunk_ids": [
+            "8f3101b5ea36ef42b241675aa3c71bcd6f6cff92150d027ad64b5bb0d8cb56e9"
+          ],
+          "rerank_score": -8.421875
+        },
+        {
+          "idx": 0,
+          "title": "History of Puerto Rico",
+          "gold": true,
+          "chars": [
+            1000,
+            1305
+          ],
+          "original_ranks": [
+            19
+          ],
+          "fused_ranks": [
+            18
+          ],
+          "chunk_ids": [
+            "483f6204df203de8cbc7c222c36dd2d9e4d1e81217210abfc6be6654a162156a"
+          ],
+          "rerank_score": -9.8359375
+        },
+        {
+          "idx": 7,
+          "title": "Zec Bras-Coupé–Désert",
+          "gold": false,
+          "chars": [
+            0,
+            274
+          ],
+          "original_ranks": [
+            20
+          ],
+          "fused_ranks": [
+            19
+          ],
+          "chunk_ids": [
+            "64ed4f913ff5dd4bde69b4ed0d1ecf18186225327b35ad493f21af467f269c79"
+          ],
+          "rerank_score": -10.546875
+        }
+      ],
+      "baseline": {
+        "selected": [
+          {
+            "slot": 1,
+            "idx": 14,
+            "title": "Puerto Rico Highway 149",
+            "gold": false,
+            "chars": [
+              0,
+              720
+            ],
+            "original_ranks": [
+              1
+            ],
+            "fused_ranks": [
+              3
+            ],
+            "chunk_ids": [
+              "d6f8bef229f21d9975f3338195be992739838e3355af19bed7ffdc3fbe3d7f6b"
+            ]
+          },
+          {
+            "slot": 2,
+            "idx": 2,
+            "title": "Arecibo, Puerto Rico",
+            "gold": true,
+            "chars": [
+              0,
+              532
+            ],
+            "original_ranks": [
+              2
+            ],
+            "fused_ranks": [
+              11
+            ],
+            "chunk_ids": [
+              "a72ed955890e3a1ab7e94740b4b135bd7d147f2ef9d4873d970c447777b428f3"
+            ]
+          },
+          {
+            "slot": 3,
+            "idx": 15,
+            "title": "Commonwealth of Nations",
+            "gold": false,
+            "chars": [
+              0,
+              427
+            ],
+            "original_ranks": [
+              3
+            ],
+            "fused_ranks": [
+              1
+            ],
+            "chunk_ids": [
+              "70f448c3ca9079c9667bc9aedb5f918e525289f1f28467ef7a6c9bde5b885e61"
+            ]
+          },
+          {
+            "slot": 4,
+            "idx": 18,
+            "title": "British Empire",
+            "gold": false,
+            "chars": [
+              0,
+              1200
+            ],
+            "original_ranks": [
+              4
+            ],
+            "fused_ranks": [
+              16
+            ],
+            "chunk_ids": [
+              "3f96c5fde57a5814d17ec5e8c3f8f00b6e9a2b067df1a6330a31e1c0f5406ee4"
+            ]
+          },
+          {
+            "slot": 5,
+            "idx": 18,
+            "title": "British Empire",
+            "gold": false,
+            "chars": [
+              1000,
+              1870
+            ],
+            "original_ranks": [
+              5
+            ],
+            "fused_ranks": [
+              5
+            ],
+            "chunk_ids": [
+              "f23a86965869d164f9cfb84c863ce7c55f9cc305d5f50a6390a6f3edabcf5554"
+            ]
+          },
+          {
+            "slot": 6,
+            "idx": 16,
+            "title": "Commonwealth of Nations",
+            "gold": false,
+            "chars": [
+              0,
+              400
+            ],
+            "original_ranks": [
+              6
+            ],
+            "fused_ranks": [
+              2
+            ],
+            "chunk_ids": [
+              "7482819a89e1d442b91b5b32c353e846c34de270deeb9ee3f3458b36ae5e0422"
+            ]
+          }
+        ],
+        "present_fact_slices": [
+          {
+            "idx": 2,
+            "start": 0,
+            "end": 145,
+            "containing_slots": [
+              2
+            ]
+          },
+          {
+            "idx": 0,
+            "start": 39,
+            "end": 90,
+            "containing_slots": []
+          }
+        ],
+        "minimal_atomic_repairs": {
+          "minimum": 2,
+          "options": [
+            {
+              "drop_slots": [
+                1,
+                3
+              ],
+              "add_ranks": [
+                8,
+                19
+              ]
+            },
+            {
+              "drop_slots": [
+                1,
+                4
+              ],
+              "add_ranks": [
+                8,
+                19
+              ]
+            },
+            {
+              "drop_slots": [
+                1,
+                5
+              ],
+              "add_ranks": [
+                8,
+                19
+              ]
+            },
+            {
+              "drop_slots": [
+                1,
+                6
+              ],
+              "add_ranks": [
+                8,
+                19
+              ]
+            },
+            {
+              "drop_slots": [
+                3,
+                4
+              ],
+              "add_ranks": [
+                8,
+                19
+              ]
+            },
+            {
+              "drop_slots": [
+                3,
+                5
+              ],
+              "add_ranks": [
+                8,
+                19
+              ]
+            },
+            {
+              "drop_slots": [
+                3,
+                6
+              ],
+              "add_ranks": [
+                8,
+                19
+              ]
+            },
+            {
+              "drop_slots": [
+                4,
+                5
+              ],
+              "add_ranks": [
+                8,
+                19
+              ]
+            },
+            {
+              "drop_slots": [
+                4,
+                6
+              ],
+              "add_ranks": [
+                8,
+                19
+              ]
+            },
+            {
+              "drop_slots": [
+                5,
+                6
+              ],
+              "add_ranks": [
+                8,
+                19
+              ]
+            }
+          ]
+        },
+        "wire_messages_sha256": "6496d0cae3c07e05c9fedd53e77e1512ef4f4fb451af1dc948ea7d1363a5a8b9"
+      },
+      "candidate": {
+        "selected": [
+          {
+            "slot": 1,
+            "idx": 14,
+            "title": "Puerto Rico Highway 149",
+            "gold": false,
+            "chars": [
+              0,
+              720
+            ],
+            "original_ranks": [
+              1
+            ],
+            "fused_ranks": [
+              3
+            ],
+            "chunk_ids": [
+              "d6f8bef229f21d9975f3338195be992739838e3355af19bed7ffdc3fbe3d7f6b"
+            ]
+          },
+          {
+            "slot": 2,
+            "idx": 2,
+            "title": "Arecibo, Puerto Rico",
+            "gold": true,
+            "chars": [
+              0,
+              532
+            ],
+            "original_ranks": [
+              2
+            ],
+            "fused_ranks": [
+              11
+            ],
+            "chunk_ids": [
+              "a72ed955890e3a1ab7e94740b4b135bd7d147f2ef9d4873d970c447777b428f3"
+            ]
+          },
+          {
+            "slot": 3,
+            "idx": 15,
+            "title": "Commonwealth of Nations",
+            "gold": false,
+            "chars": [
+              0,
+              427
+            ],
+            "original_ranks": [
+              3
+            ],
+            "fused_ranks": [
+              1
+            ],
+            "chunk_ids": [
+              "70f448c3ca9079c9667bc9aedb5f918e525289f1f28467ef7a6c9bde5b885e61"
+            ]
+          },
+          {
+            "slot": 4,
+            "idx": 18,
+            "title": "British Empire",
+            "gold": false,
+            "chars": [
+              0,
+              1870
+            ],
+            "original_ranks": [
+              4,
+              5
+            ],
+            "fused_ranks": [
+              16,
+              5
+            ],
+            "chunk_ids": [
+              "3f96c5fde57a5814d17ec5e8c3f8f00b6e9a2b067df1a6330a31e1c0f5406ee4",
+              "f23a86965869d164f9cfb84c863ce7c55f9cc305d5f50a6390a6f3edabcf5554"
+            ]
+          },
+          {
+            "slot": 5,
+            "idx": 16,
+            "title": "Commonwealth of Nations",
+            "gold": false,
+            "chars": [
+              0,
+              400
+            ],
+            "original_ranks": [
+              6
+            ],
+            "fused_ranks": [
+              2
+            ],
+            "chunk_ids": [
+              "7482819a89e1d442b91b5b32c353e846c34de270deeb9ee3f3458b36ae5e0422"
+            ]
+          },
+          {
+            "slot": 6,
+            "idx": 10,
+            "title": "History of Australia",
+            "gold": false,
+            "chars": [
+              0,
+              392
+            ],
+            "original_ranks": [
+              7
+            ],
+            "fused_ranks": [
+              10
+            ],
+            "chunk_ids": [
+              "70b21aa9a7ea7080575d9991ca9366f50742b1e3dac4e9ccc9ff6b152ffa4d23"
+            ]
+          }
+        ],
+        "present_fact_slices": [
+          {
+            "idx": 2,
+            "start": 0,
+            "end": 145,
+            "containing_slots": [
+              2
+            ]
+          },
+          {
+            "idx": 0,
+            "start": 39,
+            "end": 90,
+            "containing_slots": []
+          }
+        ],
+        "minimal_atomic_repairs": {
+          "minimum": 2,
+          "options": [
+            {
+              "drop_slots": [
+                1,
+                3
+              ],
+              "add_ranks": [
+                8,
+                19
+              ]
+            },
+            {
+              "drop_slots": [
+                1,
+                4
+              ],
+              "add_ranks": [
+                8,
+                19
+              ]
+            },
+            {
+              "drop_slots": [
+                1,
+                5
+              ],
+              "add_ranks": [
+                8,
+                19
+              ]
+            },
+            {
+              "drop_slots": [
+                1,
+                6
+              ],
+              "add_ranks": [
+                8,
+                19
+              ]
+            },
+            {
+              "drop_slots": [
+                3,
+                4
+              ],
+              "add_ranks": [
+                8,
+                19
+              ]
+            },
+            {
+              "drop_slots": [
+                3,
+                5
+              ],
+              "add_ranks": [
+                8,
+                19
+              ]
+            },
+            {
+              "drop_slots": [
+                3,
+                6
+              ],
+              "add_ranks": [
+                8,
+                19
+              ]
+            },
+            {
+              "drop_slots": [
+                4,
+                5
+              ],
+              "add_ranks": [
+                8,
+                19
+              ]
+            },
+            {
+              "drop_slots": [
+                4,
+                6
+              ],
+              "add_ranks": [
+                8,
+                19
+              ]
+            },
+            {
+              "drop_slots": [
+                5,
+                6
+              ],
+              "add_ranks": [
+                8,
+                19
+              ]
+            }
+          ]
+        },
+        "wire_messages_sha256": "96e90574e86377dff5082f798ae92358c10fb5be085925a014800c6cbe4d1133"
+      }
+    }
+  ]
+}

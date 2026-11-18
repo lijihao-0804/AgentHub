@@ -54,7 +54,7 @@ def observed_stages(case, row):
         raise ValueError("Duplicate IDs or too many passages")
     invalid = dict(valid=False, answer="", refused=False, citations=[])
     event = row["events"][0]
-    first = invalid
+    first = dict(invalid, failure="empty_output")
     if isinstance(event["content"], str) and event["content"].strip():
         try:
             r = resolve_citation_answer(
@@ -69,9 +69,9 @@ def observed_stages(case, row):
                 refused=r.insufficient_evidence,
                 citations=[selected[i] for i in r.citation_ids],
             )
-        except _InvalidCitationAnswer:
-            pass
-    final = invalid
+        except _InvalidCitationAnswer as exc:
+            first = dict(invalid, failure=exc.reason.value)
+    final = dict(invalid, failure=row["body"].get("error", {}).get("code", f"http_{row['http']}"))
     if row["http"] == 200:
         body = row["body"]
         cited = []
@@ -215,6 +215,7 @@ def prepare(directory, output, partial=False):
                         stage=stage,
                         uid=uid,
                         screen=automatic(group, case, r),
+                        failure=r.get("failure"),
                     )
                 )
     observed = {(r["id"], r["arm"], r["stage"]) for r in observations}

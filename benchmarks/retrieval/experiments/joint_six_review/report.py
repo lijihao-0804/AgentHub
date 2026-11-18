@@ -63,6 +63,7 @@ def metrics(results):
 
     asserted = [r for r in results if r["valid"] and not r["refused"]]
     negatives = [r for r in results if not r["answerable"]]
+    answerable = [r for r in results if r["answerable"]]
     return {
         "content_correct": tally("value", results),
         "strict_correct": tally("strict", results),
@@ -70,7 +71,8 @@ def metrics(results):
             "hits": sum(r["valid"] and r["value"] and r["refused"] for r in negatives),
             "total": len(negatives),
         },
-        "wrong_refusal_on_answerable": tally("refused", [r for r in results if r["answerable"]]),
+        "wrong_refusal_on_answerable": tally("refused", answerable),
+        "strict_correct_on_answerable": tally("strict", answerable),
         "citation_support": tally("support", asserted),
         "language_match": tally("language", results),
         "valid": tally("valid", results),

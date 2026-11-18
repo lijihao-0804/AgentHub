@@ -1,0 +1,5419 @@
+{
+  "schema": 1,
+  "purpose": "Prior 24-question development diagnostic; excluded from independent evaluation.",
+  "basis": "Top 20 original hydrated chunks and actual per-chunk RRF/BGE scores from archived local HTTP preflight. Baseline messages equal the archived first requests. Candidate messages are reconstructed offline, without new retrieval, generation or answer scoring. Both timings include rendering and context admission.",
+  "product_commit": "eb0082c13e857f3869bbc1c92f05fa78cc817567",
+  "product_git_blob_sha256": {
+    "packages/knowledge/joint_evidence.py": "938a008d0a1d00c90550b12d6eec47a5e12b96deb1fb02525193a1439b9853f9",
+    "packages/knowledge/citation_qa.py": "1cf218f95f9093a8e7a53a1291ef9967e8af0c2933694e6abdd9f0249830eb10"
+  },
+  "private_archives_sha256": {
+    ".scratch/composite-qa-preflight/fresh.jsonl": "9faa9016122c54488b21816c0de3ed93b014dcce87f0d39b187cd64dc168b113",
+    ".scratch/composite-qa-preflight/fresh-bindings.json": "a946c4d29699239fedadd3a2b34ada699d750c76e05606538c8f745c13f9fdae",
+    ".scratch/merge-refill-fresh/matched.json": "52e871adf5176d1f93f7c5162b34661da0b4be606b93155543215c83ebc22e55",
+    ".scratch/composite-qa-preflight/fresh-index/collection/composite/storage.sqlite": "e669584fa698e8467f2cbf77cdee2067e12ce74a6fa50fe2d23f392887301da3"
+  },
+  "rerank_model": "BAAI/bge-reranker-v2-m3",
+  "embedding_model": "BAAI/bge-m3",
+  "citation_output_mode": "PROMPT_JSON",
+  "max_passages": 6,
+  "body_budget_approx_tokens": 16000,
+  "first_request_baseline_byte_matches": 24,
+  "new_provider_calls": 0,
+  "changed_selections": 11,
+  "all_arms_show_six": true,
+  "all": {
+    "visible_both": {
+      "pairs": 24,
+      "baseline": 20,
+      "candidate": 21,
+      "gains": 1,
+      "losses": 0,
+      "tied_positive": 20,
+      "tied_negative": 3,
+      "net": 1,
+      "mcnemar_two_sided_exact": 1.0
+    },
+    "individual_visible": {
+      "pool": 47,
+      "after_overlap": 47,
+      "baseline": 44,
+      "candidate": 45,
+      "gained": 1,
+      "lost": 0
+    },
+    "candidate_pool_both": {
+      "visible": 23,
+      "full": 21
+    },
+    "full_both": {
+      "pairs": 24,
+      "baseline": 15,
+      "candidate": 16,
+      "gains": 1,
+      "losses": 0,
+      "tied_positive": 15,
+      "tied_negative": 8,
+      "net": 1,
+      "mcnemar_two_sided_exact": 1.0
+    },
+    "individual_full": {
+      "pool": 45,
+      "after_overlap": 45,
+      "baseline": 39,
+      "candidate": 40,
+      "gained": 1,
+      "lost": 0
+    },
+    "min_raw_chunks_for_both_distribution": {
+      "3": 5,
+      "2": 16,
+      "unavailable": 3
+    },
+    "min_retained_chunks_for_both_distribution": {
+      "3": 5,
+      "2": 16,
+      "unavailable": 3
+    },
+    "different_wire_inputs": 11
+  },
+  "recoverable_six": {
+    "visible_both": {
+      "pairs": 6,
+      "baseline": 3,
+      "candidate": 4,
+      "gains": 1,
+      "losses": 0,
+      "tied_positive": 3,
+      "tied_negative": 2,
+      "net": 1,
+      "mcnemar_two_sided_exact": 1.0
+    },
+    "individual_visible": {
+      "pool": 12,
+      "after_overlap": 12,
+      "baseline": 9,
+      "candidate": 10,
+      "gained": 1,
+      "lost": 0
+    },
+    "candidate_pool_both": {
+      "visible": 6,
+      "full": 6
+    },
+    "full_both": {
+      "pairs": 6,
+      "baseline": 0,
+      "candidate": 1,
+      "gains": 1,
+      "losses": 0,
+      "tied_positive": 0,
+      "tied_negative": 5,
+      "net": 1,
+      "mcnemar_two_sided_exact": 1.0
+    },
+    "individual_full": {
+      "pool": 12,
+      "after_overlap": 12,
+      "baseline": 6,
+      "candidate": 7,
+      "gained": 1,
+      "lost": 0
+    },
+    "min_raw_chunks_for_both_distribution": {
+      "3": 5,
+      "2": 1
+    },
+    "min_retained_chunks_for_both_distribution": {
+      "3": 5,
+      "2": 1
+    },
+    "different_wire_inputs": 5
+  },
+  "recoverable_ids": [
+    "2hop__75213_24779",
+    "2hop__37658_68056",
+    "2hop__767960_92444",
+    "2hop__136704_91206",
+    "2hop__161005_489272",
+    "2hop__435776_81382"
+  ],
+  "local_pack_and_render_ms": {
+    "baseline": {
+      "total": 59.966,
+      "median": 2.529,
+      "max": 3.768
+    },
+    "candidate": {
+      "total": 3145.408,
+      "median": 130.825,
+      "max": 191.291
+    }
+  },
+  "wall_seconds_before_report_write": 3.79,
+  "cases": [
+    {
+      "id": "2hop__75213_24779",
+      "pool": {
+        "visible": [
+          "2hop__75213_24779::paragraph::2",
+          "2hop__75213_24779::paragraph::9"
+        ],
+        "full": [
+          "2hop__75213_24779::paragraph::2",
+          "2hop__75213_24779::paragraph::9"
+        ]
+      },
+      "after_overlap": {
+        "visible": [
+          "2hop__75213_24779::paragraph::2",
+          "2hop__75213_24779::paragraph::9"
+        ],
+        "full": [
+          "2hop__75213_24779::paragraph::2",
+          "2hop__75213_24779::paragraph::9"
+        ]
+      },
+      "pool_count": 20,
+      "pool_id_score_sha256": "9169ac703ec1d4956ca55200668950a6e63ac578559856d28b1a5dda87ee445b",
+      "min_raw_chunks_for_all_gold": 3,
+      "min_retained_chunks_for_all_gold": 3,
+      "local_pack_ms": {
+        "baseline": 3.768,
+        "candidate": 125.8
+      },
+      "baseline": {
+        "visible": [
+          "2hop__75213_24779::paragraph::2",
+          "2hop__75213_24779::paragraph::9"
+        ],
+        "full": [
+          "2hop__75213_24779::paragraph::2"
+        ],
+        "message_sha256": "ec6c55f45ff1cc335d0389a29c54c30882c61b1be96abd8ab6ccc3ed6c1879fe",
+        "selected": [
+          {
+            "slot": 1,
+            "paragraph": 2,
+            "rank": 1,
+            "chunk_id": "c9b7ad5f177ea9a59887fab177941c84210ef4981e1b3f4576c1b477dde916dc",
+            "chars": [
+              0,
+              504
+            ]
+          },
+          {
+            "slot": 2,
+            "paragraph": 10,
+            "rank": 2,
+            "chunk_id": "454d793b4c22ffd86751b65e1ef20bbe9d0c498832e3ca679ee039e266aa4c76",
+            "chars": [
+              0,
+              872
+            ]
+          },
+          {
+            "slot": 3,
+            "paragraph": 12,
+            "rank": 3,
+            "chunk_id": "f06e0d64c5010e98fcd5162a4a1e2a6790dbdfc7990d93947ded6a9fe581da6c",
+            "chars": [
+              0,
+              1145
+            ]
+          },
+          {
+            "slot": 4,
+            "paragraph": 17,
+            "rank": 4,
+            "chunk_id": "168ad39e91eeef3c989989d1f1814f116e85665b12cea63362ed7ce3f8fd7942",
+            "chars": [
+              0,
+              773
+            ]
+          },
+          {
+            "slot": 5,
+            "paragraph": 9,
+            "rank": 5,
+            "chunk_id": "95070d983d77f77a04645522669bba36c59bba01a69be97aa02decae3c4f5dc9",
+            "chars": [
+              0,
+              1200
+            ]
+          },
+          {
+            "slot": 6,
+            "paragraph": 5,
+            "rank": 6,
+            "chunk_id": "c1ef38c973cdb7d8ec88e270800342ddcb2e722343116220943f17cf9be2940a",
+            "chars": [
+              0,
+              967
+            ]
+          }
+        ]
+      },
+      "candidate": {
+        "visible": [
+          "2hop__75213_24779::paragraph::2",
+          "2hop__75213_24779::paragraph::9"
+        ],
+        "full": [
+          "2hop__75213_24779::paragraph::2"
+        ],
+        "message_sha256": "c55e80d2c007a1253579d6d4c30a4799fcdf7ccde56fdb70c8d15f5d9cfa0775",
+        "selected": [
+          {
+            "slot": 1,
+            "paragraph": 2,
+            "rank": 1,
+            "chunk_id": "c9b7ad5f177ea9a59887fab177941c84210ef4981e1b3f4576c1b477dde916dc",
+            "chars": [
+              0,
+              504
+            ]
+          },
+          {
+            "slot": 2,
+            "paragraph": 10,
+            "rank": 2,
+            "chunk_id": "454d793b4c22ffd86751b65e1ef20bbe9d0c498832e3ca679ee039e266aa4c76",
+            "chars": [
+              0,
+              872
+            ]
+          },
+          {
+            "slot": 3,
+            "paragraph": 12,
+            "rank": 3,
+            "chunk_id": "f06e0d64c5010e98fcd5162a4a1e2a6790dbdfc7990d93947ded6a9fe581da6c",
+            "chars": [
+              0,
+              1145
+            ]
+          },
+          {
+            "slot": 4,
+            "paragraph": 17,
+            "rank": 4,
+            "chunk_id": "168ad39e91eeef3c989989d1f1814f116e85665b12cea63362ed7ce3f8fd7942",
+            "chars": [
+              0,
+              773
+            ]
+          },
+          {
+            "slot": 5,
+            "paragraph": 9,
+            "rank": 5,
+            "chunk_id": "95070d983d77f77a04645522669bba36c59bba01a69be97aa02decae3c4f5dc9",
+            "chars": [
+              0,
+              1200
+            ]
+          },
+          {
+            "slot": 6,
+            "paragraph": 11,
+            "rank": 8,
+            "chunk_id": "eaf1ea8fc2687dd696cefd2cc39b62dadc9a0efcf97a05f7d44b223ffabc5d14",
+            "chars": [
+              0,
+              675
+            ]
+          }
+        ]
+      },
+      "hops": [
+        {
+          "hop": 1,
+          "paragraph": 9,
+          "pool_ranks": [
+            5,
+            15
+          ],
+          "baseline": {
+            "ranks": [
+              5
+            ],
+            "visible": true,
+            "full": false
+          },
+          "candidate": {
+            "ranks": [
+              5
+            ],
+            "visible": true,
+            "full": false
+          }
+        },
+        {
+          "hop": 2,
+          "paragraph": 2,
+          "pool_ranks": [
+            1
+          ],
+          "baseline": {
+            "ranks": [
+              1
+            ],
+            "visible": true,
+            "full": true
+          },
+          "candidate": {
+            "ranks": [
+              1
+            ],
+            "visible": true,
+            "full": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "2hop__130545_62851",
+      "pool": {
+        "visible": [
+          "2hop__130545_62851::paragraph::0",
+          "2hop__130545_62851::paragraph::17"
+        ],
+        "full": [
+          "2hop__130545_62851::paragraph::0",
+          "2hop__130545_62851::paragraph::17"
+        ]
+      },
+      "after_overlap": {
+        "visible": [
+          "2hop__130545_62851::paragraph::0",
+          "2hop__130545_62851::paragraph::17"
+        ],
+        "full": [
+          "2hop__130545_62851::paragraph::0",
+          "2hop__130545_62851::paragraph::17"
+        ]
+      },
+      "pool_count": 20,
+      "pool_id_score_sha256": "8780d83833b0a5b993fdbd248c6e95eb87ccf6388dc2ad9de45e71566e6b271f",
+      "min_raw_chunks_for_all_gold": 2,
+      "min_retained_chunks_for_all_gold": 2,
+      "local_pack_ms": {
+        "baseline": 2.276,
+        "candidate": 113.24
+      },
+      "baseline": {
+        "visible": [
+          "2hop__130545_62851::paragraph::0",
+          "2hop__130545_62851::paragraph::17"
+        ],
+        "full": [
+          "2hop__130545_62851::paragraph::0",
+          "2hop__130545_62851::paragraph::17"
+        ],
+        "message_sha256": "e55ee524390ed6c00dfb19372f7b773879f1f0daaba4b666a97b872593495609",
+        "selected": [
+          {
+            "slot": 1,
+            "paragraph": 0,
+            "rank": 1,
+            "chunk_id": "c7fd0898644b810c4107bbc20668c1e2a4e7d9a5dca8166bb587eb22588f7814",
+            "chars": [
+              0,
+              582
+            ]
+          },
+          {
+            "slot": 2,
+            "paragraph": 15,
+            "rank": 2,
+            "chunk_id": "27c3daeb87b2172165f8b0941fcfe29634b82aad7bb21c2ccf58423677c46205",
+            "chars": [
+              0,
+              1200
+            ]
+          },
+          {
+            "slot": 3,
+            "paragraph": 1,
+            "rank": 3,
+            "chunk_id": "eb0871712d6b2852cf3a7f8f3d7e6cd66e43dcf370b4e0d5f92a787db2e1af5a",
+            "chars": [
+              0,
+              1200
+            ]
+          },
+          {
+            "slot": 4,
+            "paragraph": 19,
+            "rank": 4,
+            "chunk_id": "cfd88b9a40ab6caa94e1668c6bfcf1958235e5edb64bf743770999a0fe84118f",
+            "chars": [
+              0,
+              1200
+            ]
+          },
+          {
+            "slot": 5,
+            "paragraph": 17,
+            "rank": 5,
+            "chunk_id": "35cac3c020597e0ecf8a68762fa43e8f3affe26617b423cd46a32fc15b82c973",
+            "chars": [
+              0,
+              784
+            ]
+          },
+          {
+            "slot": 6,
+            "paragraph": 11,
+            "rank": 6,
+            "chunk_id": "299370560dad7c20c326844f912d9511f4190c4f0497ffce46af770d50e828a2",
+            "chars": [
+              0,
+              577
+            ]
+          }
+        ]
+      },
+      "candidate": {
+        "visible": [
+          "2hop__130545_62851::paragraph::0",
+          "2hop__130545_62851::paragraph::17"
+        ],
+        "full": [
+          "2hop__130545_62851::paragraph::0",
+          "2hop__130545_62851::paragraph::17"
+        ],
+        "message_sha256": "c995464c6f3e9a723591f4c54c69307ff7f5ff36e36562af9114f053b4d85ff6",
+        "selected": [
+          {
+            "slot": 1,
+            "paragraph": 0,
+            "rank": 1,
+            "chunk_id": "c7fd0898644b810c4107bbc20668c1e2a4e7d9a5dca8166bb587eb22588f7814",
+            "chars": [
+              0,
+              582
+            ]
+          },
+          {
+            "slot": 2,
+            "paragraph": 15,
+            "rank": 2,
+            "chunk_id": "27c3daeb87b2172165f8b0941fcfe29634b82aad7bb21c2ccf58423677c46205",
+            "chars": [
+              0,
+              1200
+            ]
+          },
+          {
+            "slot": 3,
+            "paragraph": 17,
+            "rank": 5,
+            "chunk_id": "35cac3c020597e0ecf8a68762fa43e8f3affe26617b423cd46a32fc15b82c973",
+            "chars": [
+              0,
+              784
+            ]
+          },
+          {
+            "slot": 4,
+            "paragraph": 11,
+            "rank": 6,
+            "chunk_id": "299370560dad7c20c326844f912d9511f4190c4f0497ffce46af770d50e828a2",
+            "chars": [
+              0,
+              577
+            ]
+          },
+          {
+            "slot": 5,
+            "paragraph": 12,
+            "rank": 7,
+            "chunk_id": "9f5f066bf6a5134cbbc0c3a54814c82a3cd23aa495859cc32650a2e7c8275bf6",
+            "chars": [
+              0,
+              493
+            ]
+          },
+          {
+            "slot": 6,
+            "paragraph": 7,
+            "rank": 8,
+            "chunk_id": "f454af5f5f20d860eab7344490498babe608b92bb642a2982ad951acca510c7d",
+            "chars": [
+              0,
+              637
+            ]
+          }
+        ]
+      },
+      "hops": [
+        {
+          "hop": 1,
+          "paragraph": 0,
+          "pool_ranks": [
+            1
+          ],
+          "baseline": {
+            "ranks": [
+              1
+            ],
+            "visible": true,
+            "full": true
+          },
+          "candidate": {
+            "ranks": [
+              1
+            ],
+            "visible": true,
+            "full": true
+          }
+        },
+        {
+          "hop": 2,
+          "paragraph": 17,
+          "pool_ranks": [
+            5
+          ],
+          "baseline": {
+            "ranks": [
+              5
+            ],
+            "visible": true,
+            "full": true
+          },
+          "candidate": {
+            "ranks": [
+              5
+            ],
+            "visible": true,
+            "full": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "2hop__37658_68056",
+      "pool": {
+        "visible": [
+          "2hop__37658_68056::paragraph::0",
+          "2hop__37658_68056::paragraph::7"
+        ],
+        "full": [
+          "2hop__37658_68056::paragraph::0",
+          "2hop__37658_68056::paragraph::7"
+        ]
+      },
+      "after_overlap": {
+        "visible": [
+          "2hop__37658_68056::paragraph::0",
+          "2hop__37658_68056::paragraph::7"
+        ],
+        "full": [
+          "2hop__37658_68056::paragraph::0",
+          "2hop__37658_68056::paragraph::7"
+        ]
+      },
+      "pool_count": 20,
+      "pool_id_score_sha256": "e8fa7ffceded9e39b59bf82f743936a028fe6f9d3808b5fa248febb77581c0fb",
+      "min_raw_chunks_for_all_gold": 3,
+      "min_retained_chunks_for_all_gold": 3,
+      "local_pack_ms": {
+        "baseline": 2.062,
+        "candidate": 102.109
+      },
+      "baseline": {
+        "visible": [
+          "2hop__37658_68056::paragraph::0",
+          "2hop__37658_68056::paragraph::7"
+        ],
+        "full": [
+          "2hop__37658_68056::paragraph::7"
+        ],
+        "message_sha256": "ead5e6231e5abd4a4b53263d8d5bdf9bc52c4145a746c96b5d47b725c4cc0075",
+        "selected": [
+          {
+            "slot": 1,
+            "paragraph": 0,
+            "rank": 1,
+            "chunk_id": "21ece1eac176f453c90614a0df72e611e38069e7ddb43dfbfe8e071124d8b323",
+            "chars": [
+              0,
+              1200
+            ]
+          },
+          {
+            "slot": 2,
+            "paragraph": 7,
+            "rank": 2,
+            "chunk_id": "e687ea4bed2974f8fffe22fc921f9c6b53547681f085018538ed40a3ae929725",
+            "chars": [
+              0,
+              745
+            ]
+          },
+          {
+            "slot": 3,
+            "paragraph": 2,
+            "rank": 3,
+            "chunk_id": "c912c5827003570c52a1ea85a7e648871982d46e5f992483fdd550f906c08875",
+            "chars": [
+              0,
+              912
+            ]
+          },
+          {
+            "slot": 4,
+            "paragraph": 5,
+            "rank": 4,
+            "chunk_id": "02cdd96f19d13344f13f8d95d631e1c9d9029b0045bca2b9d458dea768ae242d",
+            "chars": [
+              0,
+              1200
+            ]
+          },
+          {
+            "slot": 5,
+            "paragraph": 1,
+            "rank": 5,
+            "chunk_id": "1f3bdabcc5d6d89b1770b2cd2c95d8ab3c7a2c39ba389d468157226721cc331e",
+            "chars": [
+              0,
+              774
+            ]
+          },
+          {
+            "slot": 6,
+            "paragraph": 5,
+            "rank": 6,
+            "chunk_id": "ccfec66b69facbbdcfb81a4861a358e5d6c135d15f2dd5266213beb1da708dba",
+            "chars": [
+              1000,
+              1524
+            ]
+          }
+        ]
+      },
+      "candidate": {
+        "visible": [
+          "2hop__37658_68056::paragraph::0",
+          "2hop__37658_68056::paragraph::7"
+        ],
+        "full": [
+          "2hop__37658_68056::paragraph::7"
+        ],
+        "message_sha256": "d11f0176c8914d0d0bab8ad1c7f1b84e424af2eabd4b8246e98a1d5786cf15e8",
+        "selected": [
+          {
+            "slot": 1,
+            "paragraph": 0,
+            "rank": 1,
+            "chunk_id": "21ece1eac176f453c90614a0df72e611e38069e7ddb43dfbfe8e071124d8b323",
+            "chars": [
+              0,
+              1200
+            ]
+          },
+          {
+            "slot": 2,
+            "paragraph": 7,
+            "rank": 2,
+            "chunk_id": "e687ea4bed2974f8fffe22fc921f9c6b53547681f085018538ed40a3ae929725",
+            "chars": [
+              0,
+              745
+            ]
+          },
+          {
+            "slot": 3,
+            "paragraph": 2,
+            "rank": 3,
+            "chunk_id": "c912c5827003570c52a1ea85a7e648871982d46e5f992483fdd550f906c08875",
+            "chars": [
+              0,
+              912
+            ]
+          },
+          {
+            "slot": 4,
+            "paragraph": 5,
+            "rank": 4,
+            "chunk_id": "02cdd96f19d13344f13f8d95d631e1c9d9029b0045bca2b9d458dea768ae242d",
+            "chars": [
+              0,
+              1200
+            ]
+          },
+          {
+            "slot": 5,
+            "paragraph": 1,
+            "rank": 5,
+            "chunk_id": "1f3bdabcc5d6d89b1770b2cd2c95d8ab3c7a2c39ba389d468157226721cc331e",
+            "chars": [
+              0,
+              774
+            ]
+          },
+          {
+            "slot": 6,
+            "paragraph": 10,
+            "rank": 7,
+            "chunk_id": "c4367e3cdb937e7aef1da9274fc058291b0975a9640fd76015a4ef38c0ade339",
+            "chars": [
+              0,
+              1046
+            ]
+          }
+        ]
+      },
+      "hops": [
+        {
+          "hop": 1,
+          "paragraph": 0,
+          "pool_ranks": [
+            1,
+            12
+          ],
+          "baseline": {
+            "ranks": [
+              1
+            ],
+            "visible": true,
+            "full": false
+          },
+          "candidate": {
+            "ranks": [
+              1
+            ],
+            "visible": true,
+            "full": false
+          }
+        },
+        {
+          "hop": 2,
+          "paragraph": 7,
+          "pool_ranks": [
+            2
+          ],
+          "baseline": {
+            "ranks": [
+              2
+            ],
+            "visible": true,
+            "full": true
+          },
+          "candidate": {
+            "ranks": [
+              2
+            ],
+            "visible": true,
+            "full": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "2hop__767960_92444",
+      "pool": {
+        "visible": [
+          "2hop__767960_92444::paragraph::3",
+          "2hop__767960_92444::paragraph::5"
+        ],
+        "full": [
+          "2hop__767960_92444::paragraph::3",
+          "2hop__767960_92444::paragraph::5"
+        ]
+      },
+      "after_overlap": {
+        "visible": [
+          "2hop__767960_92444::paragraph::3",
+          "2hop__767960_92444::paragraph::5"
+        ],
+        "full": [
+          "2hop__767960_92444::paragraph::3",
+          "2hop__767960_92444::paragraph::5"
+        ]
+      },
+      "pool_count": 20,
+      "pool_id_score_sha256": "baed2d8bca8e85268b49d5a45548f87f1cd59d8176083b9b7f149190e16f6811",
+      "min_raw_chunks_for_all_gold": 3,
+      "min_retained_chunks_for_all_gold": 3,
+      "local_pack_ms": {
+        "baseline": 1.629,
+        "candidate": 100.498
+      },
+      "baseline": {
+        "visible": [
+          "2hop__767960_92444::paragraph::3",
+          "2hop__767960_92444::paragraph::5"
+        ],
+        "full": [
+          "2hop__767960_92444::paragraph::5"
+        ],
+        "message_sha256": "fecba64ef866db93ae949f4678a99a9ab8809ffe1ee12533fff1f6cda7afa359",
+        "selected": [
+          {
+            "slot": 1,
+            "paragraph": 3,
+            "rank": 1,
+            "chunk_id": "58a408118e9c485c93038ea948c5ccff02855660f2040d909bbbd91d1a224a85",
+            "chars": [
+              0,
+              1200
+            ]
+          },
+          {
+            "slot": 2,
+            "paragraph": 5,
+            "rank": 2,
+            "chunk_id": "552f54f3b32594f8b3e965903822c2db502a0e4e37d33b502ca76791559d3596",
+            "chars": [
+              0,
+              733
+            ]
+          },
+          {
+            "slot": 3,
+            "paragraph": 15,
+            "rank": 3,
+            "chunk_id": "fe30d0eef7fc143519fb077b3da97b6947c4bfdb65cdd595455b30426912b0fa",
+            "chars": [
+              0,
+              831
+            ]
+          },
+          {
+            "slot": 4,
+            "paragraph": 10,
+            "rank": 4,
+            "chunk_id": "af9419e6f12599c20903acd35db52b5300b7a69ee415c4f450fe1f62e8133f4b",
+            "chars": [
+              0,
+              228
+            ]
+          },
+          {
+            "slot": 5,
+            "paragraph": 9,
+            "rank": 5,
+            "chunk_id": "529c36539cbf6abd8b6bb62b0609037fed5374832e81f9532843810c2eb51430",
+            "chars": [
+              0,
+              451
+            ]
+          },
+          {
+            "slot": 6,
+            "paragraph": 14,
+            "rank": 6,
+            "chunk_id": "087f9b0c339f2b5e1549855f8f2434aa66fbd907df30a6eb412cca4d2c6db70e",
+            "chars": [
+              0,
+              769
+            ]
+          }
+        ]
+      },
+      "candidate": {
+        "visible": [
+          "2hop__767960_92444::paragraph::3",
+          "2hop__767960_92444::paragraph::5"
+        ],
+        "full": [
+          "2hop__767960_92444::paragraph::5"
+        ],
+        "message_sha256": "53191b677208b685cab839aab420d82e953afef7749491fbe09c7c278ea2607a",
+        "selected": [
+          {
+            "slot": 1,
+            "paragraph": 3,
+            "rank": 1,
+            "chunk_id": "58a408118e9c485c93038ea948c5ccff02855660f2040d909bbbd91d1a224a85",
+            "chars": [
+              0,
+              1200
+            ]
+          },
+          {
+            "slot": 2,
+            "paragraph": 5,
+            "rank": 2,
+            "chunk_id": "552f54f3b32594f8b3e965903822c2db502a0e4e37d33b502ca76791559d3596",
+            "chars": [
+              0,
+              733
+            ]
+          },
+          {
+            "slot": 3,
+            "paragraph": 15,
+            "rank": 3,
+            "chunk_id": "fe30d0eef7fc143519fb077b3da97b6947c4bfdb65cdd595455b30426912b0fa",
+            "chars": [
+              0,
+              831
+            ]
+          },
+          {
+            "slot": 4,
+            "paragraph": 10,
+            "rank": 4,
+            "chunk_id": "af9419e6f12599c20903acd35db52b5300b7a69ee415c4f450fe1f62e8133f4b",
+            "chars": [
+              0,
+              228
+            ]
+          },
+          {
+            "slot": 5,
+            "paragraph": 9,
+            "rank": 5,
+            "chunk_id": "529c36539cbf6abd8b6bb62b0609037fed5374832e81f9532843810c2eb51430",
+            "chars": [
+              0,
+              451
+            ]
+          },
+          {
+            "slot": 6,
+            "paragraph": 1,
+            "rank": 8,
+            "chunk_id": "080a59e0f1c9fe57c3dd884f3cc1aea4e57c2a727763d8803f6067fa40dd7579",
+            "chars": [
+              0,
+              1200
+            ]
+          }
+        ]
+      },
+      "hops": [
+        {
+          "hop": 1,
+          "paragraph": 5,
+          "pool_ranks": [
+            2
+          ],
+          "baseline": {
+            "ranks": [
+              2
+            ],
+            "visible": true,
+            "full": true
+          },
+          "candidate": {
+            "ranks": [
+              2
+            ],
+            "visible": true,
+            "full": true
+          }
+        },
+        {
+          "hop": 2,
+          "paragraph": 3,
+          "pool_ranks": [
+            1,
+            14
+          ],
+          "baseline": {
+            "ranks": [
+              1
+            ],
+            "visible": true,
+            "full": false
+          },
+          "candidate": {
+            "ranks": [
+              1
+            ],
+            "visible": true,
+            "full": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "2hop__136704_91206",
+      "pool": {
+        "visible": [
+          "2hop__136704_91206::paragraph::16",
+          "2hop__136704_91206::paragraph::4"
+        ],
+        "full": [
+          "2hop__136704_91206::paragraph::16",
+          "2hop__136704_91206::paragraph::4"
+        ]
+      },
+      "after_overlap": {
+        "visible": [
+          "2hop__136704_91206::paragraph::16",
+          "2hop__136704_91206::paragraph::4"
+        ],
+        "full": [
+          "2hop__136704_91206::paragraph::16",
+          "2hop__136704_91206::paragraph::4"
+        ]
+      },
+      "pool_count": 20,
+      "pool_id_score_sha256": "44e7485eca8646e87b18126ef5e202ef1e63da0b70e14874cb36cc0adaa58c04",
+      "min_raw_chunks_for_all_gold": 2,
+      "min_retained_chunks_for_all_gold": 2,
+      "local_pack_ms": {
+        "baseline": 2.505,
+        "candidate": 111.029
+      },
+      "baseline": {
+        "visible": [
+          "2hop__136704_91206::paragraph::16"
+        ],
+        "full": [
+          "2hop__136704_91206::paragraph::16"
+        ],
+        "message_sha256": "f9ae5e36aaa548d072d6a0f170323a744d80021b8c42fc83cd98e98ead9d7a1d",
+        "selected": [
+          {
+            "slot": 1,
+            "paragraph": 16,
+            "rank": 1,
+            "chunk_id": "8835260404495c2b9c00c76f213da1e5c3c808f34a4d13ac89668e851fefaa13",
+            "chars": [
+              0,
+              143
+            ]
+          },
+          {
+            "slot": 2,
+            "paragraph": 10,
+            "rank": 2,
+            "chunk_id": "34bfede6bbadb68096f4ac526923a1226a7e4d86fdad0936162613a05a43c2be",
+            "chars": [
+              0,
+              385
+            ]
+          },
+          {
+            "slot": 3,
+            "paragraph": 19,
+            "rank": 3,
+            "chunk_id": "5948ded913b4294a6a4da3f70664148be3ff453c55044555a35048f055e856e2",
+            "chars": [
+              0,
+              800
+            ]
+          },
+          {
+            "slot": 4,
+            "paragraph": 0,
+            "rank": 4,
+            "chunk_id": "9d4cbc19b4dc545f2da706ec9867451d098f4482362dd50998a56aa67fd3e589",
+            "chars": [
+              0,
+              359
+            ]
+          },
+          {
+            "slot": 5,
+            "paragraph": 12,
+            "rank": 5,
+            "chunk_id": "770f6d304aa52dab46d370ceebc2d88494ee88fbe604540dc939aaa6edae0adf",
+            "chars": [
+              0,
+              634
+            ]
+          },
+          {
+            "slot": 6,
+            "paragraph": 3,
+            "rank": 6,
+            "chunk_id": "97d58e9cc3c8e31599f569420ec902ecf807836488872618014e996148b3edd2",
+            "chars": [
+              0,
+              598
+            ]
+          }
+        ]
+      },
+      "candidate": {
+        "visible": [
+          "2hop__136704_91206::paragraph::16",
+          "2hop__136704_91206::paragraph::4"
+        ],
+        "full": [
+          "2hop__136704_91206::paragraph::16",
+          "2hop__136704_91206::paragraph::4"
+        ],
+        "message_sha256": "47315884229cd5c29fd9a5cb6c17e7d3b0ad30fdee1cb154cf8fd2d8d1ff495e",
+        "selected": [
+          {
+            "slot": 1,
+            "paragraph": 16,
+            "rank": 1,
+            "chunk_id": "8835260404495c2b9c00c76f213da1e5c3c808f34a4d13ac89668e851fefaa13",
+            "chars": [
+              0,
+              143
+            ]
+          },
+          {
+            "slot": 2,
+            "paragraph": 10,
+            "rank": 2,
+            "chunk_id": "34bfede6bbadb68096f4ac526923a1226a7e4d86fdad0936162613a05a43c2be",
+            "chars": [
+              0,
+              385
+            ]
+          },
+          {
+            "slot": 3,
+            "paragraph": 19,
+            "rank": 3,
+            "chunk_id": "5948ded913b4294a6a4da3f70664148be3ff453c55044555a35048f055e856e2",
+            "chars": [
+              0,
+              800
+            ]
+          },
+          {
+            "slot": 4,
+            "paragraph": 0,
+            "rank": 4,
+            "chunk_id": "9d4cbc19b4dc545f2da706ec9867451d098f4482362dd50998a56aa67fd3e589",
+            "chars": [
+              0,
+              359
+            ]
+          },
+          {
+            "slot": 5,
+            "paragraph": 12,
+            "rank": 5,
+            "chunk_id": "770f6d304aa52dab46d370ceebc2d88494ee88fbe604540dc939aaa6edae0adf",
+            "chars": [
+              0,
+              634
+            ]
+          },
+          {
+            "slot": 6,
+            "paragraph": 4,
+            "rank": 8,
+            "chunk_id": "9a09c52acff15ac35e778c279085f2e5a413aba0724449148f177ea43fb693dc",
+            "chars": [
+              0,
+              745
+            ]
+          }
+        ]
+      },
+      "hops": [
+        {
+          "hop": 1,
+          "paragraph": 16,
+          "pool_ranks": [
+            1
+          ],
+          "baseline": {
+            "ranks": [
+              1
+            ],
+            "visible": true,
+            "full": true
+          },
+          "candidate": {
+            "ranks": [
+              1
+            ],
+            "visible": true,
+            "full": true
+          }
+        },
+        {
+          "hop": 2,
+          "paragraph": 4,
+          "pool_ranks": [
+            8
+          ],
+          "baseline": {
+            "ranks": [],
+            "visible": false,
+            "full": false
+          },
+          "candidate": {
+            "ranks": [
+              8
+            ],
+            "visible": true,
+            "full": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "2hop__296958_70763",
+      "pool": {
+        "visible": [
+          "2hop__296958_70763::paragraph::0",
+          "2hop__296958_70763::paragraph::2"
+        ],
+        "full": [
+          "2hop__296958_70763::paragraph::0",
+          "2hop__296958_70763::paragraph::2"
+        ]
+      },
+      "after_overlap": {
+        "visible": [
+          "2hop__296958_70763::paragraph::0",
+          "2hop__296958_70763::paragraph::2"
+        ],
+        "full": [
+          "2hop__296958_70763::paragraph::0",
+          "2hop__296958_70763::paragraph::2"
+        ]
+      },
+      "pool_count": 20,
+      "pool_id_score_sha256": "629b851c7e38fcf0f56ef0293ffa78e225d85ff0b525e8f421116f066115cf21",
+      "min_raw_chunks_for_all_gold": 2,
+      "min_retained_chunks_for_all_gold": 2,
+      "local_pack_ms": {
+        "baseline": 1.485,
+        "candidate": 118.183
+      },
+      "baseline": {
+        "visible": [
+          "2hop__296958_70763::paragraph::0",
+          "2hop__296958_70763::paragraph::2"
+        ],
+        "full": [
+          "2hop__296958_70763::paragraph::0",
+          "2hop__296958_70763::paragraph::2"
+        ],
+        "message_sha256": "393d0bb743ae8ac793e7944070c1189fe5bcf11e9802f0c35c7d60430b2994fb",
+        "selected": [
+          {
+            "slot": 1,
+            "paragraph": 0,
+            "rank": 1,
+            "chunk_id": "70fb35606f597c3289c55ac4a67acbbc07e4b078be534893630ca2c5c334891d",
+            "chars": [
+              0,
+              309
+            ]
+          },
+          {
+            "slot": 2,
+            "paragraph": 3,
+            "rank": 2,
+            "chunk_id": "6f489b41bcb0c9095876be9b779b9869aff2b48fd9b0eeba4cbb401ecff4c1e6",
+            "chars": [
+              0,
+              530
+            ]
+          },
+          {
+            "slot": 3,
+            "paragraph": 9,
+            "rank": 3,
+            "chunk_id": "7815e983bda6e0c8b2c4af9991d21f31a76a004210c0af4ef8c24c6a557c09be",
+            "chars": [
+              0,
+              433
+            ]
+          },
+          {
+            "slot": 4,
+            "paragraph": 2,
+            "rank": 4,
+            "chunk_id": "65f44ddde11e749c40af19503a9c728690a40ebd8724c705bb54ad1bf9500d7a",
+            "chars": [
+              0,
+              615
+            ]
+          },
+          {
+            "slot": 5,
+            "paragraph": 10,
+            "rank": 5,
+            "chunk_id": "e4fa9fc31f1c1bf337b9f021435ada6d16de4c829a5e4ddb1ddc8c4ae024e249",
+            "chars": [
+              1000,
+              1651
+            ]
+          },
+          {
+            "slot": 6,
+            "paragraph": 14,
+            "rank": 6,
+            "chunk_id": "a8bbc733507a4a190f69b952ad71fce6a12814fff84b7a7d61bcdabd94208364",
+            "chars": [
+              0,
+              623
+            ]
+          }
+        ]
+      },
+      "candidate": {
+        "visible": [
+          "2hop__296958_70763::paragraph::0",
+          "2hop__296958_70763::paragraph::2"
+        ],
+        "full": [
+          "2hop__296958_70763::paragraph::0",
+          "2hop__296958_70763::paragraph::2"
+        ],
+        "message_sha256": "393d0bb743ae8ac793e7944070c1189fe5bcf11e9802f0c35c7d60430b2994fb",
+        "selected": [
+          {
+            "slot": 1,
+            "paragraph": 0,
+            "rank": 1,
+            "chunk_id": "70fb35606f597c3289c55ac4a67acbbc07e4b078be534893630ca2c5c334891d",
+            "chars": [
+              0,
+              309
+            ]
+          },
+          {
+            "slot": 2,
+            "paragraph": 3,
+            "rank": 2,
+            "chunk_id": "6f489b41bcb0c9095876be9b779b9869aff2b48fd9b0eeba4cbb401ecff4c1e6",
+            "chars": [
+              0,
+              530
+            ]
+          },
+          {
+            "slot": 3,
+            "paragraph": 9,
+            "rank": 3,
+            "chunk_id": "7815e983bda6e0c8b2c4af9991d21f31a76a004210c0af4ef8c24c6a557c09be",
+            "chars": [
+              0,
+              433
+            ]
+          },
+          {
+            "slot": 4,
+            "paragraph": 2,
+            "rank": 4,
+            "chunk_id": "65f44ddde11e749c40af19503a9c728690a40ebd8724c705bb54ad1bf9500d7a",
+            "chars": [
+              0,
+              615
+            ]
+          },
+          {
+            "slot": 5,
+            "paragraph": 10,
+            "rank": 5,
+            "chunk_id": "e4fa9fc31f1c1bf337b9f021435ada6d16de4c829a5e4ddb1ddc8c4ae024e249",
+            "chars": [
+              1000,
+              1651
+            ]
+          },
+          {
+            "slot": 6,
+            "paragraph": 14,
+            "rank": 6,
+            "chunk_id": "a8bbc733507a4a190f69b952ad71fce6a12814fff84b7a7d61bcdabd94208364",
+            "chars": [
+              0,
+              623
+            ]
+          }
+        ]
+      },
+      "hops": [
+        {
+          "hop": 1,
+          "paragraph": 0,
+          "pool_ranks": [
+            1
+          ],
+          "baseline": {
+            "ranks": [
+              1
+            ],
+            "visible": true,
+            "full": true
+          },
+          "candidate": {
+            "ranks": [
+              1
+            ],
+            "visible": true,
+            "full": true
+          }
+        },
+        {
+          "hop": 2,
+          "paragraph": 2,
+          "pool_ranks": [
+            4
+          ],
+          "baseline": {
+            "ranks": [
+              4
+            ],
+            "visible": true,
+            "full": true
+          },
+          "candidate": {
+            "ranks": [
+              4
+            ],
+            "visible": true,
+            "full": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "2hop__159116_44674",
+      "pool": {
+        "visible": [
+          "2hop__159116_44674::paragraph::0",
+          "2hop__159116_44674::paragraph::8"
+        ],
+        "full": [
+          "2hop__159116_44674::paragraph::0",
+          "2hop__159116_44674::paragraph::8"
+        ]
+      },
+      "after_overlap": {
+        "visible": [
+          "2hop__159116_44674::paragraph::0",
+          "2hop__159116_44674::paragraph::8"
+        ],
+        "full": [
+          "2hop__159116_44674::paragraph::0",
+          "2hop__159116_44674::paragraph::8"
+        ]
+      },
+      "pool_count": 20,
+      "pool_id_score_sha256": "016b1b65d6d14389ae61d9966b42f165c5ca8accf01bae585da3ced561677996",
+      "min_raw_chunks_for_all_gold": 2,
+      "min_retained_chunks_for_all_gold": 2,
+      "local_pack_ms": {
+        "baseline": 3.194,
+        "candidate": 126.837
+      },
+      "baseline": {
+        "visible": [
+          "2hop__159116_44674::paragraph::0",
+          "2hop__159116_44674::paragraph::8"
+        ],
+        "full": [
+          "2hop__159116_44674::paragraph::0",
+          "2hop__159116_44674::paragraph::8"
+        ],
+        "message_sha256": "6285b092d296f6761d696b39e888aed81d56137e288ebe4969270abd0bf71f93",
+        "selected": [
+          {
+            "slot": 1,
+            "paragraph": 8,
+            "rank": 1,
+            "chunk_id": "00997d7c8e7a172e5d7dd27b0dbf14bdae6b0fc33d33df852c520b2227d502a1",
+            "chars": [
+              0,
+              1052
+            ]
+          },
+          {
+            "slot": 2,
+            "paragraph": 5,
+            "rank": 2,
+            "chunk_id": "1deac24d0574359baa98d7fa8f1cf8d27e20f4b4e9529c97899fcba0320dd75e",
+            "chars": [
+              0,
+              1006
+            ]
+          },
+          {
+            "slot": 3,
+            "paragraph": 0,
+            "rank": 3,
+            "chunk_id": "d4c644c71e1cb8876d6ca0411d044c9fdfdec5a0b4d1cf562900985a897e6569",
+            "chars": [
+              0,
+              877
+            ]
+          },
+          {
+            "slot": 4,
+            "paragraph": 18,
+            "rank": 4,
+            "chunk_id": "4165ef71316f265949ec70f5f5800b0d06f167c5febcaef836b92527025c7c07",
+            "chars": [
+              0,
+              1069
+            ]
+          },
+          {
+            "slot": 5,
+            "paragraph": 10,
+            "rank": 5,
+            "chunk_id": "2bc729f0a437f2461dcd0120026cfb9e72cdeb0234a395da471546ac619858da",
+            "chars": [
+              0,
+              422
+            ]
+          },
+          {
+            "slot": 6,
+            "paragraph": 13,
+            "rank": 6,
+            "chunk_id": "f48e6132a9bd804b452dc6c7278a7858df1a6dbeb8760a551ad0656b36741db8",
+            "chars": [
+              0,
+              918
+            ]
+          }
+        ]
+      },
+      "candidate": {
+        "visible": [
+          "2hop__159116_44674::paragraph::0",
+          "2hop__159116_44674::paragraph::8"
+        ],
+        "full": [
+          "2hop__159116_44674::paragraph::0",
+          "2hop__159116_44674::paragraph::8"
+        ],
+        "message_sha256": "4513ebed8201b9e9cc7c1135a4ca623c6e6e2b878dcf5bf585a6daf6566686ff",
+        "selected": [
+          {
+            "slot": 1,
+            "paragraph": 8,
+            "rank": 1,
+            "chunk_id": "00997d7c8e7a172e5d7dd27b0dbf14bdae6b0fc33d33df852c520b2227d502a1",
+            "chars": [
+              0,
+              1052
+            ]
+          },
+          {
+            "slot": 2,
+            "paragraph": 5,
+            "rank": 2,
+            "chunk_id": "1deac24d0574359baa98d7fa8f1cf8d27e20f4b4e9529c97899fcba0320dd75e",
+            "chars": [
+              0,
+              1006
+            ]
+          },
+          {
+            "slot": 3,
+            "paragraph": 0,
+            "rank": 3,
+            "chunk_id": "d4c644c71e1cb8876d6ca0411d044c9fdfdec5a0b4d1cf562900985a897e6569",
+            "chars": [
+              0,
+              877
+            ]
+          },
+          {
+            "slot": 4,
+            "paragraph": 18,
+            "rank": 4,
+            "chunk_id": "4165ef71316f265949ec70f5f5800b0d06f167c5febcaef836b92527025c7c07",
+            "chars": [
+              0,
+              1069
+            ]
+          },
+          {
+            "slot": 5,
+            "paragraph": 10,
+            "rank": 5,
+            "chunk_id": "2bc729f0a437f2461dcd0120026cfb9e72cdeb0234a395da471546ac619858da",
+            "chars": [
+              0,
+              422
+            ]
+          },
+          {
+            "slot": 6,
+            "paragraph": 15,
+            "rank": 10,
+            "chunk_id": "b56caec58ec6c28625a50d8ac57c4bdfbee2ca06ba420ab168b7422b6d2363da",
+            "chars": [
+              0,
+              1200
+            ]
+          }
+        ]
+      },
+      "hops": [
+        {
+          "hop": 1,
+          "paragraph": 8,
+          "pool_ranks": [
+            1
+          ],
+          "baseline": {
+            "ranks": [
+              1
+            ],
+            "visible": true,
+            "full": true
+          },
+          "candidate": {
+            "ranks": [
+              1
+            ],
+            "visible": true,
+            "full": true
+          }
+        },
+        {
+          "hop": 2,
+          "paragraph": 0,
+          "pool_ranks": [
+            3
+          ],
+          "baseline": {
+            "ranks": [
+              3
+            ],
+            "visible": true,
+            "full": true
+          },
+          "candidate": {
+            "ranks": [
+              3
+            ],
+            "visible": true,
+            "full": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "2hop__287642_42734",
+      "pool": {
+        "visible": [
+          "2hop__287642_42734::paragraph::2",
+          "2hop__287642_42734::paragraph::6"
+        ],
+        "full": [
+          "2hop__287642_42734::paragraph::2",
+          "2hop__287642_42734::paragraph::6"
+        ]
+      },
+      "after_overlap": {
+        "visible": [
+          "2hop__287642_42734::paragraph::2",
+          "2hop__287642_42734::paragraph::6"
+        ],
+        "full": [
+          "2hop__287642_42734::paragraph::2",
+          "2hop__287642_42734::paragraph::6"
+        ]
+      },
+      "pool_count": 20,
+      "pool_id_score_sha256": "0eeda55ed16bb104d03399bb5d58981e44aaf5fe7ca1a81f5df46d6ea6d4e8b9",
+      "min_raw_chunks_for_all_gold": 2,
+      "min_retained_chunks_for_all_gold": 2,
+      "local_pack_ms": {
+        "baseline": 1.828,
+        "candidate": 132.977
+      },
+      "baseline": {
+        "visible": [
+          "2hop__287642_42734::paragraph::2",
+          "2hop__287642_42734::paragraph::6"
+        ],
+        "full": [
+          "2hop__287642_42734::paragraph::2",
+          "2hop__287642_42734::paragraph::6"
+        ],
+        "message_sha256": "10548892f85674cda88a3a8e08ed73b898716c7e47dc9f14fcd8b6dc892855e4",
+        "selected": [
+          {
+            "slot": 1,
+            "paragraph": 2,
+            "rank": 1,
+            "chunk_id": "25bd087bbf93ece4e7ae5e5c876a6d23b0830e49795d232ab774566cd40afb8f",
+            "chars": [
+              0,
+              181
+            ]
+          },
+          {
+            "slot": 2,
+            "paragraph": 11,
+            "rank": 2,
+            "chunk_id": "91afb4b1e706c6f8319af563504c018f02b82133e2fa5b89cc4ca4e32f496ac8",
+            "chars": [
+              0,
+              518
+            ]
+          },
+          {
+            "slot": 3,
+            "paragraph": 10,
+            "rank": 3,
+            "chunk_id": "9f78e3b472b6f0bee0fb61216690824e129ffbc97909a1bf071e1ecb40f1aa73",
+            "chars": [
+              0,
+              441
+            ]
+          },
+          {
+            "slot": 4,
+            "paragraph": 6,
+            "rank": 4,
+            "chunk_id": "d53c6b44853b0ed0b71ef72ac3b6edbdc0e3a1e15378a8f2afa495aab21879f0",
+            "chars": [
+              0,
+              437
+            ]
+          },
+          {
+            "slot": 5,
+            "paragraph": 19,
+            "rank": 5,
+            "chunk_id": "ceb9f3884653b22559aabcb5f31c2fb09d3afef52b2fee082b5a855c975b3725",
+            "chars": [
+              0,
+              1200
+            ]
+          },
+          {
+            "slot": 6,
+            "paragraph": 19,
+            "rank": 6,
+            "chunk_id": "5a475d6446ffd22fc9c744bb1d73ac77a129c041a57d20f2e860f25ff233d691",
+            "chars": [
+              1000,
+              1582
+            ]
+          }
+        ]
+      },
+      "candidate": {
+        "visible": [
+          "2hop__287642_42734::paragraph::2",
+          "2hop__287642_42734::paragraph::6"
+        ],
+        "full": [
+          "2hop__287642_42734::paragraph::2",
+          "2hop__287642_42734::paragraph::6"
+        ],
+        "message_sha256": "c6f2dc0fc540a34499ff9fd8a43b75fc5cf6261555c95040603d4711d2d64c16",
+        "selected": [
+          {
+            "slot": 1,
+            "paragraph": 2,
+            "rank": 1,
+            "chunk_id": "25bd087bbf93ece4e7ae5e5c876a6d23b0830e49795d232ab774566cd40afb8f",
+            "chars": [
+              0,
+              181
+            ]
+          },
+          {
+            "slot": 2,
+            "paragraph": 11,
+            "rank": 2,
+            "chunk_id": "91afb4b1e706c6f8319af563504c018f02b82133e2fa5b89cc4ca4e32f496ac8",
+            "chars": [
+              0,
+              518
+            ]
+          },
+          {
+            "slot": 3,
+            "paragraph": 10,
+            "rank": 3,
+            "chunk_id": "9f78e3b472b6f0bee0fb61216690824e129ffbc97909a1bf071e1ecb40f1aa73",
+            "chars": [
+              0,
+              441
+            ]
+          },
+          {
+            "slot": 4,
+            "paragraph": 6,
+            "rank": 4,
+            "chunk_id": "d53c6b44853b0ed0b71ef72ac3b6edbdc0e3a1e15378a8f2afa495aab21879f0",
+            "chars": [
+              0,
+              437
+            ]
+          },
+          {
+            "slot": 5,
+            "paragraph": 19,
+            "rank": 5,
+            "chunk_id": "ceb9f3884653b22559aabcb5f31c2fb09d3afef52b2fee082b5a855c975b3725",
+            "chars": [
+              0,
+              1200
+            ]
+          },
+          {
+            "slot": 6,
+            "paragraph": 5,
+            "rank": 7,
+            "chunk_id": "007c8636c3d227edef0d6ed27c8f89719c6d18d91af1ce8b4a8965ef7f37b861",
+            "chars": [
+              0,
+              374
+            ]
+          }
+        ]
+      },
+      "hops": [
+        {
+          "hop": 1,
+          "paragraph": 2,
+          "pool_ranks": [
+            1
+          ],
+          "baseline": {
+            "ranks": [
+              1
+            ],
+            "visible": true,
+            "full": true
+          },
+          "candidate": {
+            "ranks": [
+              1
+            ],
+            "visible": true,
+            "full": true
+          }
+        },
+        {
+          "hop": 2,
+          "paragraph": 6,
+          "pool_ranks": [
+            4
+          ],
+          "baseline": {
+            "ranks": [
+              4
+            ],
+            "visible": true,
+            "full": true
+          },
+          "candidate": {
+            "ranks": [
+              4
+            ],
+            "visible": true,
+            "full": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "2hop__16759_74989",
+      "pool": {
+        "visible": [
+          "2hop__16759_74989::paragraph::12",
+          "2hop__16759_74989::paragraph::14"
+        ],
+        "full": [
+          "2hop__16759_74989::paragraph::12",
+          "2hop__16759_74989::paragraph::14"
+        ]
+      },
+      "after_overlap": {
+        "visible": [
+          "2hop__16759_74989::paragraph::12",
+          "2hop__16759_74989::paragraph::14"
+        ],
+        "full": [
+          "2hop__16759_74989::paragraph::12",
+          "2hop__16759_74989::paragraph::14"
+        ]
+      },
+      "pool_count": 20,
+      "pool_id_score_sha256": "c826e79aa2c391252d3199ace4c725eb1d8bc484ae836bc0c00603234d0bf4c0",
+      "min_raw_chunks_for_all_gold": 2,
+      "min_retained_chunks_for_all_gold": 2,
+      "local_pack_ms": {
+        "baseline": 1.524,
+        "candidate": 136.247
+      },
+      "baseline": {
+        "visible": [
+          "2hop__16759_74989::paragraph::12",
+          "2hop__16759_74989::paragraph::14"
+        ],
+        "full": [
+          "2hop__16759_74989::paragraph::12",
+          "2hop__16759_74989::paragraph::14"
+        ],
+        "message_sha256": "fc1ac21ab13f2f3ca8037e8192fd658c6a06b734f6fef45c749d16c46640ea02",
+        "selected": [
+          {
+            "slot": 1,
+            "paragraph": 2,
+            "rank": 1,
+            "chunk_id": "135b753b76803048689e64ef478c9c4a4fa052ca512c651b437f6dac8fd4b8b9",
+            "chars": [
+              0,
+              326
+            ]
+          },
+          {
+            "slot": 2,
+            "paragraph": 6,
+            "rank": 2,
+            "chunk_id": "3933db83e7fb43e4a9efc771bf88bb593aa79f308fbd0fa00d205ca2d2ee547c",
+            "chars": [
+              0,
+              240
+            ]
+          },
+          {
+            "slot": 3,
+            "paragraph": 14,
+            "rank": 3,
+            "chunk_id": "a00c6ee3f4addfeeec19d5b6614052656889ab476b11c97ad7ea1682fee42c3b",
+            "chars": [
+              0,
+              695
+            ]
+          },
+          {
+            "slot": 4,
+            "paragraph": 12,
+            "rank": 4,
+            "chunk_id": "38adf3521ace48814426ff4a2d4c9242661754171785d5a3eb560bcb41e1f967",
+            "chars": [
+              0,
+              245
+            ]
+          },
+          {
+            "slot": 5,
+            "paragraph": 9,
+            "rank": 5,
+            "chunk_id": "6a16ac886e33f80ff5feefe56bb41151098ee7601f5accd2b6afbad6ae4e756a",
+            "chars": [
+              0,
+              871
+            ]
+          },
+          {
+            "slot": 6,
+            "paragraph": 19,
+            "rank": 6,
+            "chunk_id": "b58afe1d050bfdbd034a0c2585c226dd74e04c57b4f889318de0ff8c9e0990a4",
+            "chars": [
+              0,
+              934
+            ]
+          }
+        ]
+      },
+      "candidate": {
+        "visible": [
+          "2hop__16759_74989::paragraph::12",
+          "2hop__16759_74989::paragraph::14"
+        ],
+        "full": [
+          "2hop__16759_74989::paragraph::12",
+          "2hop__16759_74989::paragraph::14"
+        ],
+        "message_sha256": "f16fdbeb7eaf5150f14f196fc917c0b6f05e2d75ffa8f2bb54654df2d635b36f",
+        "selected": [
+          {
+            "slot": 1,
+            "paragraph": 2,
+            "rank": 1,
+            "chunk_id": "135b753b76803048689e64ef478c9c4a4fa052ca512c651b437f6dac8fd4b8b9",
+            "chars": [
+              0,
+              326
+            ]
+          },
+          {
+            "slot": 2,
+            "paragraph": 6,
+            "rank": 2,
+            "chunk_id": "3933db83e7fb43e4a9efc771bf88bb593aa79f308fbd0fa00d205ca2d2ee547c",
+            "chars": [
+              0,
+              240
+            ]
+          },
+          {
+            "slot": 3,
+            "paragraph": 14,
+            "rank": 3,
+            "chunk_id": "a00c6ee3f4addfeeec19d5b6614052656889ab476b11c97ad7ea1682fee42c3b",
+            "chars": [
+              0,
+              695
+            ]
+          },
+          {
+            "slot": 4,
+            "paragraph": 12,
+            "rank": 4,
+            "chunk_id": "38adf3521ace48814426ff4a2d4c9242661754171785d5a3eb560bcb41e1f967",
+            "chars": [
+              0,
+              245
+            ]
+          },
+          {
+            "slot": 5,
+            "paragraph": 9,
+            "rank": 5,
+            "chunk_id": "6a16ac886e33f80ff5feefe56bb41151098ee7601f5accd2b6afbad6ae4e756a",
+            "chars": [
+              0,
+              871
+            ]
+          },
+          {
+            "slot": 6,
+            "paragraph": 15,
+            "rank": 9,
+            "chunk_id": "f0d40fd3a18db12a5b71276ed851362c4ffe1b18af284130323e6248e451522d",
+            "chars": [
+              0,
+              1200
+            ]
+          }
+        ]
+      },
+      "hops": [
+        {
+          "hop": 1,
+          "paragraph": 14,
+          "pool_ranks": [
+            3
+          ],
+          "baseline": {
+            "ranks": [
+              3
+            ],
+            "visible": true,
+            "full": true
+          },
+          "candidate": {
+            "ranks": [
+              3
+            ],
+            "visible": true,
+            "full": true
+          }
+        },
+        {
+          "hop": 2,
+          "paragraph": 12,
+          "pool_ranks": [
+            4
+          ],
+          "baseline": {
+            "ranks": [
+              4
+            ],
+            "visible": true,
+            "full": true
+          },
+          "candidate": {
+            "ranks": [
+              4
+            ],
+            "visible": true,
+            "full": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "2hop__161005_489272",
+      "pool": {
+        "visible": [
+          "2hop__161005_489272::paragraph::14",
+          "2hop__161005_489272::paragraph::15"
+        ],
+        "full": [
+          "2hop__161005_489272::paragraph::14",
+          "2hop__161005_489272::paragraph::15"
+        ]
+      },
+      "after_overlap": {
+        "visible": [
+          "2hop__161005_489272::paragraph::14",
+          "2hop__161005_489272::paragraph::15"
+        ],
+        "full": [
+          "2hop__161005_489272::paragraph::14",
+          "2hop__161005_489272::paragraph::15"
+        ]
+      },
+      "pool_count": 20,
+      "pool_id_score_sha256": "2b41de3ea0278daccf2d25cb8bded4d3cff0e0ef398a306427416fc97a71234f",
+      "min_raw_chunks_for_all_gold": 3,
+      "min_retained_chunks_for_all_gold": 3,
+      "local_pack_ms": {
+        "baseline": 2.71,
+        "candidate": 139.519
+      },
+      "baseline": {
+        "visible": [
+          "2hop__161005_489272::paragraph::15"
+        ],
+        "full": [
+          "2hop__161005_489272::paragraph::15"
+        ],
+        "message_sha256": "7ce27678c8d71b0b4e7cde77a72910ca2281d296b5e47e80bd8b8a8217a71a56",
+        "selected": [
+          {
+            "slot": 1,
+            "paragraph": 13,
+            "rank": 1,
+            "chunk_id": "971531833fa17894af7d0a9cd26a14149903ceead12a4b6ddecb5e51f0d1e3f3",
+            "chars": [
+              0,
+              494
+            ]
+          },
+          {
+            "slot": 2,
+            "paragraph": 15,
+            "rank": 2,
+            "chunk_id": "da597722a9832bd44014e609b4e191b24fe1916ff04c19b03d9c648d42c7c82b",
+            "chars": [
+              0,
+              1200
+            ]
+          },
+          {
+            "slot": 3,
+            "paragraph": 7,
+            "rank": 3,
+            "chunk_id": "05c9215c8f5b12badf6ec7866ecde6b6977b90b3b403f7ededc2207a55e7bc36",
+            "chars": [
+              0,
+              1015
+            ]
+          },
+          {
+            "slot": 4,
+            "paragraph": 15,
+            "rank": 4,
+            "chunk_id": "b9b061f7f639d0dca827c440f24b13c0590e8ed7de8a3f3baa3095885b8a2106",
+            "chars": [
+              1000,
+              1523
+            ]
+          },
+          {
+            "slot": 5,
+            "paragraph": 2,
+            "rank": 5,
+            "chunk_id": "bc16b48e34f959fb7a1f0ee8517576f4802a3b60558376260d4bf93ae83dc4be",
+            "chars": [
+              1000,
+              1513
+            ]
+          },
+          {
+            "slot": 6,
+            "paragraph": 3,
+            "rank": 6,
+            "chunk_id": "40537bb3140f4090cd169014ac416f53e1135ce5cb5b0d5bd31317a4b9baa3cc",
+            "chars": [
+              0,
+              860
+            ]
+          }
+        ]
+      },
+      "candidate": {
+        "visible": [
+          "2hop__161005_489272::paragraph::15"
+        ],
+        "full": [
+          "2hop__161005_489272::paragraph::15"
+        ],
+        "message_sha256": "7ce27678c8d71b0b4e7cde77a72910ca2281d296b5e47e80bd8b8a8217a71a56",
+        "selected": [
+          {
+            "slot": 1,
+            "paragraph": 13,
+            "rank": 1,
+            "chunk_id": "971531833fa17894af7d0a9cd26a14149903ceead12a4b6ddecb5e51f0d1e3f3",
+            "chars": [
+              0,
+              494
+            ]
+          },
+          {
+            "slot": 2,
+            "paragraph": 15,
+            "rank": 2,
+            "chunk_id": "da597722a9832bd44014e609b4e191b24fe1916ff04c19b03d9c648d42c7c82b",
+            "chars": [
+              0,
+              1200
+            ]
+          },
+          {
+            "slot": 3,
+            "paragraph": 7,
+            "rank": 3,
+            "chunk_id": "05c9215c8f5b12badf6ec7866ecde6b6977b90b3b403f7ededc2207a55e7bc36",
+            "chars": [
+              0,
+              1015
+            ]
+          },
+          {
+            "slot": 4,
+            "paragraph": 15,
+            "rank": 4,
+            "chunk_id": "b9b061f7f639d0dca827c440f24b13c0590e8ed7de8a3f3baa3095885b8a2106",
+            "chars": [
+              1000,
+              1523
+            ]
+          },
+          {
+            "slot": 5,
+            "paragraph": 2,
+            "rank": 5,
+            "chunk_id": "bc16b48e34f959fb7a1f0ee8517576f4802a3b60558376260d4bf93ae83dc4be",
+            "chars": [
+              1000,
+              1513
+            ]
+          },
+          {
+            "slot": 6,
+            "paragraph": 3,
+            "rank": 6,
+            "chunk_id": "40537bb3140f4090cd169014ac416f53e1135ce5cb5b0d5bd31317a4b9baa3cc",
+            "chars": [
+              0,
+              860
+            ]
+          }
+        ]
+      },
+      "hops": [
+        {
+          "hop": 1,
+          "paragraph": 15,
+          "pool_ranks": [
+            2,
+            4
+          ],
+          "baseline": {
+            "ranks": [
+              2,
+              4
+            ],
+            "visible": true,
+            "full": true
+          },
+          "candidate": {
+            "ranks": [
+              2,
+              4
+            ],
+            "visible": true,
+            "full": true
+          }
+        },
+        {
+          "hop": 2,
+          "paragraph": 14,
+          "pool_ranks": [
+            16
+          ],
+          "baseline": {
+            "ranks": [],
+            "visible": false,
+            "full": false
+          },
+          "candidate": {
+            "ranks": [],
+            "visible": false,
+            "full": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "2hop__147059_31296",
+      "pool": {
+        "visible": [
+          "2hop__147059_31296::paragraph::0",
+          "2hop__147059_31296::paragraph::5"
+        ],
+        "full": [
+          "2hop__147059_31296::paragraph::0",
+          "2hop__147059_31296::paragraph::5"
+        ]
+      },
+      "after_overlap": {
+        "visible": [
+          "2hop__147059_31296::paragraph::0",
+          "2hop__147059_31296::paragraph::5"
+        ],
+        "full": [
+          "2hop__147059_31296::paragraph::0",
+          "2hop__147059_31296::paragraph::5"
+        ]
+      },
+      "pool_count": 20,
+      "pool_id_score_sha256": "24513e18c28df2631f1d98605d85375dad8254feef3fb6bd3ac2b55ebcccd858",
+      "min_raw_chunks_for_all_gold": 2,
+      "min_retained_chunks_for_all_gold": 2,
+      "local_pack_ms": {
+        "baseline": 3.396,
+        "candidate": 153.752
+      },
+      "baseline": {
+        "visible": [
+          "2hop__147059_31296::paragraph::0",
+          "2hop__147059_31296::paragraph::5"
+        ],
+        "full": [
+          "2hop__147059_31296::paragraph::0",
+          "2hop__147059_31296::paragraph::5"
+        ],
+        "message_sha256": "e62bf57a3e37810cec64570146e6fd17ebe5f5de3cd1ff0a4b4ef1ffb85bc70b",
+        "selected": [
+          {
+            "slot": 1,
+            "paragraph": 0,
+            "rank": 1,
+            "chunk_id": "0a240d5cbd669113639abb09c48426f2b202b667ab7bf89136e25127aca798f6",
+            "chars": [
+              0,
+              626
+            ]
+          },
+          {
+            "slot": 2,
+            "paragraph": 18,
+            "rank": 2,
+            "chunk_id": "7e6ea2f205de2865ee36b9096b9401b13d5c7f346473f4e1c7f3937c74a7f6fd",
+            "chars": [
+              0,
+              627
+            ]
+          },
+          {
+            "slot": 3,
+            "paragraph": 5,
+            "rank": 3,
+            "chunk_id": "6849f64892832332769f50fafedc8e8901bfcf3d8331526e815be9d8112f3fe0",
+            "chars": [
+              0,
+              728
+            ]
+          },
+          {
+            "slot": 4,
+            "paragraph": 16,
+            "rank": 4,
+            "chunk_id": "f44b6c70c4a56bdc1ebe641ca7085986841b5cc223fac637845f8e83e53a76c9",
+            "chars": [
+              0,
+              1200
+            ]
+          },
+          {
+            "slot": 5,
+            "paragraph": 3,
+            "rank": 5,
+            "chunk_id": "091891b59f3db5502b2bc7ef5013065f7b169585d0fcc73199f791f8a4062bba",
+            "chars": [
+              0,
+              919
+            ]
+          },
+          {
+            "slot": 6,
+            "paragraph": 2,
+            "rank": 6,
+            "chunk_id": "c00a1ed37ca9cff833989655f7b60c4343dc283cf1872debe3e249af2224b647",
+            "chars": [
+              0,
+              1200
+            ]
+          }
+        ]
+      },
+      "candidate": {
+        "visible": [
+          "2hop__147059_31296::paragraph::0",
+          "2hop__147059_31296::paragraph::5"
+        ],
+        "full": [
+          "2hop__147059_31296::paragraph::0",
+          "2hop__147059_31296::paragraph::5"
+        ],
+        "message_sha256": "e62bf57a3e37810cec64570146e6fd17ebe5f5de3cd1ff0a4b4ef1ffb85bc70b",
+        "selected": [
+          {
+            "slot": 1,
+            "paragraph": 0,
+            "rank": 1,
+            "chunk_id": "0a240d5cbd669113639abb09c48426f2b202b667ab7bf89136e25127aca798f6",
+            "chars": [
+              0,
+              626
+            ]
+          },
+          {
+            "slot": 2,
+            "paragraph": 18,
+            "rank": 2,
+            "chunk_id": "7e6ea2f205de2865ee36b9096b9401b13d5c7f346473f4e1c7f3937c74a7f6fd",
+            "chars": [
+              0,
+              627
+            ]
+          },
+          {
+            "slot": 3,
+            "paragraph": 5,
+            "rank": 3,
+            "chunk_id": "6849f64892832332769f50fafedc8e8901bfcf3d8331526e815be9d8112f3fe0",
+            "chars": [
+              0,
+              728
+            ]
+          },
+          {
+            "slot": 4,
+            "paragraph": 16,
+            "rank": 4,
+            "chunk_id": "f44b6c70c4a56bdc1ebe641ca7085986841b5cc223fac637845f8e83e53a76c9",
+            "chars": [
+              0,
+              1200
+            ]
+          },
+          {
+            "slot": 5,
+            "paragraph": 3,
+            "rank": 5,
+            "chunk_id": "091891b59f3db5502b2bc7ef5013065f7b169585d0fcc73199f791f8a4062bba",
+            "chars": [
+              0,
+              919
+            ]
+          },
+          {
+            "slot": 6,
+            "paragraph": 2,
+            "rank": 6,
+            "chunk_id": "c00a1ed37ca9cff833989655f7b60c4343dc283cf1872debe3e249af2224b647",
+            "chars": [
+              0,
+              1200
+            ]
+          }
+        ]
+      },
+      "hops": [
+        {
+          "hop": 1,
+          "paragraph": 0,
+          "pool_ranks": [
+            1
+          ],
+          "baseline": {
+            "ranks": [
+              1
+            ],
+            "visible": true,
+            "full": true
+          },
+          "candidate": {
+            "ranks": [
+              1
+            ],
+            "visible": true,
+            "full": true
+          }
+        },
+        {
+          "hop": 2,
+          "paragraph": 5,
+          "pool_ranks": [
+            3
+          ],
+          "baseline": {
+            "ranks": [
+              3
+            ],
+            "visible": true,
+            "full": true
+          },
+          "candidate": {
+            "ranks": [
+              3
+            ],
+            "visible": true,
+            "full": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "2hop__131509_29360",
+      "pool": {
+        "visible": [
+          "2hop__131509_29360::paragraph::18",
+          "2hop__131509_29360::paragraph::9"
+        ],
+        "full": [
+          "2hop__131509_29360::paragraph::18",
+          "2hop__131509_29360::paragraph::9"
+        ]
+      },
+      "after_overlap": {
+        "visible": [
+          "2hop__131509_29360::paragraph::18",
+          "2hop__131509_29360::paragraph::9"
+        ],
+        "full": [
+          "2hop__131509_29360::paragraph::18",
+          "2hop__131509_29360::paragraph::9"
+        ]
+      },
+      "pool_count": 20,
+      "pool_id_score_sha256": "ceaae3c12ec11e6726966a7dbbb64820f5035abe43cf3e10bddedcfe8090181c",
+      "min_raw_chunks_for_all_gold": 2,
+      "min_retained_chunks_for_all_gold": 2,
+      "local_pack_ms": {
+        "baseline": 2.554,
+        "candidate": 139.465
+      },
+      "baseline": {
+        "visible": [
+          "2hop__131509_29360::paragraph::18",
+          "2hop__131509_29360::paragraph::9"
+        ],
+        "full": [
+          "2hop__131509_29360::paragraph::18",
+          "2hop__131509_29360::paragraph::9"
+        ],
+        "message_sha256": "ce76a9e83411eeffe106a22d800a3b5120ef4720beb6b536b93924b6a05ce78a",
+        "selected": [
+          {
+            "slot": 1,
+            "paragraph": 9,
+            "rank": 1,
+            "chunk_id": "4d9cc43bc1eb9f68f86ffb648c638bfc451df95bbec5edfd9c9e401c47ac41ab",
+            "chars": [
+              0,
+              562
+            ]
+          },
+          {
+            "slot": 2,
+            "paragraph": 6,
+            "rank": 2,
+            "chunk_id": "6a37a197419aed421d61ccaa423a24c04af5a3f2eccbb4d4c4fdf089c1080de2",
+            "chars": [
+              0,
+              903
+            ]
+          },
+          {
+            "slot": 3,
+            "paragraph": 18,
+            "rank": 3,
+            "chunk_id": "dc4a4e7c1b6c5865a38583c8803185fc77ca64dee50c22ec151cecb65ce6689c",
+            "chars": [
+              0,
+              953
+            ]
+          },
+          {
+            "slot": 4,
+            "paragraph": 16,
+            "rank": 4,
+            "chunk_id": "06b49090e1e03d12bd3ff9115620cec21d9d9aa8f4ac52219589159bfb90336e",
+            "chars": [
+              0,
+              265
+            ]
+          },
+          {
+            "slot": 5,
+            "paragraph": 15,
+            "rank": 5,
+            "chunk_id": "1ba0540b00f0e500427645890fe2fc724e4311b89e865d429c3668f8cbc2e457",
+            "chars": [
+              0,
+              156
+            ]
+          },
+          {
+            "slot": 6,
+            "paragraph": 19,
+            "rank": 6,
+            "chunk_id": "58d9738f74ce6086be3d0b98015eb164c8dc9379bc515fe3dccc2252dca37653",
+            "chars": [
+              0,
+              1200
+            ]
+          }
+        ]
+      },
+      "candidate": {
+        "visible": [
+          "2hop__131509_29360::paragraph::18",
+          "2hop__131509_29360::paragraph::9"
+        ],
+        "full": [
+          "2hop__131509_29360::paragraph::18",
+          "2hop__131509_29360::paragraph::9"
+        ],
+        "message_sha256": "ce76a9e83411eeffe106a22d800a3b5120ef4720beb6b536b93924b6a05ce78a",
+        "selected": [
+          {
+            "slot": 1,
+            "paragraph": 9,
+            "rank": 1,
+            "chunk_id": "4d9cc43bc1eb9f68f86ffb648c638bfc451df95bbec5edfd9c9e401c47ac41ab",
+            "chars": [
+              0,
+              562
+            ]
+          },
+          {
+            "slot": 2,
+            "paragraph": 6,
+            "rank": 2,
+            "chunk_id": "6a37a197419aed421d61ccaa423a24c04af5a3f2eccbb4d4c4fdf089c1080de2",
+            "chars": [
+              0,
+              903
+            ]
+          },
+          {
+            "slot": 3,
+            "paragraph": 18,
+            "rank": 3,
+            "chunk_id": "dc4a4e7c1b6c5865a38583c8803185fc77ca64dee50c22ec151cecb65ce6689c",
+            "chars": [
+              0,
+              953
+            ]
+          },
+          {
+            "slot": 4,
+            "paragraph": 16,
+            "rank": 4,
+            "chunk_id": "06b49090e1e03d12bd3ff9115620cec21d9d9aa8f4ac52219589159bfb90336e",
+            "chars": [
+              0,
+              265
+            ]
+          },
+          {
+            "slot": 5,
+            "paragraph": 15,
+            "rank": 5,
+            "chunk_id": "1ba0540b00f0e500427645890fe2fc724e4311b89e865d429c3668f8cbc2e457",
+            "chars": [
+              0,
+              156
+            ]
+          },
+          {
+            "slot": 6,
+            "paragraph": 19,
+            "rank": 6,
+            "chunk_id": "58d9738f74ce6086be3d0b98015eb164c8dc9379bc515fe3dccc2252dca37653",
+            "chars": [
+              0,
+              1200
+            ]
+          }
+        ]
+      },
+      "hops": [
+        {
+          "hop": 1,
+          "paragraph": 9,
+          "pool_ranks": [
+            1
+          ],
+          "baseline": {
+            "ranks": [
+              1
+            ],
+            "visible": true,
+            "full": true
+          },
+          "candidate": {
+            "ranks": [
+              1
+            ],
+            "visible": true,
+            "full": true
+          }
+        },
+        {
+          "hop": 2,
+          "paragraph": 18,
+          "pool_ranks": [
+            3
+          ],
+          "baseline": {
+            "ranks": [
+              3
+            ],
+            "visible": true,
+            "full": true
+          },
+          "candidate": {
+            "ranks": [
+              3
+            ],
+            "visible": true,
+            "full": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "2hop__661591_13701",
+      "pool": {
+        "visible": [
+          "2hop__661591_13701::paragraph::18",
+          "2hop__661591_13701::paragraph::2"
+        ],
+        "full": [
+          "2hop__661591_13701::paragraph::18",
+          "2hop__661591_13701::paragraph::2"
+        ]
+      },
+      "after_overlap": {
+        "visible": [
+          "2hop__661591_13701::paragraph::18",
+          "2hop__661591_13701::paragraph::2"
+        ],
+        "full": [
+          "2hop__661591_13701::paragraph::18",
+          "2hop__661591_13701::paragraph::2"
+        ]
+      },
+      "pool_count": 20,
+      "pool_id_score_sha256": "b2dd45e4d227d5ff8997a33f7fe9d9f34a6d702551eb48a3bc024ae31e69d22e",
+      "min_raw_chunks_for_all_gold": 2,
+      "min_retained_chunks_for_all_gold": 2,
+      "local_pack_ms": {
+        "baseline": 3.165,
+        "candidate": 130.144
+      },
+      "baseline": {
+        "visible": [
+          "2hop__661591_13701::paragraph::18",
+          "2hop__661591_13701::paragraph::2"
+        ],
+        "full": [
+          "2hop__661591_13701::paragraph::18",
+          "2hop__661591_13701::paragraph::2"
+        ],
+        "message_sha256": "8da1436000fa0c5a249c57ab20f26441b45c3262a8974f14ffba1824c16fd0a2",
+        "selected": [
+          {
+            "slot": 1,
+            "paragraph": 18,
+            "rank": 1,
+            "chunk_id": "5c740388ca122ab26f79df2d5534183cd4751d89ec87070bdf81d4008c0d32cd",
+            "chars": [
+              0,
+              515
+            ]
+          },
+          {
+            "slot": 2,
+            "paragraph": 2,
+            "rank": 2,
+            "chunk_id": "a944e0a092c81cf41bb1517ccb3a557d1bb0782b76259c2d2518d1b4f0dd992e",
+            "chars": [
+              0,
+              468
+            ]
+          },
+          {
+            "slot": 3,
+            "paragraph": 15,
+            "rank": 3,
+            "chunk_id": "799170a218695606dfedfd49d21f920ed6637e1df43f229a579867a0389eb5d9",
+            "chars": [
+              0,
+              1200
+            ]
+          },
+          {
+            "slot": 4,
+            "paragraph": 4,
+            "rank": 4,
+            "chunk_id": "d529ce86df00aaf3c369028b18c86064aa8196e712fd574fff9f68ef9ccb4735",
+            "chars": [
+              0,
+              450
+            ]
+          },
+          {
+            "slot": 5,
+            "paragraph": 13,
+            "rank": 5,
+            "chunk_id": "2d2603ef3dc990926254e6ffe9ac77e1a014ba2cc407bbdb3c004eac9fb63b37",
+            "chars": [
+              0,
+              1200
+            ]
+          },
+          {
+            "slot": 6,
+            "paragraph": 12,
+            "rank": 6,
+            "chunk_id": "8308e7f5ff5f4e07312487a9eb73f09b51e6cd6111d329f6a30023f969a5093a",
+            "chars": [
+              0,
+              192
+            ]
+          }
+        ]
+      },
+      "candidate": {
+        "visible": [
+          "2hop__661591_13701::paragraph::18",
+          "2hop__661591_13701::paragraph::2"
+        ],
+        "full": [
+          "2hop__661591_13701::paragraph::18",
+          "2hop__661591_13701::paragraph::2"
+        ],
+        "message_sha256": "628c47bedff87a258e78109825efc1c681eaaf6199b94717543ab2c0bda0e633",
+        "selected": [
+          {
+            "slot": 1,
+            "paragraph": 18,
+            "rank": 1,
+            "chunk_id": "5c740388ca122ab26f79df2d5534183cd4751d89ec87070bdf81d4008c0d32cd",
+            "chars": [
+              0,
+              515
+            ]
+          },
+          {
+            "slot": 2,
+            "paragraph": 2,
+            "rank": 2,
+            "chunk_id": "a944e0a092c81cf41bb1517ccb3a557d1bb0782b76259c2d2518d1b4f0dd992e",
+            "chars": [
+              0,
+              468
+            ]
+          },
+          {
+            "slot": 3,
+            "paragraph": 15,
+            "rank": 3,
+            "chunk_id": "799170a218695606dfedfd49d21f920ed6637e1df43f229a579867a0389eb5d9",
+            "chars": [
+              0,
+              1200
+            ]
+          },
+          {
+            "slot": 4,
+            "paragraph": 4,
+            "rank": 4,
+            "chunk_id": "d529ce86df00aaf3c369028b18c86064aa8196e712fd574fff9f68ef9ccb4735",
+            "chars": [
+              0,
+              450
+            ]
+          },
+          {
+            "slot": 5,
+            "paragraph": 12,
+            "rank": 6,
+            "chunk_id": "8308e7f5ff5f4e07312487a9eb73f09b51e6cd6111d329f6a30023f969a5093a",
+            "chars": [
+              0,
+              192
+            ]
+          },
+          {
+            "slot": 6,
+            "paragraph": 11,
+            "rank": 7,
+            "chunk_id": "c1313aa5389ca8af03f9121654a8a3a7e733b65421d23abffa0a0d9b21be6bc9",
+            "chars": [
+              0,
+              803
+            ]
+          }
+        ]
+      },
+      "hops": [
+        {
+          "hop": 1,
+          "paragraph": 2,
+          "pool_ranks": [
+            2
+          ],
+          "baseline": {
+            "ranks": [
+              2
+            ],
+            "visible": true,
+            "full": true
+          },
+          "candidate": {
+            "ranks": [
+              2
+            ],
+            "visible": true,
+            "full": true
+          }
+        },
+        {
+          "hop": 2,
+          "paragraph": 18,
+          "pool_ranks": [
+            1
+          ],
+          "baseline": {
+            "ranks": [
+              1
+            ],
+            "visible": true,
+            "full": true
+          },
+          "candidate": {
+            "ranks": [
+              1
+            ],
+            "visible": true,
+            "full": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "2hop__54013_93263",
+      "pool": {
+        "visible": [
+          "2hop__54013_93263::paragraph::14",
+          "2hop__54013_93263::paragraph::15"
+        ],
+        "full": [
+          "2hop__54013_93263::paragraph::14",
+          "2hop__54013_93263::paragraph::15"
+        ]
+      },
+      "after_overlap": {
+        "visible": [
+          "2hop__54013_93263::paragraph::14",
+          "2hop__54013_93263::paragraph::15"
+        ],
+        "full": [
+          "2hop__54013_93263::paragraph::14",
+          "2hop__54013_93263::paragraph::15"
+        ]
+      },
+      "pool_count": 20,
+      "pool_id_score_sha256": "da87a78aa6aedfed125d31252c843b083b9803baf4c29027c7f052e0b92332b2",
+      "min_raw_chunks_for_all_gold": 2,
+      "min_retained_chunks_for_all_gold": 2,
+      "local_pack_ms": {
+        "baseline": 3.427,
+        "candidate": 132.091
+      },
+      "baseline": {
+        "visible": [
+          "2hop__54013_93263::paragraph::14",
+          "2hop__54013_93263::paragraph::15"
+        ],
+        "full": [
+          "2hop__54013_93263::paragraph::14",
+          "2hop__54013_93263::paragraph::15"
+        ],
+        "message_sha256": "04d905bd69291d8169acf6cc224a66741365447b87389d96d4c918418d89aace",
+        "selected": [
+          {
+            "slot": 1,
+            "paragraph": 2,
+            "rank": 1,
+            "chunk_id": "df2d952bfa54460193eb619038b33fc4c3e036765f565d18246bc14a25a1e05b",
+            "chars": [
+              0,
+              817
+            ]
+          },
+          {
+            "slot": 2,
+            "paragraph": 5,
+            "rank": 2,
+            "chunk_id": "0e4f17e29c698a0c5ebb3e85bd4b04d0d558f0727275462752ac70f7d8ceffe2",
+            "chars": [
+              1000,
+              1663
+            ]
+          },
+          {
+            "slot": 3,
+            "paragraph": 14,
+            "rank": 3,
+            "chunk_id": "dbd92cdc2b366262ee8cb7f1147eef98121471931f0dca5961dceee89f5b3ba8",
+            "chars": [
+              0,
+              837
+            ]
+          },
+          {
+            "slot": 4,
+            "paragraph": 10,
+            "rank": 4,
+            "chunk_id": "60d8595187ddb3046dce23a48a134d65316b1c7f13102bf0e1b338d880948173",
+            "chars": [
+              0,
+              629
+            ]
+          },
+          {
+            "slot": 5,
+            "paragraph": 5,
+            "rank": 5,
+            "chunk_id": "12fa05b00837a09c13aa1872440ed4d8afc201c20501c9772fcb6a87ee37308a",
+            "chars": [
+              0,
+              1200
+            ]
+          },
+          {
+            "slot": 6,
+            "paragraph": 15,
+            "rank": 6,
+            "chunk_id": "1e54d560e070956f2810db5bc8ed97c07083a7b0769609db531643a69c9e7b58",
+            "chars": [
+              0,
+              1106
+            ]
+          }
+        ]
+      },
+      "candidate": {
+        "visible": [
+          "2hop__54013_93263::paragraph::14",
+          "2hop__54013_93263::paragraph::15"
+        ],
+        "full": [
+          "2hop__54013_93263::paragraph::14",
+          "2hop__54013_93263::paragraph::15"
+        ],
+        "message_sha256": "04d905bd69291d8169acf6cc224a66741365447b87389d96d4c918418d89aace",
+        "selected": [
+          {
+            "slot": 1,
+            "paragraph": 2,
+            "rank": 1,
+            "chunk_id": "df2d952bfa54460193eb619038b33fc4c3e036765f565d18246bc14a25a1e05b",
+            "chars": [
+              0,
+              817
+            ]
+          },
+          {
+            "slot": 2,
+            "paragraph": 5,
+            "rank": 2,
+            "chunk_id": "0e4f17e29c698a0c5ebb3e85bd4b04d0d558f0727275462752ac70f7d8ceffe2",
+            "chars": [
+              1000,
+              1663
+            ]
+          },
+          {
+            "slot": 3,
+            "paragraph": 14,
+            "rank": 3,
+            "chunk_id": "dbd92cdc2b366262ee8cb7f1147eef98121471931f0dca5961dceee89f5b3ba8",
+            "chars": [
+              0,
+              837
+            ]
+          },
+          {
+            "slot": 4,
+            "paragraph": 10,
+            "rank": 4,
+            "chunk_id": "60d8595187ddb3046dce23a48a134d65316b1c7f13102bf0e1b338d880948173",
+            "chars": [
+              0,
+              629
+            ]
+          },
+          {
+            "slot": 5,
+            "paragraph": 5,
+            "rank": 5,
+            "chunk_id": "12fa05b00837a09c13aa1872440ed4d8afc201c20501c9772fcb6a87ee37308a",
+            "chars": [
+              0,
+              1200
+            ]
+          },
+          {
+            "slot": 6,
+            "paragraph": 15,
+            "rank": 6,
+            "chunk_id": "1e54d560e070956f2810db5bc8ed97c07083a7b0769609db531643a69c9e7b58",
+            "chars": [
+              0,
+              1106
+            ]
+          }
+        ]
+      },
+      "hops": [
+        {
+          "hop": 1,
+          "paragraph": 14,
+          "pool_ranks": [
+            3
+          ],
+          "baseline": {
+            "ranks": [
+              3
+            ],
+            "visible": true,
+            "full": true
+          },
+          "candidate": {
+            "ranks": [
+              3
+            ],
+            "visible": true,
+            "full": true
+          }
+        },
+        {
+          "hop": 2,
+          "paragraph": 15,
+          "pool_ranks": [
+            6
+          ],
+          "baseline": {
+            "ranks": [
+              6
+            ],
+            "visible": true,
+            "full": true
+          },
+          "candidate": {
+            "ranks": [
+              6
+            ],
+            "visible": true,
+            "full": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "2hop__3826_78497",
+      "pool": {
+        "visible": [
+          "2hop__3826_78497::paragraph::0",
+          "2hop__3826_78497::paragraph::18"
+        ],
+        "full": [
+          "2hop__3826_78497::paragraph::18"
+        ]
+      },
+      "after_overlap": {
+        "visible": [
+          "2hop__3826_78497::paragraph::0",
+          "2hop__3826_78497::paragraph::18"
+        ],
+        "full": [
+          "2hop__3826_78497::paragraph::18"
+        ]
+      },
+      "pool_count": 20,
+      "pool_id_score_sha256": "3cf80208a54e8a6d07494e35e29bf90f58057cd04e331cac705f0609ece143c9",
+      "min_raw_chunks_for_all_gold": null,
+      "min_retained_chunks_for_all_gold": null,
+      "local_pack_ms": {
+        "baseline": 3.065,
+        "candidate": 122.851
+      },
+      "baseline": {
+        "visible": [
+          "2hop__3826_78497::paragraph::0",
+          "2hop__3826_78497::paragraph::18"
+        ],
+        "full": [
+          "2hop__3826_78497::paragraph::18"
+        ],
+        "message_sha256": "593d86886d36a22dfa725cb6e7f5f4861f86dca89d6bbf962ca747e207deb601",
+        "selected": [
+          {
+            "slot": 1,
+            "paragraph": 18,
+            "rank": 1,
+            "chunk_id": "6c679589d6fdcb8b87f9b13792d472400a5fe75104a3c09e4617469da620c3db",
+            "chars": [
+              0,
+              884
+            ]
+          },
+          {
+            "slot": 2,
+            "paragraph": 0,
+            "rank": 2,
+            "chunk_id": "4783b53e6945d4f7286947ab40026817572f5381906b3501e0cd02a87f9c3c39",
+            "chars": [
+              0,
+              1200
+            ]
+          },
+          {
+            "slot": 3,
+            "paragraph": 4,
+            "rank": 3,
+            "chunk_id": "2bd88656191676ac69e4fcefe2d9a6d5ebfd7f93a04bedefc6f79a1f7094c0d2",
+            "chars": [
+              0,
+              1012
+            ]
+          },
+          {
+            "slot": 4,
+            "paragraph": 7,
+            "rank": 4,
+            "chunk_id": "054a3b41fc2facbb7de760e8bec47bcc41e8aad3def325a412454c0c1ad2aa9c",
+            "chars": [
+              0,
+              564
+            ]
+          },
+          {
+            "slot": 5,
+            "paragraph": 10,
+            "rank": 5,
+            "chunk_id": "fd26e27ed940de8cd60b4dbca1ca0447f3c459be7c1b8da41218e6bf230d2d7b",
+            "chars": [
+              0,
+              650
+            ]
+          },
+          {
+            "slot": 6,
+            "paragraph": 15,
+            "rank": 6,
+            "chunk_id": "a17568bc02ca1dceeb1ca3564e15d3b43fe7605229130a8fc1e34d631bb01172",
+            "chars": [
+              0,
+              414
+            ]
+          }
+        ]
+      },
+      "candidate": {
+        "visible": [
+          "2hop__3826_78497::paragraph::0",
+          "2hop__3826_78497::paragraph::18"
+        ],
+        "full": [
+          "2hop__3826_78497::paragraph::18"
+        ],
+        "message_sha256": "593d86886d36a22dfa725cb6e7f5f4861f86dca89d6bbf962ca747e207deb601",
+        "selected": [
+          {
+            "slot": 1,
+            "paragraph": 18,
+            "rank": 1,
+            "chunk_id": "6c679589d6fdcb8b87f9b13792d472400a5fe75104a3c09e4617469da620c3db",
+            "chars": [
+              0,
+              884
+            ]
+          },
+          {
+            "slot": 2,
+            "paragraph": 0,
+            "rank": 2,
+            "chunk_id": "4783b53e6945d4f7286947ab40026817572f5381906b3501e0cd02a87f9c3c39",
+            "chars": [
+              0,
+              1200
+            ]
+          },
+          {
+            "slot": 3,
+            "paragraph": 4,
+            "rank": 3,
+            "chunk_id": "2bd88656191676ac69e4fcefe2d9a6d5ebfd7f93a04bedefc6f79a1f7094c0d2",
+            "chars": [
+              0,
+              1012
+            ]
+          },
+          {
+            "slot": 4,
+            "paragraph": 7,
+            "rank": 4,
+            "chunk_id": "054a3b41fc2facbb7de760e8bec47bcc41e8aad3def325a412454c0c1ad2aa9c",
+            "chars": [
+              0,
+              564
+            ]
+          },
+          {
+            "slot": 5,
+            "paragraph": 10,
+            "rank": 5,
+            "chunk_id": "fd26e27ed940de8cd60b4dbca1ca0447f3c459be7c1b8da41218e6bf230d2d7b",
+            "chars": [
+              0,
+              650
+            ]
+          },
+          {
+            "slot": 6,
+            "paragraph": 15,
+            "rank": 6,
+            "chunk_id": "a17568bc02ca1dceeb1ca3564e15d3b43fe7605229130a8fc1e34d631bb01172",
+            "chars": [
+              0,
+              414
+            ]
+          }
+        ]
+      },
+      "hops": [
+        {
+          "hop": 1,
+          "paragraph": 18,
+          "pool_ranks": [
+            1
+          ],
+          "baseline": {
+            "ranks": [
+              1
+            ],
+            "visible": true,
+            "full": true
+          },
+          "candidate": {
+            "ranks": [
+              1
+            ],
+            "visible": true,
+            "full": true
+          }
+        },
+        {
+          "hop": 2,
+          "paragraph": 0,
+          "pool_ranks": [
+            2
+          ],
+          "baseline": {
+            "ranks": [
+              2
+            ],
+            "visible": true,
+            "full": false
+          },
+          "candidate": {
+            "ranks": [
+              2
+            ],
+            "visible": true,
+            "full": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "2hop__224187_88123",
+      "pool": {
+        "visible": [
+          "2hop__224187_88123::paragraph::17",
+          "2hop__224187_88123::paragraph::3"
+        ],
+        "full": [
+          "2hop__224187_88123::paragraph::17",
+          "2hop__224187_88123::paragraph::3"
+        ]
+      },
+      "after_overlap": {
+        "visible": [
+          "2hop__224187_88123::paragraph::17",
+          "2hop__224187_88123::paragraph::3"
+        ],
+        "full": [
+          "2hop__224187_88123::paragraph::17",
+          "2hop__224187_88123::paragraph::3"
+        ]
+      },
+      "pool_count": 20,
+      "pool_id_score_sha256": "50d22b66f45aa6889d1a8cef5b4cf5cdda899fb73bfa056717940d271b3fd1b5",
+      "min_raw_chunks_for_all_gold": 2,
+      "min_retained_chunks_for_all_gold": 2,
+      "local_pack_ms": {
+        "baseline": 2.733,
+        "candidate": 136.057
+      },
+      "baseline": {
+        "visible": [
+          "2hop__224187_88123::paragraph::17",
+          "2hop__224187_88123::paragraph::3"
+        ],
+        "full": [
+          "2hop__224187_88123::paragraph::17",
+          "2hop__224187_88123::paragraph::3"
+        ],
+        "message_sha256": "e4be1ae7fe00916f9a96049714216276022b86a6ece475b3781bf2e1d5fbfe83",
+        "selected": [
+          {
+            "slot": 1,
+            "paragraph": 17,
+            "rank": 1,
+            "chunk_id": "340ab3d205f2a82be77e8fd210038266522b7c5d1bc19218bdee96c88720a00d",
+            "chars": [
+              0,
+              254
+            ]
+          },
+          {
+            "slot": 2,
+            "paragraph": 9,
+            "rank": 2,
+            "chunk_id": "9d16b140dafc3acf4a42d3d7c8a0b3c6d5051f87590e80f5ea66f439d5333282",
+            "chars": [
+              0,
+              425
+            ]
+          },
+          {
+            "slot": 3,
+            "paragraph": 3,
+            "rank": 3,
+            "chunk_id": "068cc8426dd575d5b8b93ee5dda514e60a13719376ed6cb9223747155561384d",
+            "chars": [
+              0,
+              433
+            ]
+          },
+          {
+            "slot": 4,
+            "paragraph": 15,
+            "rank": 4,
+            "chunk_id": "4b8a7a31be342cc71bafcdfc99b73253c65950a8ea226e8672b456e733e9f3f5",
+            "chars": [
+              0,
+              572
+            ]
+          },
+          {
+            "slot": 5,
+            "paragraph": 16,
+            "rank": 5,
+            "chunk_id": "451cda76b07978fc6a746fb36ef360780ff58f24b2ac0bd3eacb1062ac95305a",
+            "chars": [
+              1000,
+              1292
+            ]
+          },
+          {
+            "slot": 6,
+            "paragraph": 16,
+            "rank": 6,
+            "chunk_id": "529adb7db28bdd9a253fba50a7c5b8c378e6c0299f8e1aabdb7ab4051c3ab6d3",
+            "chars": [
+              0,
+              1200
+            ]
+          }
+        ]
+      },
+      "candidate": {
+        "visible": [
+          "2hop__224187_88123::paragraph::17",
+          "2hop__224187_88123::paragraph::3"
+        ],
+        "full": [
+          "2hop__224187_88123::paragraph::17",
+          "2hop__224187_88123::paragraph::3"
+        ],
+        "message_sha256": "633a31672434def326102f51bbdd69a02e502ae06ca8a9178cb6308bb755f683",
+        "selected": [
+          {
+            "slot": 1,
+            "paragraph": 17,
+            "rank": 1,
+            "chunk_id": "340ab3d205f2a82be77e8fd210038266522b7c5d1bc19218bdee96c88720a00d",
+            "chars": [
+              0,
+              254
+            ]
+          },
+          {
+            "slot": 2,
+            "paragraph": 9,
+            "rank": 2,
+            "chunk_id": "9d16b140dafc3acf4a42d3d7c8a0b3c6d5051f87590e80f5ea66f439d5333282",
+            "chars": [
+              0,
+              425
+            ]
+          },
+          {
+            "slot": 3,
+            "paragraph": 3,
+            "rank": 3,
+            "chunk_id": "068cc8426dd575d5b8b93ee5dda514e60a13719376ed6cb9223747155561384d",
+            "chars": [
+              0,
+              433
+            ]
+          },
+          {
+            "slot": 4,
+            "paragraph": 15,
+            "rank": 4,
+            "chunk_id": "4b8a7a31be342cc71bafcdfc99b73253c65950a8ea226e8672b456e733e9f3f5",
+            "chars": [
+              0,
+              572
+            ]
+          },
+          {
+            "slot": 5,
+            "paragraph": 16,
+            "rank": 5,
+            "chunk_id": "451cda76b07978fc6a746fb36ef360780ff58f24b2ac0bd3eacb1062ac95305a",
+            "chars": [
+              1000,
+              1292
+            ]
+          },
+          {
+            "slot": 6,
+            "paragraph": 14,
+            "rank": 9,
+            "chunk_id": "94d151d7efd20d0bd87efcccd49f521adcd4faa4c8bdb85404e416fb293062f2",
+            "chars": [
+              0,
+              261
+            ]
+          }
+        ]
+      },
+      "hops": [
+        {
+          "hop": 1,
+          "paragraph": 17,
+          "pool_ranks": [
+            1
+          ],
+          "baseline": {
+            "ranks": [
+              1
+            ],
+            "visible": true,
+            "full": true
+          },
+          "candidate": {
+            "ranks": [
+              1
+            ],
+            "visible": true,
+            "full": true
+          }
+        },
+        {
+          "hop": 2,
+          "paragraph": 3,
+          "pool_ranks": [
+            3
+          ],
+          "baseline": {
+            "ranks": [
+              3
+            ],
+            "visible": true,
+            "full": true
+          },
+          "candidate": {
+            "ranks": [
+              3
+            ],
+            "visible": true,
+            "full": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "2hop__136390_48224",
+      "pool": {
+        "visible": [
+          "2hop__136390_48224::paragraph::6",
+          "2hop__136390_48224::paragraph::8"
+        ],
+        "full": [
+          "2hop__136390_48224::paragraph::6",
+          "2hop__136390_48224::paragraph::8"
+        ]
+      },
+      "after_overlap": {
+        "visible": [
+          "2hop__136390_48224::paragraph::6",
+          "2hop__136390_48224::paragraph::8"
+        ],
+        "full": [
+          "2hop__136390_48224::paragraph::6",
+          "2hop__136390_48224::paragraph::8"
+        ]
+      },
+      "pool_count": 20,
+      "pool_id_score_sha256": "59fdbb458bb514c6b843635892e61fb6a27000dadaf9353005bfd4a2a39dd365",
+      "min_raw_chunks_for_all_gold": 2,
+      "min_retained_chunks_for_all_gold": 2,
+      "local_pack_ms": {
+        "baseline": 2.284,
+        "candidate": 125.301
+      },
+      "baseline": {
+        "visible": [
+          "2hop__136390_48224::paragraph::6",
+          "2hop__136390_48224::paragraph::8"
+        ],
+        "full": [
+          "2hop__136390_48224::paragraph::6",
+          "2hop__136390_48224::paragraph::8"
+        ],
+        "message_sha256": "f54565bd88980a034906a13db090a6e5d33f385107bb6dc106353a3541d6713a",
+        "selected": [
+          {
+            "slot": 1,
+            "paragraph": 8,
+            "rank": 1,
+            "chunk_id": "3dce3fc18db2eb2eb668d98dcd60daca936ae52a09311064d54a98b71bf7129a",
+            "chars": [
+              0,
+              749
+            ]
+          },
+          {
+            "slot": 2,
+            "paragraph": 6,
+            "rank": 2,
+            "chunk_id": "7e04df3e6d87bf3697ddc34a8d5a4d4ced01fbe8b01c33c11432341688ad417b",
+            "chars": [
+              0,
+              829
+            ]
+          },
+          {
+            "slot": 3,
+            "paragraph": 12,
+            "rank": 3,
+            "chunk_id": "011dbbb650eb1135023685b98ca2e1c84c1e9c14cb448034feb0584ef8b3a99c",
+            "chars": [
+              0,
+              350
+            ]
+          },
+          {
+            "slot": 4,
+            "paragraph": 16,
+            "rank": 4,
+            "chunk_id": "f38d9aa03f33845cd6b7eb3c3b7dbe39b3dbf0d38ab72bb8c124731850f836d1",
+            "chars": [
+              0,
+              1029
+            ]
+          },
+          {
+            "slot": 5,
+            "paragraph": 4,
+            "rank": 5,
+            "chunk_id": "9ab10d941cdc1831e6f0b7e9758fae79f5c0a6fbe367b15cc6200290664fc153",
+            "chars": [
+              0,
+              272
+            ]
+          },
+          {
+            "slot": 6,
+            "paragraph": 19,
+            "rank": 6,
+            "chunk_id": "ec77a99d8f2e50a937ada52a86d9c04da6972d47ca1bc4abdcfcffd329fb3a4d",
+            "chars": [
+              0,
+              752
+            ]
+          }
+        ]
+      },
+      "candidate": {
+        "visible": [
+          "2hop__136390_48224::paragraph::6",
+          "2hop__136390_48224::paragraph::8"
+        ],
+        "full": [
+          "2hop__136390_48224::paragraph::6",
+          "2hop__136390_48224::paragraph::8"
+        ],
+        "message_sha256": "f54565bd88980a034906a13db090a6e5d33f385107bb6dc106353a3541d6713a",
+        "selected": [
+          {
+            "slot": 1,
+            "paragraph": 8,
+            "rank": 1,
+            "chunk_id": "3dce3fc18db2eb2eb668d98dcd60daca936ae52a09311064d54a98b71bf7129a",
+            "chars": [
+              0,
+              749
+            ]
+          },
+          {
+            "slot": 2,
+            "paragraph": 6,
+            "rank": 2,
+            "chunk_id": "7e04df3e6d87bf3697ddc34a8d5a4d4ced01fbe8b01c33c11432341688ad417b",
+            "chars": [
+              0,
+              829
+            ]
+          },
+          {
+            "slot": 3,
+            "paragraph": 12,
+            "rank": 3,
+            "chunk_id": "011dbbb650eb1135023685b98ca2e1c84c1e9c14cb448034feb0584ef8b3a99c",
+            "chars": [
+              0,
+              350
+            ]
+          },
+          {
+            "slot": 4,
+            "paragraph": 16,
+            "rank": 4,
+            "chunk_id": "f38d9aa03f33845cd6b7eb3c3b7dbe39b3dbf0d38ab72bb8c124731850f836d1",
+            "chars": [
+              0,
+              1029
+            ]
+          },
+          {
+            "slot": 5,
+            "paragraph": 4,
+            "rank": 5,
+            "chunk_id": "9ab10d941cdc1831e6f0b7e9758fae79f5c0a6fbe367b15cc6200290664fc153",
+            "chars": [
+              0,
+              272
+            ]
+          },
+          {
+            "slot": 6,
+            "paragraph": 19,
+            "rank": 6,
+            "chunk_id": "ec77a99d8f2e50a937ada52a86d9c04da6972d47ca1bc4abdcfcffd329fb3a4d",
+            "chars": [
+              0,
+              752
+            ]
+          }
+        ]
+      },
+      "hops": [
+        {
+          "hop": 1,
+          "paragraph": 8,
+          "pool_ranks": [
+            1
+          ],
+          "baseline": {
+            "ranks": [
+              1
+            ],
+            "visible": true,
+            "full": true
+          },
+          "candidate": {
+            "ranks": [
+              1
+            ],
+            "visible": true,
+            "full": true
+          }
+        },
+        {
+          "hop": 2,
+          "paragraph": 6,
+          "pool_ranks": [
+            2
+          ],
+          "baseline": {
+            "ranks": [
+              2
+            ],
+            "visible": true,
+            "full": true
+          },
+          "candidate": {
+            "ranks": [
+              2
+            ],
+            "visible": true,
+            "full": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "2hop__137037_31263",
+      "pool": {
+        "visible": [
+          "2hop__137037_31263::paragraph::19",
+          "2hop__137037_31263::paragraph::7"
+        ],
+        "full": [
+          "2hop__137037_31263::paragraph::19",
+          "2hop__137037_31263::paragraph::7"
+        ]
+      },
+      "after_overlap": {
+        "visible": [
+          "2hop__137037_31263::paragraph::19",
+          "2hop__137037_31263::paragraph::7"
+        ],
+        "full": [
+          "2hop__137037_31263::paragraph::19",
+          "2hop__137037_31263::paragraph::7"
+        ]
+      },
+      "pool_count": 20,
+      "pool_id_score_sha256": "0063c2727464a2d116d7101db4d090c4f096fc9b2ae305319720bbf50f865e7e",
+      "min_raw_chunks_for_all_gold": 2,
+      "min_retained_chunks_for_all_gold": 2,
+      "local_pack_ms": {
+        "baseline": 1.597,
+        "candidate": 126.503
+      },
+      "baseline": {
+        "visible": [
+          "2hop__137037_31263::paragraph::19",
+          "2hop__137037_31263::paragraph::7"
+        ],
+        "full": [
+          "2hop__137037_31263::paragraph::19",
+          "2hop__137037_31263::paragraph::7"
+        ],
+        "message_sha256": "6bf0a01be48f696b9688c177ab7dfb2bfec91cd19b078cddfc49c122d93596c3",
+        "selected": [
+          {
+            "slot": 1,
+            "paragraph": 19,
+            "rank": 1,
+            "chunk_id": "71ac053996cf0e1a8eb9e7c3d3c3db636e76cbbadb3dc6a28569d4343cba67c0",
+            "chars": [
+              0,
+              380
+            ]
+          },
+          {
+            "slot": 2,
+            "paragraph": 7,
+            "rank": 2,
+            "chunk_id": "86ee50b530d2a72b11e932ff8357cf8025b8495ec9a61c4a424ef723a3f793eb",
+            "chars": [
+              0,
+              516
+            ]
+          },
+          {
+            "slot": 3,
+            "paragraph": 15,
+            "rank": 3,
+            "chunk_id": "7825cdb34ccc680c39646cc3c0e17c692d2351b2ef40fd736c480fb4ae8fc50b",
+            "chars": [
+              0,
+              351
+            ]
+          },
+          {
+            "slot": 4,
+            "paragraph": 8,
+            "rank": 4,
+            "chunk_id": "d2d4f922132fe9d625156dc9384f3c6fb5b71bdd168b89ca7bdf85bdf6a7682c",
+            "chars": [
+              0,
+              768
+            ]
+          },
+          {
+            "slot": 5,
+            "paragraph": 12,
+            "rank": 5,
+            "chunk_id": "d8e9d79090478102d67f47601e58890cccc763c21cde33ce51510fd402aab456",
+            "chars": [
+              0,
+              988
+            ]
+          },
+          {
+            "slot": 6,
+            "paragraph": 14,
+            "rank": 6,
+            "chunk_id": "1665b527ceb599780ad9d337eb4480785d7dfe9d40905cc40eb1732e431b2398",
+            "chars": [
+              0,
+              831
+            ]
+          }
+        ]
+      },
+      "candidate": {
+        "visible": [
+          "2hop__137037_31263::paragraph::19",
+          "2hop__137037_31263::paragraph::7"
+        ],
+        "full": [
+          "2hop__137037_31263::paragraph::19",
+          "2hop__137037_31263::paragraph::7"
+        ],
+        "message_sha256": "6bf0a01be48f696b9688c177ab7dfb2bfec91cd19b078cddfc49c122d93596c3",
+        "selected": [
+          {
+            "slot": 1,
+            "paragraph": 19,
+            "rank": 1,
+            "chunk_id": "71ac053996cf0e1a8eb9e7c3d3c3db636e76cbbadb3dc6a28569d4343cba67c0",
+            "chars": [
+              0,
+              380
+            ]
+          },
+          {
+            "slot": 2,
+            "paragraph": 7,
+            "rank": 2,
+            "chunk_id": "86ee50b530d2a72b11e932ff8357cf8025b8495ec9a61c4a424ef723a3f793eb",
+            "chars": [
+              0,
+              516
+            ]
+          },
+          {
+            "slot": 3,
+            "paragraph": 15,
+            "rank": 3,
+            "chunk_id": "7825cdb34ccc680c39646cc3c0e17c692d2351b2ef40fd736c480fb4ae8fc50b",
+            "chars": [
+              0,
+              351
+            ]
+          },
+          {
+            "slot": 4,
+            "paragraph": 8,
+            "rank": 4,
+            "chunk_id": "d2d4f922132fe9d625156dc9384f3c6fb5b71bdd168b89ca7bdf85bdf6a7682c",
+            "chars": [
+              0,
+              768
+            ]
+          },
+          {
+            "slot": 5,
+            "paragraph": 12,
+            "rank": 5,
+            "chunk_id": "d8e9d79090478102d67f47601e58890cccc763c21cde33ce51510fd402aab456",
+            "chars": [
+              0,
+              988
+            ]
+          },
+          {
+            "slot": 6,
+            "paragraph": 14,
+            "rank": 6,
+            "chunk_id": "1665b527ceb599780ad9d337eb4480785d7dfe9d40905cc40eb1732e431b2398",
+            "chars": [
+              0,
+              831
+            ]
+          }
+        ]
+      },
+      "hops": [
+        {
+          "hop": 1,
+          "paragraph": 19,
+          "pool_ranks": [
+            1
+          ],
+          "baseline": {
+            "ranks": [
+              1
+            ],
+            "visible": true,
+            "full": true
+          },
+          "candidate": {
+            "ranks": [
+              1
+            ],
+            "visible": true,
+            "full": true
+          }
+        },
+        {
+          "hop": 2,
+          "paragraph": 7,
+          "pool_ranks": [
+            2
+          ],
+          "baseline": {
+            "ranks": [
+              2
+            ],
+            "visible": true,
+            "full": true
+          },
+          "candidate": {
+            "ranks": [
+              2
+            ],
+            "visible": true,
+            "full": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "2hop__501879_60047",
+      "pool": {
+        "visible": [
+          "2hop__501879_60047::paragraph::15",
+          "2hop__501879_60047::paragraph::5"
+        ],
+        "full": [
+          "2hop__501879_60047::paragraph::15",
+          "2hop__501879_60047::paragraph::5"
+        ]
+      },
+      "after_overlap": {
+        "visible": [
+          "2hop__501879_60047::paragraph::15",
+          "2hop__501879_60047::paragraph::5"
+        ],
+        "full": [
+          "2hop__501879_60047::paragraph::15",
+          "2hop__501879_60047::paragraph::5"
+        ]
+      },
+      "pool_count": 20,
+      "pool_id_score_sha256": "e5819e37a01c53c88c9d20bfd795b59b06cad27960e64fe5f5878aeff8777e75",
+      "min_raw_chunks_for_all_gold": 2,
+      "min_retained_chunks_for_all_gold": 2,
+      "local_pack_ms": {
+        "baseline": 2.607,
+        "candidate": 139.58
+      },
+      "baseline": {
+        "visible": [
+          "2hop__501879_60047::paragraph::15",
+          "2hop__501879_60047::paragraph::5"
+        ],
+        "full": [
+          "2hop__501879_60047::paragraph::15",
+          "2hop__501879_60047::paragraph::5"
+        ],
+        "message_sha256": "fc4fd99572fc15ecd2c3d6a9420a9053d04dee01f467aaeff13e57600b921883",
+        "selected": [
+          {
+            "slot": 1,
+            "paragraph": 15,
+            "rank": 1,
+            "chunk_id": "ea01cf0b1f770cef308b4f53a27a0f2c166cefbd919b8041df11bf40430ec7b9",
+            "chars": [
+              0,
+              342
+            ]
+          },
+          {
+            "slot": 2,
+            "paragraph": 11,
+            "rank": 2,
+            "chunk_id": "d0a0cf9b3071c952aa110897360ff8ca0ddadc68ed3f89773e8f41bd1fba9e23",
+            "chars": [
+              0,
+              278
+            ]
+          },
+          {
+            "slot": 3,
+            "paragraph": 10,
+            "rank": 3,
+            "chunk_id": "f6a8553710a5931961423c202e44298549f5129439a330d31823aefbc64738c1",
+            "chars": [
+              0,
+              1200
+            ]
+          },
+          {
+            "slot": 4,
+            "paragraph": 5,
+            "rank": 4,
+            "chunk_id": "78da0ffca50d9a5d6adf37a6072e3e852ebbaf47cd42723833e5e409b1a6f66e",
+            "chars": [
+              0,
+              188
+            ]
+          },
+          {
+            "slot": 5,
+            "paragraph": 6,
+            "rank": 5,
+            "chunk_id": "3259a72bc444b2d00f3c45cfb85fe95500c915f1bba1e409d19ca74b5d791b96",
+            "chars": [
+              0,
+              1200
+            ]
+          },
+          {
+            "slot": 6,
+            "paragraph": 17,
+            "rank": 6,
+            "chunk_id": "d0b110a927340709eb95304d48922ba72af93e0cd783387c72fbc7e9bdfdbc25",
+            "chars": [
+              0,
+              938
+            ]
+          }
+        ]
+      },
+      "candidate": {
+        "visible": [
+          "2hop__501879_60047::paragraph::15",
+          "2hop__501879_60047::paragraph::5"
+        ],
+        "full": [
+          "2hop__501879_60047::paragraph::15",
+          "2hop__501879_60047::paragraph::5"
+        ],
+        "message_sha256": "fc4fd99572fc15ecd2c3d6a9420a9053d04dee01f467aaeff13e57600b921883",
+        "selected": [
+          {
+            "slot": 1,
+            "paragraph": 15,
+            "rank": 1,
+            "chunk_id": "ea01cf0b1f770cef308b4f53a27a0f2c166cefbd919b8041df11bf40430ec7b9",
+            "chars": [
+              0,
+              342
+            ]
+          },
+          {
+            "slot": 2,
+            "paragraph": 11,
+            "rank": 2,
+            "chunk_id": "d0a0cf9b3071c952aa110897360ff8ca0ddadc68ed3f89773e8f41bd1fba9e23",
+            "chars": [
+              0,
+              278
+            ]
+          },
+          {
+            "slot": 3,
+            "paragraph": 10,
+            "rank": 3,
+            "chunk_id": "f6a8553710a5931961423c202e44298549f5129439a330d31823aefbc64738c1",
+            "chars": [
+              0,
+              1200
+            ]
+          },
+          {
+            "slot": 4,
+            "paragraph": 5,
+            "rank": 4,
+            "chunk_id": "78da0ffca50d9a5d6adf37a6072e3e852ebbaf47cd42723833e5e409b1a6f66e",
+            "chars": [
+              0,
+              188
+            ]
+          },
+          {
+            "slot": 5,
+            "paragraph": 6,
+            "rank": 5,
+            "chunk_id": "3259a72bc444b2d00f3c45cfb85fe95500c915f1bba1e409d19ca74b5d791b96",
+            "chars": [
+              0,
+              1200
+            ]
+          },
+          {
+            "slot": 6,
+            "paragraph": 17,
+            "rank": 6,
+            "chunk_id": "d0b110a927340709eb95304d48922ba72af93e0cd783387c72fbc7e9bdfdbc25",
+            "chars": [
+              0,
+              938
+            ]
+          }
+        ]
+      },
+      "hops": [
+        {
+          "hop": 1,
+          "paragraph": 15,
+          "pool_ranks": [
+            1
+          ],
+          "baseline": {
+            "ranks": [
+              1
+            ],
+            "visible": true,
+            "full": true
+          },
+          "candidate": {
+            "ranks": [
+              1
+            ],
+            "visible": true,
+            "full": true
+          }
+        },
+        {
+          "hop": 2,
+          "paragraph": 5,
+          "pool_ranks": [
+            4
+          ],
+          "baseline": {
+            "ranks": [
+              4
+            ],
+            "visible": true,
+            "full": true
+          },
+          "candidate": {
+            "ranks": [
+              4
+            ],
+            "visible": true,
+            "full": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "2hop__57261_34563",
+      "pool": {
+        "visible": [
+          "2hop__57261_34563::paragraph::5",
+          "2hop__57261_34563::paragraph::7"
+        ],
+        "full": [
+          "2hop__57261_34563::paragraph::7"
+        ]
+      },
+      "after_overlap": {
+        "visible": [
+          "2hop__57261_34563::paragraph::5",
+          "2hop__57261_34563::paragraph::7"
+        ],
+        "full": [
+          "2hop__57261_34563::paragraph::7"
+        ]
+      },
+      "pool_count": 20,
+      "pool_id_score_sha256": "8b67c245c41109691f408b50d1e615c85097a21b304e932d91c9fe34a9677111",
+      "min_raw_chunks_for_all_gold": null,
+      "min_retained_chunks_for_all_gold": null,
+      "local_pack_ms": {
+        "baseline": 2.85,
+        "candidate": 131.506
+      },
+      "baseline": {
+        "visible": [
+          "2hop__57261_34563::paragraph::5",
+          "2hop__57261_34563::paragraph::7"
+        ],
+        "full": [
+          "2hop__57261_34563::paragraph::7"
+        ],
+        "message_sha256": "3ef9a77f2ad49563a5c7d897e3eb498851fabdcc8658a3feb6fe3d4782a90df1",
+        "selected": [
+          {
+            "slot": 1,
+            "paragraph": 7,
+            "rank": 1,
+            "chunk_id": "b4e5c2d650a987271ba4f2b3d6781ce524fbf2e5c92ae2bd118455f28b1df19e",
+            "chars": [
+              0,
+              751
+            ]
+          },
+          {
+            "slot": 2,
+            "paragraph": 13,
+            "rank": 2,
+            "chunk_id": "1d97db13c80923d2d8f6b33958dcf6555cf6713d4fb2997234b3d6f889882411",
+            "chars": [
+              0,
+              1200
+            ]
+          },
+          {
+            "slot": 3,
+            "paragraph": 3,
+            "rank": 3,
+            "chunk_id": "d26fadd02d65ecfde789417bd414cffc913e1ab55dfffabdc79b1bf77bc3d244",
+            "chars": [
+              1000,
+              1594
+            ]
+          },
+          {
+            "slot": 4,
+            "paragraph": 3,
+            "rank": 4,
+            "chunk_id": "ccf72a47ad821c71c36782ab65376db3a30963a38e7f8d39507d60820df709f5",
+            "chars": [
+              0,
+              1200
+            ]
+          },
+          {
+            "slot": 5,
+            "paragraph": 5,
+            "rank": 5,
+            "chunk_id": "13ab28978e079ac7b898850f5f06800f152bccf83b85300cf539fd654538fb76",
+            "chars": [
+              0,
+              1200
+            ]
+          },
+          {
+            "slot": 6,
+            "paragraph": 16,
+            "rank": 6,
+            "chunk_id": "6d62cbadf437f993d575fa1ec23e1253ad0ad242259ef75d9b9b1d3eea2c3437",
+            "chars": [
+              0,
+              285
+            ]
+          }
+        ]
+      },
+      "candidate": {
+        "visible": [
+          "2hop__57261_34563::paragraph::5",
+          "2hop__57261_34563::paragraph::7"
+        ],
+        "full": [
+          "2hop__57261_34563::paragraph::7"
+        ],
+        "message_sha256": "3ef9a77f2ad49563a5c7d897e3eb498851fabdcc8658a3feb6fe3d4782a90df1",
+        "selected": [
+          {
+            "slot": 1,
+            "paragraph": 7,
+            "rank": 1,
+            "chunk_id": "b4e5c2d650a987271ba4f2b3d6781ce524fbf2e5c92ae2bd118455f28b1df19e",
+            "chars": [
+              0,
+              751
+            ]
+          },
+          {
+            "slot": 2,
+            "paragraph": 13,
+            "rank": 2,
+            "chunk_id": "1d97db13c80923d2d8f6b33958dcf6555cf6713d4fb2997234b3d6f889882411",
+            "chars": [
+              0,
+              1200
+            ]
+          },
+          {
+            "slot": 3,
+            "paragraph": 3,
+            "rank": 3,
+            "chunk_id": "d26fadd02d65ecfde789417bd414cffc913e1ab55dfffabdc79b1bf77bc3d244",
+            "chars": [
+              1000,
+              1594
+            ]
+          },
+          {
+            "slot": 4,
+            "paragraph": 3,
+            "rank": 4,
+            "chunk_id": "ccf72a47ad821c71c36782ab65376db3a30963a38e7f8d39507d60820df709f5",
+            "chars": [
+              0,
+              1200
+            ]
+          },
+          {
+            "slot": 5,
+            "paragraph": 5,
+            "rank": 5,
+            "chunk_id": "13ab28978e079ac7b898850f5f06800f152bccf83b85300cf539fd654538fb76",
+            "chars": [
+              0,
+              1200
+            ]
+          },
+          {
+            "slot": 6,
+            "paragraph": 16,
+            "rank": 6,
+            "chunk_id": "6d62cbadf437f993d575fa1ec23e1253ad0ad242259ef75d9b9b1d3eea2c3437",
+            "chars": [
+              0,
+              285
+            ]
+          }
+        ]
+      },
+      "hops": [
+        {
+          "hop": 1,
+          "paragraph": 5,
+          "pool_ranks": [
+            5
+          ],
+          "baseline": {
+            "ranks": [
+              5
+            ],
+            "visible": true,
+            "full": false
+          },
+          "candidate": {
+            "ranks": [
+              5
+            ],
+            "visible": true,
+            "full": false
+          }
+        },
+        {
+          "hop": 2,
+          "paragraph": 7,
+          "pool_ranks": [
+            1
+          ],
+          "baseline": {
+            "ranks": [
+              1
+            ],
+            "visible": true,
+            "full": true
+          },
+          "candidate": {
+            "ranks": [
+              1
+            ],
+            "visible": true,
+            "full": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "2hop__435776_81382",
+      "pool": {
+        "visible": [
+          "2hop__435776_81382::paragraph::0",
+          "2hop__435776_81382::paragraph::2"
+        ],
+        "full": [
+          "2hop__435776_81382::paragraph::0",
+          "2hop__435776_81382::paragraph::2"
+        ]
+      },
+      "after_overlap": {
+        "visible": [
+          "2hop__435776_81382::paragraph::0",
+          "2hop__435776_81382::paragraph::2"
+        ],
+        "full": [
+          "2hop__435776_81382::paragraph::0",
+          "2hop__435776_81382::paragraph::2"
+        ]
+      },
+      "pool_count": 20,
+      "pool_id_score_sha256": "440ff283aadff612aedfcf14491e9d516a225f8f27e15c0c96cd9436a803d85f",
+      "min_raw_chunks_for_all_gold": 3,
+      "min_retained_chunks_for_all_gold": 3,
+      "local_pack_ms": {
+        "baseline": 2.465,
+        "candidate": 139.941
+      },
+      "baseline": {
+        "visible": [
+          "2hop__435776_81382::paragraph::2"
+        ],
+        "full": [
+          "2hop__435776_81382::paragraph::2"
+        ],
+        "message_sha256": "9866077ff2dde91f9d0546e4a860e3714e0385e952eee111f975dec3476b5b81",
+        "selected": [
+          {
+            "slot": 1,
+            "paragraph": 14,
+            "rank": 1,
+            "chunk_id": "d6f8bef229f21d9975f3338195be992739838e3355af19bed7ffdc3fbe3d7f6b",
+            "chars": [
+              0,
+              720
+            ]
+          },
+          {
+            "slot": 2,
+            "paragraph": 2,
+            "rank": 2,
+            "chunk_id": "a72ed955890e3a1ab7e94740b4b135bd7d147f2ef9d4873d970c447777b428f3",
+            "chars": [
+              0,
+              532
+            ]
+          },
+          {
+            "slot": 3,
+            "paragraph": 15,
+            "rank": 3,
+            "chunk_id": "70f448c3ca9079c9667bc9aedb5f918e525289f1f28467ef7a6c9bde5b885e61",
+            "chars": [
+              0,
+              427
+            ]
+          },
+          {
+            "slot": 4,
+            "paragraph": 18,
+            "rank": 4,
+            "chunk_id": "3f96c5fde57a5814d17ec5e8c3f8f00b6e9a2b067df1a6330a31e1c0f5406ee4",
+            "chars": [
+              0,
+              1200
+            ]
+          },
+          {
+            "slot": 5,
+            "paragraph": 18,
+            "rank": 5,
+            "chunk_id": "f23a86965869d164f9cfb84c863ce7c55f9cc305d5f50a6390a6f3edabcf5554",
+            "chars": [
+              1000,
+              1870
+            ]
+          },
+          {
+            "slot": 6,
+            "paragraph": 16,
+            "rank": 6,
+            "chunk_id": "7482819a89e1d442b91b5b32c353e846c34de270deeb9ee3f3458b36ae5e0422",
+            "chars": [
+              0,
+              400
+            ]
+          }
+        ]
+      },
+      "candidate": {
+        "visible": [
+          "2hop__435776_81382::paragraph::2"
+        ],
+        "full": [
+          "2hop__435776_81382::paragraph::2"
+        ],
+        "message_sha256": "19fc401eeafad4fc4c5aaacd277b74d6347d14051017245d4ebf33baa9b7231c",
+        "selected": [
+          {
+            "slot": 1,
+            "paragraph": 14,
+            "rank": 1,
+            "chunk_id": "d6f8bef229f21d9975f3338195be992739838e3355af19bed7ffdc3fbe3d7f6b",
+            "chars": [
+              0,
+              720
+            ]
+          },
+          {
+            "slot": 2,
+            "paragraph": 2,
+            "rank": 2,
+            "chunk_id": "a72ed955890e3a1ab7e94740b4b135bd7d147f2ef9d4873d970c447777b428f3",
+            "chars": [
+              0,
+              532
+            ]
+          },
+          {
+            "slot": 3,
+            "paragraph": 15,
+            "rank": 3,
+            "chunk_id": "70f448c3ca9079c9667bc9aedb5f918e525289f1f28467ef7a6c9bde5b885e61",
+            "chars": [
+              0,
+              427
+            ]
+          },
+          {
+            "slot": 4,
+            "paragraph": 18,
+            "rank": 4,
+            "chunk_id": "3f96c5fde57a5814d17ec5e8c3f8f00b6e9a2b067df1a6330a31e1c0f5406ee4",
+            "chars": [
+              0,
+              1200
+            ]
+          },
+          {
+            "slot": 5,
+            "paragraph": 18,
+            "rank": 5,
+            "chunk_id": "f23a86965869d164f9cfb84c863ce7c55f9cc305d5f50a6390a6f3edabcf5554",
+            "chars": [
+              1000,
+              1870
+            ]
+          },
+          {
+            "slot": 6,
+            "paragraph": 1,
+            "rank": 10,
+            "chunk_id": "461af05e4a89ca5c211f9cc63e080ba35873e235521da23fc50d471fab9ac093",
+            "chars": [
+              0,
+              476
+            ]
+          }
+        ]
+      },
+      "hops": [
+        {
+          "hop": 1,
+          "paragraph": 2,
+          "pool_ranks": [
+            2
+          ],
+          "baseline": {
+            "ranks": [
+              2
+            ],
+            "visible": true,
+            "full": true
+          },
+          "candidate": {
+            "ranks": [
+              2
+            ],
+            "visible": true,
+            "full": true
+          }
+        },
+        {
+          "hop": 2,
+          "paragraph": 0,
+          "pool_ranks": [
+            8,
+            19
+          ],
+          "baseline": {
+            "ranks": [],
+            "visible": false,
+            "full": false
+          },
+          "candidate": {
+            "ranks": [],
+            "visible": false,
+            "full": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "2hop__563921_149236",
+      "pool": {
+        "visible": [
+          "2hop__563921_149236::paragraph::4"
+        ],
+        "full": [
+          "2hop__563921_149236::paragraph::4"
+        ]
+      },
+      "after_overlap": {
+        "visible": [
+          "2hop__563921_149236::paragraph::4"
+        ],
+        "full": [
+          "2hop__563921_149236::paragraph::4"
+        ]
+      },
+      "pool_count": 20,
+      "pool_id_score_sha256": "ffe1008b181ae619eed7e08f51af3f7cb46ccd8ce954a8aa059c5293543c1ce4",
+      "min_raw_chunks_for_all_gold": null,
+      "min_retained_chunks_for_all_gold": null,
+      "local_pack_ms": {
+        "baseline": 2.631,
+        "candidate": 191.291
+      },
+      "baseline": {
+        "visible": [
+          "2hop__563921_149236::paragraph::4"
+        ],
+        "full": [
+          "2hop__563921_149236::paragraph::4"
+        ],
+        "message_sha256": "d89a61dafb7e7980b422ff7cd67f900867920f5a95f8f07935cc06ec420ed0b5",
+        "selected": [
+          {
+            "slot": 1,
+            "paragraph": 4,
+            "rank": 1,
+            "chunk_id": "3409bf272915659a6c89005bd48848ea1290da46b95246a24d792532b8c290bc",
+            "chars": [
+              0,
+              436
+            ]
+          },
+          {
+            "slot": 2,
+            "paragraph": 6,
+            "rank": 2,
+            "chunk_id": "912e30e9675a990e72c726eeb26778611103e3d9345c582ce3ac9a31d87f152f",
+            "chars": [
+              0,
+              767
+            ]
+          },
+          {
+            "slot": 3,
+            "paragraph": 7,
+            "rank": 3,
+            "chunk_id": "0b9053f26ebf6dd9d32ddbe82b4cc1130a921990fac4e34c8bf4559bd3bdc785",
+            "chars": [
+              0,
+              882
+            ]
+          },
+          {
+            "slot": 4,
+            "paragraph": 3,
+            "rank": 4,
+            "chunk_id": "3115e59445efc4c9382b578ce49d57cf713593d454192902c7c5ad4fb705c127",
+            "chars": [
+              0,
+              1200
+            ]
+          },
+          {
+            "slot": 5,
+            "paragraph": 3,
+            "rank": 5,
+            "chunk_id": "d20d738efeb869a6751d714b83f58da2f7f8f30ed111db371a86cc78a8b93d9f",
+            "chars": [
+              1000,
+              1773
+            ]
+          },
+          {
+            "slot": 6,
+            "paragraph": 2,
+            "rank": 6,
+            "chunk_id": "4e77955eb96dfb96c119590f98eff49d3ff1bcb543b76f5e3ca8be7fcc559934",
+            "chars": [
+              0,
+              1130
+            ]
+          }
+        ]
+      },
+      "candidate": {
+        "visible": [
+          "2hop__563921_149236::paragraph::4"
+        ],
+        "full": [
+          "2hop__563921_149236::paragraph::4"
+        ],
+        "message_sha256": "d89a61dafb7e7980b422ff7cd67f900867920f5a95f8f07935cc06ec420ed0b5",
+        "selected": [
+          {
+            "slot": 1,
+            "paragraph": 4,
+            "rank": 1,
+            "chunk_id": "3409bf272915659a6c89005bd48848ea1290da46b95246a24d792532b8c290bc",
+            "chars": [
+              0,
+              436
+            ]
+          },
+          {
+            "slot": 2,
+            "paragraph": 6,
+            "rank": 2,
+            "chunk_id": "912e30e9675a990e72c726eeb26778611103e3d9345c582ce3ac9a31d87f152f",
+            "chars": [
+              0,
+              767
+            ]
+          },
+          {
+            "slot": 3,
+            "paragraph": 7,
+            "rank": 3,
+            "chunk_id": "0b9053f26ebf6dd9d32ddbe82b4cc1130a921990fac4e34c8bf4559bd3bdc785",
+            "chars": [
+              0,
+              882
+            ]
+          },
+          {
+            "slot": 4,
+            "paragraph": 3,
+            "rank": 4,
+            "chunk_id": "3115e59445efc4c9382b578ce49d57cf713593d454192902c7c5ad4fb705c127",
+            "chars": [
+              0,
+              1200
+            ]
+          },
+          {
+            "slot": 5,
+            "paragraph": 3,
+            "rank": 5,
+            "chunk_id": "d20d738efeb869a6751d714b83f58da2f7f8f30ed111db371a86cc78a8b93d9f",
+            "chars": [
+              1000,
+              1773
+            ]
+          },
+          {
+            "slot": 6,
+            "paragraph": 2,
+            "rank": 6,
+            "chunk_id": "4e77955eb96dfb96c119590f98eff49d3ff1bcb543b76f5e3ca8be7fcc559934",
+            "chars": [
+              0,
+              1130
+            ]
+          }
+        ]
+      },
+      "hops": [
+        {
+          "hop": 1,
+          "paragraph": 4,
+          "pool_ranks": [
+            1
+          ],
+          "baseline": {
+            "ranks": [
+              1
+            ],
+            "visible": true,
+            "full": true
+          },
+          "candidate": {
+            "ranks": [
+              1
+            ],
+            "visible": true,
+            "full": true
+          }
+        },
+        {
+          "hop": 2,
+          "paragraph": 11,
+          "pool_ranks": [],
+          "baseline": {
+            "ranks": [],
+            "visible": false,
+            "full": false
+          },
+          "candidate": {
+            "ranks": [],
+            "visible": false,
+            "full": false
+          }
+        }
+      ]
+    },
+    {
+      "id": "2hop__361498_52667",
+      "pool": {
+        "visible": [
+          "2hop__361498_52667::paragraph::14",
+          "2hop__361498_52667::paragraph::3"
+        ],
+        "full": [
+          "2hop__361498_52667::paragraph::14",
+          "2hop__361498_52667::paragraph::3"
+        ]
+      },
+      "after_overlap": {
+        "visible": [
+          "2hop__361498_52667::paragraph::14",
+          "2hop__361498_52667::paragraph::3"
+        ],
+        "full": [
+          "2hop__361498_52667::paragraph::14",
+          "2hop__361498_52667::paragraph::3"
+        ]
+      },
+      "pool_count": 20,
+      "pool_id_score_sha256": "7e50bd454409963065241475b3cd89d9e9ce22fefb3d8127403bea1a0818e9d4",
+      "min_raw_chunks_for_all_gold": 2,
+      "min_retained_chunks_for_all_gold": 2,
+      "local_pack_ms": {
+        "baseline": 1.808,
+        "candidate": 129.765
+      },
+      "baseline": {
+        "visible": [
+          "2hop__361498_52667::paragraph::14",
+          "2hop__361498_52667::paragraph::3"
+        ],
+        "full": [
+          "2hop__361498_52667::paragraph::14",
+          "2hop__361498_52667::paragraph::3"
+        ],
+        "message_sha256": "687e3143d4c04215aef68f64d997ba20280a5790a5680f117e1447e29743a9d2",
+        "selected": [
+          {
+            "slot": 1,
+            "paragraph": 3,
+            "rank": 1,
+            "chunk_id": "b3cf45da8f83c8fc2ddee645afd254d703c97aab02efdc3a8ac4697f478ed558",
+            "chars": [
+              0,
+              186
+            ]
+          },
+          {
+            "slot": 2,
+            "paragraph": 14,
+            "rank": 2,
+            "chunk_id": "5c13a97fcd72beb11b37cbbae0f122ec6a216d5f92654c3a2f9709af535288d7",
+            "chars": [
+              0,
+              456
+            ]
+          },
+          {
+            "slot": 3,
+            "paragraph": 5,
+            "rank": 3,
+            "chunk_id": "acc70c5d3815cd157feef9d626cd254ab4b9e64b360ce9757e7710bcf6f27dd6",
+            "chars": [
+              0,
+              554
+            ]
+          },
+          {
+            "slot": 4,
+            "paragraph": 10,
+            "rank": 4,
+            "chunk_id": "d382e3ad1bf9c5ac295954745b96587220e78659cbe66c43bc049c568a9d2d7a",
+            "chars": [
+              0,
+              1200
+            ]
+          },
+          {
+            "slot": 5,
+            "paragraph": 1,
+            "rank": 5,
+            "chunk_id": "bf2050f64b3a29d2f239b305f515fabf9249eb4787c1bfbee11a9c05f46fb294",
+            "chars": [
+              0,
+              682
+            ]
+          },
+          {
+            "slot": 6,
+            "paragraph": 9,
+            "rank": 6,
+            "chunk_id": "47f26c5d96d417b2ea88265e1132bcc68a7d451613d665476f6172894ad586f7",
+            "chars": [
+              0,
+              500
+            ]
+          }
+        ]
+      },
+      "candidate": {
+        "visible": [
+          "2hop__361498_52667::paragraph::14",
+          "2hop__361498_52667::paragraph::3"
+        ],
+        "full": [
+          "2hop__361498_52667::paragraph::14",
+          "2hop__361498_52667::paragraph::3"
+        ],
+        "message_sha256": "687e3143d4c04215aef68f64d997ba20280a5790a5680f117e1447e29743a9d2",
+        "selected": [
+          {
+            "slot": 1,
+            "paragraph": 3,
+            "rank": 1,
+            "chunk_id": "b3cf45da8f83c8fc2ddee645afd254d703c97aab02efdc3a8ac4697f478ed558",
+            "chars": [
+              0,
+              186
+            ]
+          },
+          {
+            "slot": 2,
+            "paragraph": 14,
+            "rank": 2,
+            "chunk_id": "5c13a97fcd72beb11b37cbbae0f122ec6a216d5f92654c3a2f9709af535288d7",
+            "chars": [
+              0,
+              456
+            ]
+          },
+          {
+            "slot": 3,
+            "paragraph": 5,
+            "rank": 3,
+            "chunk_id": "acc70c5d3815cd157feef9d626cd254ab4b9e64b360ce9757e7710bcf6f27dd6",
+            "chars": [
+              0,
+              554
+            ]
+          },
+          {
+            "slot": 4,
+            "paragraph": 10,
+            "rank": 4,
+            "chunk_id": "d382e3ad1bf9c5ac295954745b96587220e78659cbe66c43bc049c568a9d2d7a",
+            "chars": [
+              0,
+              1200
+            ]
+          },
+          {
+            "slot": 5,
+            "paragraph": 1,
+            "rank": 5,
+            "chunk_id": "bf2050f64b3a29d2f239b305f515fabf9249eb4787c1bfbee11a9c05f46fb294",
+            "chars": [
+              0,
+              682
+            ]
+          },
+          {
+            "slot": 6,
+            "paragraph": 9,
+            "rank": 6,
+            "chunk_id": "47f26c5d96d417b2ea88265e1132bcc68a7d451613d665476f6172894ad586f7",
+            "chars": [
+              0,
+              500
+            ]
+          }
+        ]
+      },
+      "hops": [
+        {
+          "hop": 1,
+          "paragraph": 3,
+          "pool_ranks": [
+            1
+          ],
+          "baseline": {
+            "ranks": [
+              1
+            ],
+            "visible": true,
+            "full": true
+          },
+          "candidate": {
+            "ranks": [
+              1
+            ],
+            "visible": true,
+            "full": true
+          }
+        },
+        {
+          "hop": 2,
+          "paragraph": 14,
+          "pool_ranks": [
+            2
+          ],
+          "baseline": {
+            "ranks": [
+              2
+            ],
+            "visible": true,
+            "full": true
+          },
+          "candidate": {
+            "ranks": [
+              2
+            ],
+            "visible": true,
+            "full": true
+          }
+        }
+      ]
+    },
+    {
+      "id": "2hop__161751_34874",
+      "pool": {
+        "visible": [
+          "2hop__161751_34874::paragraph::19",
+          "2hop__161751_34874::paragraph::2"
+        ],
+        "full": [
+          "2hop__161751_34874::paragraph::19",
+          "2hop__161751_34874::paragraph::2"
+        ]
+      },
+      "after_overlap": {
+        "visible": [
+          "2hop__161751_34874::paragraph::19",
+          "2hop__161751_34874::paragraph::2"
+        ],
+        "full": [
+          "2hop__161751_34874::paragraph::19",
+          "2hop__161751_34874::paragraph::2"
+        ]
+      },
+      "pool_count": 20,
+      "pool_id_score_sha256": "67058aa3eb40bf3f23f4cb0ea6f96d8dd1fe49d0871d9a5896a866d9446d2aef",
+      "min_raw_chunks_for_all_gold": 2,
+      "min_retained_chunks_for_all_gold": 2,
+      "local_pack_ms": {
+        "baseline": 2.403,
+        "candidate": 140.722
+      },
+      "baseline": {
+        "visible": [
+          "2hop__161751_34874::paragraph::19",
+          "2hop__161751_34874::paragraph::2"
+        ],
+        "full": [
+          "2hop__161751_34874::paragraph::19",
+          "2hop__161751_34874::paragraph::2"
+        ],
+        "message_sha256": "023240849d0fd7720960becf9c60782bc38b26186c700db57af6efc389bfe9a0",
+        "selected": [
+          {
+            "slot": 1,
+            "paragraph": 10,
+            "rank": 1,
+            "chunk_id": "acc2e1e4198da69f3fe2134896573eed0264bad5efcdf2bed45ed51ea80fb4ce",
+            "chars": [
+              0,
+              399
+            ]
+          },
+          {
+            "slot": 2,
+            "paragraph": 2,
+            "rank": 2,
+            "chunk_id": "71f9d69e53f9328ca9dada35c7423f90286a78dc25b80fe2e784da9eec6037a3",
+            "chars": [
+              0,
+              243
+            ]
+          },
+          {
+            "slot": 3,
+            "paragraph": 8,
+            "rank": 3,
+            "chunk_id": "2cc94e4ee3ee6cf854126394897363112c0d5e417eff721fe1c3a7b1587fb02c",
+            "chars": [
+              0,
+              349
+            ]
+          },
+          {
+            "slot": 4,
+            "paragraph": 19,
+            "rank": 4,
+            "chunk_id": "11a14c5ea8dd4c9d2cf772b03a8c1e194c0146ab83222dc6587815f7e393a4d6",
+            "chars": [
+              0,
+              910
+            ]
+          },
+          {
+            "slot": 5,
+            "paragraph": 17,
+            "rank": 5,
+            "chunk_id": "2fc93406bbe307f1980f559c6154e26bf307292250babbab7a2dc003cdaab19f",
+            "chars": [
+              0,
+              864
+            ]
+          },
+          {
+            "slot": 6,
+            "paragraph": 9,
+            "rank": 6,
+            "chunk_id": "e316643dc2883de646508ea054a6fd55a6a05efdc79a0de4ae4ef98960fcb627",
+            "chars": [
+              0,
+              902
+            ]
+          }
+        ]
+      },
+      "candidate": {
+        "visible": [
+          "2hop__161751_34874::paragraph::19",
+          "2hop__161751_34874::paragraph::2"
+        ],
+        "full": [
+          "2hop__161751_34874::paragraph::19",
+          "2hop__161751_34874::paragraph::2"
+        ],
+        "message_sha256": "023240849d0fd7720960becf9c60782bc38b26186c700db57af6efc389bfe9a0",
+        "selected": [
+          {
+            "slot": 1,
+            "paragraph": 10,
+            "rank": 1,
+            "chunk_id": "acc2e1e4198da69f3fe2134896573eed0264bad5efcdf2bed45ed51ea80fb4ce",
+            "chars": [
+              0,
+              399
+            ]
+          },
+          {
+            "slot": 2,
+            "paragraph": 2,
+            "rank": 2,
+            "chunk_id": "71f9d69e53f9328ca9dada35c7423f90286a78dc25b80fe2e784da9eec6037a3",
+            "chars": [
+              0,
+              243
+            ]
+          },
+          {
+            "slot": 3,
+            "paragraph": 8,
+            "rank": 3,
+            "chunk_id": "2cc94e4ee3ee6cf854126394897363112c0d5e417eff721fe1c3a7b1587fb02c",
+            "chars": [
+              0,
+              349
+            ]
+          },
+          {
+            "slot": 4,
+            "paragraph": 19,
+            "rank": 4,
+            "chunk_id": "11a14c5ea8dd4c9d2cf772b03a8c1e194c0146ab83222dc6587815f7e393a4d6",
+            "chars": [
+              0,
+              910
+            ]
+          },
+          {
+            "slot": 5,
+            "paragraph": 17,
+            "rank": 5,
+            "chunk_id": "2fc93406bbe307f1980f559c6154e26bf307292250babbab7a2dc003cdaab19f",
+            "chars": [
+              0,
+              864
+            ]
+          },
+          {
+            "slot": 6,
+            "paragraph": 9,
+            "rank": 6,
+            "chunk_id": "e316643dc2883de646508ea054a6fd55a6a05efdc79a0de4ae4ef98960fcb627",
+            "chars": [
+              0,
+              902
+            ]
+          }
+        ]
+      },
+      "hops": [
+        {
+          "hop": 1,
+          "paragraph": 2,
+          "pool_ranks": [
+            2
+          ],
+          "baseline": {
+            "ranks": [
+              2
+            ],
+            "visible": true,
+            "full": true
+          },
+          "candidate": {
+            "ranks": [
+              2
+            ],
+            "visible": true,
+            "full": true
+          }
+        },
+        {
+          "hop": 2,
+          "paragraph": 19,
+          "pool_ranks": [
+            4
+          ],
+          "baseline": {
+            "ranks": [
+              4
+            ],
+            "visible": true,
+            "full": true
+          },
+          "candidate": {
+            "ranks": [
+              4
+            ],
+            "visible": true,
+            "full": true
+          }
+        }
+      ]
+    }
+  ]
+}
