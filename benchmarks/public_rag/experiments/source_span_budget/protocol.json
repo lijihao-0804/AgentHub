@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "source_commit": "f2822c3ae0ff9d6f0c6a24547c58472142fde3af",
+  "cohort": "confirmation",
+  "registered_questions": 553,
+  "candidate_arm": "baseline",
+  "reranked_cutoff": 5,
+  "approx_token_budget": 512,
+  "unit": "indexed normalized source character intervals, Python half-open offsets",
+  "primary": "annotated source pairs with at least one complete official rationale set visible",
+  "secondary": ["queries with any complete rationale", "positive sources delivered", "estimated evidence tokens", "source windows delivered"],
+  "policy": "Scan the same five BGE-ranked chunks in both arms. Admit whole spans only. Candidate unions touching or overlapping intervals of the same indexed source before charging; skip a candidate that exceeds the same token budget. Keep source IDs and gap boundaries.",
+  "retention_gate": "Any newly lost complete rationale blocks promotion. Report every changed query, including mixed gains and losses. No threshold tuning or alternate budgets.",
+  "exposure": "Existing source-component-disjoint confirmation partition of SciFact TRAIN. Previously examined by other retrieval studies. No question or label selects this policy or its settings."
+}

@@ -1,0 +1,41 @@
+{
+  "protocol_sha256": "78c089bb20319eb0f205f54b1d9c3b1bdaea808afdee47b7cb027083065311f6",
+  "upstream_protocol_sha256": "c4c024b0876db23a3fa068c33cd13f2a9f7e3de8f568567d50954bc61b9baef9",
+  "model_protocol_sha256": "ebf3105ad9ace94923b190f0a5b92a9b015379a65e6f2c6d23714ef648afa9db",
+  "official_source_sha256": "11c621288d41ac144d29b13b0f8503b3820b7d6e8b1f6ff24dff335c196d76be",
+  "ordered_ids_sha256": "24010c64ddecf485b91797bb9487c955a5132598c78db2a84e6aa38ed7f96825",
+  "source_components": 367,
+  "denominators": {
+    "queries": 553,
+    "annotated_queries": 341,
+    "annotated_pairs": 379,
+    "positive_pairs": 625
+  },
+  "stages_before_budget": {
+    "fused20_positive_sources": 539,
+    "reranked5_positive_sources": 482,
+    "reranked5_complete_rationale_pairs": 342
+  },
+  "metrics": {
+    "baseline": {
+      "complete_rationale_pairs": 277,
+      "rationale_pairs_with_joint_source_coverage": 277,
+      "queries_with_rationale": 274,
+      "positive_sources": 376,
+      "evidence_tokens": 223454,
+      "windows": 989
+    },
+    "compact": {
+      "complete_rationale_pairs": 285,
+      "rationale_pairs_with_joint_source_coverage": 285,
+      "queries_with_rationale": 282,
+      "positive_sources": 376,
+      "evidence_tokens": 223910,
+      "windows": 867
+    }
+  },
+  "queries_with_changed_spans": 160,
+  "queries_gaining_rationale": 8,
+  "queries_losing_rationale": 0,
+  "pairs_sha256": "499af8e8f91b52c5820ce284c97155fcd31cc1dea99f10595af83466e0c309f0"
+}
