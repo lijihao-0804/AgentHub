@@ -666,6 +666,32 @@ async function exerciseWorkspaceAndWorkbench(page, baseUrl, fixtures, observatio
     detail: `${sidebarBefore} -> ${sidebarAfter}`,
   });
 
+  await page.keyboard.press("Control+k");
+  const finder = page.locator(".page-finder[open]");
+  await finder.locator("input").fill("/knowledge");
+  await finder.locator("input").press("ArrowDown");
+  const focusedHref = await finder.locator("a:focus").getAttribute("href");
+  await page.keyboard.press("Escape");
+  observations.push({
+    name: "keyboard-page-finder",
+    pass: focusedHref === "/knowledge" && !(await finder.isVisible()),
+    detail: focusedHref,
+  });
+
+  await page.goto(baseUrl);
+  const task = page.locator(".home-task-field textarea");
+  await task.fill("Check the order\nReview the evidence before submitting.");
+  await page.locator(".home-workflow-options label").filter({ has: page.locator('input[value="/support"]') }).click();
+  await task.press("Control+Enter");
+  await page.waitForURL((url) => url.pathname === "/support");
+  const conversationTitle = page.locator('input[name="conversation-title"]');
+  await conversationTitle.waitFor();
+  observations.push({
+    name: "home-task-private-handoff",
+    pass: (await conversationTitle.inputValue()) === "Check the order" && !new URL(page.url()).search,
+    detail: "Home to support draft",
+  });
+
   if (!fixtures.thread) return;
   await page.goto(`${baseUrl}/research/${encodeURIComponent(fixtures.thread.id)}`, {
     waitUntil: "domcontentloaded",

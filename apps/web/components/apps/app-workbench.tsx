@@ -65,7 +65,7 @@ export default function AppWorkbench({
   children: (context: AppThreadContext) => ReactNode;
 }) {
   const { t, locale, formatDateTime, formatRelativeTime, formatCount } = useI18n();
-  const { connected, sessionId, workspaceId, accessToken, permissions } = useFrontendSession();
+  const { connected, sessionId, workspaceId, accessToken, permissions, queueTaskDraft, takeTaskDraft } = useFrontendSession();
   const cannotDelete = permissions === null || !permissions.includes("agent_run");
   const cannotCreate = cannotDelete;
   const router = useRouter();
@@ -144,6 +144,7 @@ export default function AppWorkbench({
   const [showCreate, setShowCreate] = useState(false);
   const [agentId, setAgentId] = useState("");
   const [title, setTitle] = useState("");
+  const initialTask = useRef("");
   const [renaming, setRenaming] = useState(false);
   const [titleDraft, setTitleDraft] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -171,12 +172,13 @@ export default function AppWorkbench({
     return () => document.removeEventListener("keydown", dismiss);
   }, [railOpen]);
 
-  // The home composer can hand off a starting task through ?draft=; prefill it.
+  // Older bookmarks used a query string. New tasks travel in the current session.
   useEffect(() => {
     if (typeof window === "undefined" || threadId) return;
-    const seed = new URLSearchParams(window.location.search).get("draft");
-    if (seed) setTitle(seed);
-  }, [threadId]);
+    const seed = takeTaskDraft(copy.basePath) || new URLSearchParams(window.location.search).get("draft");
+    if (seed) initialTask.current = seed.slice(0, 32000);
+    if (initialTask.current) setTitle(initialTask.current.split(/\r?\n/, 1)[0].slice(0, 200));
+  }, [copy.basePath, takeTaskDraft, threadId]);
 
   // On phones the thread list is an overlay drawer; start it closed so the
   // conversation is visible first.
@@ -252,6 +254,8 @@ export default function AppWorkbench({
       createThread(auth, selectedAgent.id, { title: title.trim(), kind: copy.kind }),
     );
     if (created) {
+      queueTaskDraft(created.id, initialTask.current);
+      initialTask.current = "";
       setShowCreate(false);
       setTitle("");
       summaryCacheRef.current.clear();

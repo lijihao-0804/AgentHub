@@ -64,13 +64,17 @@ export default function AppConversationPane({
   onTurnCompleted: () => void;
 }) {
   const { t, locale, formatDateTime } = useI18n();
-  const { workspaceId, accessToken, permissions } = useFrontendSession();
+  const { workspaceId, accessToken, permissions, takeTaskDraft } = useFrontendSession();
   const cannotRun = permissions !== null && !permissions.includes("agent_run");
   const mutation = useWorkspaceMutation(`app-turns:${threadId}`);
   const submissionRef = useRef<TurnSubmissionState>(createSubmissionState());
   const [recoverySubmission, setRecoverySubmission] = useState<TurnSubmission | null>(null);
   const composerTextareaRef = useRef<HTMLTextAreaElement | null>(null);
   const [draft, setDraft] = useState("");
+  useEffect(() => {
+    const initial = takeTaskDraft(threadId);
+    if (initial) setDraft(initial);
+  }, [takeTaskDraft, threadId]);
   // Auto-grow the composer textarea; reset when the draft clears.
   useEffect(() => {
     if (draft) return;
@@ -94,7 +98,6 @@ export default function AppConversationPane({
   useEffect(() => {
     submissionRef.current = createSubmissionState();
     setRecoverySubmission(null);
-    setDraft("");
     setPendingInput(null);
     setStreamText(null);
     setStreamRunId(null);

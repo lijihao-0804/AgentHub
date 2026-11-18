@@ -1,21 +1,21 @@
 /* Product introduction and focused authentication form. */
 .auth-frame { display:grid; min-height:100dvh; padding:1.5rem; background:var(--background); }
 .auth-layout { display:grid; grid-template-columns:minmax(0,1.05fr) minmax(0,1fr); margin:auto; max-width:1380px; min-height:min(840px,calc(100dvh - 3rem)); width:100%; }
-.auth-story { background:#142e35; border-radius:22px; color:#eaf6f5; display:flex; flex-direction:column; justify-content:center; overflow:hidden; padding:clamp(2rem,5vw,5rem); position:relative; }
-.auth-story::after { border:1px solid #2b4c52; border-radius:50%; content:""; height:450px; pointer-events:none; position:absolute; right:-260px; top:-200px; width:450px; }
+.auth-story { background:var(--surface-nav); border-radius:22px; color:var(--sidebar-text); display:flex; flex-direction:column; justify-content:center; overflow:hidden; padding:clamp(2rem,5vw,5rem); position:relative; }
+.auth-story::after { border:1px solid var(--sidebar-border); border-radius:50%; content:""; height:450px; pointer-events:none; position:absolute; right:-260px; top:-200px; width:450px; }
 .auth-story-brand { align-items:center; display:flex; font-size:1.45rem; font-weight:750; gap:.65rem; letter-spacing:-.055em; margin-bottom:auto; padding-bottom:3rem; }
-.auth-story-brand svg { color:#8bddc9; flex-shrink:0; }
+.auth-story-brand svg { color:var(--sidebar-active-border); flex-shrink:0; }
 .auth-story-copy { max-width:30rem; }
-.auth-story-copy h2 { color:#f4fbfa; font-size:clamp(2.5rem,4.5vw,4.5rem); font-weight:650; letter-spacing:-.055em; line-height:1.18; margin:0 0 1.5rem; text-wrap:balance; }
-.auth-story-copy > p { color:#b9d0d2; font-size:1rem; line-height:1.85; max-width:27rem; }
-.auth-flow { background:#1a383f; border:1px solid #355158; border-radius:14px; margin-top:3rem; padding:1.5rem; }
-.auth-flow-heading { align-items:center; color:#e7f5f3; display:flex; font-size:.8rem; font-weight:600; gap:.5rem; }
-.auth-flow-indicator { background:#8bddc9; border-radius:50%; height:6px; width:6px; }
+.auth-story-copy h2 { color:var(--sidebar-text); font-size:clamp(2.5rem,4.5vw,4.5rem); font-weight:650; letter-spacing:-.055em; line-height:1.18; margin:0 0 1.5rem; text-wrap:balance; }
+.auth-story-copy > p { color:var(--sidebar-muted); font-size:1rem; line-height:1.85; max-width:27rem; }
+.auth-flow { background:var(--sidebar-hover); border:1px solid var(--sidebar-border); border-radius:14px; margin-top:3rem; padding:1.5rem; }
+.auth-flow-heading { align-items:center; color:var(--sidebar-text); display:flex; font-size:.8rem; font-weight:600; gap:.5rem; }
+.auth-flow-indicator { background:var(--sidebar-active-border); border-radius:50%; height:6px; width:6px; }
 .auth-flow-steps { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); list-style:none; margin:1.75rem 0; padding:0; }
-.auth-flow-steps li { align-items:center; color:#bfd6d7; display:flex; flex-direction:column; font-size:.7rem; gap:.75rem; position:relative; text-align:center; }
-.auth-flow-icon { align-items:center; background:#25474e; border:1px solid #45646b; border-radius:12px; color:#a7e4d7; display:flex; height:46px; justify-content:center; position:relative; width:46px; z-index:1; }
-.auth-flow-line { background:#45646b; height:1px; left:calc(50% + 23px); position:absolute; right:calc(-50% + 23px); top:23px; }
-.auth-flow > p { border-top:1px solid #355158; color:#adc8cb; font-size:.72rem; line-height:1.6; margin:0; padding-top:1rem; }
+.auth-flow-steps li { align-items:center; color:var(--sidebar-muted); display:flex; flex-direction:column; font-size:.7rem; gap:.75rem; position:relative; text-align:center; }
+.auth-flow-icon { align-items:center; background:var(--sidebar-active); border:1px solid var(--sidebar-border); border-radius:12px; color:var(--sidebar-active-border); display:flex; height:46px; justify-content:center; position:relative; width:46px; z-index:1; }
+.auth-flow-line { background:var(--sidebar-border); height:1px; left:calc(50% + 23px); position:absolute; right:calc(-50% + 23px); top:23px; }
+.auth-flow > p { border-top:1px solid var(--sidebar-border); color:var(--sidebar-muted); font-size:.72rem; line-height:1.6; margin:0; padding-top:1rem; }
 .auth-story-note { color:#a4c2c5; font-size:.75rem; margin:auto 0 0; padding-top:3rem; }
 .auth-form-side { align-items:center; display:flex; justify-content:center; min-width:0; padding:clamp(1.5rem,6vw,5rem); }
 .auth-card { display:grid; gap:1.25rem; max-width:380px; min-width:0; width:100%; }

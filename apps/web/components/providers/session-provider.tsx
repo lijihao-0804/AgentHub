@@ -68,6 +68,8 @@ type FrontendSessionContextValue = {
   panelOpen: boolean;
   openPanel: () => void;
   closePanel: () => void;
+  queueTaskDraft: (destination: string, text: string) => void;
+  takeTaskDraft: (destination: string) => string;
 };
 
 const FrontendSessionContext = createContext<FrontendSessionContextValue | null>(null);
@@ -99,6 +101,20 @@ export function FrontendSessionProvider({ children }: { children: ReactNode }) {
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [workspaceId, setWorkspaceId] = useState("");
   const [sessionId, setSessionId] = useState(0);
+  const pendingTask = useRef<{ sessionId: number; workspaceId: string; destination: string; text: string } | null>(null);
+  useEffect(() => {
+    const task = pendingTask.current;
+    if (task && (task.sessionId !== sessionId || task.workspaceId !== workspaceId)) pendingTask.current = null;
+  }, [sessionId, workspaceId]);
+  const queueTaskDraft = useCallback((destination: string, text: string) => {
+    pendingTask.current = text ? { sessionId, workspaceId, destination, text } : null;
+  }, [sessionId, workspaceId]);
+  const takeTaskDraft = useCallback((destination: string) => {
+    const task = pendingTask.current;
+    if (!task || task.destination !== destination || task.sessionId !== sessionId || task.workspaceId !== workspaceId) return "";
+    pendingTask.current = null;
+    return task.text;
+  }, [sessionId, workspaceId]);
   const [permissions, setPermissions] = useState<string[] | null>(null);
   const [tenancyLoading, setTenancyLoading] = useState(false);
   const [tenancyError, setTenancyError] = useState<ApiError | null>(null);
@@ -400,6 +416,8 @@ export function FrontendSessionProvider({ children }: { children: ReactNode }) {
       setActiveWorkspace,
       reloadTenancy,
       panelOpen,
+      queueTaskDraft,
+      takeTaskDraft,
       openPanel,
       closePanel,
     }),
@@ -422,6 +440,8 @@ export function FrontendSessionProvider({ children }: { children: ReactNode }) {
       setActiveWorkspace,
       reloadTenancy,
       panelOpen,
+      queueTaskDraft,
+      takeTaskDraft,
       openPanel,
       closePanel,
     ],

@@ -26,30 +26,22 @@ type HomeApplication = {
 };
 
 type HomeCopy = {
-  eyebrow: string;
   heading: string;
-  lede: string;
   dashboard: string;
   launchTitle: string;
-  launchLede: string;
   taskLabel: string;
   taskPlaceholder: string;
   destination: string;
   start: string;
   pulseTitle: string;
-  pulseLede: string;
   agents: string;
   knowledge: string;
   tools: string;
   approvals: string;
-  available: string;
-  waiting: string;
   unavailable: string;
-  sourceNote: string;
   refresh: string;
   partialError: string;
   recentTitle: string;
-  recentLede: string;
   viewRuns: string;
   noRuns: string;
   noRunsHint: string;
@@ -62,37 +54,28 @@ type HomeCopy = {
   openPlayground: string;
   openAgents: string;
   applicationsTitle: string;
-  applicationsLede: string;
   openApplication: string;
   loading: string;
 };
 
 const COPY: Record<Locale, HomeCopy> = {
   "en-US": {
-    eyebrow: "Workspace",
-    heading: "What should we move forward today?",
-    lede: "Start with the outcome you need. The context, decisions, and next step stay together in this workspace.",
+    heading: "Workspace overview",
     dashboard: "Open operations dashboard",
-    launchTitle: "What should happen next?",
-    launchLede: "Pick the workflow that fits the work. You can add details and review access before anything starts.",
+    launchTitle: "Start a task",
     taskLabel: "Task",
     taskPlaceholder: "Describe the outcome you need…",
     destination: "Run with",
-    start: "Start task",
-    pulseTitle: "Workspace at a glance",
-    pulseLede: "What is ready to use and what is waiting for you.",
+    start: "Continue",
+    pulseTitle: "Workspace resources",
     agents: "Agents",
     knowledge: "Knowledge bases",
     tools: "Tools",
     approvals: "Pending approvals",
-    available: "available",
-    waiting: "waiting",
     unavailable: "Unavailable",
-    sourceNote: "Counts include everything currently ready or waiting in this workspace.",
     refresh: "Refresh",
     partialError: "Some details could not load. You can still use the rest of the workspace.",
     recentTitle: "Recent work",
-    recentLede: "Pick up where the latest work left off and see what each run needs next.",
     viewRuns: "View all runs",
     noRuns: "No runs yet",
     noRunsHint: "Start a task above when an application is ready.",
@@ -104,36 +87,27 @@ const COPY: Record<Locale, HomeCopy> = {
     openApprovals: "Review approvals",
     openPlayground: "Test retrieval",
     openAgents: "Manage agents",
-    applicationsTitle: "Choose a way to work",
-    applicationsLede: "Choose the workflow that best matches the outcome you need.",
+    applicationsTitle: "Applications",
     openApplication: "Start in this workflow",
     loading: "Loading workspace context…",
   },
   "zh-CN": {
-    eyebrow: "工作区",
-    heading: "今天，推进哪些工作？",
-    lede: "从一个明确结果开始。上下文、决定和下一步会留在当前工作区。",
+    heading: "工作区总览",
     dashboard: "打开运营仪表板",
-    launchTitle: "接下来要完成什么？",
-    launchLede: "选择最适合这项工作的应用。启动前仍可补充细节、确认工具权限。",
+    launchTitle: "发起任务",
     taskLabel: "任务",
     taskPlaceholder: "描述你希望得到的结果…",
     destination: "使用应用",
-    start: "启动任务",
-    pulseTitle: "工作区一览",
-    pulseLede: "看看哪些资源已就绪，以及有哪些事项在等你处理。",
+    start: "继续",
+    pulseTitle: "工作区资源",
     agents: "智能体",
     knowledge: "知识库",
     tools: "工具",
     approvals: "待审批",
-    available: "项可用",
-    waiting: "项待处理",
     unavailable: "暂不可用",
-    sourceNote: "计数涵盖当前工作区已就绪和待处理的事项。",
     refresh: "刷新",
     partialError: "部分内容暂时无法加载，其余工作区功能仍可继续使用。",
     recentTitle: "最近工作",
-    recentLede: "接着最近的工作继续，并查看每项运行接下来需要什么。",
     viewRuns: "查看全部运行",
     noRuns: "暂无运行",
     noRunsHint: "应用就绪后，可从上方启动第一项任务。",
@@ -145,8 +119,7 @@ const COPY: Record<Locale, HomeCopy> = {
     openApprovals: "查看审批",
     openPlayground: "测试检索",
     openAgents: "管理智能体",
-    applicationsTitle: "选择一种工作方式",
-    applicationsLede: "选择最贴合你需要的结果的工作方式。",
+    applicationsTitle: "工作应用",
     openApplication: "从这里开始",
     loading: "正在加载工作区上下文…",
   },
@@ -214,7 +187,7 @@ export default function HomeWorkbench() {
 
 function HomeWorkbenchContent() {
   const { t, locale, statusLabel, errorText, formatCount, formatRelativeTime } = useI18n();
-  const { connected, workspaceId, workspaces, organizations, accessToken, sessionId, openPanel } = useFrontendSession();
+  const { connected, workspaceId, workspaces, organizations, accessToken, sessionId, openPanel, queueTaskDraft } = useFrontendSession();
   const router = useRouter();
   const copy = COPY[locale];
   const [draft, setDraft] = useState("");
@@ -280,8 +253,8 @@ function HomeWorkbenchContent() {
 
   function startTask(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const seed = draft.trim();
-    router.push(seed ? `${appHref}?draft=${encodeURIComponent(seed)}` : appHref);
+    queueTaskDraft(appHref, draft.trim());
+    router.push(appHref);
   }
 
   if (!connected) {
@@ -289,9 +262,7 @@ function HomeWorkbenchContent() {
       <div className="page home-page">
         <header className="home-page-head">
           <div>
-            <p className="catalog-eyebrow">{copy.eyebrow}</p>
             <h1>{copy.heading}</h1>
-            <p className="page-lede">{copy.lede}</p>
           </div>
         </header>
         <SessionRequired contextKey="session.context.dashboard" />
@@ -307,9 +278,7 @@ function HomeWorkbenchContent() {
     <div className="page home-page">
       <header className="home-page-head">
         <div className="home-page-title">
-          <p className="catalog-eyebrow">{copy.eyebrow}</p>
           <h1>{copy.heading}</h1>
-          <p className="page-lede">{copy.lede}</p>
         </div>
         <div className="home-page-context">
           <span className="home-workspace-line" title={workspaceId}>
@@ -329,17 +298,32 @@ function HomeWorkbenchContent() {
             <span className="home-launch-mark" aria-hidden="true"><Icon name={selectedApplication.icon} size={23} /></span>
             <div>
               <h2 id="home-launch-title">{copy.launchTitle}</h2>
-              <p>{copy.launchLede}</p>
+              <p>{t(selectedApplication.descriptionKey)}</p>
             </div>
           </div>
           <form className="home-task-form" onSubmit={startTask}>
+            <fieldset className="home-workflow-options">
+              <legend className="sr-only">{copy.destination}</legend>
+              {APPLICATIONS.map((item) => (
+                <label key={item.href}>
+                  <input type="radio" name="workflow" value={item.href}
+                    checked={appHref === item.href} onChange={() => setAppHref(item.href)} />
+                  <span><Icon name={item.icon} size={16} />{t(item.titleKey)}</span>
+                </label>
+              ))}
+            </fieldset>
             <label className="home-task-field">
               <span className="sr-only">{copy.taskLabel}</span>
-              <input
+              <textarea rows={3} maxLength={32000}
                 value={draft}
                 onChange={(event) => setDraft(event.target.value)}
                 placeholder={copy.taskPlaceholder}
-                autoComplete="off"
+                onKeyDown={(event) => {
+                  if (!event.nativeEvent.isComposing && event.key === "Enter" && (event.ctrlKey || event.metaKey)) {
+                    event.preventDefault();
+                    event.currentTarget.form?.requestSubmit();
+                  }
+                }}
               />
             </label>
             <div className="home-task-controls">
@@ -357,25 +341,13 @@ function HomeWorkbenchContent() {
               </button>
             </div>
           </form>
-          <nav className="home-application-shortcuts" aria-label={t("home.applications.title")}>
-            {APPLICATIONS.map((item) => (
-              <Link
-                href={item.href}
-                key={item.href}
-                className={item.href === appHref ? "home-application-shortcut is-active" : "home-application-shortcut"}
-              >
-                <Icon name={item.icon} size={16} />
-                <span>{t(item.titleKey)}</span>
-              </Link>
-            ))}
-          </nav>
+
         </section>
 
         <aside className="home-pulse" aria-labelledby="home-pulse-title">
           <div className="home-section-heading home-section-heading-compact">
             <div>
               <h2 id="home-pulse-title">{copy.pulseTitle}</h2>
-              <p>{copy.pulseLede}</p>
             </div>
             <button
               type="button"
@@ -392,17 +364,14 @@ function HomeWorkbenchContent() {
             <Link href="/agents" className="home-pulse-item">
               <span>{copy.agents}</span>
               <strong>{displayCount(data.agentCount, unknownCountLabel, formatCount)}</strong>
-              <small>{data.agentCount === null ? "" : copy.available}</small>
             </Link>
             <Link href="/knowledge" className="home-pulse-item">
               <span>{copy.knowledge}</span>
               <strong>{displayCount(data.knowledgeCount, unknownCountLabel, formatCount)}</strong>
-              <small>{data.knowledgeCount === null ? "" : copy.available}</small>
             </Link>
             <Link href="/tools" className="home-pulse-item">
               <span>{copy.tools}</span>
               <strong>{displayCount(data.toolCount, unknownCountLabel, formatCount)}</strong>
-              <small>{data.toolCount === null ? "" : copy.available}</small>
             </Link>
             <Link
               href="/approvals"
@@ -410,11 +379,10 @@ function HomeWorkbenchContent() {
             >
               <span>{copy.approvals}</span>
               <strong>{displayCount(pendingApprovals, unknownCountLabel, formatCount)}</strong>
-              <small>{pendingApprovals === null ? "" : copy.waiting}</small>
             </Link>
           </div>
           {partialError && <p className="home-data-note is-warning">{copy.partialError}</p>}
-          <p className="home-data-note">{loading ? copy.loading : copy.sourceNote}</p>
+          {loading && <p className="home-data-note" role="status">{copy.loading}</p>}
         </aside>
       </div>
 
@@ -423,7 +391,6 @@ function HomeWorkbenchContent() {
           <div className="home-section-heading">
             <div>
               <h2 id="home-recent-title">{copy.recentTitle}</h2>
-              <p>{copy.recentLede}</p>
             </div>
             <Link className="home-text-link" href="/runs">{copy.viewRuns}</Link>
           </div>
@@ -487,7 +454,6 @@ function HomeWorkbenchContent() {
         <div className="home-section-heading">
           <div>
             <h2 id="home-applications-title">{copy.applicationsTitle}</h2>
-            <p>{copy.applicationsLede}</p>
           </div>
         </div>
         <div className="home-application-grid">

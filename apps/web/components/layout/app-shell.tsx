@@ -14,6 +14,7 @@ import LanguageSwitcher from "@/components/layout/language-switcher";
 import ThemeSwitcher from "@/components/layout/theme-switcher";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import WorkspaceSelector from "@/components/layout/workspace-selector";
+import PageFinder from "@/components/layout/page-finder";
 import UserMenu from "@/components/layout/user-menu";
 import { RouteTitle } from "@/components/layout/route-title";
 import { AutoBreadcrumbs } from "@/components/layout/breadcrumbs";
@@ -521,6 +522,7 @@ function ShellChrome({ children }: { children: ReactNode }) {
           <WorkspaceSelector />
           <span className="topbar-spacer" aria-hidden="true" />
           <div className="topbar-actions">
+            <PageFinder groups={PRIMARY_GROUPS} />
             <ThemeSwitcher />
             <LanguageSwitcher />
             <UserMenu />
