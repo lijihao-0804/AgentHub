@@ -36,6 +36,7 @@ export default function Select({
   const selectedIndex = useMemo(() => options.findIndex((option) => option.value === value), [options, value]);
   const [activeIndex, setActiveIndex] = useState(selectedIndex >= 0 ? selectedIndex : 0);
   const rootRef = useRef<HTMLDivElement>(null);
+  const controlRef = useRef<HTMLButtonElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
 
   const openMenu = useCallback(() => {
@@ -75,6 +76,7 @@ export default function Select({
     if (!option || option.disabled) return;
     onChange(option.value);
     setOpen(false);
+    controlRef.current?.focus({ preventScroll: true });
   }
 
   function onControlKeyDown(event: React.KeyboardEvent) {
@@ -127,6 +129,7 @@ export default function Select({
   return (
     <div className={`select-root${className ? ` ${className}` : ""}`} ref={rootRef} data-open={open || undefined}>
       <button
+        ref={controlRef}
         type="button"
         className="select-control"
         role="combobox"
@@ -154,7 +157,11 @@ export default function Select({
                 option.value === value ? " select-option-selected" : ""
               }${option.disabled ? " select-option-disabled" : ""}`}
               onPointerEnter={() => setActiveIndex(index)}
-              onClick={() => commit(index)}
+              onClick={(event) => {
+                // An enclosing label would forward this click to the trigger and reopen the list.
+                event.preventDefault();
+                commit(index);
+              }}
             >
               {option.label}
             </li>

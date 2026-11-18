@@ -191,8 +191,84 @@ function testAppearance() {
   console.log('PASS appearance first paint, legacy choice, live OS changes, accent persistence, storage events and private browsing');
 }
 
+async function testRunHistoryFilters() {
+  const params = new URLSearchParams();
+  const requests = [];
+  const makeRun = (id, status) => ({
+    id, status, trace_id: id, agent_version_number: 1, started_at: '2026-01-01',
+    duration_ms: null, total_tokens: null, total_cost_amount: null, tool_call_count: 0,
+  });
+  const ui = harness({
+    'next/navigation': { useSearchParams: () => params },
+    '@/lib/api/agents': { listAgents: async () => [] },
+    '@/lib/api/runs': { listRuns: async (input) => {
+      requests.push(input);
+      if (input.status) return { items: [makeRun('attention-run', input.status)], next_cursor: null };
+      return input.cursor
+        ? { items: [makeRun('older-run', 'SUCCEEDED')], next_cursor: null }
+        : { items: [makeRun('recent-run', 'SUCCEEDED')], next_cursor: 'page-two' };
+    } },
+  });
+  ui.mocks.react.useDeferredValue = value => value;
+  const Page = load('app/runs/page.tsx', ui.mocks).default;
+  const view = Page().props.children.type;
+  const render = () => ui.render(view);
+  async function flushChanges() {
+    render();
+    ui.effects.forEach(effect => effect());
+    await tick();
+  }
+  await flushChanges();
+  const toolbar = elements(render(), node => typeof node.props.onSearchChange === 'function')[0];
+  toolbar.props.onSearchChange('older-run');
+  let tree = render();
+  assert.equal(elements(tree, node => node.type === 'table').length, 0);
+  const loadMore = elements(tree, node => node.type === 'button' && node.props.children === 'runs.loadMore')[0];
+  assert.ok(loadMore, 'an empty search among loaded rows must preserve the next-page action');
+  loadMore.props.onClick();
+  await tick();
+  tree = render();
+  assert.ok(elements(tree, node => node.props.href === '/runs/older-run').length);
+  assert.deepEqual(requests.map(({ cursor }) => cursor), [null, 'page-two']);
+
+  ui.session.accessToken = 'renewed';
+  await flushChanges();
+  assert.equal(requests.length, 2, 'token renewal preserves pagination');
+  params.set('status', 'NEEDS_ATTENTION');
+  await flushChanges();
+  assert.equal(requests.length, 3);
+  assert.equal(requests.at(-1).cursor, null);
+  assert.equal(requests.at(-1).status, 'NEEDS_ATTENTION');
+  tree = render();
+  assert.ok(elements(tree, node => node.props.value === 'NEEDS_ATTENTION').length);
+  assert.ok(elements(tree, node => node.props.href === '/runs/attention-run').length);
+  assert.equal(elements(tree, node => node.props.href === '/runs/older-run').length, 0);
+  console.log('PASS run-history URL filters, pagination after empty searches and token renewal');
+}
+
+function testLabeledSelect() {
+  const ui = harness();
+  const Select = load('components/ui/select.tsx', ui.mocks).default;
+  let value = 'one', focused = false;
+  const options = [{ value: 'one', label: 'One' }, { value: 'two', label: 'Two' }];
+  const render = () => ui.render(Select, { value, options, onChange: next => { value = next; } });
+  const trigger = elements(render(), node => node.props.role === 'combobox')[0];
+  trigger.props.ref.current = { focus: () => { focused = true; } };
+  trigger.props.onClick();
+  const option = elements(render(), node => node.props.role === 'option')[1];
+  let forwardedToLabel = true;
+  option.props.onClick({ preventDefault() { forwardedToLabel = false; } });
+  assert.equal(forwardedToLabel, false, 'a label must not reactivate the trigger after a pointer selection');
+  assert.equal(value, 'two');
+  assert.equal(focused, true);
+  assert.equal(elements(render(), node => node.props.role === 'listbox').length, 0);
+  console.log('PASS labeled select closes after a pointer selection and returns focus to its trigger');
+}
+
 async function main() {
   testAppearance();
+  await testRunHistoryFilters();
+  testLabeledSelect();
   await testIngestionAndPreferences();
   const { autoBreadcrumbs } = load('components/layout/breadcrumbs.tsx');
   const trialRun = '12345678-1234-4234-8234-123456789abc';

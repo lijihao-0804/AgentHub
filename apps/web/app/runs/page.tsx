@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useDeferredValue, useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useCallback, useDeferredValue, useEffect, useRef, useState } from "react";
 
 import StatusBadge from "@/components/ui/status-badge";
 import { EmptyState, ErrorState, LoadingState, SessionRequired } from "@/components/ui/states";
@@ -37,23 +38,24 @@ function shortId(id: string): string {
 }
 
 export default function RunsPage() {
+  return <Suspense fallback={<LoadingState />}><RunHistory /></Suspense>;
+}
+
+function RunHistory() {
   const { t, locale, statusLabel, failureCategoryLabel, formatDateTime, formatRelativeTime, formatCount, formatDurationMs, formatCurrencyAmount } =
     useI18n();
   const { workspaceId, accessToken, connected } = useFrontendSession();
-  const [status, setStatus] = useState("");
-  const [agentVersionId, setAgentVersionId] = useState("");
-  /** Draft filter picks; the applied version id stays `agentVersionId`. */
+  const query = useSearchParams();
+  const status = query.get("status")?.trim() ?? "";
+  const agentVersionId = query.get("agent_version_id")?.trim() ?? "";
   const [agents, setAgents] = useState<Agent[]>([]);
   const [agentVersions, setAgentVersions] = useState<AgentVersion[]>([]);
   const [selectedAgentId, setSelectedAgentId] = useState("");
-  const [selectedVersionId, setSelectedVersionId] = useState("");
   const [runs, setRuns] = useState<RunListItem[]>([]);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
   const [loading, setLoading] = useState(false);
-  const [initialLoaded, setInitialLoaded] = useState(false);
-  // null until the URL has been read; the first load waits for it.
-  const [urlFilters, setUrlFilters] = useState<{ status: string; agentVersionId: string } | null>(null);
+  const loadedFilterKey = useRef<string | null>(null);
   const [search, setSearch] = useState("");
   const deferredSearch = useDeferredValue(search);
   /** Generation of the latest list request; stale responses never land. */
@@ -62,10 +64,8 @@ export default function RunsPage() {
   const pagedRef = useRef(false);
 
   const refresh = useCallback(
-    async (cursor: string | null = null, overrides?: { status?: string; agentVersionId?: string }) => {
+    async (cursor: string | null = null) => {
       if (!connected) return;
-      const effectiveStatus = overrides?.status ?? status;
-      const effectiveVersion = overrides?.agentVersionId ?? agentVersionId;
       const generation = (generationRef.current += 1);
       pagedRef.current = cursor !== null;
       setLoading(true);
@@ -73,8 +73,8 @@ export default function RunsPage() {
         const result = await listRuns({
           workspaceId,
           accessToken,
-          status: effectiveStatus,
-          agentVersionId: effectiveVersion,
+          status,
+          agentVersionId,
           cursor,
           limit: 25,
         });
@@ -92,35 +92,18 @@ export default function RunsPage() {
     [connected, workspaceId, accessToken, status, agentVersionId],
   );
 
-  // Deep links such as /runs?status=NEEDS_ATTENTION must preload the filters.
-  // The parsed values are kept in state of their own, not just pushed into the
-  // controls: setting the controls does not retroactively change the `refresh`
-  // closure the first load already captured, so the first request has to be
-  // given the filters explicitly or it fetches every run and then never
-  // re-fetches, leaving the deep link showing the opposite of what it asked
-  // for until the user presses Apply.
+  // A renewed access token must preserve older pages the user already loaded.
+  const filterKey = connected ? JSON.stringify([workspaceId, status, agentVersionId]) : null;
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const urlStatus = params.get("status") ?? "";
-    const urlVersion = params.get("agent_version_id") ?? "";
-    if (urlStatus || urlVersion) {
-      setStatus(urlStatus);
-      setAgentVersionId(urlVersion);
-      setSelectedVersionId(urlVersion);
+    if (loadedFilterKey.current === filterKey) return;
+    loadedFilterKey.current = filterKey;
+    if (filterKey !== null) {
+      setRuns([]);
+      setNextCursor(null);
+      setError(null);
+      void refresh();
     }
-    setUrlFilters({ status: urlStatus, agentVersionId: urlVersion });
-  }, []);
-
-  useEffect(() => {
-    if (connected && !initialLoaded && urlFilters !== null) {
-      setInitialLoaded(true);
-      void refresh(null, urlFilters);
-    }
-  }, [connected, initialLoaded, refresh, urlFilters]);
-
-  useEffect(() => {
-    if (!connected) setInitialLoaded(false);
-  }, [connected]);
+  }, [filterKey, refresh]);
 
   // The version filter is a pick list, not a hand-typed UUID: load the agent
   // roster once per workspace. Failure degrades silently — the raw id stays
@@ -174,7 +157,8 @@ export default function RunsPage() {
         clearSearch: "清空搜索",
         result: (visible: number, total: number) => `显示 ${visible} / ${total}`,
         noMatch: "没有匹配的运行",
-        noMatchHint: "搜索会收窄当前列表；可清空搜索或调整上方筛选。",
+        noMatchHint: "可清空搜索或调整上方筛选。",
+        noMatchMore: "可以加载更多记录，在更早的运行中继续搜索。",
         loadedOnPage: "当前列表",
         active: "活动运行",
         needsAttention: "需要处理",
@@ -189,7 +173,8 @@ export default function RunsPage() {
         clearSearch: "Clear search",
         result: (visible: number, total: number) => `${visible} of ${total} shown`,
         noMatch: "No matching runs",
-        noMatchHint: "Search narrows this view. Clear it or adjust the filters above.",
+        noMatchHint: "Clear the search or change the filters above.",
+        noMatchMore: "Load more to search older runs.",
         loadedOnPage: "In this view",
         active: "Active",
         needsAttention: "Needs attention",
@@ -210,33 +195,17 @@ export default function RunsPage() {
     return () => window.clearInterval(interval);
   }, [connected, hasActiveRows, nextCursor, loading, refresh]);
 
-  /**
-   * Filters apply the moment a select changes — an extra Apply step reads as
-   * broken to anyone used to modern list views. Overrides carry the fresh
-   * value because state updates have not landed in this closure yet.
-   */
-  function applyFilters(overrides?: { status?: string; version?: string }) {
-    const nextStatus = overrides?.status ?? status;
-    const appliedVersion = (overrides?.version ?? selectedVersionId).trim();
+  function applyFilters(nextStatus: string, nextVersion: string) {
     const params = new URLSearchParams();
-    if (nextStatus.trim()) params.set("status", nextStatus.trim());
-    if (appliedVersion) params.set("agent_version_id", appliedVersion);
+    if (nextStatus) params.set("status", nextStatus);
+    if (nextVersion) params.set("agent_version_id", nextVersion);
     const query = params.toString();
     window.history.replaceState(null, "", query ? `/runs?${query}` : "/runs");
-    setStatus(nextStatus);
-    setAgentVersionId(appliedVersion);
-    setInitialLoaded(true);
-    void refresh(null, { status: nextStatus, agentVersionId: appliedVersion });
   }
 
   function clearFilters() {
-    setStatus("");
-    setAgentVersionId("");
     setSelectedAgentId("");
-    setSelectedVersionId("");
-    window.history.replaceState(null, "", "/runs");
-    setInitialLoaded(true);
-    void refresh(null, { status: "", agentVersionId: "" });
+    applyFilters("", "");
   }
 
   if (!connected) {
@@ -299,10 +268,7 @@ export default function RunsPage() {
             {t("runs.filters.status")}
             <Select
               value={status}
-              onChange={(next) => {
-                setStatus(next);
-                applyFilters({ status: next });
-              }}
+              onChange={(next) => applyFilters(next, agentVersionId)}
               options={[
                 { value: "", label: t("runs.filters.allStatuses") },
                 ...RUN_STATUS_OPTIONS.map(
@@ -317,10 +283,9 @@ export default function RunsPage() {
               value={selectedAgentId}
               onChange={(next) => {
                 setSelectedAgentId(next);
-                setSelectedVersionId("");
                 // Switching agents invalidates a version filter picked under
                 // the previous one; without a filter there is nothing to re-run.
-                if (agentVersionId) applyFilters({ version: "" });
+                if (agentVersionId) applyFilters(status, "");
               }}
               options={[
                 { value: "", label: t("runs.filters.allAgents") },
@@ -333,16 +298,13 @@ export default function RunsPage() {
           <label>
             {t("runs.filters.version")}
             <Select
-              value={selectedVersionId}
-              onChange={(next) => {
-                setSelectedVersionId(next);
-                applyFilters({ version: next });
-              }}
-              disabled={!selectedAgentId && agentVersions.length === 0 && !selectedVersionId}
+              value={agentVersionId}
+              onChange={(next) => applyFilters(status, next)}
+              disabled={!selectedAgentId && agentVersions.length === 0 && !agentVersionId}
               options={[
                 { value: "", label: t("runs.filters.allVersions") },
-                ...(selectedVersionId && !agentVersions.some((v) => v.id === selectedVersionId)
-                  ? [{ value: selectedVersionId, label: t("runs.filters.linkedVersion") }]
+                ...(agentVersionId && !agentVersions.some((v) => v.id === agentVersionId)
+                  ? [{ value: agentVersionId, label: t("runs.filters.linkedVersion") }]
                   : []),
                 ...agentVersions.map(
                   (version): SelectOption => ({
@@ -395,13 +357,11 @@ export default function RunsPage() {
         />
       )}
 
-      {runs.length > 0 && filteredRuns.length === 0 && (
-        <CatalogEmptyNotice title={copy.noMatch} hint={copy.noMatchHint} />
-      )}
-
-      {filteredRuns.length > 0 && (
+      {runs.length > 0 && (
         <section className="panel" aria-label={t("runs.title")}>
-          <div className="data-table">
+          {filteredRuns.length === 0 ? (
+            <CatalogEmptyNotice title={copy.noMatch} hint={nextCursor ? copy.noMatchMore : copy.noMatchHint} />
+          ) : <div className="data-table">
             <table>
               <thead>
                 <tr>
@@ -459,7 +419,7 @@ export default function RunsPage() {
                 ))}
               </tbody>
             </table>
-          </div>
+          </div>}
           {nextCursor && (
             <div className="form-actions">
               <button type="button" className="button button-ghost" onClick={() => void refresh(nextCursor)} disabled={loading}>
