@@ -1,0 +1,46 @@
+{
+  "freeze_sha256": "2340712e8d0579f95da3e055c052aac89c8447c61ddd0c09394bbb757ed6de83",
+  "sources": {
+    "main": "deb28ec77fa85a9cf2c888dd46d59a8360efa189",
+    "material": "e5300ba6d78fbd76a9c9bd423649eed79e0f99fe",
+    "source": "425c0564eb8161e22efaa0fa1a89c8161aaebe5b",
+    "tree": "9ba40ba547b11adababcd81a77827df0b23fbfcb3877b112f0c777786f587c9c"
+  },
+  "question_and_evidence_fingerprint": "fa03628b6285a99b601d0ad13def99919731ff390f8c42a90427e5dc1e34cd6e",
+  "first_wire_fingerprints": "c9629e5d78ff6d9e894d38fc341f7efc28f1c633d6ea8a4958005fbd41b4a54e",
+  "archive_outcomes_fingerprint": "a99d2e2017b789d34a6c037519b8b50d1aed03341157b855b86ffe5398112f5d",
+  "full_history_ledger_fingerprint": "b4c4656d4f725da67f8c460092fa87ae7171c2452ed751bdbe3f7aed90550584",
+  "earlier_unique_id_fingerprint": "9884a2bc25e325d925ad2ea4dcd9758e617096a7f86b888f2516d0a512f660e9",
+  "carried_budget_cny": "3.00814688",
+  "hard_ceiling_cny": "30.00000000",
+  "historical_qa_inputs": 335,
+  "historical_distinct_first_wires": 329,
+  "historical_app_requests": 670,
+  "new_bilingual_pairs": 64,
+  "named_new_generation_pairs": 7,
+  "live_app_requests": 142,
+  "model": "deepseek-v4.1-flash-1017",
+  "region": "Beijing",
+  "output_limit": 2048,
+  "temperature": 0,
+  "preparation": {
+    "complete_visible_source_pairs": 64,
+    "distinct_historical_passages_checked": 802,
+    "distinct_historical_questions_checked": 339,
+    "distinct_snapshots": 64,
+    "exact_passage_overlaps": 0,
+    "exact_question_overlaps": 0,
+    "frozen_cases_sha256": "b04a5b7fa2e2104ae3aab3b0f5688a80f6cb9fbf8f2045e836bfc156fa11fb51",
+    "messages_canonical_sha256": "586501e3deee03ac5df9a4e8d502e9806a48203ee350fd0a7f2b2291e6f7bf96",
+    "per_language_answerability_counts": {
+      "en_answerable": 16,
+      "en_refusal": 16,
+      "zh_answerable": 16,
+      "zh_refusal": 16
+    },
+    "questions": 64,
+    "records_sha256": "33608b70e0ba3c1bfd77dee2e505339c8b5979f2a1620034684c348422b3f7dd",
+    "source_sha256": "e1d1b437da3d1802cb5d1cf892cd13c7175b1a25816fb11f492a39ad19872af2",
+    "uploaded_documents": 128
+  }
+}
