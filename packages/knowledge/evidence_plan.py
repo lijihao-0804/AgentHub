@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from packages.knowledge.contracts import EvidenceOrigin
+from packages.knowledge.evidence_records import EvidenceAdmission
 
 EVIDENCE_VIEW_FORMAT = "rag_view_v1"
 _REF_FIELDS = {"snapshot_id", "knowledge_base_id", "document_revision_id", "chunk_id"}
@@ -310,8 +311,12 @@ def _select(
     was_truncated: bool = False,
     max_items: int = 10,
     server_state: Mapping[str, Any] | None = None,
-) -> tuple[dict | None, tuple[str, ...]]:
+    source_skip_reason: Callable[[str, str | None], str | None] | None = None,
+    citation_prefix: str = "",
+) -> tuple[dict | None, tuple[str, ...], dict[str, str]]:
     kept, dropped = [], []
+    retained_ids: dict[str, str] = {}
+    covered = 0
     ordered: list[dict] = []
     route = server_state.get("route") if isinstance(server_state, Mapping) else None
     if route == "HYBRID":
@@ -324,39 +329,43 @@ def _select(
             if match is not None:
                 ordered.append(match)
     ordered.extend(item for item in items if item not in ordered)
-    for item in ordered:
+    for ordinal, item in enumerate(ordered, start=1):
+        source_id = item["id"]
+        if source_skip_reason is not None:
+            # Covered redeliveries had no citation ordinal in the deduplicated
+            # input. Keep that numbering (and its UTF-8 cost) for eligible records.
+            item = {**item, "id": f"{citation_prefix}{ordinal - covered}"}
+        reason = None
         if len(kept) >= max_items:
-            dropped.append(f"{item['id']}:count_limit")
-            continue
-        candidate = [*kept, item]
-        # Reserve the larger serialization of both boolean states. The final
-        # estimator therefore cannot exceed the budget when another item drops.
-        fits = (
+            reason = "count_limit"
+        # Either truncation flag may apply after the remaining candidates.
+        elif (
             max(
                 _size(
-                    _payload(
-                        candidate,
-                        instruction,
-                        marker,
-                        server_state=server_state,
-                    ),
+                    _payload([*kept, item], instruction, marker, server_state=server_state),
                     estimator,
                 )
                 for marker in (False, True)
             )
-            <= budget
-        )
-        if fits:
+            > budget
+        ):
+            reason = "budget"
+        if source_skip_reason is not None:
+            reason = source_skip_reason(source_id, reason)
+        if reason is None:
             kept.append(item)
+            retained_ids[source_id] = item["id"]
+        elif reason == "overlap":
+            covered += 1
         else:
-            dropped.append(f"{item['id']}:budget")
+            dropped.append(f"{item['id']}:{reason}")
     result = _payload(
         kept,
         instruction,
         was_truncated or bool(dropped),
         server_state=server_state,
     )
-    return (result if _size(result, estimator) <= budget else None), tuple(dropped)
+    return (result if _size(result, estimator) <= budget else None), tuple(dropped), retained_ids
 
 
 def assemble_evidence_plan(
@@ -370,6 +379,7 @@ def assemble_evidence_plan(
     record_validator: Callable[[Mapping], str | None] | None = None,
     allow_shared_references: bool = False,
     server_state: Mapping[str, Any] | None = None,
+    evidence_admission: EvidenceAdmission | None = None,
 ) -> EvidencePlan | None:
     """Assemble the model view and its private registry.
 
@@ -459,19 +469,28 @@ def assemble_evidence_plan(
             return None
     except (TypeError, ValueError):
         return None
-    payload, dropped = _select(
+    payload, dropped, retained_ids = _select(
         items,
         budget=budget,
         estimator=estimator,
         instruction=_instruction(citation_prefix),
         max_items=max_items,
         server_state=server_state,
+        citation_prefix=citation_prefix,
+        source_skip_reason=(
+            None
+            if evidence_admission is None
+            else lambda identifier, reason: evidence_admission.record_skip_reason(
+                registry[identifier]["record"], reason
+            )
+        ),
     )
     if payload is None:
         return None
-    selected = {item["id"] for item in payload["results"]}
     return EvidencePlan(
-        payload, {key: value for key, value in registry.items() if key in selected}, dropped
+        payload,
+        {retained_ids[key]: value for key, value in registry.items() if key in retained_ids},
+        dropped,
     )
 
 
@@ -481,7 +500,7 @@ def reproject_evidence_view(
     _budget(budget)
     if not validate_evidence_view(payload):
         return None
-    result, _ = _select(
+    result, _, _ = _select(
         payload["results"],
         budget=budget,
         estimator=estimator,

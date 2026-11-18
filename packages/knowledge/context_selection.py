@@ -6,6 +6,8 @@ import json
 from collections.abc import Mapping, Sequence
 from typing import Any
 
+from packages.knowledge.evidence_records import EvidenceAdmission
+
 
 def _record_json_bytes(record: Mapping[str, Any]) -> int:
     try:
@@ -25,6 +27,7 @@ def select_budgeted_records(
     *,
     max_bytes: int,
     max_items: int,
+    evidence_admission: EvidenceAdmission | None = None,
 ) -> tuple[Mapping[str, Any], ...]:
     """Select ranked records whose compact JSON list fits within ``max_bytes``.
 
@@ -46,10 +49,17 @@ def select_budgeted_records(
     selected: list[Mapping[str, Any]] = []
     used_bytes = 2
     for record, cost in zip(records, item_bytes, strict=True):
-        if len(selected) >= max_items:
-            break
         separator = 1 if selected else 0
-        if used_bytes + separator + cost <= max_bytes:
+        reason = None
+        if len(selected) >= max_items:
+            if evidence_admission is None:
+                break
+            reason = "count_limit"
+        elif used_bytes + separator + cost > max_bytes:
+            reason = "budget"
+        if evidence_admission is not None:
+            reason = evidence_admission.record_skip_reason(record, reason)
+        if reason is None:
             selected.append(record)
             used_bytes += separator + cost
 

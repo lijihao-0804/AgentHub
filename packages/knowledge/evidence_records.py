@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
+from dataclasses import dataclass
 from typing import Any
 
 from packages.knowledge.contracts import RetrievedEvidence
@@ -40,73 +41,116 @@ def evidence_reference(item: RetrievedEvidence, *, snapshot_id: str, knowledge_b
     }
 
 
-def locator_span(locator: Any) -> tuple[int, int] | None:
-    """Return comparable character coordinates, or None when unavailable.
-
-    ``char_start``/``char_end`` are document-absolute; ``start``/``end`` are the
-    paragraph-relative pair some sources emit. Records without usable text
-    coordinates (for example page-only PDF locators) are never deduplicated.
-    """
+def _locator_range(locator: Any) -> tuple[str, tuple[int, int]] | None:
     if not isinstance(locator, Mapping):
         return None
     for start_key, end_key in (("char_start", "char_end"), ("start", "end")):
         start, end = locator.get(start_key), locator.get(end_key)
         if type(start) is int and type(end) is int and 0 <= start < end:
-            return start, end
+            return start_key, (start, end)
     return None
+
+
+def locator_span(locator: Any) -> tuple[int, int] | None:
+    """Return the offset pair as written, preferring explicit character offsets."""
+    located = _locator_range(locator)
+    return located[1] if located is not None else None
+
+
+def _scoped_span(revision_id: Any, locator: Any) -> tuple[tuple, tuple[int, int]] | None:
+    located = _locator_range(locator)
+    if located is None or not isinstance(revision_id, str) or not revision_id:
+        return None
+    # Offsets restart on each page, paragraph, layout block, visual part or table
+    # row. A line number, paragraph-local offset and document character offset can
+    # also have the same value while addressing different source text.
+    locator_type = locator.get("type")
+    if locator_type not in (
+        None,
+        "page",
+        "pdf_page",
+        "text_range",
+        "table_row",
+        "line_range",
+        "paragraph_index",
+    ):
+        return None
+    coordinates = ("page", "paragraph_ordinal", "block_index", "part_index", "row", "index")
+    scope = tuple(locator.get(key) for key in coordinates)
+    if any(value is not None and type(value) is not int for value in scope):
+        return None
+    basis, span = located
+    return (revision_id, locator_type, basis, *scope), span
 
 
 def _span_contained(span: tuple[int, int], kept: tuple[int, int]) -> bool:
     return span[0] >= kept[0] and span[1] <= kept[1]
 
 
-class _OverlapTracker:
-    """Keeps records whose span is not fully covered by a kept record.
+@dataclass(frozen=True)
+class EvidenceTextBudget:
+    """Consumer budget for the body of each complete source record."""
 
-    The judgment is containment, not mere overlap: a fixed-window neighbour
-    ([0,1200] then [1000,2200]) carries 1000 characters no kept record
-    covers, so dropping it on overlap alone would delete unique content and
-    leave an 800-character gap in a consecutive window chain. Only spans
-    entirely inside an already-kept span (exact re-deliveries, tail windows)
-    are redundant.
-    """
+    limit: int
+    estimate: Callable[[str], int]
 
-    def __init__(self) -> None:
+
+class EvidenceAdmission:
+    """Track coverage and an optional body budget for one ranked selection."""
+
+    def __init__(self, text_budget: EvidenceTextBudget | None = None) -> None:
         self._spans: dict[tuple, list[tuple[int, int]]] = {}
+        self._text_budget = text_budget
+        self._used_units = 0
+        self.dropped_overlaps = 0
 
-    def admit(self, revision_id: Any, locator: Any) -> bool:
-        span = locator_span(locator)
-        if span is None or not isinstance(revision_id, str) or not revision_id:
-            return True
-        # Offsets restart for pages, layout blocks, their captions/footnotes,
-        # and individual table rows. Windows are only comparable within one source unit.
-        coordinates = ("page", "paragraph_ordinal", "block_index", "part_index", "row")
-        scope = tuple(locator.get(key) for key in coordinates)
-        if any(v is not None and type(v) is not int for v in scope):
-            return True
-        spans = self._spans.setdefault((revision_id, *scope), [])
-        if any(_span_contained(span, other) for other in spans):
-            return False
-        spans.append(span)
-        return True
+    def skip_reason(
+        self, revision_id: Any, locator: Any, text: str, reason: str | None = None
+    ) -> str | None:
+        """Record coverage only when the caller's count and byte checks also pass."""
+        location = _scoped_span(revision_id, locator)
+        if location is not None:
+            scope, span = location
+            if any(_span_contained(span, other) for other in self._spans.get(scope, ())):
+                self.dropped_overlaps += 1
+                return "overlap"
+        if reason is not None:
+            return reason
+        if self._text_budget is not None:
+            cost = self._text_budget.estimate(text)
+            if self._used_units + cost > self._text_budget.limit:
+                return "budget"
+            self._used_units += cost
+        if location is not None:
+            self._spans.setdefault(scope, []).append(span)
+        return None
+
+    def record_skip_reason(self, record: Mapping, reason: str | None = None) -> str | None:
+        return self.skip_reason(
+            record.get("document_revision_id"),
+            record.get("locator"),
+            record.get("snippet", record.get("text", "")),
+            reason,
+        )
 
 
 def drop_overlapping_evidence(
     items: Sequence[RetrievedEvidence],
+    *,
+    max_items: int | None = None,
+    text_budget: EvidenceTextBudget | None = None,
 ) -> tuple[RetrievedEvidence, ...]:
-    """Drop later evidence whose char span is fully contained in a kept span
-    of the same document revision.
+    """Select complete ranked records within the caller's count and body budget.
 
-    Exact re-deliveries (multi-snapshot unions, tail windows inside a larger
-    window) pay the budget twice for text a kept record already covers. A
-    merely overlapping neighbour always carries unique text and is kept.
-    Records without usable text coordinates are passed through unchanged so
-    page-located sources keep their historical behaviour.
+    A kept span suppresses later spans contained in the same source coordinate
+    space. Partial overlaps and records without comparable offsets remain eligible.
     """
-    tracker = _OverlapTracker()
+    admission = EvidenceAdmission(text_budget)
     kept: list[RetrievedEvidence] = []
     for item in items:
-        if not tracker.admit(item.document_revision_id, item.locator):
+        if max_items is not None and len(kept) >= max_items:
+            break
+        if admission.skip_reason(item.document_revision_id, item.locator, item.text) is not None:
             continue
         kept.append(item)
     return tuple(kept)
@@ -122,7 +166,7 @@ def drop_overlapping_records(
     """
     if len(records) != len(references):
         return list(records), list(references)
-    tracker = _OverlapTracker()
+    admission = EvidenceAdmission()
     seen: set[tuple[str, str]] = set()
     kept_records: list[Any] = []
     kept_references: list[Any] = []
@@ -134,7 +178,7 @@ def drop_overlapping_records(
             if identity in seen:
                 continue
             seen.add(identity)
-        if not tracker.admit(record.get("document_revision_id"), record.get("locator")):
+        if admission.record_skip_reason(record) is not None:
             continue
         kept_records.append(record)
         kept_references.append(reference)
@@ -142,6 +186,8 @@ def drop_overlapping_records(
 
 
 __all__ = [
+    "EvidenceAdmission",
+    "EvidenceTextBudget",
     "MAX_EVIDENCE_EXCERPT_CHARS",
     "drop_overlapping_evidence",
     "drop_overlapping_records",

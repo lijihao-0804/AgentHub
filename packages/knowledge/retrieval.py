@@ -40,6 +40,8 @@ from packages.knowledge.contracts import (
 )
 from packages.knowledge.evidence_plan import assemble_evidence_plan
 from packages.knowledge.evidence_records import (
+    EvidenceAdmission,
+    EvidenceTextBudget,
     drop_overlapping_evidence,
     evidence_record,
     evidence_reference,
@@ -376,6 +378,8 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
         self,
         context: WorkspaceExecutionContext,
         query: RetrievalQuery,
+        *,
+        text_budget: EvidenceTextBudget | None = None,
     ) -> RetrievalResult:
         if "knowledge_run" not in context.permissions:
             raise AgentHubError("FORBIDDEN", "You do not have permission.", 403)
@@ -491,10 +495,8 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
             fusion_trace_results: tuple[RetrievalTraceResult, ...] = ()
             if strategy is RetrievalStrategy.DENSE:
                 fused = tuple(
-                    _FusedCandidate(chunk_id, float(hit.score), rank)
-                    for rank, hit in enumerate(dense_hits, start=1)
-                    for chunk_id in (_payload_chunk_id(hit),)
-                    if chunk_id is not None and math.isfinite(hit.score)
+                    _FusedCandidate(chunk_id, float(score), rank)
+                    for chunk_id, (rank, score) in _ranked_hits(dense_hits).items()
                 )[: query.candidate_top_k]
             else:
                 stage = "fusion"
@@ -683,23 +685,22 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
                         },
                     )
                 )
-            # Dedup runs on the full ranked pool BEFORE any count cut, so a
-            # dropped re-delivery frees its slot for the next ranked record.
-            # Cutting first (the old default-path order) starved the result:
-            # deferred rank-6+ records were never reconsidered.
-            deduped_pool = drop_overlapping_evidence(ranked_evidence)
-            deduped_count = len(deduped_pool)
-            if query.context_budget_bytes is None:
-                evidence = list(deduped_pool[: query.final_top_k])
-            else:
-                evidence = list(deduped_pool)
+            # Only delivered records cover source text. Keep the ranked pool available
+            # until the consumer's byte/body budget and count limit are applied.
             context_selection_metadata: dict[str, Any] | None = None
-            if query.context_budget_bytes is not None:
+            if query.context_budget_bytes is None:
+                evidence = list(
+                    drop_overlapping_evidence(
+                        ranked_evidence, max_items=query.final_top_k, text_budget=text_budget
+                    )
+                )
+            else:
+                admission = EvidenceAdmission(text_budget)
                 if query.evidence_projection == "compact_v1":
                     plan = assemble_evidence_plan(
                         [
                             evidence_record(item, snapshot_id=query.knowledge_snapshot_id)
-                            for item in evidence
+                            for item in ranked_evidence
                         ],
                         [
                             evidence_reference(
@@ -707,12 +708,13 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
                                 snapshot_id=query.knowledge_snapshot_id,
                                 knowledge_base_id=query.knowledge_base_id,
                             )
-                            for item in evidence
+                            for item in ranked_evidence
                         ],
                         budget=query.context_budget_bytes,
                         estimator=lambda text: len(text.encode("utf-8")),
                         citation_prefix="R00001E",
                         max_items=query.final_top_k,
+                        evidence_admission=admission,
                     )
                     if plan is None:
                         selected_records = ()
@@ -732,9 +734,10 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
                         )
                 else:
                     selected_records = select_budgeted_records(
-                        [asdict(item) for item in evidence],
+                        [asdict(item) for item in ranked_evidence],
                         max_bytes=query.context_budget_bytes,
                         max_items=query.final_top_k,
+                        evidence_admission=admission,
                     )
                     selected_bytes = len(
                         json.dumps(
@@ -744,13 +747,12 @@ class HybridKnowledgeRetriever(KnowledgeRetriever):
                             allow_nan=False,
                         ).encode("utf-8")
                     )
-                selected_ids = [record["chunk_id"] for record in selected_records]
-                selected_id_set = set(selected_ids)
-                evidence = [item for item in evidence if item.chunk_id in selected_id_set]
+                selected_ids = {record["chunk_id"] for record in selected_records}
+                evidence = [item for item in ranked_evidence if item.chunk_id in selected_ids]
                 context_selection_metadata = {
                     "limit": query.context_budget_bytes,
                     "before": len(ranked_evidence),
-                    "after_overlap_dedup": deduped_count,
+                    "after_overlap_dedup": len(ranked_evidence) - admission.dropped_overlaps,
                     "after": len(evidence),
                     "bytes": selected_bytes,
                 }
