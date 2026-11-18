@@ -1,0 +1,21 @@
+{
+  "source_commit": "8ba285beb041892b09091b747976665545c281be",
+  "scope": "Paired replay of a previously exposed English SciFact TRAIN cohort. Rebuild every original fixed-window chunk and query embedding from local models. Use no generator or provider API.",
+  "cohort": "confirmation",
+  "queries": 553,
+  "ordered_query_ids_sha256": "24010c64ddecf485b91797bb9487c955a5132598c78db2a84e6aa38ed7f96825",
+  "dense_k": 30,
+  "sparse_k": 30,
+  "rrf_k": 60,
+  "pool": 20,
+  "top_k": 5,
+  "arms": {
+    "rrf20": "Historical baseline. Keep the first 20 chunk-level reciprocal-rank fusion results.",
+    "bm25_refill20": "Historical lexical_refill4. Replace up to four duplicate-source tail chunks with independent BM25 results from previously absent sources.",
+    "rrf_expand": "Let m be the actual number of BM25 additions for this query. Keep the first 20+m original RRF chunks.",
+    "bm25_append": "Keep every baseline chunk and append the same m BM25 additions already chosen by bm25_refill20, in the same order. This changes pool capacity; compare to rrf_expand at identical query-level depth."
+  },
+  "score": "Use real BGE reranking in each arm's original order and batch size 8. Reuse inference only when the same query and entire ordered candidate list are identical. Measure the first five raw chunks before document deduplication.",
+  "evidence": "For each official TRAIN question/document pair with sentence annotations, at least one complete alternative sentence set must be present. Each full sentence must fit inside one returned chunk; sentences in a set may occupy different returned chunks.",
+  "interpretation": "Historical baseline and refill outcomes were already known. The two equal-depth expansion arms are a fixed diagnostic on these same questions. Report all query/source gains and losses, the extra model input count and archive agreement. No parameter search or release gate."
+}

@@ -1,0 +1,64 @@
+{
+  "protocol_source_commit": "8ba285beb041892b09091b747976665545c281be",
+  "git_head_at_measurement": "50fac1d1a7f3d124f930347209fdeecc7980cb4d",
+  "source_files_sha256": {
+    "packages/knowledge/adapters/embeddings.py": "e0ae747329f42ed973b2c79c8b8e3b8b908b634a4bc9266c832cef97f3b89337",
+    "packages/knowledge/adapters/sparse.py": "160fb507ad40208a339c79a43312b01e5d972a1be810b74ecc60e8854c9a35ce",
+    "packages/knowledge/adapters/reranker.py": "25be0de9fc75f91b9335763a2aa0e73d493ab80e0600a88be21cca686d3ce98d",
+    "packages/knowledge/retrieval.py": "f85d3ff977bb97130f695b334a34d52ad236aeb64c0392d1bc4df2bbf7d66436",
+    "packages/knowledge/chunking.py": "aa2b4373dcdbdd4729f6beefe60e5d096e776a61f44f26afa384d9502d2323c7",
+    "benchmarks/public_rag/scifact_recall_index.py": "93674686a559ff1f04fa10414f1271d4c8191b1ba2a3fe6a9ee61a815f2e3606",
+    "benchmarks/public_rag/candidate_recall_methods.py": "b41edac4a39739a6c64ee28d6f941b746be0d76d966c5e5095cf34bad19d94e8",
+    "benchmarks/public_rag/experiments/scifact_retrieval_rebuild/replay.py": "f74e0a94165b6760fd3bb4604f367047fdb9405b7abd8567b31a6fa2e3eb83ad",
+    "benchmarks/public_rag/experiments/scifact_retrieval_rebuild/summary.py": "e6fc57b139b1c1139c1e0302c030c160a27c9e08153f56b89d08ee4e6c6f0555"
+  },
+  "snapshot_sha256": "2453684867babc64462b17543f333d5847956ddb73c474bfd60c349d75c106fe",
+  "source_documents": 5183,
+  "source_chunks": 9189,
+  "encoded_train_queries": 809,
+  "full_stage_input_sha256": {
+    "corpus.jsonl": "dec31c8182f3d744c7d2c09423756fd1d17cbef75808db13ba01cc0aab4d1ac6",
+    "queries.jsonl": "8ff84a7c903f722981cd8d595c022660140c51867b27608a6d4910db86080313",
+    "qrels/train.tsv": "a53f2114831916c096b6c37d9e54da68cef4efdcdbd5ed46533601af972acf1d",
+    "dev-baseline.jsonl": "cf391506ecdc72dc2d65fd0e8a943b078a1386ae2427603b61b4cd294822a4f9",
+    "dev-baseline.meta.json": "89d9e8d76bb546d3a68bd85af3848c264ae47efcc72197e4556b9f35c0720d7d",
+    "pair-token-audit.jsonl": "37c66ed3f50af24f771f0b5cdb2d1f53f5a218d91b208a7d433b5991c952878f"
+  },
+  "official_annotation_archive_sha256": "11c621288d41ac144d29b13b0f8503b3820b7d6e8b1f6ff24dff335c196d76be",
+  "index_versions": {
+    "torch": "2.14.0+cu130",
+    "transformers": "4.57.6",
+    "sentence_transformers": "5.7.0",
+    "gpu": "NVIDIA GeForce RTX 3060 Laptop GPU"
+  },
+  "embedding_model_revision": "5617a9f61b028005a4858fdac845db406aefb181",
+  "reranker_model_revision": "953dc6f6f85a1b2dbfca4c34a2796e7dde08d41e",
+  "reranker_config": {
+    "batch_size": 8,
+    "max_length": 8192,
+    "device": "cuda",
+    "dtype": "torch.float16"
+  },
+  "index_files_sha256": {
+    "manifest.jsonl": "342f99504ee8ed5d517305ea19ddaf704e3b6ddb1d57ea3dd180a40a2e619305",
+    "dense.npy": "683bba44821263f300344aef03220ea314e6c1bc7d936e7a9141ed2e525220f6",
+    "sparse.npz": "4d572c46fb10d8c9d9032dade57d831d43437db766720ba3cc35d0bba7f1d26f",
+    "parent-dense.npy": "c6e8987c973aa63dae8f1599af5df8ee656c53fd369e3e43b3bd3f93cd990e2b",
+    "parent-sparse.npz": "6080e73f0748c8527f803c770ea8800419ac2594f2bb14446d80a75f3a7053b4",
+    "document-ids.json": "26ffac90f3a05c09d48c709e8aa31a9134ce256526ae2cf23db23cc1442da040",
+    "train-query-ids.json": "048b17d159eb0252f2212950ae9c91bf97a5d2aad70fe7dcf014b4973cbcaf59",
+    "train-query-dense.npy": "60b81e76321d9e6788ebe8479205399a3e020ec9a90d10130f0c29df51fc7844"
+  },
+  "index_files_equal_to_archived": {
+    "manifest.jsonl": true,
+    "dense.npy": true,
+    "sparse.npz": true,
+    "parent-dense.npy": true,
+    "parent-sparse.npz": true,
+    "document-ids.json": true,
+    "train-query-ids.json": true,
+    "train-query-dense.npy": true
+  },
+  "protocol_sha256": "6da6d999b37b25547250e38733e8da4bcf90b3923397a51ce84968cd1147c8de",
+  "questions_sha256": "7e532d02c35a5cd9530ecd2072f106c247c18f23fd67905b4d181b65ca91785f"
+}

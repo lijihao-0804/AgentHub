@@ -1,0 +1,697 @@
+{
+  "questions": 553,
+  "positive_pairs": 625,
+  "annotated_questions": 341,
+  "annotated_pairs": 379,
+  "source_components_in_frozen_cohort": 367,
+  "stage_totals": {
+    "rrf20": {
+      "pool_sources": {
+        "pairs": 539,
+        "queries_with_hit": 485,
+        "macro_recall_over_eligible_queries": 0.8645569620253165
+      },
+      "top5_sources": {
+        "pairs": 482,
+        "queries_with_hit": 452,
+        "macro_recall_over_eligible_queries": 0.7945750452079566
+      },
+      "pool_evidence": {
+        "pairs": 357,
+        "queries_with_hit": 325,
+        "macro_recall_over_eligible_queries": 0.946969696969697
+      },
+      "top5_evidence": {
+        "pairs": 342,
+        "queries_with_hit": 319,
+        "macro_recall_over_eligible_queries": 0.9213098729227761
+      }
+    },
+    "bm25_refill20": {
+      "pool_sources": {
+        "pairs": 547,
+        "queries_with_hit": 491,
+        "macro_recall_over_eligible_queries": 0.8772151898734177
+      },
+      "top5_sources": {
+        "pairs": 486,
+        "queries_with_hit": 452,
+        "macro_recall_over_eligible_queries": 0.7968354430379747
+      },
+      "pool_evidence": {
+        "pairs": 348,
+        "queries_with_hit": 321,
+        "macro_recall_over_eligible_queries": 0.9305962854349951
+      },
+      "top5_evidence": {
+        "pairs": 339,
+        "queries_with_hit": 316,
+        "macro_recall_over_eligible_queries": 0.9137341153470185
+      }
+    },
+    "rrf_expand": {
+      "pool_sources": {
+        "pairs": 540,
+        "queries_with_hit": 486,
+        "macro_recall_over_eligible_queries": 0.8663652802893309
+      },
+      "top5_sources": {
+        "pairs": 481,
+        "queries_with_hit": 451,
+        "macro_recall_over_eligible_queries": 0.7927667269439421
+      },
+      "pool_evidence": {
+        "pairs": 358,
+        "queries_with_hit": 326,
+        "macro_recall_over_eligible_queries": 0.9499022482893451
+      },
+      "top5_evidence": {
+        "pairs": 343,
+        "queries_with_hit": 320,
+        "macro_recall_over_eligible_queries": 0.9242424242424242
+      }
+    },
+    "bm25_append": {
+      "pool_sources": {
+        "pairs": 547,
+        "queries_with_hit": 491,
+        "macro_recall_over_eligible_queries": 0.8772151898734177
+      },
+      "top5_sources": {
+        "pairs": 483,
+        "queries_with_hit": 453,
+        "macro_recall_over_eligible_queries": 0.796383363471971
+      },
+      "pool_evidence": {
+        "pairs": 357,
+        "queries_with_hit": 325,
+        "macro_recall_over_eligible_queries": 0.946969696969697
+      },
+      "top5_evidence": {
+        "pairs": 342,
+        "queries_with_hit": 319,
+        "macro_recall_over_eligible_queries": 0.9213098729227761
+      }
+    }
+  },
+  "historical_stage_totals": {
+    "rrf20": {
+      "pool_sources": {
+        "pairs": 539,
+        "queries_with_hit": 485,
+        "macro_recall_over_eligible_queries": 0.8645569620253165
+      },
+      "top5_sources": {
+        "pairs": 482,
+        "queries_with_hit": 452,
+        "macro_recall_over_eligible_queries": 0.7945750452079566
+      },
+      "pool_evidence": {
+        "pairs": 357,
+        "queries_with_hit": 325,
+        "macro_recall_over_eligible_queries": 0.946969696969697
+      },
+      "top5_evidence": {
+        "pairs": 342,
+        "queries_with_hit": 319,
+        "macro_recall_over_eligible_queries": 0.9213098729227761
+      }
+    },
+    "bm25_refill20": {
+      "pool_sources": {
+        "pairs": 547,
+        "queries_with_hit": 491,
+        "macro_recall_over_eligible_queries": 0.8772151898734177
+      },
+      "top5_sources": {
+        "pairs": 486,
+        "queries_with_hit": 452,
+        "macro_recall_over_eligible_queries": 0.7968354430379747
+      },
+      "pool_evidence": {
+        "pairs": 348,
+        "queries_with_hit": 321,
+        "macro_recall_over_eligible_queries": 0.9305962854349951
+      },
+      "top5_evidence": {
+        "pairs": 339,
+        "queries_with_hit": 316,
+        "macro_recall_over_eligible_queries": 0.9137341153470185
+      }
+    }
+  },
+  "historical_source_or_evidence_mismatch_queries": {
+    "rrf20": {
+      "pool_sources": [],
+      "top5_sources": [],
+      "pool_evidence": [],
+      "top5_evidence": []
+    },
+    "bm25_refill20": {
+      "pool_sources": [],
+      "top5_sources": [],
+      "pool_evidence": [],
+      "top5_evidence": []
+    }
+  },
+  "historical_chunk_agreement": {
+    "dense30": {
+      "order_mismatch_queries": [
+        "253",
+        "1186"
+      ],
+      "members_mismatch_queries": []
+    },
+    "sparse30": {
+      "order_mismatch_queries": [],
+      "members_mismatch_queries": []
+    },
+    "rrf20": {
+      "order_mismatch_queries": [],
+      "members_mismatch_queries": []
+    },
+    "rrf_top5": {
+      "order_mismatch_queries": [],
+      "members_mismatch_queries": []
+    }
+  },
+  "paired_changes": {
+    "rrf20_to_bm25_refill20": {
+      "pool_sources": {
+        "gained_pairs": [
+          [
+            "1257",
+            "581832"
+          ],
+          [
+            "246",
+            "8447873"
+          ],
+          [
+            "1112",
+            "1686881"
+          ],
+          [
+            "733",
+            "34469966"
+          ],
+          [
+            "1364",
+            "8290953"
+          ],
+          [
+            "449",
+            "12209494"
+          ],
+          [
+            "838",
+            "15928989"
+          ],
+          [
+            "364",
+            "1550937"
+          ]
+        ],
+        "lost_pairs": [],
+        "zero_to_hit_queries": [
+          "1257",
+          "1112",
+          "733",
+          "1364",
+          "838",
+          "364"
+        ],
+        "hit_to_zero_queries": []
+      },
+      "top5_sources": {
+        "gained_pairs": [
+          [
+            "733",
+            "34469966"
+          ],
+          [
+            "973",
+            "28617573"
+          ],
+          [
+            "178",
+            "27123743"
+          ],
+          [
+            "1364",
+            "8290953"
+          ],
+          [
+            "838",
+            "15928989"
+          ],
+          [
+            "342",
+            "5884524"
+          ],
+          [
+            "364",
+            "1550937"
+          ],
+          [
+            "946",
+            "13083189"
+          ],
+          [
+            "916",
+            "18037805"
+          ]
+        ],
+        "lost_pairs": [
+          [
+            "254",
+            "37424881"
+          ],
+          [
+            "390",
+            "1148122"
+          ],
+          [
+            "423",
+            "8595678"
+          ],
+          [
+            "392",
+            "1148122"
+          ],
+          [
+            "389",
+            "1148122"
+          ]
+        ],
+        "zero_to_hit_queries": [
+          "733",
+          "1364",
+          "838",
+          "364",
+          "916"
+        ],
+        "hit_to_zero_queries": [
+          "254",
+          "390",
+          "423",
+          "392",
+          "389"
+        ]
+      },
+      "pool_evidence": {
+        "gained_pairs": [],
+        "lost_pairs": [
+          [
+            "1159",
+            "12584053"
+          ],
+          [
+            "973",
+            "27446873"
+          ],
+          [
+            "1380",
+            "16322674"
+          ],
+          [
+            "1327",
+            "24241932"
+          ],
+          [
+            "1376",
+            "3944632"
+          ],
+          [
+            "178",
+            "23557241"
+          ],
+          [
+            "378",
+            "11886686"
+          ],
+          [
+            "857",
+            "43334921"
+          ],
+          [
+            "466",
+            "22544171"
+          ]
+        ],
+        "zero_to_hit_queries": [],
+        "hit_to_zero_queries": [
+          "1159",
+          "1376",
+          "857",
+          "466"
+        ]
+      },
+      "top5_evidence": {
+        "gained_pairs": [
+          [
+            "973",
+            "28617573"
+          ],
+          [
+            "178",
+            "27123743"
+          ],
+          [
+            "342",
+            "5884524"
+          ]
+        ],
+        "lost_pairs": [
+          [
+            "1159",
+            "12584053"
+          ],
+          [
+            "973",
+            "27446873"
+          ],
+          [
+            "1380",
+            "16322674"
+          ],
+          [
+            "1327",
+            "24241932"
+          ],
+          [
+            "1376",
+            "3944632"
+          ],
+          [
+            "857",
+            "43334921"
+          ]
+        ],
+        "zero_to_hit_queries": [
+          "342"
+        ],
+        "hit_to_zero_queries": [
+          "1159",
+          "1380",
+          "1376",
+          "857"
+        ]
+      }
+    },
+    "rrf20_to_rrf_expand": {
+      "pool_sources": {
+        "gained_pairs": [
+          [
+            "435",
+            "9500590"
+          ]
+        ],
+        "lost_pairs": [],
+        "zero_to_hit_queries": [
+          "435"
+        ],
+        "hit_to_zero_queries": []
+      },
+      "top5_sources": {
+        "gained_pairs": [],
+        "lost_pairs": [
+          [
+            "423",
+            "8595678"
+          ]
+        ],
+        "zero_to_hit_queries": [],
+        "hit_to_zero_queries": [
+          "423"
+        ]
+      },
+      "pool_evidence": {
+        "gained_pairs": [
+          [
+            "246",
+            "3430789"
+          ]
+        ],
+        "lost_pairs": [],
+        "zero_to_hit_queries": [
+          "246"
+        ],
+        "hit_to_zero_queries": []
+      },
+      "top5_evidence": {
+        "gained_pairs": [
+          [
+            "246",
+            "3430789"
+          ]
+        ],
+        "lost_pairs": [],
+        "zero_to_hit_queries": [
+          "246"
+        ],
+        "hit_to_zero_queries": []
+      }
+    },
+    "rrf20_to_bm25_append": {
+      "pool_sources": {
+        "gained_pairs": [
+          [
+            "1257",
+            "581832"
+          ],
+          [
+            "246",
+            "8447873"
+          ],
+          [
+            "1112",
+            "1686881"
+          ],
+          [
+            "733",
+            "34469966"
+          ],
+          [
+            "1364",
+            "8290953"
+          ],
+          [
+            "449",
+            "12209494"
+          ],
+          [
+            "838",
+            "15928989"
+          ],
+          [
+            "364",
+            "1550937"
+          ]
+        ],
+        "lost_pairs": [],
+        "zero_to_hit_queries": [
+          "1257",
+          "1112",
+          "733",
+          "1364",
+          "838",
+          "364"
+        ],
+        "hit_to_zero_queries": []
+      },
+      "top5_sources": {
+        "gained_pairs": [
+          [
+            "733",
+            "34469966"
+          ],
+          [
+            "1364",
+            "8290953"
+          ],
+          [
+            "838",
+            "15928989"
+          ],
+          [
+            "364",
+            "1550937"
+          ]
+        ],
+        "lost_pairs": [
+          [
+            "390",
+            "1148122"
+          ],
+          [
+            "423",
+            "8595678"
+          ],
+          [
+            "392",
+            "1148122"
+          ]
+        ],
+        "zero_to_hit_queries": [
+          "733",
+          "1364",
+          "838",
+          "364"
+        ],
+        "hit_to_zero_queries": [
+          "390",
+          "423",
+          "392"
+        ]
+      },
+      "pool_evidence": {
+        "gained_pairs": [],
+        "lost_pairs": [],
+        "zero_to_hit_queries": [],
+        "hit_to_zero_queries": []
+      },
+      "top5_evidence": {
+        "gained_pairs": [],
+        "lost_pairs": [],
+        "zero_to_hit_queries": [],
+        "hit_to_zero_queries": []
+      }
+    },
+    "rrf_expand_to_bm25_append": {
+      "pool_sources": {
+        "gained_pairs": [
+          [
+            "1257",
+            "581832"
+          ],
+          [
+            "246",
+            "8447873"
+          ],
+          [
+            "1112",
+            "1686881"
+          ],
+          [
+            "733",
+            "34469966"
+          ],
+          [
+            "1364",
+            "8290953"
+          ],
+          [
+            "449",
+            "12209494"
+          ],
+          [
+            "838",
+            "15928989"
+          ],
+          [
+            "364",
+            "1550937"
+          ]
+        ],
+        "lost_pairs": [
+          [
+            "435",
+            "9500590"
+          ]
+        ],
+        "zero_to_hit_queries": [
+          "1257",
+          "1112",
+          "733",
+          "1364",
+          "838",
+          "364"
+        ],
+        "hit_to_zero_queries": [
+          "435"
+        ]
+      },
+      "top5_sources": {
+        "gained_pairs": [
+          [
+            "733",
+            "34469966"
+          ],
+          [
+            "1364",
+            "8290953"
+          ],
+          [
+            "838",
+            "15928989"
+          ],
+          [
+            "364",
+            "1550937"
+          ]
+        ],
+        "lost_pairs": [
+          [
+            "390",
+            "1148122"
+          ],
+          [
+            "392",
+            "1148122"
+          ]
+        ],
+        "zero_to_hit_queries": [
+          "733",
+          "1364",
+          "838",
+          "364"
+        ],
+        "hit_to_zero_queries": [
+          "390",
+          "392"
+        ]
+      },
+      "pool_evidence": {
+        "gained_pairs": [],
+        "lost_pairs": [
+          [
+            "246",
+            "3430789"
+          ]
+        ],
+        "zero_to_hit_queries": [],
+        "hit_to_zero_queries": [
+          "246"
+        ]
+      },
+      "top5_evidence": {
+        "gained_pairs": [],
+        "lost_pairs": [
+          [
+            "246",
+            "3430789"
+          ]
+        ],
+        "zero_to_hit_queries": [],
+        "hit_to_zero_queries": [
+          "246"
+        ]
+      }
+    }
+  },
+  "extra_depth_distribution": {
+    "0": 99,
+    "1": 151,
+    "2": 141,
+    "3": 98,
+    "4": 64
+  },
+  "logical_scored_pairs": {
+    "rrf20": 11060,
+    "bm25_refill20": 11060,
+    "rrf_expand": 12043,
+    "bm25_append": 12043
+  },
+  "fresh_scored_pairs_after_identical_input_reuse": 40139
+}
