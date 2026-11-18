@@ -347,7 +347,9 @@ async def test_atomic_claim_budget_under_concurrent_delivery(db_factory, tmp_pat
 
     async def claim():
         async with db_factory() as session:
-            return await claim_ingestion_job(session, job_id=job_id, lease_seconds=60, settings=settings)
+            return await claim_ingestion_job(
+                session, job_id=job_id, lease_seconds=60, settings=settings
+            )
 
     claims = await asyncio.gather(*(claim() for _ in range(8)))
     winners = [item for item in claims if item]

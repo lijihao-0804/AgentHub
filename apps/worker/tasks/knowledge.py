@@ -8,7 +8,7 @@ from dataclasses import dataclass, replace
 from itertools import batched
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.exc import SQLAlchemyError
 
 from apps.worker.celery_app import celery_app
@@ -41,7 +41,12 @@ from packages.knowledge.ingestion import (
     release_ingestion_for_retry,
     renew_ingestion_lease,
 )
-from packages.knowledge.models import DocumentChunk, IngestionStage
+from packages.knowledge.models import (
+    DocumentChunk,
+    IngestionJob,
+    IngestionJobStatus,
+    IngestionStage,
+)
 from packages.knowledge.parser import DocumentParseError, ProcessDocumentParser
 from packages.knowledge.point_ids import deterministic_point_id
 from packages.knowledge.vector_cache import encoder_fingerprint, resolve_document_vectors
@@ -101,18 +106,51 @@ async def _read_blob(store: LocalBlobStore, blob_key: str) -> bytes:
     return bytes(content)
 
 
-async def _renew_lease_loop(factory, claim: ClaimedIngestionJob, settings: Settings) -> None:
-    while True:
-        await asyncio.sleep(settings.knowledge_ingestion_lease_renewal_seconds)
-        async with factory() as session:
-            renewed = await renew_ingestion_lease(
-                session,
-                job_id=claim.id,
-                lease_token=claim.lease_token,
-                lease_seconds=settings.knowledge_ingestion_lease_seconds,
-            )
-        if not renewed:
-            return
+class _LeaseLost(Exception):
+    pass
+
+
+class _ClaimGuard:
+    def __init__(self, factory, claim: ClaimedIngestionJob):
+        self.factory = factory
+        self.claim = claim
+        self.lost = asyncio.Event()
+
+    async def check(self) -> None:
+        if not self.lost.is_set():
+            async with self.factory() as session:
+                owned = await session.scalar(
+                    select(IngestionJob.id).where(
+                        IngestionJob.id == self.claim.id,
+                        IngestionJob.status == IngestionJobStatus.PROCESSING,
+                        IngestionJob.lease_token == self.claim.lease_token,
+                        IngestionJob.lease_expires_at > func.clock_timestamp(),
+                    )
+                )
+            if owned is not None and not self.lost.is_set():
+                return
+            self.lost.set()
+        raise _LeaseLost
+
+
+async def _renew_lease_loop(guard: _ClaimGuard, settings: Settings) -> None:
+    try:
+        while True:
+            await asyncio.sleep(settings.knowledge_ingestion_lease_renewal_seconds)
+            async with guard.factory() as session:
+                renewed = await renew_ingestion_lease(
+                    session,
+                    job_id=guard.claim.id,
+                    lease_token=guard.claim.lease_token,
+                    lease_seconds=settings.knowledge_ingestion_lease_seconds,
+                )
+            if not renewed:
+                break
+    except SQLAlchemyError:
+        logger.warning(
+            "knowledge_ingestion_lease_unconfirmed", extra={"job_id": str(guard.claim.id)}
+        )
+    guard.lost.set()
 
 
 async def _cancel_renewal(task: asyncio.Task[None]) -> None:
@@ -233,8 +271,10 @@ async def _index_claim(
     dense: DenseEmbedder,
     sparse: SparseEncoder,
     index: VectorIndex,
+    guard: _ClaimGuard,
     cache_enabled: bool = True,
 ) -> _IndexingOutcome:
+    await guard.check()
     chunks = await _load_chunks(factory, claim.document_revision_id)
     if not chunks:
         return _IndexingOutcome(
@@ -247,22 +287,34 @@ async def _index_claim(
 
     point_count = 0
     try:
+        await guard.check()
         dense_key = await asyncio.to_thread(encoder_fingerprint, dense) if cache_enabled else None
+        await guard.check()
         sparse_key = await asyncio.to_thread(encoder_fingerprint, sparse) if cache_enabled else None
         for batch in batched(chunks, _INDEX_BATCH_SIZE):
-            if dense_key is None and sparse_key is None:
-                records = await asyncio.to_thread(_vector_records, claim, batch, dense, sparse)
-            else:
-                texts = [chunk.text for chunk in batch]
-                dense_vectors = await resolve_document_vectors(
-                    factory, claim.workspace_id, texts, dense.embed_documents,
-                    modality="dense", fingerprint=dense_key, dimension=dense.dimension,
-                )
-                sparse_vectors = await resolve_document_vectors(
-                    factory, claim.workspace_id, texts, sparse.encode_documents,
-                    modality="sparse", fingerprint=sparse_key,
-                )
-                records = _assemble_records(claim, batch, dense_vectors, sparse_vectors)
+            texts = [chunk.text for chunk in batch]
+            await guard.check()
+            dense_vectors = await resolve_document_vectors(
+                factory,
+                claim.workspace_id,
+                texts,
+                dense.embed_documents,
+                modality="dense",
+                fingerprint=dense_key,
+                dimension=dense.dimension,
+                check_owner=guard.check,
+            )
+            await guard.check()
+            sparse_vectors = await resolve_document_vectors(
+                factory,
+                claim.workspace_id,
+                texts,
+                sparse.encode_documents,
+                modality="sparse",
+                fingerprint=sparse_key,
+                check_owner=guard.check,
+            )
+            records = _assemble_records(claim, batch, dense_vectors, sparse_vectors)
             if point_count == 0:
                 if claim.stage == IngestionStage.EMBEDDING:
                     async with factory() as session:
@@ -275,9 +327,16 @@ async def _index_claim(
                         )
                     if not transitioned:
                         return _IndexingOutcome(None, None, True, len(chunks), 0)
+                await guard.check()
                 await asyncio.to_thread(index.ensure_collection)
+            # Once submitted, the external write may finish after takeover.
+            # Replay uses the same immutable revision and deterministic point ids.
+            await guard.check()
             await asyncio.to_thread(index.upsert, records)
             point_count += len(records)
+        await guard.check()
+    except _LeaseLost:
+        return _IndexingOutcome(None, None, True, len(chunks), point_count)
     except KnowledgeProviderError as exc:
         error = (exc.code, exc.message)
         if provider_error_is_retryable(exc.code):
@@ -329,14 +388,17 @@ async def _process_knowledge_ingestion(
         point_count = 0
         final_status = "succeeded"
         failure_code: str | None = None
-        renewal_task = asyncio.create_task(_renew_lease_loop(factory, claim, settings))
+        guard = _ClaimGuard(factory, claim)
+        renewal_task = asyncio.create_task(_renew_lease_loop(guard, settings))
         terminal_error: tuple[str, str] | None = None
         retryable_error: tuple[str, str] | None = None
         stale = False
         try:
             try:
                 if claim.stage in (IngestionStage.PARSING, IngestionStage.CHUNKING):
+                    await guard.check()
                     content = await _read_blob(LocalBlobStore(settings.blob_root), claim.blob_key)
+                    await guard.check()
                     parsed = await ProcessDocumentParser(
                         timeout_seconds=settings.knowledge_parser_timeout_seconds,
                         max_pdf_pages=settings.knowledge_max_pdf_pages,
@@ -354,6 +416,7 @@ async def _process_knowledge_ingestion(
                         if not transitioned:
                             stale = True
                     if not stale:
+                        await guard.check()
                         try:
                             assert claim.chunking_policy is not None
                             chunks = await asyncio.to_thread(
@@ -374,6 +437,7 @@ async def _process_knowledge_ingestion(
                                 "The document could not be chunked.",
                             )
                         else:
+                            await guard.check()
                             async with factory() as session:
                                 persisted = await persist_chunks_and_advance(
                                     session,
@@ -387,6 +451,7 @@ async def _process_knowledge_ingestion(
                                 claim = replace(claim, stage=IngestionStage.EMBEDDING)
 
                 if not stale and terminal_error is None:
+                    await guard.check()
                     components = _indexing_components(settings, factory=indexing_factory)
                     outcome = await _index_claim(
                         factory,
@@ -394,6 +459,7 @@ async def _process_knowledge_ingestion(
                         dense=components.dense,
                         sparse=components.sparse,
                         index=components.index,
+                        guard=guard,
                         cache_enabled=settings.knowledge_vector_cache_enabled,
                     )
                     terminal_error = outcome.terminal_error
@@ -401,6 +467,8 @@ async def _process_knowledge_ingestion(
                     stale = outcome.stale
                     chunk_count = max(chunk_count, outcome.chunk_count)
                     point_count = outcome.point_count
+            except _LeaseLost:
+                stale = True
             except BlobStoreError:
                 retryable_error = (
                     "BLOB_TEMPORARY_FAILURE",

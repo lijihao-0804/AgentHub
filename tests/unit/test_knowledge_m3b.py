@@ -176,3 +176,26 @@ def test_fixed_window_locators_add_block_base_offset() -> None:
     assert all(span[0] >= 1_500 for span in second_block)
     # Windows stay inside their own block's base range.
     assert all(span[1] <= 3_000 for span in second_block)
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("renewal_error", [False, True])
+async def test_renewal_loss_stops_next_boundary_without_new_db_work(monkeypatch, renewal_error):
+    from contextlib import nullcontext
+    from types import SimpleNamespace
+    from unittest.mock import AsyncMock, Mock
+
+    from sqlalchemy.exc import SQLAlchemyError
+
+    from apps.worker.tasks import knowledge as worker
+
+    factory = Mock(return_value=nullcontext(None))
+    guard = worker._ClaimGuard(factory, SimpleNamespace(id=uuid4(), lease_token="old"))
+    settings = SimpleNamespace(
+        knowledge_ingestion_lease_renewal_seconds=0, knowledge_ingestion_lease_seconds=60,
+    )
+    renew = AsyncMock(return_value=False, side_effect=SQLAlchemyError() if renewal_error else None)
+    monkeypatch.setattr(worker, "renew_ingestion_lease", renew)
+    await worker._renew_lease_loop(guard, settings)
+    with pytest.raises(worker._LeaseLost):
+        await guard.check()
+    factory.assert_called_once()

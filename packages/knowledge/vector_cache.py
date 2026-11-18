@@ -12,7 +12,7 @@ import hashlib
 import math
 import re
 import struct
-from collections.abc import Callable, Sequence
+from collections.abc import Awaitable, Callable, Sequence
 from uuid import UUID
 
 from sqlalchemy import delete, select
@@ -89,6 +89,7 @@ async def resolve_document_vectors(
     modality: str,
     fingerprint: str | None,
     dimension: int | None = None,
+    check_owner: Callable[[], Awaitable[None]] | None = None,
 ):
     """Resolve one modality in input order. A None identity always does a full encode."""
     if not fingerprint:
@@ -128,7 +129,11 @@ async def resolve_document_vectors(
     missing = [k for k in distinct if k not in vectors]
     if missing:
         # No database transaction or connection is held over model inference.
+        if check_owner is not None:
+            await check_owner()
         encoded = await asyncio.to_thread(encode, [distinct[k] for k in missing])
+        if check_owner is not None:
+            await check_owner()
         if len(encoded) != len(missing):
             raise _invalid()
         rows = []
