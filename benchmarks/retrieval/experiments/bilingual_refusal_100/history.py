@@ -61,6 +61,7 @@ from packages.knowledge.composition import RetrievalComponents
 from packages.knowledge.models import KnowledgeSnapshot
 from packages.model_gateway.adapters.litellm.provider_http import GuardedProviderTransport
 from packages.model_gateway.credentials import ProviderCredentialCipher
+from scripts.aliyun_api_smoke import check_url
 
 from .policy import expected_prompt
 
@@ -379,7 +380,8 @@ async def run(args):
     meter = CloudTableMeter(
         directory / "receipts.jsonl", max_calls=2 * len(cases), route=fake if args.replay else None
     )
-    if meter.route.model != MODEL or meter.route.base_url != fake.base_url:
+    check_url(meter.route.base_url, provider=True)
+    if meter.route.model != MODEL or meter.route.provider != fake.provider:
         raise ValueError("Expected the frozen Beijing provider and registered model.")
     settings = Settings(
         _env_file=None,

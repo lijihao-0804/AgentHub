@@ -1,0 +1,87 @@
+{
+  "schema": "bilingual_refusal_100_source_freeze_v1",
+  "frozen_at_utc": "2026-11-18T06:03:11.375210+00:00",
+  "historical_repository_head": "4ce80094b8bbe07da430414085528166fae303db",
+  "arms_observed_by_question_author_before_freeze": 0,
+  "dataset": {
+    "cases": 100,
+    "distinct_documents": 100,
+    "language_disposition": {
+      "en_answerable": 25,
+      "en_unanswerable": 25,
+      "zh_answerable": 25,
+      "zh_unanswerable": 25
+    },
+    "cases_sha256": "9c80fe161866687dc348a3061144b8bf24a22eaee75ccb5ab49ae67fbdc2319b",
+    "documents_sha256": "e5e72e444d022a76fa7a80924a38fcea0f1038ce4230b9e00c9c7fc3da2c4ff5",
+    "max_document_bytes": 1078,
+    "source_sha256": {
+      "musique": "83a75b1e11e4e9bb8f8308e72ac40ca617ae4431b3a0d955b61cab259248490a",
+      "cmrc2018": "5497aa2f81908e31d6b0e27d99b1f90ab63a8f58fa92fffe5d17cf62eba0c212"
+    }
+  },
+  "design": {
+    "documents_per_question": 1,
+    "questions_per_article": 1,
+    "parallel_or_translated_question_pairs": 0,
+    "source_language_matches_question_language": 100,
+    "questions_written_for_this_study": 100,
+    "eligible_data": "MuSiQue answerable TRAIN distractor paragraphs and CMRC 2018 TRAIN passages; Wikipedia originals in the question language.",
+    "unit": "One independent question and unique article per pair; both trial arms receive the identical frozen article."
+  },
+  "source_release": {
+    "musique": {
+      "revision": "922ac98f19a201998dbdae6d7f2887a5258dbdeb",
+      "asset_manifest": "benchmarks/public_rag/sources.json",
+      "split": "musique_ans_v1.0_train.jsonl"
+    },
+    "cmrc2018": {
+      "revision": "c0eb1b6ba219847457e6af3180da722bbeb656af",
+      "base_url": "https://raw.githubusercontent.com/ymcui/cmrc2018/c0eb1b6ba219847457e6af3180da722bbeb656af/squad-style-data/",
+      "split_file_sha256": {
+        "train": "5497aa2f81908e31d6b0e27d99b1f90ab63a8f58fa92fffe5d17cf62eba0c212",
+        "dev": "e9ff74231f05c230c6fa88b84441ee334d97234cbb610991cd94b82db00c7f1f",
+        "trial": "f3fae95b57da8e03afb2b57467dd221417060ef4d82db13bf22fc88589f3a6f3"
+      }
+    }
+  },
+  "exposure": {
+    "historical_commit": "4ce80094b8bbe07da430414085528166fae303db",
+    "historical_json_files": 1016,
+    "historical_file_tree_lf_sha256": "bd2f6c033f36158136479a06cefd91cce3997c4f4ee6c58176c164110eef4ff8",
+    "prior_first_refusal_cases_lf_sha256": "f5d5a9df7d42474156ac74f11532b7d6f940f07c126bbb9322d4075463f5a64c",
+    "historical_normalized_questions": 1632,
+    "historical_musique_records": 2639,
+    "historical_cmrc_passage_ids": 0,
+    "excluded_titles": 52437,
+    "excluded_passage_digests": 64305,
+    "upstream_normalized_questions": 44241,
+    "same_article_upstream_questions": 215,
+    "same_article_upstream_questions_sha256": "2388a09c9729bcc04c7339c557ba01e5d90eca91e1e89da542f8e43a875cb33a",
+    "overlaps": {
+      "prior_study_document_or_question": [],
+      "historical_record": [],
+      "historical_or_excluded_split_title": [],
+      "historical_or_excluded_split_passage": [],
+      "historical_question_text": [],
+      "upstream_question_text": []
+    }
+  },
+  "author_review": {
+    "proposition_review": "The author checked supported targets or missing requested facts against all 100 complete passages and compared source-related upstream train questions. No selected question reproduces an upstream request or a question from the first 100.",
+    "cross_language_topics": "Human-reviewed topic aliases, not Wikidata-verified canonical IDs. The two sets use different Wikipedia articles and are not parallel translations.",
+    "coverage": "The frozen local receipt tree and recorded previous study are observable. Unrecorded prior uses and language-model pretraining are outside the audit."
+  },
+  "artifacts_lf_sha256": {
+    "cases.json": "f8c374f0e4ba7e76c807f4c36c9b1cf81c704049703fe1a5146567c89926e29e",
+    "dataset.py": "fc36d1106c87a30e0b6e546a95b89541f327b130643ddf6d02c9592390987bbc",
+    "scoring.py": "d0a291a99e44158879c3cc984624496ac4b99d5bc24d3aa213ea352c060d7211",
+    "verify.py": "5829f730a83f94c329c36ea57a3113d63e92c30295b91c6ed7e33067dd0ce0bc",
+    "rubric.md": "fa776956770cee7cfada3d4bb73eba9347292b493809bb9c3e0a025719e679f6",
+    "../first_refusal_100/dataset.py": "d403fc0e4c1f7d4fd8f7d6ef9ac3157778be673ba740a93ebfb27d65319e4df4",
+    "../first_refusal_100/scoring.py": "4187f6fa8ea6db771b2c48a35ba647d4ce094bf98d7441cb66bc3e11992b8207"
+  },
+  "artifacts_bundle_sha256": "7511d27f6d67fa703a13e44a6ce79dca87185300328bd634af2988b5529d5f6f",
+  "materialized_manifest_file_sha256": "0a3823f79116ea9007ead62f3caa3419c0ab2c1e5e43d8d2f3fdfba8977713a5",
+  "materialized_manifest_canonical_sha256": "20f89fcef912b5202bf8d81b893ef38fcce0dae431566d558ace4c7d23717937"
+}

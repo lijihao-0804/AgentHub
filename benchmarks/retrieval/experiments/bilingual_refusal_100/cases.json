@@ -1,0 +1,3142 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "id": "B001",
+      "doc_id": "D15da2ec507d2",
+      "source_kind": "musique",
+      "language": "en",
+      "locator": {
+        "line": 6200,
+        "record": "2hop__143071_737459",
+        "paragraph": 3
+      },
+      "document_sha256": "686b63c665c2c4fc126c59c03b63a289784263dbee2cc5119cccd784ef855a7b",
+      "topic_aliases_en": [
+        "Front-wheel drive"
+      ],
+      "question": "Does the engine drive the rear wheels in the front-wheel-drive layout described here?",
+      "answerable": true,
+      "family": "supported_negative",
+      "target": "No. It drives the front wheels only.",
+      "facets": [
+        {
+          "aliases": [
+            "no",
+            "only the front",
+            "front wheels only",
+            "does not",
+            "doesn't",
+            "not the rear"
+          ],
+          "support": [
+            [
+              119,
+              158
+            ]
+          ]
+        }
+      ],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B002",
+      "doc_id": "Dc06b9b27798a",
+      "source_kind": "musique",
+      "language": "en",
+      "locator": {
+        "line": 9041,
+        "record": "2hop__740038_1136",
+        "paragraph": 10
+      },
+      "document_sha256": "456aa16b94a13df519bd7f1b9f51fb1ca10e41a4e77fc9a823f22a9ee6906da2",
+      "topic_aliases_en": [
+        "Dark (TV series)"
+      ],
+      "question": "On which day in March 2017 did principal photography for Dark wrap?",
+      "answerable": false,
+      "family": "chronology",
+      "target": "The start is dated to the day, while the end is dated only to March 2017.",
+      "facets": [],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B003",
+      "doc_id": "D2d2dcd7191f1",
+      "source_kind": "musique",
+      "language": "en",
+      "locator": {
+        "line": 11075,
+        "record": "2hop__106753_159106",
+        "paragraph": 1
+      },
+      "document_sha256": "ccdae56067ff59539e58eed71285eb2efa207f1a81e7f1b3c29e76bf931cdc0b",
+      "topic_aliases_en": [
+        "Shinji Harada"
+      ],
+      "question": "What was unusual about the Oricon standings of Harada’s first three singles when they were all charting?",
+      "answerable": true,
+      "family": "chart_achievement",
+      "target": "All three ranked in the top twenty at the same time.",
+      "facets": [
+        {
+          "aliases": [
+            "top twenty",
+            "top 20"
+          ],
+          "support": [
+            [
+              245,
+              322
+            ]
+          ]
+        },
+        {
+          "aliases": [
+            "same time",
+            "simultaneously",
+            "at once",
+            "together"
+          ],
+          "support": [
+            [
+              245,
+              322
+            ]
+          ]
+        }
+      ],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B004",
+      "doc_id": "D8c985f608682",
+      "source_kind": "musique",
+      "language": "en",
+      "locator": {
+        "line": 7749,
+        "record": "2hop__445192_140497",
+        "paragraph": 12
+      },
+      "document_sha256": "703b60162a9e31cd6860d3c3f82366863048fa8023babd43b29545bb0d3bef09",
+      "topic_aliases_en": [
+        "Ladies of the Big House"
+      ],
+      "question": "How many minutes long was the version of Ladies of the Big House released by Paramount?",
+      "answerable": false,
+      "family": "duration",
+      "target": "The film’s release and credits are supplied without its running time.",
+      "facets": [],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B005",
+      "doc_id": "Dd384700a7251",
+      "source_kind": "musique",
+      "language": "en",
+      "locator": {
+        "line": 13882,
+        "record": "2hop__105152_80243",
+        "paragraph": 11
+      },
+      "document_sha256": "ed870349efa03880d792a4d1b08df706f0d8a0537a8a30beb9ea17f15ff38444",
+      "topic_aliases_en": [
+        "Something in My Heart"
+      ],
+      "question": "Which chart gave “Something in My Heart” the higher peak, and what was its peak on each of the two charts?",
+      "answerable": true,
+      "family": "paired_ranks",
+      "target": "It reached number one on Canada’s RPM Country Tracks and number two on Billboard Hot Country Singles.",
+      "facets": [
+        {
+          "aliases": [
+            "number one",
+            "number 1",
+            "first",
+            "1"
+          ],
+          "support": [
+            [
+              312,
+              358
+            ]
+          ]
+        },
+        {
+          "aliases": [
+            "number two",
+            "number 2",
+            "second",
+            "2"
+          ],
+          "support": [
+            [
+              243,
+              290
+            ]
+          ]
+        }
+      ],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B006",
+      "doc_id": "Da385145b8828",
+      "source_kind": "musique",
+      "language": "en",
+      "locator": {
+        "line": 11207,
+        "record": "2hop__160069_4697",
+        "paragraph": 16
+      },
+      "document_sha256": "0993dc1d485afdf0f3b7477b4246422236e329cb36bdd890712ffcdf289daf09",
+      "topic_aliases_en": [
+        "Shadow Chasers"
+      ],
+      "question": "Which network showed the Shadow Chasers episodes ABC did not show, and how many were there?",
+      "answerable": true,
+      "family": "paired_quantity",
+      "target": "The Armed Forces Network showed four episodes.",
+      "facets": [
+        {
+          "aliases": [
+            "Armed Forces Network",
+            "AFN"
+          ],
+          "support": [
+            [
+              214,
+              260
+            ]
+          ]
+        },
+        {
+          "aliases": [
+            "four",
+            "4"
+          ],
+          "support": [
+            [
+              214,
+              260
+            ]
+          ]
+        }
+      ],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B007",
+      "doc_id": "Dafeecbc1203b",
+      "source_kind": "cmrc2018",
+      "language": "zh",
+      "locator": {
+        "article": "TRAIN_1314",
+        "passage": "TRAIN_1314"
+      },
+      "document_sha256": "339a2b71ca61fecf8c4d908e7264c0243888fbe87dd927633b1001a9c797e9f8",
+      "topic_aliases_en": [
+        "Taojie, Guangzhou",
+        "Tao Street"
+      ],
+      "question": "喜欢收集唱片的人，在陶街可以买到文中点名的哪一种唱片？",
+      "answerable": true,
+      "family": "merchandise",
+      "target": "黑胶唱片。",
+      "facets": [
+        {
+          "aliases": [
+            "黑胶",
+            "黑膠"
+          ],
+          "support": [
+            [
+              230,
+              258
+            ]
+          ]
+        }
+      ],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B008",
+      "doc_id": "D3fbf4235b6fa",
+      "source_kind": "cmrc2018",
+      "language": "zh",
+      "locator": {
+        "article": "TRAIN_3523",
+        "passage": "TRAIN_3523"
+      },
+      "document_sha256": "b1efdcdfe2166b1403cf73dd47dcc5171ebd9ad2e4a6390ad661ef6e12ebe0e6",
+      "topic_aliases_en": [
+        "Mastacembelus armatus",
+        "Zig-zag eel"
+      ],
+      "question": "大刺鳅身体后部连成一片的是哪三种鳍？",
+      "answerable": true,
+      "family": "anatomy",
+      "target": "臀鳍、背鳍和尾鳍。",
+      "facets": [
+        {
+          "aliases": [
+            "臀鳍",
+            "臀鰭"
+          ],
+          "support": [
+            [
+              151,
+              170
+            ]
+          ]
+        },
+        {
+          "aliases": [
+            "背鳍",
+            "背鰭"
+          ],
+          "support": [
+            [
+              151,
+              170
+            ]
+          ]
+        },
+        {
+          "aliases": [
+            "尾鳍",
+            "尾鰭"
+          ],
+          "support": [
+            [
+              151,
+              170
+            ]
+          ]
+        }
+      ],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B009",
+      "doc_id": "Dd8e8338bb3df",
+      "source_kind": "cmrc2018",
+      "language": "zh",
+      "locator": {
+        "article": "TRAIN_3115",
+        "passage": "TRAIN_3115"
+      },
+      "document_sha256": "b28efe81a75aa1cde964fa6b2d5a9e2910c8bdee37b3fb93c02031fe9880eeae",
+      "topic_aliases_en": [
+        "He Guangbei"
+      ],
+      "question": "和广北在中国银行工作时先后到过哪两个海外分行？",
+      "answerable": true,
+      "family": "career_path",
+      "target": "先到纽约分行，后到巴黎分行。",
+      "facets": [
+        {
+          "aliases": [
+            "纽约",
+            "紐約"
+          ],
+          "support": [
+            [
+              183,
+              197
+            ]
+          ]
+        },
+        {
+          "aliases": [
+            "巴黎"
+          ],
+          "support": [
+            [
+              183,
+              197
+            ]
+          ]
+        }
+      ],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B010",
+      "doc_id": "D24c8c1374df0",
+      "source_kind": "cmrc2018",
+      "language": "zh",
+      "locator": {
+        "article": "TRAIN_2356",
+        "passage": "TRAIN_2356"
+      },
+      "document_sha256": "cf14c9353e0cf95df351656ba4e103be38dc466ea9af9dc09b17a291bb9d46d4",
+      "topic_aliases_en": [
+        "Jiankang Shilu",
+        "The Veritable Record of Jiankang"
+      ],
+      "question": "《建康实录》原有二十卷，材料说其中有多少卷已经完全佚失？",
+      "answerable": false,
+      "family": "quantity",
+      "target": "材料说全书二十卷、现已残缺，没有交代完全佚失的卷数。",
+      "facets": [],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B011",
+      "doc_id": "D4111f0c9adfe",
+      "source_kind": "musique",
+      "language": "en",
+      "locator": {
+        "line": 7534,
+        "record": "2hop__778900_37927",
+        "paragraph": 17
+      },
+      "document_sha256": "88880afb5a6fa35702265beaf294e454eac3fe6744bdf74d5cf1b3205d43cc0b",
+      "topic_aliases_en": [
+        "Nilgiri wood pigeon"
+      ],
+      "question": "What elevation range in metres does the passage give for the forests where the Nilgiri wood pigeon forages?",
+      "answerable": false,
+      "family": "measurement",
+      "target": "It describes hill forests and canopy foraging without giving altitude bounds.",
+      "facets": [],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B012",
+      "doc_id": "Da26e187c6a89",
+      "source_kind": "musique",
+      "language": "en",
+      "locator": {
+        "line": 13118,
+        "record": "2hop__80584_158749",
+        "paragraph": 17
+      },
+      "document_sha256": "569581ec79b285bff5073a0da20b40c4879c149034efb5c3265ea90072be9cf9",
+      "topic_aliases_en": [
+        "Carol Sente"
+      ],
+      "question": "Who took over the 59th Representative District seat when Sente’s tenure ended?",
+      "answerable": false,
+      "family": "succession",
+      "target": "Her district and dates are given, but her successor is unnamed.",
+      "facets": [],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B013",
+      "doc_id": "D4dac74fa9a8a",
+      "source_kind": "musique",
+      "language": "en",
+      "locator": {
+        "line": 1339,
+        "record": "2hop__54347_9509",
+        "paragraph": 18
+      },
+      "document_sha256": "e276b74242a936e23b47260801040b1b3ff07941524a5a079626371945ffe1a8",
+      "topic_aliases_en": [
+        "Txindoki"
+      ],
+      "question": "What physical feature accounts for Txindoki’s “Basque Matterhorn” nickname?",
+      "answerable": true,
+      "family": "nickname",
+      "target": "Its pyramidal shape.",
+      "facets": [
+        {
+          "aliases": [
+            "pyramidal",
+            "pyramid shaped",
+            "pyramid shape",
+            "pyramid-like"
+          ],
+          "support": [
+            [
+              316,
+              375
+            ]
+          ]
+        }
+      ],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B014",
+      "doc_id": "D2240d1b7adeb",
+      "source_kind": "cmrc2018",
+      "language": "zh",
+      "locator": {
+        "article": "TRAIN_2582",
+        "passage": "TRAIN_2582"
+      },
+      "document_sha256": "14f677523d7f926a0c67d814cfa45de7eb70a5d90b9a965d456278dde2895ecb",
+      "topic_aliases_en": [
+        "Complex sentence",
+        "Dependent clause",
+        "Subordinate clause"
+      ],
+      "question": "例句下的注释把从句主格和主句主格分别标成什么？",
+      "answerable": true,
+      "family": "clause_roles",
+      "target": "从句主格用 no，主句主格用 wa。",
+      "facets": [
+        {
+          "aliases": [
+            "no"
+          ],
+          "support": [
+            [
+              126,
+              136
+            ]
+          ]
+        },
+        {
+          "aliases": [
+            "wa"
+          ],
+          "support": [
+            [
+              137,
+              147
+            ]
+          ]
+        }
+      ],
+      "neutral_aliases": [
+        "no, wa"
+      ]
+    },
+    {
+      "id": "B015",
+      "doc_id": "Dada1304483dd",
+      "source_kind": "cmrc2018",
+      "language": "zh",
+      "locator": {
+        "article": "TRAIN_3070",
+        "passage": "TRAIN_3070"
+      },
+      "document_sha256": "4d190a056a44a4d4c21d6ed5ccf88101e33421736242a17a97838843acc2b35f",
+      "topic_aliases_en": [
+        "Saber-toothed cat",
+        "Saber-tooth cat",
+        "Sabre-toothed cat",
+        "Saber-toothed tiger"
+      ],
+      "question": "材料给出的剑齿虎下犬齿最长能有多少厘米？",
+      "answerable": false,
+      "family": "measurement",
+      "target": "20厘米是上犬齿的最大长度，材料没有给出下犬齿的长度上限。",
+      "facets": [],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B016",
+      "doc_id": "Dc328454e7b27",
+      "source_kind": "cmrc2018",
+      "language": "zh",
+      "locator": {
+        "article": "TRAIN_2674",
+        "passage": "TRAIN_2674"
+      },
+      "document_sha256": "8c01993b0355839eb00eda9a2405b908831828a8af1b7fafea0f8c19499279a5",
+      "topic_aliases_en": [
+        "Guangdong Chao Opera Theatre",
+        "Guangdong Chaozhou Opera Theatre",
+        "Guangdong Teochew Opera Theatre"
+      ],
+      "question": "广东潮剧院主演的彩色电影《荔镜记》在文中署名的导演是谁？",
+      "answerable": true,
+      "family": "directing_credit",
+      "target": "朱石麟。",
+      "facets": [
+        {
+          "aliases": [
+            "朱石麟"
+          ],
+          "support": [
+            [
+              179,
+              194
+            ]
+          ]
+        }
+      ],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B017",
+      "doc_id": "Db493550ec7bb",
+      "source_kind": "cmrc2018",
+      "language": "zh",
+      "locator": {
+        "article": "TRAIN_2223",
+        "passage": "TRAIN_2223"
+      },
+      "document_sha256": "ccbd193925d9dfd28e73a9b0dd0d6c0f384c6a514833eb9eaa2e3296f6803183",
+      "topic_aliases_en": [
+        "Elaine, Victoria"
+      ],
+      "question": "资料描述的伊莱恩铁路线上还跑客运列车吗？现在使用这条线路的是哪些列车？",
+      "answerable": true,
+      "family": "supported_negative",
+      "target": "不再跑客运，只有谷物和载货列车。",
+      "facets": [
+        {
+          "aliases": [
+            "不",
+            "只",
+            "仅"
+          ],
+          "support": [
+            [
+              110,
+              129
+            ]
+          ]
+        },
+        {
+          "aliases": [
+            "谷物",
+            "粮食"
+          ],
+          "support": [
+            [
+              110,
+              129
+            ]
+          ]
+        },
+        {
+          "aliases": [
+            "载货",
+            "货运"
+          ],
+          "support": [
+            [
+              110,
+              129
+            ]
+          ]
+        }
+      ],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B018",
+      "doc_id": "D0bff134e8fc2",
+      "source_kind": "cmrc2018",
+      "language": "zh",
+      "locator": {
+        "article": "TRAIN_3539",
+        "passage": "TRAIN_3539"
+      },
+      "document_sha256": "1ec9f87cf5ee1700e8e7f8e42539d00a20c38d4b46cdfe3d0913043a03e317bf",
+      "topic_aliases_en": [
+        "Oxymonacanthus longirostris",
+        "Orange-spotted filefish"
+      ],
+      "question": "尖吻单棘鲀会把巢筑在什么样的位置？",
+      "answerable": true,
+      "family": "nest_site",
+      "target": "长有海藻的死珊瑚基部。",
+      "facets": [
+        {
+          "aliases": [
+            "海藻"
+          ],
+          "support": [
+            [
+              332,
+              345
+            ]
+          ]
+        },
+        {
+          "aliases": [
+            "死珊瑚"
+          ],
+          "support": [
+            [
+              332,
+              345
+            ]
+          ]
+        },
+        {
+          "aliases": [
+            "基部",
+            "底部"
+          ],
+          "support": [
+            [
+              332,
+              345
+            ]
+          ]
+        }
+      ],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B019",
+      "doc_id": "D10926d486c80",
+      "source_kind": "cmrc2018",
+      "language": "zh",
+      "locator": {
+        "article": "TRAIN_2501",
+        "passage": "TRAIN_2501"
+      },
+      "document_sha256": "6f84d5b86a89508283b769535f981e5f282ef88e2a61fd7be938a19215d0e16a",
+      "topic_aliases_en": [
+        "Zhao Tiao",
+        "Emperor Xizu of Song"
+      ],
+      "question": "赵朓在永清担任县令的任期具体从哪年开始？",
+      "answerable": false,
+      "family": "chronology",
+      "target": "材料列出他历任县令的地方，未给永清任期的开始年份。",
+      "facets": [],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B020",
+      "doc_id": "Dedeb4b8f21a1",
+      "source_kind": "cmrc2018",
+      "language": "zh",
+      "locator": {
+        "article": "TRAIN_3728",
+        "passage": "TRAIN_3728"
+      },
+      "document_sha256": "3c65670b3b59532af8b23e8d76373fbbed841d9086032db8953acc0279a39dfd",
+      "topic_aliases_en": [
+        "Guiyuan Temple"
+      ],
+      "question": "归元寺的五百罗汉堂本身占地多少平方米？",
+      "answerable": false,
+      "family": "measurement",
+      "target": "材料列出了罗汉堂，给的是整座寺院的占地说法，未列单座罗汉堂面积。",
+      "facets": [],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B021",
+      "doc_id": "De21ff546ce4b",
+      "source_kind": "cmrc2018",
+      "language": "zh",
+      "locator": {
+        "article": "TRAIN_532",
+        "passage": "TRAIN_532"
+      },
+      "document_sha256": "1c59e2dee4dba4faa0ec2fc739ceee490f56946b1e280326482bf501cecad64c",
+      "topic_aliases_en": [
+        "Modern Sketch",
+        "Shidai Manhua"
+      ],
+      "question": "《时代漫画》创刊号当时每册定价是多少？",
+      "answerable": false,
+      "family": "price",
+      "target": "文中说明了创刊时间、出版者和作品类型，未给创刊号定价。",
+      "facets": [],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B022",
+      "doc_id": "De771af55f236",
+      "source_kind": "musique",
+      "language": "en",
+      "locator": {
+        "line": 2015,
+        "record": "2hop__91620_84230",
+        "paragraph": 7
+      },
+      "document_sha256": "ac27570c53d70d89141d79b0967ac68955d400712b5370b4ebe441da37eb9f9b",
+      "topic_aliases_en": [
+        "Byers Canyon"
+      ],
+      "question": "How many Union Pacific trains a day does the passage say travel through Byers Canyon?",
+      "answerable": false,
+      "family": "frequency",
+      "target": "It names the Moffat Route and says it crosses the canyon, without giving a train frequency.",
+      "facets": [],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B023",
+      "doc_id": "D0de24466a9de",
+      "source_kind": "musique",
+      "language": "en",
+      "locator": {
+        "line": 3358,
+        "record": "2hop__151537_444333",
+        "paragraph": 9
+      },
+      "document_sha256": "cf9640726f94ec74208f1ffcb57b3dcefbd4aef219c5858b31350e0cfc48ba66",
+      "topic_aliases_en": [
+        "Journal of Personality and Social Psychology"
+      ],
+      "question": "Which university is listed for the editor of the Interpersonal Relations and Group Processes section?",
+      "answerable": true,
+      "family": "affiliation",
+      "target": "York University.",
+      "facets": [
+        {
+          "aliases": [
+            "York University",
+            "York"
+          ],
+          "support": [
+            [
+              392,
+              479
+            ]
+          ]
+        }
+      ],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B024",
+      "doc_id": "Da79afc418dfa",
+      "source_kind": "musique",
+      "language": "en",
+      "locator": {
+        "line": 5408,
+        "record": "2hop__425440_62766",
+        "paragraph": 19
+      },
+      "document_sha256": "68c7bceef4595d617779128070c56b113ec167455e8f8c87fc867e7d9d5f905a",
+      "topic_aliases_en": [
+        "Shine over Babylon"
+      ],
+      "question": "Could a listener buy the original single release of “Shine over Babylon” on a physical format, according to the passage?",
+      "answerable": true,
+      "family": "supported_negative",
+      "target": "No. It was released only as a digital download.",
+      "facets": [
+        {
+          "aliases": [
+            "no",
+            "digital download",
+            "digital only"
+          ],
+          "support": [
+            [
+              262,
+              301
+            ]
+          ]
+        }
+      ],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B025",
+      "doc_id": "D60185722d302",
+      "source_kind": "musique",
+      "language": "en",
+      "locator": {
+        "line": 2555,
+        "record": "2hop__559444_20122",
+        "paragraph": 7
+      },
+      "document_sha256": "fd13431aadd5a56a5afbce9384313b3794ea5439dc3675bf970d7ddf835ee7a8",
+      "topic_aliases_en": [
+        "Brazil at the 2010 FIFA World Cup"
+      ],
+      "question": "What was the score of the quarter-final in which the Netherlands eliminated Brazil?",
+      "answerable": false,
+      "family": "match_result",
+      "target": "The stage and opponent are identified, but the match score is absent.",
+      "facets": [],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B026",
+      "doc_id": "Dc67b7bc1a724",
+      "source_kind": "musique",
+      "language": "en",
+      "locator": {
+        "line": 1514,
+        "record": "2hop__748037_162253",
+        "paragraph": 11
+      },
+      "document_sha256": "4bee84f1eb6496f2853fdb4807d2836dc954f3fdfdc4a84811541ec0aa4743fe",
+      "topic_aliases_en": [
+        "Hermann Muthesius"
+      ],
+      "question": "Which book by Muthesius does the passage credit with spreading Arts and Crafts ideas in Germany?",
+      "answerable": false,
+      "family": "attribution",
+      "target": "It attributes the promotion to Muthesius without naming a book.",
+      "facets": [],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B027",
+      "doc_id": "D3a0c7e7dcf2d",
+      "source_kind": "cmrc2018",
+      "language": "zh",
+      "locator": {
+        "article": "TRAIN_3669",
+        "passage": "TRAIN_3669"
+      },
+      "document_sha256": "7b47cbf79a88454c23b8fac9d77794d6f599bbf3fe854cbd57db008520e31745",
+      "topic_aliases_en": [
+        "Eternal Blaze"
+      ],
+      "question": "水树奈奈的《ETERNAL BLAZE》在周榜上停留了多久？",
+      "answerable": true,
+      "family": "duration",
+      "target": "十五个星期。",
+      "facets": [
+        {
+          "aliases": [
+            "十五",
+            "15"
+          ],
+          "support": [
+            [
+              308,
+              320
+            ]
+          ]
+        }
+      ],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B028",
+      "doc_id": "Df23a22420b1d",
+      "source_kind": "cmrc2018",
+      "language": "zh",
+      "locator": {
+        "article": "TRAIN_580",
+        "passage": "TRAIN_580"
+      },
+      "document_sha256": "bb3e877232d3289e938f48ff948bde1b0884d0fe7d5dbbbde9ad24c3bdac0697",
+      "topic_aliases_en": [
+        "West Nanjing Road Subdistrict",
+        "Nanjing West Road Subdistrict"
+      ],
+      "question": "要到南京西路街道办事处，应该去延安中路的几号？",
+      "answerable": true,
+      "family": "address",
+      "target": "延安中路929号。",
+      "facets": [
+        {
+          "aliases": [
+            "929",
+            "九百二十九"
+          ],
+          "support": [
+            [
+              67,
+              81
+            ]
+          ]
+        }
+      ],
+      "neutral_aliases": [
+        "929"
+      ]
+    },
+    {
+      "id": "B029",
+      "doc_id": "Da047bfd2efb9",
+      "source_kind": "musique",
+      "language": "en",
+      "locator": {
+        "line": 720,
+        "record": "2hop__54136_37433",
+        "paragraph": 12
+      },
+      "document_sha256": "72f1dfab985599d83713d6a10bf1e879f79995f017d990f27c47de2525364109",
+      "topic_aliases_en": [
+        "Friedrich Naumann Foundation"
+      ],
+      "question": "In what titled publication did Naumann set out the view of civic education described here?",
+      "answerable": false,
+      "family": "attribution",
+      "target": "His view is described without naming a publication in which he stated it.",
+      "facets": [],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B030",
+      "doc_id": "D07a1862a4d14",
+      "source_kind": "cmrc2018",
+      "language": "zh",
+      "locator": {
+        "article": "TRAIN_2626",
+        "passage": "TRAIN_2626"
+      },
+      "document_sha256": "c12670c8df832085cb2c5fba8c5a2fe292329867c9a3eb444e193bc0ce72a5c9",
+      "topic_aliases_en": [
+        "Xishan dialect",
+        "Xishan Wu Chinese"
+      ],
+      "question": "西山话的北片和南片各偏向哪一地带的吴语方言？",
+      "answerable": true,
+      "family": "paired_affinities",
+      "target": "北片偏苏沪嘉方言，南片偏湖州方言。",
+      "facets": [
+        {
+          "aliases": [
+            "苏沪嘉"
+          ],
+          "support": [
+            [
+              212,
+              222
+            ]
+          ]
+        },
+        {
+          "aliases": [
+            "湖州"
+          ],
+          "support": [
+            [
+              230,
+              237
+            ]
+          ]
+        }
+      ],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B031",
+      "doc_id": "D82390f42f3b7",
+      "source_kind": "musique",
+      "language": "en",
+      "locator": {
+        "line": 139,
+        "record": "2hop__93350_56335",
+        "paragraph": 10
+      },
+      "document_sha256": "95e136ecbc8518fa6dbbefd0f60f2ea102f015b2f276ab40a9a046033ab57298",
+      "topic_aliases_en": [
+        "Perth SpeedDome"
+      ],
+      "question": "Who designed the Perth SpeedDome, and who supervised its construction?",
+      "answerable": true,
+      "family": "paired_roles",
+      "target": "Ralph Schürmann designed it and Ron Webb supervised construction.",
+      "facets": [
+        {
+          "aliases": [
+            "Ralph Schürmann",
+            "Schurmann"
+          ],
+          "support": [
+            [
+              150,
+              194
+            ]
+          ]
+        },
+        {
+          "aliases": [
+            "Ron Webb",
+            "Webb"
+          ],
+          "support": [
+            [
+              199,
+              273
+            ]
+          ]
+        }
+      ],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B032",
+      "doc_id": "Dc84416a9372c",
+      "source_kind": "musique",
+      "language": "en",
+      "locator": {
+        "line": 14951,
+        "record": "3hop1__13315_594903_21414",
+        "paragraph": 4
+      },
+      "document_sha256": "e23ced54f2c5b168532d479623841e61c658ee29b38474fae17bb1c5c7ea1b10",
+      "topic_aliases_en": [
+        "Ellen Churchill Semple"
+      ],
+      "question": "Which organization did Ellen Churchill Semple lead as its first woman president?",
+      "answerable": true,
+      "family": "affiliation",
+      "target": "The Association of American Geographers.",
+      "facets": [
+        {
+          "aliases": [
+            "Association of American Geographers"
+          ],
+          "support": [
+            [
+              111,
+              180
+            ]
+          ]
+        }
+      ],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B033",
+      "doc_id": "Dab49b1679984",
+      "source_kind": "musique",
+      "language": "en",
+      "locator": {
+        "line": 443,
+        "record": "2hop__7104_718961",
+        "paragraph": 13
+      },
+      "document_sha256": "046c3d350cafb46fdff5f6cb7596e9c00df3c69c676d570001945f937c787eaf",
+      "topic_aliases_en": [
+        "Pierre Deladonchamps"
+      ],
+      "question": "How many votes did Deladonchamps receive when he won the César for Most Promising Actor?",
+      "answerable": false,
+      "family": "award",
+      "target": "The passage records the win and the film but omits the voting tally.",
+      "facets": [],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B034",
+      "doc_id": "Dab2c73b27d10",
+      "source_kind": "cmrc2018",
+      "language": "zh",
+      "locator": {
+        "article": "TRAIN_3586",
+        "passage": "TRAIN_3586"
+      },
+      "document_sha256": "25f2dc43d9cfcd656e704462cede8b33a18aebc40931f45f01dfbea72a32b1e5",
+      "topic_aliases_en": [
+        "Oyakodon"
+      ],
+      "question": "玉日出的客人最初为什么把剩下的军鸡锅和白饭拌在一起吃？",
+      "answerable": true,
+      "family": "reason",
+      "target": "当时鸡蛋昂贵，客人舍不得浪费没吃完的料理。",
+      "facets": [
+        {
+          "aliases": [
+            "昂贵",
+            "很贵",
+            "价高",
+            "价格高",
+            "价格贵",
+            "昂貴"
+          ],
+          "support": [
+            [
+              200,
+              235
+            ]
+          ]
+        },
+        {
+          "aliases": [
+            "浪费",
+            "浪費",
+            "丢弃",
+            "扔掉"
+          ],
+          "support": [
+            [
+              214,
+              254
+            ]
+          ]
+        }
+      ],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B035",
+      "doc_id": "D3a95840b4288",
+      "source_kind": "musique",
+      "language": "en",
+      "locator": {
+        "line": 13892,
+        "record": "2hop__392298_635722",
+        "paragraph": 11
+      },
+      "document_sha256": "e6dc8e7d5088988d044ba762130b39641a29c424f6ae22616fef8c4e8ad2c1fa",
+      "topic_aliases_en": [
+        "Rock Chalk, Jayhawk"
+      ],
+      "question": "While devising the chant that became “Rock Chalk Jayhawk,” how were Bailey and his colleagues traveling, and where were they headed?",
+      "answerable": true,
+      "family": "origin_story",
+      "target": "They were traveling by train to Lawrence.",
+      "facets": [
+        {
+          "aliases": [
+            "train",
+            "rail"
+          ],
+          "support": [
+            [
+              149,
+              198
+            ]
+          ]
+        },
+        {
+          "aliases": [
+            "Lawrence"
+          ],
+          "support": [
+            [
+              149,
+              198
+            ]
+          ]
+        }
+      ],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B036",
+      "doc_id": "D34685574d4d0",
+      "source_kind": "musique",
+      "language": "en",
+      "locator": {
+        "line": 2804,
+        "record": "2hop__108091_235015",
+        "paragraph": 5
+      },
+      "document_sha256": "f69a1f6c6ffe0c10227c43c553872f0dc651ad30efa8d687331c04017e3d52fe",
+      "topic_aliases_en": [
+        "Saint Lawrence River"
+      ],
+      "question": "Which body of water does the Saint Lawrence link the Great Lakes to?",
+      "answerable": true,
+      "family": "waterway",
+      "target": "The Atlantic Ocean.",
+      "facets": [
+        {
+          "aliases": [
+            "Atlantic Ocean",
+            "Atlantic"
+          ],
+          "support": [
+            [
+              289,
+              339
+            ]
+          ]
+        }
+      ],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B037",
+      "doc_id": "D7c3f1a757e1e",
+      "source_kind": "musique",
+      "language": "en",
+      "locator": {
+        "line": 17138,
+        "record": "3hop1__475487_374880_86609",
+        "paragraph": 14
+      },
+      "document_sha256": "a54bbdd279447df316b48d3142af45454146c1b4f111f5f95f7ca4e33472c1bf",
+      "topic_aliases_en": [
+        "Functional Materials"
+      ],
+      "question": "How many copies were printed in the first issue of Functional Materials?",
+      "answerable": false,
+      "family": "quantity",
+      "target": "The journal’s founding year, frequency and publisher are given without a print run.",
+      "facets": [],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B038",
+      "doc_id": "Db2dc0437f85e",
+      "source_kind": "cmrc2018",
+      "language": "zh",
+      "locator": {
+        "article": "TRAIN_2725",
+        "passage": "TRAIN_2725"
+      },
+      "document_sha256": "f7783159f49c46725bac38436f5a4cd9417b3c8025af2af43ffb574ab7e969c0",
+      "topic_aliases_en": [
+        "Black-throated bushtit",
+        "Black-throated tit",
+        "Aegithalos concinnus"
+      ],
+      "question": "文中说成年红头长尾山雀的喉部有什么明显的颜色特征？",
+      "answerable": true,
+      "family": "identifying_mark",
+      "target": "喉部有黑色浓斑。",
+      "facets": [
+        {
+          "aliases": [
+            "黑色浓斑",
+            "黑斑",
+            "黑色斑",
+            "黑色的大斑"
+          ],
+          "support": [
+            [
+              270,
+              279
+            ]
+          ]
+        }
+      ],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B039",
+      "doc_id": "D6c46aed0ecbc",
+      "source_kind": "musique",
+      "language": "en",
+      "locator": {
+        "line": 15286,
+        "record": "3hop1__54755_681261_369731",
+        "paragraph": 7
+      },
+      "document_sha256": "6863d02d7152f49e8fb3b00f55bed00133d1ffe74d2a711e8d12db4d64ea9bb2",
+      "topic_aliases_en": [
+        "Jason Brooks (actor)"
+      ],
+      "question": "What was the episode number within season four for Brooks’s guest appearance on Friends?",
+      "answerable": false,
+      "family": "episode",
+      "target": "The passage names the episode and season but gives an episode number only for Charmed.",
+      "facets": [],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B040",
+      "doc_id": "D5f8719b2108a",
+      "source_kind": "musique",
+      "language": "en",
+      "locator": {
+        "line": 14806,
+        "record": "3hop1__156462_100761_81955",
+        "paragraph": 7
+      },
+      "document_sha256": "883586cd150144fbac60b3542158c361051d610b62e69ae67ee7c897be7545da",
+      "topic_aliases_en": [
+        "Pakhra River"
+      ],
+      "question": "During which two months does freeze-up begin on the Pakhra, as distinct from the months when the ice breaks up?",
+      "answerable": true,
+      "family": "seasonal_pattern",
+      "target": "November or December.",
+      "facets": [
+        {
+          "aliases": [
+            "November"
+          ],
+          "support": [
+            [
+              192,
+              240
+            ]
+          ]
+        },
+        {
+          "aliases": [
+            "December"
+          ],
+          "support": [
+            [
+              192,
+              240
+            ]
+          ]
+        }
+      ],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B041",
+      "doc_id": "D2ee5e2434a07",
+      "source_kind": "cmrc2018",
+      "language": "zh",
+      "locator": {
+        "article": "TRAIN_771",
+        "passage": "TRAIN_771"
+      },
+      "document_sha256": "81f7d50d3d1181b206192047711b4931230156827984742b4b7423ec13251e62",
+      "topic_aliases_en": [
+        "Celtis",
+        "Hackberry"
+      ],
+      "question": "朴属植物的一颗成熟核果平均有多少克重？",
+      "answerable": false,
+      "family": "measurement",
+      "target": "资料写了核果的直径，没有给出平均重量。",
+      "facets": [],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B042",
+      "doc_id": "D9707943f75a0",
+      "source_kind": "cmrc2018",
+      "language": "zh",
+      "locator": {
+        "article": "TRAIN_228",
+        "passage": "TRAIN_228"
+      },
+      "document_sha256": "1dec5bcc05d9075b6c2351ee24841650ebc3d8215ad972c96f5a4c429dceca53",
+      "topic_aliases_en": [
+        "Bus factor",
+        "Truck factor"
+      ],
+      "question": "文中给 Debian 项目本身的巴士系数定为多少？",
+      "answerable": false,
+      "family": "project_metric",
+      "target": "材料只说 Debian 的文件提到过这个术语，所举数值对应的是 Linux 内核。",
+      "facets": [],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B043",
+      "doc_id": "Da4b19691ade3",
+      "source_kind": "cmrc2018",
+      "language": "zh",
+      "locator": {
+        "article": "TRAIN_754",
+        "passage": "TRAIN_754"
+      },
+      "document_sha256": "a5fb2709f41ff1b5ce5838d5cbb38a6537541bdc689a41f56c45b18f55a00879",
+      "topic_aliases_en": [
+        "Qiongwen (geography)",
+        "Qiongwen"
+      ],
+      "question": "从琼山桂林洋出发沿琼文高速公路走到终点，终点在文昌的什么地方？",
+      "answerable": true,
+      "family": "route",
+      "target": "文昌英城。",
+      "facets": [
+        {
+          "aliases": [
+            "英城"
+          ],
+          "support": [
+            [
+              331,
+              347
+            ]
+          ]
+        }
+      ],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B044",
+      "doc_id": "D350431edeb1d",
+      "source_kind": "cmrc2018",
+      "language": "zh",
+      "locator": {
+        "article": "TRAIN_2047",
+        "passage": "TRAIN_2047"
+      },
+      "document_sha256": "2154b7836098a34a6b6aa208719b951fd3e85691d44e3cf49efea862e2321812",
+      "topic_aliases_en": [
+        "Global Sea Level Observing System",
+        "GLOSS"
+      ],
+      "question": "升级后的全球海平面观测站每隔多少秒向海啸中心发送一次数据？",
+      "answerable": false,
+      "family": "interval",
+      "target": "材料写明通过卫星传送实时数据，未说明两次传送之间相隔多少秒。",
+      "facets": [],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B045",
+      "doc_id": "De97b73324eb2",
+      "source_kind": "musique",
+      "language": "en",
+      "locator": {
+        "line": 19504,
+        "record": "2hop__32290_69169",
+        "paragraph": 5
+      },
+      "document_sha256": "bdb9c6afc9b7a6423c885113f2d82db8379d4aba7f3235c52cf068dfff3f2969",
+      "topic_aliases_en": [
+        "Ural State University of Railway Transport"
+      ],
+      "question": "How many railway specialists graduated in the university’s first graduating class?",
+      "answerable": false,
+      "family": "quantity",
+      "target": "The founding date and the training mission give no first-cohort graduate count.",
+      "facets": [],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B046",
+      "doc_id": "D74e227257867",
+      "source_kind": "cmrc2018",
+      "language": "zh",
+      "locator": {
+        "article": "TRAIN_2411",
+        "passage": "TRAIN_2411"
+      },
+      "document_sha256": "74fe03b936ecc84f1cea4955047321e62f20119bc72eb843623b38a770270ce0",
+      "topic_aliases_en": [
+        "Vättern",
+        "Lake Vättern"
+      ],
+      "question": "韦特恩湖已知的最深处，比平均水深大约深多少米？",
+      "answerable": true,
+      "family": "difference",
+      "target": "大约深87米。",
+      "facets": [
+        {
+          "aliases": [
+            "87",
+            "八十七"
+          ],
+          "support": [
+            [
+              203,
+              224
+            ]
+          ]
+        }
+      ],
+      "neutral_aliases": [
+        "87"
+      ]
+    },
+    {
+      "id": "B047",
+      "doc_id": "Df25560b427e6",
+      "source_kind": "musique",
+      "language": "en",
+      "locator": {
+        "line": 200,
+        "record": "2hop__62735_7643",
+        "paragraph": 17
+      },
+      "document_sha256": "57bc60b70711b4ebec5ed9b8070f3bf91804e1673f8a5e4a24abccafcc983ebe",
+      "topic_aliases_en": [
+        "Rufus Flint"
+      ],
+      "question": "In what field was Flint’s Cornell degree, distinct from the subjects he taught or studied in Central America?",
+      "answerable": true,
+      "family": "qualification",
+      "target": "Mechanical engineering.",
+      "facets": [
+        {
+          "aliases": [
+            "mechanical engineering"
+          ],
+          "support": [
+            [
+              205,
+              262
+            ]
+          ]
+        }
+      ],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B048",
+      "doc_id": "D09ed0c68b4c8",
+      "source_kind": "musique",
+      "language": "en",
+      "locator": {
+        "line": 7995,
+        "record": "2hop__87059_33141",
+        "paragraph": 1
+      },
+      "document_sha256": "fcea71048c35ae6d8f4c85273be444a8cb7f8318ea8e347b7fe079aa868ea29f",
+      "topic_aliases_en": [
+        "Luxe, Calme et Volupté"
+      ],
+      "question": "What are the canvas height and width of Matisse’s Luxe, Calme et Volupté?",
+      "answerable": false,
+      "family": "measurement",
+      "target": "The description identifies the artist, medium and style without giving dimensions.",
+      "facets": [],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B049",
+      "doc_id": "D1f47389a8a44",
+      "source_kind": "cmrc2018",
+      "language": "zh",
+      "locator": {
+        "article": "TRAIN_1609",
+        "passage": "TRAIN_1609"
+      },
+      "document_sha256": "5aa0a465f2a716b2de9ca69e119a1bd4af628020636fe126831d9495c504ed71",
+      "topic_aliases_en": [
+        "List of Christian denominations",
+        "List of Christian denominations by number of members"
+      ],
+      "question": "列出的基督新教教派中，路德宗一共有多少位信徒？",
+      "answerable": false,
+      "family": "membership_count",
+      "target": "文中举了路德宗等例子，未给路德宗的信徒人数。",
+      "facets": [],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B050",
+      "doc_id": "D30de6df8bc5c",
+      "source_kind": "cmrc2018",
+      "language": "zh",
+      "locator": {
+        "article": "TRAIN_3692",
+        "passage": "TRAIN_3692"
+      },
+      "document_sha256": "2bbc330513bd2d63926be14e5d7b44e0b49cb6d5bde79524e1c2a632e5f26b99",
+      "topic_aliases_en": [
+        "Beijing Jingshan School"
+      ],
+      "question": "昌平区的寄宿分校在学制和教学资源上与北京景山学校本部是什么关系？",
+      "answerable": true,
+      "family": "shared_features",
+      "target": "两校实行同一学制，并共享教学资源。",
+      "facets": [
+        {
+          "aliases": [
+            "同一学制",
+            "相同学制",
+            "学制相同",
+            "学制一样",
+            "一样的学制"
+          ],
+          "support": [
+            [
+              341,
+              361
+            ]
+          ]
+        },
+        {
+          "aliases": [
+            "共享",
+            "共用"
+          ],
+          "support": [
+            [
+              341,
+              361
+            ]
+          ]
+        }
+      ],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B051",
+      "doc_id": "Dfdea35f4917b",
+      "source_kind": "cmrc2018",
+      "language": "zh",
+      "locator": {
+        "article": "TRAIN_2498",
+        "passage": "TRAIN_2498"
+      },
+      "document_sha256": "933fb99e83112c1f70ff9964c705aba8b68dc4f7e7f25054066b1cca898e1afd",
+      "topic_aliases_en": [
+        "List of Yu-Gi-Oh! characters",
+        "Yu-Gi-Oh! characters"
+      ],
+      "question": "海马濑人接手并转向游戏开发后，集团有多少名员工？",
+      "answerable": true,
+      "family": "staffing",
+      "target": "有2000名员工。",
+      "facets": [
+        {
+          "aliases": [
+            "2000",
+            "2,000",
+            "两千",
+            "二千"
+          ],
+          "support": [
+            [
+              188,
+              211
+            ]
+          ]
+        }
+      ],
+      "neutral_aliases": [
+        "2000",
+        "2,000"
+      ]
+    },
+    {
+      "id": "B052",
+      "doc_id": "Df2510eec1f83",
+      "source_kind": "cmrc2018",
+      "language": "zh",
+      "locator": {
+        "article": "TRAIN_666",
+        "passage": "TRAIN_666"
+      },
+      "document_sha256": "d539b020ffec215c3686b79cdc2b3f86b6635b7a1e1eb58036543486a8a3bf32",
+      "topic_aliases_en": [
+        "Shengshan, Zhejiang",
+        "Shengshan Town"
+      ],
+      "question": "并入嵊山镇的乡叫什么，合并发生在哪一年？",
+      "answerable": true,
+      "family": "administrative_change",
+      "target": "壁下乡，2001年。",
+      "facets": [
+        {
+          "aliases": [
+            "壁下乡"
+          ],
+          "support": [
+            [
+              217,
+              233
+            ]
+          ]
+        },
+        {
+          "aliases": [
+            "2001",
+            "二〇〇一",
+            "二零零一"
+          ],
+          "support": [
+            [
+              217,
+              233
+            ]
+          ]
+        }
+      ],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B053",
+      "doc_id": "D0f6f8709a6d2",
+      "source_kind": "cmrc2018",
+      "language": "zh",
+      "locator": {
+        "article": "TRAIN_3814",
+        "passage": "TRAIN_3814"
+      },
+      "document_sha256": "0d61a31547c40a1e7c51bf6db253921dd7522d51ec249a00ed24765e21ac40f4",
+      "topic_aliases_en": [
+        "Yeke Kingdom",
+        "Garanganze Kingdom"
+      ],
+      "question": "姆西里王国鼎盛时具体控制了当地贸易总额的百分之几？",
+      "answerable": false,
+      "family": "proportion",
+      "target": "资料说该王国基本垄断当地贸易，没有给出份额百分比。",
+      "facets": [],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B054",
+      "doc_id": "Dc40fc1b4d9bc",
+      "source_kind": "cmrc2018",
+      "language": "zh",
+      "locator": {
+        "article": "TRAIN_3551",
+        "passage": "TRAIN_3551"
+      },
+      "document_sha256": "ed8f70b4fd36c100f5df91135751662eb7a3a71a2977df5b9071bc728099b77f",
+      "topic_aliases_en": [
+        "Mac OS X 10.0",
+        "Mac OS X v10.0",
+        "Mac OS X Cheetah"
+      ],
+      "question": "与公开测试版相比，评论者测得“猎豹”的启动时间是多少秒？",
+      "answerable": false,
+      "family": "measurement",
+      "target": "材料只说速度没有变快，没有启动时间的秒数或测试记录。",
+      "facets": [],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B055",
+      "doc_id": "D29cb38f0361d",
+      "source_kind": "musique",
+      "language": "en",
+      "locator": {
+        "line": 10235,
+        "record": "2hop__27401_511430",
+        "paragraph": 11
+      },
+      "document_sha256": "65de63a14cf6e6467a717e88b53c2e683a748d64086c30e424c4fd0372e81344",
+      "topic_aliases_en": [
+        "Hofman Hill"
+      ],
+      "question": "What animals took Hofman to Antarctica on repeated research visits, and how many visits does the passage count?",
+      "answerable": true,
+      "family": "research_history",
+      "target": "He studied seals on twelve visits.",
+      "facets": [
+        {
+          "aliases": [
+            "seal",
+            "seals"
+          ],
+          "support": [
+            [
+              339,
+              361
+            ]
+          ]
+        },
+        {
+          "aliases": [
+            "twelve",
+            "12"
+          ],
+          "support": [
+            [
+              349,
+              388
+            ]
+          ]
+        }
+      ],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B056",
+      "doc_id": "Da2a68763b75d",
+      "source_kind": "musique",
+      "language": "en",
+      "locator": {
+        "line": 2343,
+        "record": "2hop__52331_171545",
+        "paragraph": 12
+      },
+      "document_sha256": "6ceaf8339549ab90c2879ad52c0e2a7c35fbfa447b9d1c40369f0c3b14bbfdf9",
+      "topic_aliases_en": [
+        "Danger Zone (song)"
+      ],
+      "question": "Who supplied the tune for “Danger Zone,” and who supplied the words?",
+      "answerable": true,
+      "family": "paired_roles",
+      "target": "Giorgio Moroder composed the music and Tom Whitlock wrote the lyrics.",
+      "facets": [
+        {
+          "aliases": [
+            "Giorgio Moroder",
+            "Moroder"
+          ],
+          "support": [
+            [
+              52,
+              85
+            ]
+          ]
+        },
+        {
+          "aliases": [
+            "Tom Whitlock",
+            "Whitlock"
+          ],
+          "support": [
+            [
+              90,
+              120
+            ]
+          ]
+        }
+      ],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B057",
+      "doc_id": "D175eb0f09e18",
+      "source_kind": "musique",
+      "language": "en",
+      "locator": {
+        "line": 10870,
+        "record": "2hop__654068_14960",
+        "paragraph": 0
+      },
+      "document_sha256": "f11d14f414ec0333259fdf41e80e6969ba90a2717b2173452fa77347a8677dda",
+      "topic_aliases_en": [
+        "Hershey's Cookies 'n' Creme"
+      ],
+      "question": "Is the king-size Cookies ’n’ Creme bar described as longer or wider than the original, and which dimension does change?",
+      "answerable": true,
+      "family": "supported_negative",
+      "target": "No. It has the same footprint and is thicker.",
+      "facets": [
+        {
+          "aliases": [
+            "same",
+            "shares",
+            "unchanged",
+            "no",
+            "neither"
+          ],
+          "support": [
+            [
+              227,
+              294
+            ]
+          ]
+        },
+        {
+          "aliases": [
+            "thicker",
+            "thickness"
+          ],
+          "support": [
+            [
+              227,
+              294
+            ]
+          ]
+        }
+      ],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B058",
+      "doc_id": "Dfea12839c5dc",
+      "source_kind": "musique",
+      "language": "en",
+      "locator": {
+        "line": 8583,
+        "record": "2hop__462040_45731",
+        "paragraph": 4
+      },
+      "document_sha256": "5ac94328b24db254a7ad5e80ee4fdd33f77973bbf5197372770bd770f8b54995",
+      "topic_aliases_en": [
+        "Zach Stone Is Gonna Be Famous"
+      ],
+      "question": "How much does Zach pay the camera crew to film his daily life?",
+      "answerable": false,
+      "family": "price",
+      "target": "It says he hires the crew without stating a fee.",
+      "facets": [],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B059",
+      "doc_id": "D63e67de83e6c",
+      "source_kind": "cmrc2018",
+      "language": "zh",
+      "locator": {
+        "article": "TRAIN_3660",
+        "passage": "TRAIN_3660"
+      },
+      "document_sha256": "8fb5ae11927a3b598536229003722b504143ae12f7b3cc34117a26e2d5a0d3c0",
+      "topic_aliases_en": [
+        "James Taylor",
+        "James Vernon Taylor"
+      ],
+      "question": "泰勒在1976年推出的钻石级唱片，发行第一周卖了多少张？",
+      "answerable": false,
+      "family": "quantity",
+      "target": "材料只给累计销量，没有首周销量。",
+      "facets": [],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B060",
+      "doc_id": "Dd4c2e35033b4",
+      "source_kind": "musique",
+      "language": "en",
+      "locator": {
+        "line": 721,
+        "record": "2hop__717755_86916",
+        "paragraph": 1
+      },
+      "document_sha256": "dbd294701605edfe8ea1030872be7a758c94716e40d1ed3f4455c547c83bcd8c",
+      "topic_aliases_en": [
+        "Charles Hunter (composer)"
+      ],
+      "question": "What sale price does the passage give for the first published edition of “Tickled to Death”?",
+      "answerable": false,
+      "family": "price",
+      "target": "It gives the publication year and the title without giving the price.",
+      "facets": [],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B061",
+      "doc_id": "D90ec81db026f",
+      "source_kind": "musique",
+      "language": "en",
+      "locator": {
+        "line": 19044,
+        "record": "4hop3__666203_823491_51280_242202",
+        "paragraph": 0
+      },
+      "document_sha256": "55ffca9b7c09959028aac40639114c86b589d0766e2bd17d51f29b0fe227f2d3",
+      "topic_aliases_en": [
+        "Jedediah Smith"
+      ],
+      "question": "Which crossing of the Continental Divide did Smith’s explorations popularize for Oregon Trail pioneers?",
+      "answerable": true,
+      "family": "geographic_function",
+      "target": "South Pass.",
+      "facets": [
+        {
+          "aliases": [
+            "South Pass"
+          ],
+          "support": [
+            [
+              404,
+              504
+            ]
+          ]
+        }
+      ],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B062",
+      "doc_id": "D8f74f0106d5f",
+      "source_kind": "musique",
+      "language": "en",
+      "locator": {
+        "line": 10991,
+        "record": "2hop__131280_47102",
+        "paragraph": 17
+      },
+      "document_sha256": "b792ab68d65ddc29b388729fab45cfeda06166419b043bda73668bff5e168f40",
+      "topic_aliases_en": [
+        "San Clemente Dam"
+      ],
+      "question": "What two types of concern led to the removal of San Clemente Dam?",
+      "answerable": true,
+      "family": "paired_causes",
+      "target": "Safety and environmental concerns.",
+      "facets": [
+        {
+          "aliases": [
+            "safety"
+          ],
+          "support": [
+            [
+              303,
+              380
+            ]
+          ]
+        },
+        {
+          "aliases": [
+            "environmental",
+            "environment"
+          ],
+          "support": [
+            [
+              303,
+              380
+            ]
+          ]
+        }
+      ],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B063",
+      "doc_id": "Dbcd503e12758",
+      "source_kind": "cmrc2018",
+      "language": "zh",
+      "locator": {
+        "article": "TRAIN_1556",
+        "passage": "TRAIN_1556"
+      },
+      "document_sha256": "13f88d2a9c6877856ca346fcea9c036d1c3a2abdbd5f2cdb48b461e73741a21a",
+      "topic_aliases_en": [
+        "Vodacom"
+      ],
+      "question": "沃达丰为把沃达康的持股提高到65%，同意支付多少南非兰特？",
+      "answerable": false,
+      "family": "price",
+      "target": "资料给了持股比例和沃达康的年收益，未给购股价格。",
+      "facets": [],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B064",
+      "doc_id": "D45f2be7602cb",
+      "source_kind": "musique",
+      "language": "en",
+      "locator": {
+        "line": 2155,
+        "record": "2hop__142818_570414",
+        "paragraph": 11
+      },
+      "document_sha256": "9915f7fa9ee93671c57eb35a2a47798eebcf5f51b3df878c2024f11817adb85c",
+      "topic_aliases_en": [
+        "We Came to Dance"
+      ],
+      "question": "At which studio and in which city was Ultravox’s “We Came to Dance” recorded?",
+      "answerable": true,
+      "family": "recording_site",
+      "target": "Air Studios in London.",
+      "facets": [
+        {
+          "aliases": [
+            "Air Studios"
+          ],
+          "support": [
+            [
+              159,
+              190
+            ]
+          ]
+        },
+        {
+          "aliases": [
+            "London"
+          ],
+          "support": [
+            [
+              159,
+              190
+            ]
+          ]
+        }
+      ],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B065",
+      "doc_id": "Dcd81d972a0b0",
+      "source_kind": "musique",
+      "language": "en",
+      "locator": {
+        "line": 14950,
+        "record": "3hop1__13315_594903_41375",
+        "paragraph": 14
+      },
+      "document_sha256": "61217be68efe2100088820c5f98a102685fb6075c8f917423b05864953d129f9",
+      "topic_aliases_en": [
+        "John Robert Procter"
+      ],
+      "question": "In which year did Procter’s tenure as Kentucky state geologist end and his federal commission presidency begin?",
+      "answerable": true,
+      "family": "transition",
+      "target": "The two tenures met in 1893.",
+      "facets": [
+        {
+          "aliases": [
+            "1893"
+          ],
+          "support": [
+            [
+              188,
+              309
+            ]
+          ]
+        }
+      ],
+      "neutral_aliases": [
+        "1893"
+      ]
+    },
+    {
+      "id": "B066",
+      "doc_id": "Dcf97dc210c7d",
+      "source_kind": "musique",
+      "language": "en",
+      "locator": {
+        "line": 13639,
+        "record": "2hop__272634_135703",
+        "paragraph": 3
+      },
+      "document_sha256": "a6d24124efdcf8c991636535756c1b369cc74cfa0d77596f940c7ce516bb8fe0",
+      "topic_aliases_en": [
+        "Neil Eckersley"
+      ],
+      "question": "Which judoka won gold in the division in which Neil Eckersley received bronze in Los Angeles?",
+      "answerable": false,
+      "family": "award",
+      "target": "The passage identifies two bronze medallists but no gold medallist.",
+      "facets": [],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B067",
+      "doc_id": "Dbdb4ec405815",
+      "source_kind": "musique",
+      "language": "en",
+      "locator": {
+        "line": 17410,
+        "record": "3hop1__61746_67065_21126",
+        "paragraph": 18
+      },
+      "document_sha256": "833087ce058efbf771504652391992c4750925b1e78ce27650382ec3135dfc95",
+      "topic_aliases_en": [
+        "The Marriage Playground"
+      ],
+      "question": "At which studio lot was The Marriage Playground filmed?",
+      "answerable": false,
+      "family": "production_site",
+      "target": "The distributor, credits and release date are given, but no filming lot is named.",
+      "facets": [],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B068",
+      "doc_id": "D09a44afb4a94",
+      "source_kind": "musique",
+      "language": "en",
+      "locator": {
+        "line": 11496,
+        "record": "2hop__129320_43057",
+        "paragraph": 16
+      },
+      "document_sha256": "08c70c55172e347a020dc7f4b0cc8a40dce727045a3308ed858af0c72ee05d94",
+      "topic_aliases_en": [
+        "Fowler River"
+      ],
+      "question": "Which lake receives water from the Fowler River before it continues through the wider watershed?",
+      "answerable": true,
+      "family": "waterway",
+      "target": "Newfound Lake.",
+      "facets": [
+        {
+          "aliases": [
+            "Newfound Lake"
+          ],
+          "support": [
+            [
+              97,
+              129
+            ]
+          ]
+        }
+      ],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B069",
+      "doc_id": "D0afc7ca38992",
+      "source_kind": "cmrc2018",
+      "language": "zh",
+      "locator": {
+        "article": "TRAIN_2287",
+        "passage": "TRAIN_2287"
+      },
+      "document_sha256": "f698ea89a6998b36e3706d8ec4cae1768e7bfeff1e8ee34ed79b1112391ad723",
+      "topic_aliases_en": [
+        "Ostorhinchus multilineatus",
+        "Many-lined cardinalfish"
+      ],
+      "question": "多线天竺鲷的卵由哪一方亲鱼口孵，大约几天孵成仔鱼？",
+      "answerable": true,
+      "family": "brooding",
+      "target": "由雄鱼口孵，大约七天。",
+      "facets": [
+        {
+          "aliases": [
+            "雄鱼",
+            "雄性",
+            "雄亲鱼",
+            "公鱼"
+          ],
+          "support": [
+            [
+              257,
+              265
+            ]
+          ]
+        },
+        {
+          "aliases": [
+            "七",
+            "7"
+          ],
+          "support": [
+            [
+              266,
+              274
+            ]
+          ]
+        }
+      ],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B070",
+      "doc_id": "Db274123351bb",
+      "source_kind": "cmrc2018",
+      "language": "zh",
+      "locator": {
+        "article": "TRAIN_947",
+        "passage": "TRAIN_947"
+      },
+      "document_sha256": "db225266774ea644474457ed59349db3b85c51ce005375efab8750d9d8345bc1",
+      "topic_aliases_en": [
+        "Wang Yang (footballer, born 1989)",
+        "Wang Yang (Chinese footballer)"
+      ],
+      "question": "哪一种球员身份认定让汪洋能够自由转会到比利时？",
+      "answerable": true,
+      "family": "eligibility",
+      "target": "中国足协认定他为业余球员。",
+      "facets": [
+        {
+          "aliases": [
+            "业余"
+          ],
+          "support": [
+            [
+              198,
+              223
+            ]
+          ]
+        }
+      ],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B071",
+      "doc_id": "D7d8df7953c72",
+      "source_kind": "cmrc2018",
+      "language": "zh",
+      "locator": {
+        "article": "TRAIN_2481",
+        "passage": "TRAIN_2481"
+      },
+      "document_sha256": "145a0be99d463421923181c19825140a6d2e70ff3ed3989a1d20b31082a8c05c",
+      "topic_aliases_en": [
+        "Renmin Road, Suzhou",
+        "Renmin Road (Suzhou)"
+      ],
+      "question": "1928年苏州人民路察院场以北段拓宽后，当时约有多宽，路面用的是什么材料？",
+      "answerable": true,
+      "family": "paired_features",
+      "target": "当时约十米宽，铺的是碎石。",
+      "facets": [
+        {
+          "aliases": [
+            "十米",
+            "10米",
+            "10 米"
+          ],
+          "support": [
+            [
+              245,
+              261
+            ]
+          ]
+        },
+        {
+          "aliases": [
+            "碎石"
+          ],
+          "support": [
+            [
+              245,
+              261
+            ]
+          ]
+        }
+      ],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B072",
+      "doc_id": "Da5f06453df92",
+      "source_kind": "cmrc2018",
+      "language": "zh",
+      "locator": {
+        "article": "TRAIN_3691",
+        "passage": "TRAIN_3691"
+      },
+      "document_sha256": "8535624ed517cf734f799995955bba5be6a03af6136aa40972c22cb133d3e44b",
+      "topic_aliases_en": [
+        "Crippled Avengers",
+        "Return of the 5 Deadly Venoms"
+      ],
+      "question": "1978年张彻执导的《残缺》片长多少分钟？",
+      "answerable": false,
+      "family": "duration",
+      "target": "文中给出了年份、导演和故事情节，没有给出片长。",
+      "facets": [],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B073",
+      "doc_id": "Dcc6a22bf782d",
+      "source_kind": "musique",
+      "language": "en",
+      "locator": {
+        "line": 1223,
+        "record": "2hop__471876_85098",
+        "paragraph": 12
+      },
+      "document_sha256": "43567c53cf6609fd1dc9b678249101b1c2db43993302dfb84a377a0bece0cc13",
+      "topic_aliases_en": [
+        "Come and Get It (Dannii Minogue song)"
+      ],
+      "question": "How long in minutes and seconds is the radio version of “Come and Get It” that was added to the reissue?",
+      "answerable": false,
+      "family": "duration",
+      "target": "The versions and release history are described, but no track length is supplied.",
+      "facets": [],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B074",
+      "doc_id": "D5c356285e9bf",
+      "source_kind": "musique",
+      "language": "en",
+      "locator": {
+        "line": 16025,
+        "record": "3hop1__129307_85073_398678",
+        "paragraph": 15
+      },
+      "document_sha256": "9ed1eef4e147bc1901115d1ded370012197698569d16d410cacb4e659bb00e39",
+      "topic_aliases_en": [
+        "Milk River Natural Area"
+      ],
+      "question": "What percentage of Milk River Natural Area lies in Cypress County?",
+      "answerable": false,
+      "family": "proportion",
+      "target": "The description calls it a small portion without quantifying the share.",
+      "facets": [],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B075",
+      "doc_id": "Db9d7a270192c",
+      "source_kind": "musique",
+      "language": "en",
+      "locator": {
+        "line": 9751,
+        "record": "2hop__146194_8682",
+        "paragraph": 2
+      },
+      "document_sha256": "6c38cdd095e46fef2c8d0d0356489c805dc48b22a7ece8456995029418817bc8",
+      "topic_aliases_en": [
+        "Clayton, Missouri"
+      ],
+      "question": "For what building did Ralph Clayton donate land?",
+      "answerable": true,
+      "family": "purpose",
+      "target": "The courthouse.",
+      "facets": [
+        {
+          "aliases": [
+            "courthouse",
+            "court house"
+          ],
+          "support": [
+            [
+              237,
+              291
+            ]
+          ]
+        }
+      ],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B076",
+      "doc_id": "D5e7c1acf37e0",
+      "source_kind": "cmrc2018",
+      "language": "zh",
+      "locator": {
+        "article": "TRAIN_304",
+        "passage": "TRAIN_304"
+      },
+      "document_sha256": "c0c3411aae78ce3171e9d3b36f5e1af2b2faeb3abb283187df90a21ef97c35a2",
+      "topic_aliases_en": [
+        "Dionysopithecus"
+      ],
+      "question": "双沟最早出土的那件醉猿化石是哪一侧的哪块颌骨，还连着什么？",
+      "answerable": true,
+      "family": "fossil_evidence",
+      "target": "是左上颌骨，还连着几颗牙齿。",
+      "facets": [
+        {
+          "aliases": [
+            "左上颌",
+            "左侧上颌",
+            "左上頜"
+          ],
+          "support": [
+            [
+              79,
+              96
+            ]
+          ]
+        },
+        {
+          "aliases": [
+            "牙齿",
+            "牙齒",
+            "牙"
+          ],
+          "support": [
+            [
+              79,
+              96
+            ]
+          ]
+        }
+      ],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B077",
+      "doc_id": "D1639bbaa80a5",
+      "source_kind": "cmrc2018",
+      "language": "zh",
+      "locator": {
+        "article": "TRAIN_664",
+        "passage": "TRAIN_664"
+      },
+      "document_sha256": "2c6299e8a24abc43051a9c0c01ae4583a6c5d359998f2d964c75d3aa5d79c795",
+      "topic_aliases_en": [
+        "Daixi, Daishan",
+        "Daixi Town, Zhejiang"
+      ],
+      "question": "岱西镇的十个离岛中，仅西垦山一岛的陆地面积是多少？",
+      "answerable": false,
+      "family": "measurement",
+      "target": "资料给出了十个离岛的合计面积，没有单列西垦山的面积。",
+      "facets": [],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B078",
+      "doc_id": "D6c960947c5d8",
+      "source_kind": "cmrc2018",
+      "language": "zh",
+      "locator": {
+        "article": "TRAIN_1685",
+        "passage": "TRAIN_1685"
+      },
+      "document_sha256": "dd5243a26a91648b5b44fbbc8e128fd3c1d8a06bef26d14215fee3f06c8c4749",
+      "topic_aliases_en": [
+        "Holloway, London"
+      ],
+      "question": "阿森纳迁往酋长球场以前，使用的海布里球场能容纳多少观众？",
+      "answerable": false,
+      "family": "capacity",
+      "target": "文中给了酋长球场的容量，未给海布里球场的容量。",
+      "facets": [],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B079",
+      "doc_id": "D42335739e05f",
+      "source_kind": "cmrc2018",
+      "language": "zh",
+      "locator": {
+        "article": "TRAIN_174",
+        "passage": "TRAIN_174"
+      },
+      "document_sha256": "1c3215147c72f5ae1f4274e7e0114b18d5f388fc09b87af58139c84c61693a2a",
+      "topic_aliases_en": [
+        "Uta no Onii-san",
+        "Uta no Oniisan"
+      ],
+      "question": "电视剧《音乐孩子王》全剧一共有多少集？",
+      "answerable": false,
+      "family": "quantity",
+      "target": "材料交代开播时间、播出时段和停播安排，没有给出全剧集数。",
+      "facets": [],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B080",
+      "doc_id": "D53b6809d6b67",
+      "source_kind": "musique",
+      "language": "en",
+      "locator": {
+        "line": 11921,
+        "record": "2hop__512017_159115",
+        "paragraph": 17
+      },
+      "document_sha256": "d34f0e24fcae5085ba15f2bdb829340c1e3546fe57c11d0065caa890bfa3beeb",
+      "topic_aliases_en": [
+        "Diego Torres"
+      ],
+      "question": "In which year did Diego Torres win his first Latin Grammy award?",
+      "answerable": false,
+      "family": "chronology",
+      "target": "The passage gives his total awards and nominations, but no date for the first win.",
+      "facets": [],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B081",
+      "doc_id": "Db11d83f871ee",
+      "source_kind": "musique",
+      "language": "en",
+      "locator": {
+        "line": 1548,
+        "record": "2hop__75762_196273",
+        "paragraph": 2
+      },
+      "document_sha256": "58d7c764535ac2ddb9ce6abd080715c866ad64f51a60844601f9a3db7ba0754c",
+      "topic_aliases_en": [
+        "Clement Stachowiak"
+      ],
+      "question": "Did Stachowiak win a seat in the U.S. House when he ran in 1948?",
+      "answerable": true,
+      "family": "supported_negative",
+      "target": "No. His 1948 candidacy was unsuccessful.",
+      "facets": [
+        {
+          "aliases": [
+            "no",
+            "unsuccessful",
+            "lost",
+            "did not win"
+          ],
+          "support": [
+            [
+              211,
+              307
+            ]
+          ]
+        }
+      ],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B082",
+      "doc_id": "Dd7c8aa5a0128",
+      "source_kind": "musique",
+      "language": "en",
+      "locator": {
+        "line": 12626,
+        "record": "2hop__230438_73786",
+        "paragraph": 2
+      },
+      "document_sha256": "0c2e9889dd89971ae1b698b48e253cdb2b21c0bc3459417fd04eca088d05667d",
+      "topic_aliases_en": [
+        "Adrogue, con ilustraciones de Norah Borges"
+      ],
+      "question": "How many illustrations by Norah Borges are in the poetry volume about Adrogué?",
+      "answerable": false,
+      "family": "quantity",
+      "target": "The passage identifies the illustrator and the subject without giving the illustration count.",
+      "facets": [],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B083",
+      "doc_id": "Da58f0c6c742c",
+      "source_kind": "cmrc2018",
+      "language": "zh",
+      "locator": {
+        "article": "TRAIN_2737",
+        "passage": "TRAIN_2737"
+      },
+      "document_sha256": "53341b2b17bf02fc52d76c3c7afd701083f84a23f0c3eae3d93364ed2b1bb631",
+      "topic_aliases_en": [
+        "List of Nürburgring Nordschleife lap times",
+        "Nürburgring lap times"
+      ],
+      "question": "日产 GTR 的北环测试成绩在这段资料中是多少分多少秒？",
+      "answerable": false,
+      "family": "lap_time",
+      "target": "文中将日产 GTR 列作厂商测试的例子，但未列它的圈速成绩。",
+      "facets": [],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B084",
+      "doc_id": "D5485bc2bbc3e",
+      "source_kind": "cmrc2018",
+      "language": "zh",
+      "locator": {
+        "article": "TRAIN_1180",
+        "passage": "TRAIN_1180"
+      },
+      "document_sha256": "81891c6dd1706b5cd951299e7de5250c86955bd6201d6785a43d14968160c17e",
+      "topic_aliases_en": [
+        "Tintin and the Picaros",
+        "Tintin et les Picaros"
+      ],
+      "question": "《丁丁与丛林战士》在1976年的几月首次出版？",
+      "answerable": false,
+      "family": "chronology",
+      "target": "文中给了初版年份，没有给月份。",
+      "facets": [],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B085",
+      "doc_id": "De2dc03044b18",
+      "source_kind": "cmrc2018",
+      "language": "zh",
+      "locator": {
+        "article": "TRAIN_2711",
+        "passage": "TRAIN_2711"
+      },
+      "document_sha256": "60beda477d2e00c0feaf82e75d37116d2dbed04376345cc176ca9a731aa696f8",
+      "topic_aliases_en": [
+        "Rufous-rumped grassbird",
+        "Large grass warbler",
+        "Graminicola bengalensis"
+      ],
+      "question": "大草莺在香港当地估计还剩多少只？",
+      "answerable": false,
+      "family": "local_count",
+      "target": "资料估算的是全球数量，没有单列香港的数量。",
+      "facets": [],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B086",
+      "doc_id": "D9c7179070307",
+      "source_kind": "cmrc2018",
+      "language": "zh",
+      "locator": {
+        "article": "TRAIN_2077",
+        "passage": "TRAIN_2077"
+      },
+      "document_sha256": "10ec820a3ff1416acf329b64a4f840dfde0b55413d83e9b22b828bdcad8942a1",
+      "topic_aliases_en": [
+        "Republic Square, Plzeň",
+        "Náměstí Republiky, Plzeň",
+        "Republic Square (Plzeň)"
+      ],
+      "question": "比尔森共和国广场具体在哪一年把鹅卵石路面改铺成了沥青？",
+      "answerable": false,
+      "family": "chronology",
+      "target": "1859年铺的是鹅卵石，材料只说后来改铺沥青，没有给改铺年份。",
+      "facets": [],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B087",
+      "doc_id": "D16616c035933",
+      "source_kind": "cmrc2018",
+      "language": "zh",
+      "locator": {
+        "article": "TRAIN_3595",
+        "passage": "TRAIN_3595"
+      },
+      "document_sha256": "ae6c0a4b0959a20c8e099c38966c30ca5609ea659b0dbbd352693926858c4282",
+      "topic_aliases_en": [
+        "Shenhu, Fujian",
+        "Shenhu, Jinjiang"
+      ],
+      "question": "深沪镇的支柱产业纺织业每年的产值有多少元？",
+      "answerable": false,
+      "family": "output_quantity",
+      "target": "文中说明纺织业是支柱产业，没有给年度产值。",
+      "facets": [],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B088",
+      "doc_id": "D9a8b4082de64",
+      "source_kind": "cmrc2018",
+      "language": "zh",
+      "locator": {
+        "article": "TRAIN_2730",
+        "passage": "TRAIN_2730"
+      },
+      "document_sha256": "7e5128e2c1ce92aa81ee996fc645987bd8ba59a4887d686030a1ed16cadf3032",
+      "topic_aliases_en": [
+        "Jinniu Street, Kunming",
+        "Jinniu Street"
+      ],
+      "question": "昆明旧城改造后留下的金牛街清真寺，最早建于哪个时期？",
+      "answerable": true,
+      "family": "chronology",
+      "target": "明代初年。",
+      "facets": [
+        {
+          "aliases": [
+            "明代初",
+            "明初",
+            "明朝初"
+          ],
+          "support": [
+            [
+              235,
+              257
+            ]
+          ]
+        }
+      ],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B089",
+      "doc_id": "D9242bcff8662",
+      "source_kind": "musique",
+      "language": "en",
+      "locator": {
+        "line": 3881,
+        "record": "2hop__661661_759679",
+        "paragraph": 8
+      },
+      "document_sha256": "ace8774dce17b2bb5442da310cdec41ff0dfafd86fb4c67c7bb02acf9227700f",
+      "topic_aliases_en": [
+        "James Monroe Deems"
+      ],
+      "question": "How many senators voted in favor of Deems’s appointment when the Senate confirmed it?",
+      "answerable": false,
+      "family": "vote_tally",
+      "target": "The confirmation is dated, but its vote count is absent.",
+      "facets": [],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B090",
+      "doc_id": "D517565da0646",
+      "source_kind": "cmrc2018",
+      "language": "zh",
+      "locator": {
+        "article": "TRAIN_1081",
+        "passage": "TRAIN_1081"
+      },
+      "document_sha256": "778dd07a5e411c2dc368731461f031a9b2da56a1efc168465d20ba2425a8ef46",
+      "topic_aliases_en": [
+        "Guo Jin (general)",
+        "Guo Jin"
+      ],
+      "question": "田钦祚从被贬为房州团练使到再贬柳州，相隔了多少年？",
+      "answerable": false,
+      "family": "interval",
+      "target": "材料交代了先后顺序，没有写两次贬官各自的日期或间隔。",
+      "facets": [],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B091",
+      "doc_id": "Dc9a7e3daceca",
+      "source_kind": "cmrc2018",
+      "language": "zh",
+      "locator": {
+        "article": "TRAIN_2306",
+        "passage": "TRAIN_2306"
+      },
+      "document_sha256": "d500c38093aba8b75b37b85fa05ee1b3340a7633394312e210079c3931e07a5a",
+      "topic_aliases_en": [
+        "Luchaogang railway station"
+      ],
+      "question": "从芦潮港站到虹桥国际机场，比到浦东国际机场远多少公里？",
+      "answerable": true,
+      "family": "difference",
+      "target": "远43公里。",
+      "facets": [
+        {
+          "aliases": [
+            "43",
+            "四十三"
+          ],
+          "support": [
+            [
+              61,
+              86
+            ]
+          ]
+        }
+      ],
+      "neutral_aliases": [
+        "43"
+      ]
+    },
+    {
+      "id": "B092",
+      "doc_id": "D95852c093ae3",
+      "source_kind": "musique",
+      "language": "en",
+      "locator": {
+        "line": 7453,
+        "record": "2hop__355966_131909",
+        "paragraph": 6
+      },
+      "document_sha256": "0afb44bfa7431ecdf8872cc98ce458942b9f00b0cd3f8140cac2c1e0d340d829",
+      "topic_aliases_en": [
+        "Károly"
+      ],
+      "question": "What bird does the Turkic word behind the Hungarian name Károly denote?",
+      "answerable": true,
+      "family": "word_origin",
+      "target": "A hawk.",
+      "facets": [
+        {
+          "aliases": [
+            "hawk"
+          ],
+          "support": [
+            [
+              137,
+              171
+            ]
+          ]
+        }
+      ],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B093",
+      "doc_id": "Ddedb2922a9ec",
+      "source_kind": "musique",
+      "language": "en",
+      "locator": {
+        "line": 8734,
+        "record": "2hop__20911_20713",
+        "paragraph": 9
+      },
+      "document_sha256": "e3d9fc18ef41c37d990803cba35af78fbe324c97ed5909371406865d50543e96",
+      "topic_aliases_en": [
+        "Zarina Wahab"
+      ],
+      "question": "Which was released first, Chitchor or Gopal Krishna, according to the profile of Zarina Wahab?",
+      "answerable": false,
+      "family": "chronology",
+      "target": "It places both of her roles in the 1970s without ordering the films.",
+      "facets": [],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B094",
+      "doc_id": "Dd1fc0abcd16c",
+      "source_kind": "musique",
+      "language": "en",
+      "locator": {
+        "line": 5184,
+        "record": "2hop__732098_46031",
+        "paragraph": 9
+      },
+      "document_sha256": "e84ba590ca2ef44b07e2a387575411c81548d2de0972f98ea3bd34854cc4f694",
+      "topic_aliases_en": [
+        "The Serial"
+      ],
+      "question": "Which two newspapers carried the chapters before The Serial appeared as a book?",
+      "answerable": true,
+      "family": "publication_venues",
+      "target": "Pacific Sun and the San Francisco Chronicle.",
+      "facets": [
+        {
+          "aliases": [
+            "Pacific Sun"
+          ],
+          "support": [
+            [
+              220,
+              293
+            ]
+          ]
+        },
+        {
+          "aliases": [
+            "San Francisco Chronicle"
+          ],
+          "support": [
+            [
+              280,
+              335
+            ]
+          ]
+        }
+      ],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B095",
+      "doc_id": "Ddd6bbf4d3c01",
+      "source_kind": "cmrc2018",
+      "language": "zh",
+      "locator": {
+        "article": "TRAIN_2117",
+        "passage": "TRAIN_2117"
+      },
+      "document_sha256": "5b777f44df790b13f1ffd1ac81db9a93aac3df7be3b0f2a0af7b4f742ce99ed4",
+      "topic_aliases_en": [
+        "Hemimyzon taitungensis",
+        "Taitung river loach"
+      ],
+      "question": "台东间吸鳅背鳍上的条纹和尾鳍上的波状横带分别是什么颜色？",
+      "answerable": true,
+      "family": "paired_markings",
+      "target": "背鳍条纹灰黑，尾鳍横带白色。",
+      "facets": [
+        {
+          "aliases": [
+            "灰黑"
+          ],
+          "support": [
+            [
+              216,
+              227
+            ]
+          ]
+        },
+        {
+          "aliases": [
+            "白"
+          ],
+          "support": [
+            [
+              228,
+              241
+            ]
+          ]
+        }
+      ],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B096",
+      "doc_id": "Dcf57a931443e",
+      "source_kind": "cmrc2018",
+      "language": "zh",
+      "locator": {
+        "article": "TRAIN_2020",
+        "passage": "TRAIN_2020"
+      },
+      "document_sha256": "a9e97bceb7becdfbfd06eede9b2d8355574094832dbdc25720a776fb411ef1c1",
+      "topic_aliases_en": [
+        "Nintendo DS storage devices",
+        "Nintendo DS flash cartridge",
+        "Flash cartridge"
+      ],
+      "question": "文中提到的 SLOT-1 烧录卡，最多能使用多大容量的存储卡？",
+      "answerable": false,
+      "family": "capacity",
+      "target": "材料只比较了存储容量的大小，没有给出能使用的最大容量。",
+      "facets": [],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B097",
+      "doc_id": "D4cfa6e9c4938",
+      "source_kind": "cmrc2018",
+      "language": "zh",
+      "locator": {
+        "article": "TRAIN_894",
+        "passage": "TRAIN_894"
+      },
+      "document_sha256": "50f22f8007a582ca88bfb5a3380e21532ad1165325395eaec0eb27f94569b66a",
+      "topic_aliases_en": [
+        "Wanshan Vocational Middle School",
+        "Wusheng County Wanshan Vocational Middle School"
+      ],
+      "question": "万善职业中学建有多少间多媒体语音教室？",
+      "answerable": false,
+      "family": "quantity",
+      "target": "材料列出了多媒体语音教室这一设施，没有给出教室间数。",
+      "facets": [],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B098",
+      "doc_id": "D669d25dd5f46",
+      "source_kind": "musique",
+      "language": "en",
+      "locator": {
+        "line": 19547,
+        "record": "2hop__130914_24607",
+        "paragraph": 15
+      },
+      "document_sha256": "99bfe89bfa108ca844d3ae09b138fa8f41e09efec816ab0da8b6dc831359967c",
+      "topic_aliases_en": [
+        "Quake Lake"
+      ],
+      "question": "What magnitude does the passage assign to the earthquake that created Quake Lake?",
+      "answerable": false,
+      "family": "measurement",
+      "target": "It dates the earthquake and states the death toll without assigning a magnitude.",
+      "facets": [],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B099",
+      "doc_id": "Daa9b21633cd5",
+      "source_kind": "cmrc2018",
+      "language": "zh",
+      "locator": {
+        "article": "TRAIN_2212",
+        "passage": "TRAIN_2212"
+      },
+      "document_sha256": "1575a3aa67f7ed1ef25ba5e5ac330b27f15923b983e9eef6f419bef7efe47511",
+      "topic_aliases_en": [
+        "Coscoroba swan",
+        "Coscoroba coscoroba"
+      ],
+      "question": "扁嘴鹅起飞时，平时被双翼遮住的哪一处黑色标记会格外显眼？",
+      "answerable": true,
+      "family": "identifying_mark",
+      "target": "第六根主羽的末端呈黑色。",
+      "facets": [
+        {
+          "aliases": [
+            "第六",
+            "第6"
+          ],
+          "support": [
+            [
+              84,
+              120
+            ]
+          ]
+        },
+        {
+          "aliases": [
+            "主羽",
+            "主飞羽",
+            "主翼羽"
+          ],
+          "support": [
+            [
+              84,
+              120
+            ]
+          ]
+        },
+        {
+          "aliases": [
+            "末端",
+            "端部",
+            "尖端",
+            "羽端",
+            "梢"
+          ],
+          "support": [
+            [
+              84,
+              120
+            ]
+          ]
+        }
+      ],
+      "neutral_aliases": []
+    },
+    {
+      "id": "B100",
+      "doc_id": "Dbb66204b7bc8",
+      "source_kind": "musique",
+      "language": "en",
+      "locator": {
+        "line": 10202,
+        "record": "2hop__66739_92014",
+        "paragraph": 18
+      },
+      "document_sha256": "f62524e7e8a2c74c6b086b8affd2082d495508e0daa4d8f798d5582655d95b40",
+      "topic_aliases_en": [
+        "Peekskill riots"
+      ],
+      "question": "How much did a ticket to the Civil Rights Congress benefit concert at Lakeland Acres cost?",
+      "answerable": false,
+      "family": "price",
+      "target": "The passage identifies the benefit, date and site, but gives no admission price.",
+      "facets": [],
+      "neutral_aliases": []
+    }
+  ]
+}
