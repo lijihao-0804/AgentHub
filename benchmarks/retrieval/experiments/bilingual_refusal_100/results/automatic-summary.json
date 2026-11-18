@@ -1,0 +1,2191 @@
+{
+  "schema": "bilingual_refusal_100_paired_metrics_v1",
+  "questions": 100,
+  "arms": {
+    "baseline": {
+      "first": {
+        "strict_all": {
+          "count": 73,
+          "total": 100,
+          "percent": 73.0
+        },
+        "semantic_and_citation_all": {
+          "count": 73,
+          "total": 100,
+          "percent": 73.0
+        },
+        "value_all": {
+          "count": 77,
+          "total": 100,
+          "percent": 77.0
+        },
+        "citation_all": {
+          "count": 73,
+          "total": 100,
+          "percent": 73.0
+        },
+        "positive_value": {
+          "count": 50,
+          "total": 50,
+          "percent": 100.0
+        },
+        "positive_value_with_language": {
+          "count": 50,
+          "total": 50,
+          "percent": 100.0
+        },
+        "positive_supported": {
+          "count": 46,
+          "total": 50,
+          "percent": 92.0
+        },
+        "positive_strict": {
+          "count": 46,
+          "total": 50,
+          "percent": 92.0
+        },
+        "correct_refusal": {
+          "count": 27,
+          "total": 50,
+          "percent": 54.0
+        },
+        "semantic_refusal": {
+          "count": 27,
+          "total": 50,
+          "percent": 54.0
+        },
+        "false_refusals": {
+          "count": 0,
+          "total": 50,
+          "percent": 0.0
+        },
+        "unsafe_answers": {
+          "count": 2,
+          "total": 50,
+          "percent": 4.0
+        },
+        "refusals_all": {
+          "count": 27,
+          "total": 100,
+          "percent": 27.0
+        },
+        "cited_answer_support": {
+          "count": 46,
+          "total": 52,
+          "percent": 88.46
+        },
+        "cited_answer_support_with_language": {
+          "count": 46,
+          "total": 52,
+          "percent": 88.46
+        },
+        "language_match": {
+          "count": 98,
+          "total": 100,
+          "percent": 98.0
+        },
+        "language_mismatches": 0,
+        "language_unassessable": 2,
+        "language_mismatch_ids": [],
+        "unresolved_review_ids": [],
+        "invalid_reasons": {
+          "citations_on_refusal": 19,
+          "json_parse": 2
+        },
+        "states": {
+          "answer": 52,
+          "refusal": 27,
+          "invalid": 21
+        },
+        "gold_presented_but_refused": {
+          "count": 0,
+          "total": 50,
+          "percent": 0.0,
+          "ids": []
+        }
+      },
+      "final": {
+        "strict_all": {
+          "count": 92,
+          "total": 100,
+          "percent": 92.0
+        },
+        "semantic_and_citation_all": {
+          "count": 92,
+          "total": 100,
+          "percent": 92.0
+        },
+        "value_all": {
+          "count": 96,
+          "total": 100,
+          "percent": 96.0
+        },
+        "citation_all": {
+          "count": 92,
+          "total": 100,
+          "percent": 92.0
+        },
+        "positive_value": {
+          "count": 50,
+          "total": 50,
+          "percent": 100.0
+        },
+        "positive_value_with_language": {
+          "count": 50,
+          "total": 50,
+          "percent": 100.0
+        },
+        "positive_supported": {
+          "count": 46,
+          "total": 50,
+          "percent": 92.0
+        },
+        "positive_strict": {
+          "count": 46,
+          "total": 50,
+          "percent": 92.0
+        },
+        "correct_refusal": {
+          "count": 46,
+          "total": 50,
+          "percent": 92.0
+        },
+        "semantic_refusal": {
+          "count": 46,
+          "total": 50,
+          "percent": 92.0
+        },
+        "false_refusals": {
+          "count": 0,
+          "total": 50,
+          "percent": 0.0
+        },
+        "unsafe_answers": {
+          "count": 2,
+          "total": 50,
+          "percent": 4.0
+        },
+        "refusals_all": {
+          "count": 46,
+          "total": 100,
+          "percent": 46.0
+        },
+        "cited_answer_support": {
+          "count": 46,
+          "total": 52,
+          "percent": 88.46
+        },
+        "cited_answer_support_with_language": {
+          "count": 46,
+          "total": 52,
+          "percent": 88.46
+        },
+        "language_match": {
+          "count": 98,
+          "total": 100,
+          "percent": 98.0
+        },
+        "language_mismatches": 0,
+        "language_unassessable": 2,
+        "language_mismatch_ids": [],
+        "unresolved_review_ids": [],
+        "invalid_reasons": {},
+        "states": {
+          "answer": 52,
+          "refusal": 46,
+          "error": 2
+        },
+        "gold_presented_but_refused": {
+          "count": 0,
+          "total": 50,
+          "percent": 0.0,
+          "ids": []
+        }
+      },
+      "first_http_requests": 100,
+      "confirmed_calls": 119,
+      "corrections": 19,
+      "estimated_cny": "0.2239248",
+      "http_status": {
+        "200": 98,
+        "502": 2
+      }
+    },
+    "candidate": {
+      "first": {
+        "strict_all": {
+          "count": 99,
+          "total": 100,
+          "percent": 99.0
+        },
+        "semantic_and_citation_all": {
+          "count": 99,
+          "total": 100,
+          "percent": 99.0
+        },
+        "value_all": {
+          "count": 99,
+          "total": 100,
+          "percent": 99.0
+        },
+        "citation_all": {
+          "count": 99,
+          "total": 100,
+          "percent": 99.0
+        },
+        "positive_value": {
+          "count": 49,
+          "total": 50,
+          "percent": 98.0
+        },
+        "positive_value_with_language": {
+          "count": 49,
+          "total": 50,
+          "percent": 98.0
+        },
+        "positive_supported": {
+          "count": 49,
+          "total": 50,
+          "percent": 98.0
+        },
+        "positive_strict": {
+          "count": 49,
+          "total": 50,
+          "percent": 98.0
+        },
+        "correct_refusal": {
+          "count": 50,
+          "total": 50,
+          "percent": 100.0
+        },
+        "semantic_refusal": {
+          "count": 50,
+          "total": 50,
+          "percent": 100.0
+        },
+        "false_refusals": {
+          "count": 0,
+          "total": 50,
+          "percent": 0.0
+        },
+        "unsafe_answers": {
+          "count": 0,
+          "total": 50,
+          "percent": 0.0
+        },
+        "refusals_all": {
+          "count": 50,
+          "total": 100,
+          "percent": 50.0
+        },
+        "cited_answer_support": {
+          "count": 49,
+          "total": 49,
+          "percent": 100.0
+        },
+        "cited_answer_support_with_language": {
+          "count": 49,
+          "total": 49,
+          "percent": 100.0
+        },
+        "language_match": {
+          "count": 100,
+          "total": 100,
+          "percent": 100.0
+        },
+        "language_mismatches": 0,
+        "language_unassessable": 0,
+        "language_mismatch_ids": [],
+        "unresolved_review_ids": [],
+        "invalid_reasons": {
+          "citation_mismatch": 1
+        },
+        "states": {
+          "answer": 49,
+          "invalid": 1,
+          "refusal": 50
+        },
+        "gold_presented_but_refused": {
+          "count": 0,
+          "total": 50,
+          "percent": 0.0,
+          "ids": []
+        }
+      },
+      "final": {
+        "strict_all": {
+          "count": 100,
+          "total": 100,
+          "percent": 100.0
+        },
+        "semantic_and_citation_all": {
+          "count": 100,
+          "total": 100,
+          "percent": 100.0
+        },
+        "value_all": {
+          "count": 100,
+          "total": 100,
+          "percent": 100.0
+        },
+        "citation_all": {
+          "count": 100,
+          "total": 100,
+          "percent": 100.0
+        },
+        "positive_value": {
+          "count": 50,
+          "total": 50,
+          "percent": 100.0
+        },
+        "positive_value_with_language": {
+          "count": 50,
+          "total": 50,
+          "percent": 100.0
+        },
+        "positive_supported": {
+          "count": 50,
+          "total": 50,
+          "percent": 100.0
+        },
+        "positive_strict": {
+          "count": 50,
+          "total": 50,
+          "percent": 100.0
+        },
+        "correct_refusal": {
+          "count": 50,
+          "total": 50,
+          "percent": 100.0
+        },
+        "semantic_refusal": {
+          "count": 50,
+          "total": 50,
+          "percent": 100.0
+        },
+        "false_refusals": {
+          "count": 0,
+          "total": 50,
+          "percent": 0.0
+        },
+        "unsafe_answers": {
+          "count": 0,
+          "total": 50,
+          "percent": 0.0
+        },
+        "refusals_all": {
+          "count": 50,
+          "total": 100,
+          "percent": 50.0
+        },
+        "cited_answer_support": {
+          "count": 50,
+          "total": 50,
+          "percent": 100.0
+        },
+        "cited_answer_support_with_language": {
+          "count": 50,
+          "total": 50,
+          "percent": 100.0
+        },
+        "language_match": {
+          "count": 100,
+          "total": 100,
+          "percent": 100.0
+        },
+        "language_mismatches": 0,
+        "language_unassessable": 0,
+        "language_mismatch_ids": [],
+        "unresolved_review_ids": [],
+        "invalid_reasons": {},
+        "states": {
+          "answer": 50,
+          "refusal": 50
+        },
+        "gold_presented_but_refused": {
+          "count": 0,
+          "total": 50,
+          "percent": 0.0,
+          "ids": []
+        }
+      },
+      "first_http_requests": 100,
+      "confirmed_calls": 101,
+      "corrections": 1,
+      "estimated_cny": "0.1560960",
+      "http_status": {
+        "200": 100
+      }
+    }
+  },
+  "retrieval": {
+    "candidate": {
+      "annotated_support_coverage": {
+        "count": 50,
+        "total": 50,
+        "percent": 100.0
+      },
+      "missing_support_ids": [],
+      "chunk_count_distribution": {
+        "1": 100
+      }
+    },
+    "reranked": {
+      "annotated_support_coverage": {
+        "count": 50,
+        "total": 50,
+        "percent": 100.0
+      },
+      "missing_support_ids": [],
+      "chunk_count_distribution": {
+        "1": 100
+      }
+    },
+    "presented": {
+      "annotated_support_coverage": {
+        "count": 50,
+        "total": 50,
+        "percent": 100.0
+      },
+      "missing_support_ids": [],
+      "chunk_count_distribution": {
+        "1": 100
+      }
+    }
+  },
+  "paired_changes": {
+    "first": {
+      "strict": {
+        "improved": [
+          "B011",
+          "B012",
+          "B016",
+          "B020",
+          "B026",
+          "B033",
+          "B039",
+          "B042",
+          "B043",
+          "B044",
+          "B053",
+          "B054",
+          "B058",
+          "B059",
+          "B060",
+          "B063",
+          "B074",
+          "B080",
+          "B082",
+          "B086",
+          "B087",
+          "B089",
+          "B091",
+          "B093",
+          "B095",
+          "B096",
+          "B098"
+        ],
+        "regressed": [
+          "B006"
+        ],
+        "net_count": 26,
+        "unchanged_count": 72,
+        "paired_exact_two_sided_p": 2.1606683731079102e-07
+      },
+      "semantic_and_citation": {
+        "improved": [
+          "B011",
+          "B012",
+          "B016",
+          "B020",
+          "B026",
+          "B033",
+          "B039",
+          "B042",
+          "B043",
+          "B044",
+          "B053",
+          "B054",
+          "B058",
+          "B059",
+          "B060",
+          "B063",
+          "B074",
+          "B080",
+          "B082",
+          "B086",
+          "B087",
+          "B089",
+          "B091",
+          "B093",
+          "B095",
+          "B096",
+          "B098"
+        ],
+        "regressed": [
+          "B006"
+        ],
+        "net_count": 26,
+        "unchanged_count": 72,
+        "paired_exact_two_sided_p": 2.1606683731079102e-07
+      },
+      "language": {
+        "improved": [
+          "B039",
+          "B086"
+        ],
+        "regressed": [],
+        "net_count": 2,
+        "unchanged_count": 98,
+        "paired_exact_two_sided_p": 0.5
+      },
+      "value": {
+        "improved": [
+          "B011",
+          "B012",
+          "B020",
+          "B026",
+          "B033",
+          "B039",
+          "B042",
+          "B044",
+          "B053",
+          "B054",
+          "B058",
+          "B059",
+          "B060",
+          "B063",
+          "B074",
+          "B080",
+          "B082",
+          "B086",
+          "B087",
+          "B089",
+          "B093",
+          "B096",
+          "B098"
+        ],
+        "regressed": [
+          "B006"
+        ],
+        "net_count": 22,
+        "unchanged_count": 76,
+        "paired_exact_two_sided_p": 2.9802322387695312e-06
+      },
+      "citation": {
+        "improved": [
+          "B011",
+          "B012",
+          "B016",
+          "B020",
+          "B026",
+          "B033",
+          "B039",
+          "B042",
+          "B043",
+          "B044",
+          "B053",
+          "B054",
+          "B058",
+          "B059",
+          "B060",
+          "B063",
+          "B074",
+          "B080",
+          "B082",
+          "B086",
+          "B087",
+          "B089",
+          "B091",
+          "B093",
+          "B095",
+          "B096",
+          "B098"
+        ],
+        "regressed": [
+          "B006"
+        ],
+        "net_count": 26,
+        "unchanged_count": 72,
+        "paired_exact_two_sided_p": 2.1606683731079102e-07
+      },
+      "positive_value": {
+        "improved": [],
+        "regressed": [
+          "B006"
+        ],
+        "net_count": -1,
+        "unchanged_count": 49,
+        "paired_exact_two_sided_p": 1.0
+      },
+      "positive_supported": {
+        "improved": [
+          "B016",
+          "B043",
+          "B091",
+          "B095"
+        ],
+        "regressed": [
+          "B006"
+        ],
+        "net_count": 3,
+        "unchanged_count": 45,
+        "paired_exact_two_sided_p": 0.375
+      },
+      "positive_strict": {
+        "improved": [
+          "B016",
+          "B043",
+          "B091",
+          "B095"
+        ],
+        "regressed": [
+          "B006"
+        ],
+        "net_count": 3,
+        "unchanged_count": 45,
+        "paired_exact_two_sided_p": 0.375
+      },
+      "correct_refusal": {
+        "improved": [
+          "B011",
+          "B012",
+          "B020",
+          "B026",
+          "B033",
+          "B039",
+          "B042",
+          "B044",
+          "B053",
+          "B054",
+          "B058",
+          "B059",
+          "B060",
+          "B063",
+          "B074",
+          "B080",
+          "B082",
+          "B086",
+          "B087",
+          "B089",
+          "B093",
+          "B096",
+          "B098"
+        ],
+        "regressed": [],
+        "net_count": 23,
+        "unchanged_count": 27,
+        "paired_exact_two_sided_p": 2.384185791015625e-07
+      }
+    },
+    "final": {
+      "strict": {
+        "improved": [
+          "B016",
+          "B039",
+          "B043",
+          "B044",
+          "B063",
+          "B086",
+          "B091",
+          "B095"
+        ],
+        "regressed": [],
+        "net_count": 8,
+        "unchanged_count": 92,
+        "paired_exact_two_sided_p": 0.0078125
+      },
+      "semantic_and_citation": {
+        "improved": [
+          "B016",
+          "B039",
+          "B043",
+          "B044",
+          "B063",
+          "B086",
+          "B091",
+          "B095"
+        ],
+        "regressed": [],
+        "net_count": 8,
+        "unchanged_count": 92,
+        "paired_exact_two_sided_p": 0.0078125
+      },
+      "language": {
+        "improved": [
+          "B039",
+          "B086"
+        ],
+        "regressed": [],
+        "net_count": 2,
+        "unchanged_count": 98,
+        "paired_exact_two_sided_p": 0.5
+      },
+      "value": {
+        "improved": [
+          "B039",
+          "B044",
+          "B063",
+          "B086"
+        ],
+        "regressed": [],
+        "net_count": 4,
+        "unchanged_count": 96,
+        "paired_exact_two_sided_p": 0.125
+      },
+      "citation": {
+        "improved": [
+          "B016",
+          "B039",
+          "B043",
+          "B044",
+          "B063",
+          "B086",
+          "B091",
+          "B095"
+        ],
+        "regressed": [],
+        "net_count": 8,
+        "unchanged_count": 92,
+        "paired_exact_two_sided_p": 0.0078125
+      },
+      "positive_value": {
+        "improved": [],
+        "regressed": [],
+        "net_count": 0,
+        "unchanged_count": 50,
+        "paired_exact_two_sided_p": 1.0
+      },
+      "positive_supported": {
+        "improved": [
+          "B016",
+          "B043",
+          "B091",
+          "B095"
+        ],
+        "regressed": [],
+        "net_count": 4,
+        "unchanged_count": 46,
+        "paired_exact_two_sided_p": 0.125
+      },
+      "positive_strict": {
+        "improved": [
+          "B016",
+          "B043",
+          "B091",
+          "B095"
+        ],
+        "regressed": [],
+        "net_count": 4,
+        "unchanged_count": 46,
+        "paired_exact_two_sided_p": 0.125
+      },
+      "correct_refusal": {
+        "improved": [
+          "B039",
+          "B044",
+          "B063",
+          "B086"
+        ],
+        "regressed": [],
+        "net_count": 4,
+        "unchanged_count": 46,
+        "paired_exact_two_sided_p": 0.125
+      }
+    }
+  },
+  "by_language": {
+    "en": {
+      "questions": 50,
+      "arms": {
+        "baseline": {
+          "first": {
+            "strict_all": {
+              "count": 37,
+              "total": 50,
+              "percent": 74.0
+            },
+            "semantic_and_citation_all": {
+              "count": 37,
+              "total": 50,
+              "percent": 74.0
+            },
+            "value_all": {
+              "count": 37,
+              "total": 50,
+              "percent": 74.0
+            },
+            "citation_all": {
+              "count": 37,
+              "total": 50,
+              "percent": 74.0
+            },
+            "positive_value": {
+              "count": 25,
+              "total": 25,
+              "percent": 100.0
+            },
+            "positive_value_with_language": {
+              "count": 25,
+              "total": 25,
+              "percent": 100.0
+            },
+            "positive_supported": {
+              "count": 25,
+              "total": 25,
+              "percent": 100.0
+            },
+            "positive_strict": {
+              "count": 25,
+              "total": 25,
+              "percent": 100.0
+            },
+            "correct_refusal": {
+              "count": 12,
+              "total": 25,
+              "percent": 48.0
+            },
+            "semantic_refusal": {
+              "count": 12,
+              "total": 25,
+              "percent": 48.0
+            },
+            "false_refusals": {
+              "count": 0,
+              "total": 25,
+              "percent": 0.0
+            },
+            "unsafe_answers": {
+              "count": 0,
+              "total": 25,
+              "percent": 0.0
+            },
+            "refusals_all": {
+              "count": 12,
+              "total": 50,
+              "percent": 24.0
+            },
+            "cited_answer_support": {
+              "count": 25,
+              "total": 25,
+              "percent": 100.0
+            },
+            "cited_answer_support_with_language": {
+              "count": 25,
+              "total": 25,
+              "percent": 100.0
+            },
+            "language_match": {
+              "count": 49,
+              "total": 50,
+              "percent": 98.0
+            },
+            "language_mismatches": 0,
+            "language_unassessable": 1,
+            "language_mismatch_ids": [],
+            "unresolved_review_ids": [],
+            "invalid_reasons": {
+              "citations_on_refusal": 12,
+              "json_parse": 1
+            },
+            "states": {
+              "answer": 25,
+              "refusal": 12,
+              "invalid": 13
+            },
+            "gold_presented_but_refused": {
+              "count": 0,
+              "total": 25,
+              "percent": 0.0,
+              "ids": []
+            }
+          },
+          "final": {
+            "strict_all": {
+              "count": 49,
+              "total": 50,
+              "percent": 98.0
+            },
+            "semantic_and_citation_all": {
+              "count": 49,
+              "total": 50,
+              "percent": 98.0
+            },
+            "value_all": {
+              "count": 49,
+              "total": 50,
+              "percent": 98.0
+            },
+            "citation_all": {
+              "count": 49,
+              "total": 50,
+              "percent": 98.0
+            },
+            "positive_value": {
+              "count": 25,
+              "total": 25,
+              "percent": 100.0
+            },
+            "positive_value_with_language": {
+              "count": 25,
+              "total": 25,
+              "percent": 100.0
+            },
+            "positive_supported": {
+              "count": 25,
+              "total": 25,
+              "percent": 100.0
+            },
+            "positive_strict": {
+              "count": 25,
+              "total": 25,
+              "percent": 100.0
+            },
+            "correct_refusal": {
+              "count": 24,
+              "total": 25,
+              "percent": 96.0
+            },
+            "semantic_refusal": {
+              "count": 24,
+              "total": 25,
+              "percent": 96.0
+            },
+            "false_refusals": {
+              "count": 0,
+              "total": 25,
+              "percent": 0.0
+            },
+            "unsafe_answers": {
+              "count": 0,
+              "total": 25,
+              "percent": 0.0
+            },
+            "refusals_all": {
+              "count": 24,
+              "total": 50,
+              "percent": 48.0
+            },
+            "cited_answer_support": {
+              "count": 25,
+              "total": 25,
+              "percent": 100.0
+            },
+            "cited_answer_support_with_language": {
+              "count": 25,
+              "total": 25,
+              "percent": 100.0
+            },
+            "language_match": {
+              "count": 49,
+              "total": 50,
+              "percent": 98.0
+            },
+            "language_mismatches": 0,
+            "language_unassessable": 1,
+            "language_mismatch_ids": [],
+            "unresolved_review_ids": [],
+            "invalid_reasons": {},
+            "states": {
+              "answer": 25,
+              "refusal": 24,
+              "error": 1
+            },
+            "gold_presented_but_refused": {
+              "count": 0,
+              "total": 25,
+              "percent": 0.0,
+              "ids": []
+            }
+          },
+          "first_http_requests": 50,
+          "confirmed_calls": 62,
+          "corrections": 12,
+          "estimated_cny": "0.1072320",
+          "http_status": {
+            "200": 49,
+            "502": 1
+          }
+        },
+        "candidate": {
+          "first": {
+            "strict_all": {
+              "count": 49,
+              "total": 50,
+              "percent": 98.0
+            },
+            "semantic_and_citation_all": {
+              "count": 49,
+              "total": 50,
+              "percent": 98.0
+            },
+            "value_all": {
+              "count": 49,
+              "total": 50,
+              "percent": 98.0
+            },
+            "citation_all": {
+              "count": 49,
+              "total": 50,
+              "percent": 98.0
+            },
+            "positive_value": {
+              "count": 24,
+              "total": 25,
+              "percent": 96.0
+            },
+            "positive_value_with_language": {
+              "count": 24,
+              "total": 25,
+              "percent": 96.0
+            },
+            "positive_supported": {
+              "count": 24,
+              "total": 25,
+              "percent": 96.0
+            },
+            "positive_strict": {
+              "count": 24,
+              "total": 25,
+              "percent": 96.0
+            },
+            "correct_refusal": {
+              "count": 25,
+              "total": 25,
+              "percent": 100.0
+            },
+            "semantic_refusal": {
+              "count": 25,
+              "total": 25,
+              "percent": 100.0
+            },
+            "false_refusals": {
+              "count": 0,
+              "total": 25,
+              "percent": 0.0
+            },
+            "unsafe_answers": {
+              "count": 0,
+              "total": 25,
+              "percent": 0.0
+            },
+            "refusals_all": {
+              "count": 25,
+              "total": 50,
+              "percent": 50.0
+            },
+            "cited_answer_support": {
+              "count": 24,
+              "total": 24,
+              "percent": 100.0
+            },
+            "cited_answer_support_with_language": {
+              "count": 24,
+              "total": 24,
+              "percent": 100.0
+            },
+            "language_match": {
+              "count": 50,
+              "total": 50,
+              "percent": 100.0
+            },
+            "language_mismatches": 0,
+            "language_unassessable": 0,
+            "language_mismatch_ids": [],
+            "unresolved_review_ids": [],
+            "invalid_reasons": {
+              "citation_mismatch": 1
+            },
+            "states": {
+              "answer": 24,
+              "invalid": 1,
+              "refusal": 25
+            },
+            "gold_presented_but_refused": {
+              "count": 0,
+              "total": 25,
+              "percent": 0.0,
+              "ids": []
+            }
+          },
+          "final": {
+            "strict_all": {
+              "count": 50,
+              "total": 50,
+              "percent": 100.0
+            },
+            "semantic_and_citation_all": {
+              "count": 50,
+              "total": 50,
+              "percent": 100.0
+            },
+            "value_all": {
+              "count": 50,
+              "total": 50,
+              "percent": 100.0
+            },
+            "citation_all": {
+              "count": 50,
+              "total": 50,
+              "percent": 100.0
+            },
+            "positive_value": {
+              "count": 25,
+              "total": 25,
+              "percent": 100.0
+            },
+            "positive_value_with_language": {
+              "count": 25,
+              "total": 25,
+              "percent": 100.0
+            },
+            "positive_supported": {
+              "count": 25,
+              "total": 25,
+              "percent": 100.0
+            },
+            "positive_strict": {
+              "count": 25,
+              "total": 25,
+              "percent": 100.0
+            },
+            "correct_refusal": {
+              "count": 25,
+              "total": 25,
+              "percent": 100.0
+            },
+            "semantic_refusal": {
+              "count": 25,
+              "total": 25,
+              "percent": 100.0
+            },
+            "false_refusals": {
+              "count": 0,
+              "total": 25,
+              "percent": 0.0
+            },
+            "unsafe_answers": {
+              "count": 0,
+              "total": 25,
+              "percent": 0.0
+            },
+            "refusals_all": {
+              "count": 25,
+              "total": 50,
+              "percent": 50.0
+            },
+            "cited_answer_support": {
+              "count": 25,
+              "total": 25,
+              "percent": 100.0
+            },
+            "cited_answer_support_with_language": {
+              "count": 25,
+              "total": 25,
+              "percent": 100.0
+            },
+            "language_match": {
+              "count": 50,
+              "total": 50,
+              "percent": 100.0
+            },
+            "language_mismatches": 0,
+            "language_unassessable": 0,
+            "language_mismatch_ids": [],
+            "unresolved_review_ids": [],
+            "invalid_reasons": {},
+            "states": {
+              "answer": 25,
+              "refusal": 25
+            },
+            "gold_presented_but_refused": {
+              "count": 0,
+              "total": 25,
+              "percent": 0.0,
+              "ids": []
+            }
+          },
+          "first_http_requests": 50,
+          "confirmed_calls": 51,
+          "corrections": 1,
+          "estimated_cny": "0.0714788",
+          "http_status": {
+            "200": 50
+          }
+        }
+      },
+      "retrieval": {
+        "candidate": {
+          "annotated_support_coverage": {
+            "count": 25,
+            "total": 25,
+            "percent": 100.0
+          },
+          "missing_support_ids": [],
+          "chunk_count_distribution": {
+            "1": 50
+          }
+        },
+        "reranked": {
+          "annotated_support_coverage": {
+            "count": 25,
+            "total": 25,
+            "percent": 100.0
+          },
+          "missing_support_ids": [],
+          "chunk_count_distribution": {
+            "1": 50
+          }
+        },
+        "presented": {
+          "annotated_support_coverage": {
+            "count": 25,
+            "total": 25,
+            "percent": 100.0
+          },
+          "missing_support_ids": [],
+          "chunk_count_distribution": {
+            "1": 50
+          }
+        }
+      },
+      "paired_changes": {
+        "first": {
+          "strict": {
+            "improved": [
+              "B011",
+              "B012",
+              "B026",
+              "B033",
+              "B039",
+              "B058",
+              "B060",
+              "B074",
+              "B080",
+              "B082",
+              "B089",
+              "B093",
+              "B098"
+            ],
+            "regressed": [
+              "B006"
+            ],
+            "net_count": 12,
+            "unchanged_count": 36,
+            "paired_exact_two_sided_p": 0.0018310546875
+          },
+          "semantic_and_citation": {
+            "improved": [
+              "B011",
+              "B012",
+              "B026",
+              "B033",
+              "B039",
+              "B058",
+              "B060",
+              "B074",
+              "B080",
+              "B082",
+              "B089",
+              "B093",
+              "B098"
+            ],
+            "regressed": [
+              "B006"
+            ],
+            "net_count": 12,
+            "unchanged_count": 36,
+            "paired_exact_two_sided_p": 0.0018310546875
+          },
+          "language": {
+            "improved": [
+              "B039"
+            ],
+            "regressed": [],
+            "net_count": 1,
+            "unchanged_count": 49,
+            "paired_exact_two_sided_p": 1.0
+          },
+          "value": {
+            "improved": [
+              "B011",
+              "B012",
+              "B026",
+              "B033",
+              "B039",
+              "B058",
+              "B060",
+              "B074",
+              "B080",
+              "B082",
+              "B089",
+              "B093",
+              "B098"
+            ],
+            "regressed": [
+              "B006"
+            ],
+            "net_count": 12,
+            "unchanged_count": 36,
+            "paired_exact_two_sided_p": 0.0018310546875
+          },
+          "citation": {
+            "improved": [
+              "B011",
+              "B012",
+              "B026",
+              "B033",
+              "B039",
+              "B058",
+              "B060",
+              "B074",
+              "B080",
+              "B082",
+              "B089",
+              "B093",
+              "B098"
+            ],
+            "regressed": [
+              "B006"
+            ],
+            "net_count": 12,
+            "unchanged_count": 36,
+            "paired_exact_two_sided_p": 0.0018310546875
+          },
+          "positive_value": {
+            "improved": [],
+            "regressed": [
+              "B006"
+            ],
+            "net_count": -1,
+            "unchanged_count": 24,
+            "paired_exact_two_sided_p": 1.0
+          },
+          "positive_supported": {
+            "improved": [],
+            "regressed": [
+              "B006"
+            ],
+            "net_count": -1,
+            "unchanged_count": 24,
+            "paired_exact_two_sided_p": 1.0
+          },
+          "positive_strict": {
+            "improved": [],
+            "regressed": [
+              "B006"
+            ],
+            "net_count": -1,
+            "unchanged_count": 24,
+            "paired_exact_two_sided_p": 1.0
+          },
+          "correct_refusal": {
+            "improved": [
+              "B011",
+              "B012",
+              "B026",
+              "B033",
+              "B039",
+              "B058",
+              "B060",
+              "B074",
+              "B080",
+              "B082",
+              "B089",
+              "B093",
+              "B098"
+            ],
+            "regressed": [],
+            "net_count": 13,
+            "unchanged_count": 12,
+            "paired_exact_two_sided_p": 0.000244140625
+          }
+        },
+        "final": {
+          "strict": {
+            "improved": [
+              "B039"
+            ],
+            "regressed": [],
+            "net_count": 1,
+            "unchanged_count": 49,
+            "paired_exact_two_sided_p": 1.0
+          },
+          "semantic_and_citation": {
+            "improved": [
+              "B039"
+            ],
+            "regressed": [],
+            "net_count": 1,
+            "unchanged_count": 49,
+            "paired_exact_two_sided_p": 1.0
+          },
+          "language": {
+            "improved": [
+              "B039"
+            ],
+            "regressed": [],
+            "net_count": 1,
+            "unchanged_count": 49,
+            "paired_exact_two_sided_p": 1.0
+          },
+          "value": {
+            "improved": [
+              "B039"
+            ],
+            "regressed": [],
+            "net_count": 1,
+            "unchanged_count": 49,
+            "paired_exact_two_sided_p": 1.0
+          },
+          "citation": {
+            "improved": [
+              "B039"
+            ],
+            "regressed": [],
+            "net_count": 1,
+            "unchanged_count": 49,
+            "paired_exact_two_sided_p": 1.0
+          },
+          "positive_value": {
+            "improved": [],
+            "regressed": [],
+            "net_count": 0,
+            "unchanged_count": 25,
+            "paired_exact_two_sided_p": 1.0
+          },
+          "positive_supported": {
+            "improved": [],
+            "regressed": [],
+            "net_count": 0,
+            "unchanged_count": 25,
+            "paired_exact_two_sided_p": 1.0
+          },
+          "positive_strict": {
+            "improved": [],
+            "regressed": [],
+            "net_count": 0,
+            "unchanged_count": 25,
+            "paired_exact_two_sided_p": 1.0
+          },
+          "correct_refusal": {
+            "improved": [
+              "B039"
+            ],
+            "regressed": [],
+            "net_count": 1,
+            "unchanged_count": 24,
+            "paired_exact_two_sided_p": 1.0
+          }
+        }
+      }
+    },
+    "zh": {
+      "questions": 50,
+      "arms": {
+        "baseline": {
+          "first": {
+            "strict_all": {
+              "count": 36,
+              "total": 50,
+              "percent": 72.0
+            },
+            "semantic_and_citation_all": {
+              "count": 36,
+              "total": 50,
+              "percent": 72.0
+            },
+            "value_all": {
+              "count": 40,
+              "total": 50,
+              "percent": 80.0
+            },
+            "citation_all": {
+              "count": 36,
+              "total": 50,
+              "percent": 72.0
+            },
+            "positive_value": {
+              "count": 25,
+              "total": 25,
+              "percent": 100.0
+            },
+            "positive_value_with_language": {
+              "count": 25,
+              "total": 25,
+              "percent": 100.0
+            },
+            "positive_supported": {
+              "count": 21,
+              "total": 25,
+              "percent": 84.0
+            },
+            "positive_strict": {
+              "count": 21,
+              "total": 25,
+              "percent": 84.0
+            },
+            "correct_refusal": {
+              "count": 15,
+              "total": 25,
+              "percent": 60.0
+            },
+            "semantic_refusal": {
+              "count": 15,
+              "total": 25,
+              "percent": 60.0
+            },
+            "false_refusals": {
+              "count": 0,
+              "total": 25,
+              "percent": 0.0
+            },
+            "unsafe_answers": {
+              "count": 2,
+              "total": 25,
+              "percent": 8.0
+            },
+            "refusals_all": {
+              "count": 15,
+              "total": 50,
+              "percent": 30.0
+            },
+            "cited_answer_support": {
+              "count": 21,
+              "total": 27,
+              "percent": 77.78
+            },
+            "cited_answer_support_with_language": {
+              "count": 21,
+              "total": 27,
+              "percent": 77.78
+            },
+            "language_match": {
+              "count": 49,
+              "total": 50,
+              "percent": 98.0
+            },
+            "language_mismatches": 0,
+            "language_unassessable": 1,
+            "language_mismatch_ids": [],
+            "unresolved_review_ids": [],
+            "invalid_reasons": {
+              "citations_on_refusal": 7,
+              "json_parse": 1
+            },
+            "states": {
+              "answer": 27,
+              "refusal": 15,
+              "invalid": 8
+            },
+            "gold_presented_but_refused": {
+              "count": 0,
+              "total": 25,
+              "percent": 0.0,
+              "ids": []
+            }
+          },
+          "final": {
+            "strict_all": {
+              "count": 43,
+              "total": 50,
+              "percent": 86.0
+            },
+            "semantic_and_citation_all": {
+              "count": 43,
+              "total": 50,
+              "percent": 86.0
+            },
+            "value_all": {
+              "count": 47,
+              "total": 50,
+              "percent": 94.0
+            },
+            "citation_all": {
+              "count": 43,
+              "total": 50,
+              "percent": 86.0
+            },
+            "positive_value": {
+              "count": 25,
+              "total": 25,
+              "percent": 100.0
+            },
+            "positive_value_with_language": {
+              "count": 25,
+              "total": 25,
+              "percent": 100.0
+            },
+            "positive_supported": {
+              "count": 21,
+              "total": 25,
+              "percent": 84.0
+            },
+            "positive_strict": {
+              "count": 21,
+              "total": 25,
+              "percent": 84.0
+            },
+            "correct_refusal": {
+              "count": 22,
+              "total": 25,
+              "percent": 88.0
+            },
+            "semantic_refusal": {
+              "count": 22,
+              "total": 25,
+              "percent": 88.0
+            },
+            "false_refusals": {
+              "count": 0,
+              "total": 25,
+              "percent": 0.0
+            },
+            "unsafe_answers": {
+              "count": 2,
+              "total": 25,
+              "percent": 8.0
+            },
+            "refusals_all": {
+              "count": 22,
+              "total": 50,
+              "percent": 44.0
+            },
+            "cited_answer_support": {
+              "count": 21,
+              "total": 27,
+              "percent": 77.78
+            },
+            "cited_answer_support_with_language": {
+              "count": 21,
+              "total": 27,
+              "percent": 77.78
+            },
+            "language_match": {
+              "count": 49,
+              "total": 50,
+              "percent": 98.0
+            },
+            "language_mismatches": 0,
+            "language_unassessable": 1,
+            "language_mismatch_ids": [],
+            "unresolved_review_ids": [],
+            "invalid_reasons": {},
+            "states": {
+              "answer": 27,
+              "refusal": 22,
+              "error": 1
+            },
+            "gold_presented_but_refused": {
+              "count": 0,
+              "total": 25,
+              "percent": 0.0,
+              "ids": []
+            }
+          },
+          "first_http_requests": 50,
+          "confirmed_calls": 57,
+          "corrections": 7,
+          "estimated_cny": "0.1166928",
+          "http_status": {
+            "200": 49,
+            "502": 1
+          }
+        },
+        "candidate": {
+          "first": {
+            "strict_all": {
+              "count": 50,
+              "total": 50,
+              "percent": 100.0
+            },
+            "semantic_and_citation_all": {
+              "count": 50,
+              "total": 50,
+              "percent": 100.0
+            },
+            "value_all": {
+              "count": 50,
+              "total": 50,
+              "percent": 100.0
+            },
+            "citation_all": {
+              "count": 50,
+              "total": 50,
+              "percent": 100.0
+            },
+            "positive_value": {
+              "count": 25,
+              "total": 25,
+              "percent": 100.0
+            },
+            "positive_value_with_language": {
+              "count": 25,
+              "total": 25,
+              "percent": 100.0
+            },
+            "positive_supported": {
+              "count": 25,
+              "total": 25,
+              "percent": 100.0
+            },
+            "positive_strict": {
+              "count": 25,
+              "total": 25,
+              "percent": 100.0
+            },
+            "correct_refusal": {
+              "count": 25,
+              "total": 25,
+              "percent": 100.0
+            },
+            "semantic_refusal": {
+              "count": 25,
+              "total": 25,
+              "percent": 100.0
+            },
+            "false_refusals": {
+              "count": 0,
+              "total": 25,
+              "percent": 0.0
+            },
+            "unsafe_answers": {
+              "count": 0,
+              "total": 25,
+              "percent": 0.0
+            },
+            "refusals_all": {
+              "count": 25,
+              "total": 50,
+              "percent": 50.0
+            },
+            "cited_answer_support": {
+              "count": 25,
+              "total": 25,
+              "percent": 100.0
+            },
+            "cited_answer_support_with_language": {
+              "count": 25,
+              "total": 25,
+              "percent": 100.0
+            },
+            "language_match": {
+              "count": 50,
+              "total": 50,
+              "percent": 100.0
+            },
+            "language_mismatches": 0,
+            "language_unassessable": 0,
+            "language_mismatch_ids": [],
+            "unresolved_review_ids": [],
+            "invalid_reasons": {},
+            "states": {
+              "answer": 25,
+              "refusal": 25
+            },
+            "gold_presented_but_refused": {
+              "count": 0,
+              "total": 25,
+              "percent": 0.0,
+              "ids": []
+            }
+          },
+          "final": {
+            "strict_all": {
+              "count": 50,
+              "total": 50,
+              "percent": 100.0
+            },
+            "semantic_and_citation_all": {
+              "count": 50,
+              "total": 50,
+              "percent": 100.0
+            },
+            "value_all": {
+              "count": 50,
+              "total": 50,
+              "percent": 100.0
+            },
+            "citation_all": {
+              "count": 50,
+              "total": 50,
+              "percent": 100.0
+            },
+            "positive_value": {
+              "count": 25,
+              "total": 25,
+              "percent": 100.0
+            },
+            "positive_value_with_language": {
+              "count": 25,
+              "total": 25,
+              "percent": 100.0
+            },
+            "positive_supported": {
+              "count": 25,
+              "total": 25,
+              "percent": 100.0
+            },
+            "positive_strict": {
+              "count": 25,
+              "total": 25,
+              "percent": 100.0
+            },
+            "correct_refusal": {
+              "count": 25,
+              "total": 25,
+              "percent": 100.0
+            },
+            "semantic_refusal": {
+              "count": 25,
+              "total": 25,
+              "percent": 100.0
+            },
+            "false_refusals": {
+              "count": 0,
+              "total": 25,
+              "percent": 0.0
+            },
+            "unsafe_answers": {
+              "count": 0,
+              "total": 25,
+              "percent": 0.0
+            },
+            "refusals_all": {
+              "count": 25,
+              "total": 50,
+              "percent": 50.0
+            },
+            "cited_answer_support": {
+              "count": 25,
+              "total": 25,
+              "percent": 100.0
+            },
+            "cited_answer_support_with_language": {
+              "count": 25,
+              "total": 25,
+              "percent": 100.0
+            },
+            "language_match": {
+              "count": 50,
+              "total": 50,
+              "percent": 100.0
+            },
+            "language_mismatches": 0,
+            "language_unassessable": 0,
+            "language_mismatch_ids": [],
+            "unresolved_review_ids": [],
+            "invalid_reasons": {},
+            "states": {
+              "answer": 25,
+              "refusal": 25
+            },
+            "gold_presented_but_refused": {
+              "count": 0,
+              "total": 25,
+              "percent": 0.0,
+              "ids": []
+            }
+          },
+          "first_http_requests": 50,
+          "confirmed_calls": 50,
+          "corrections": 0,
+          "estimated_cny": "0.0846172",
+          "http_status": {
+            "200": 50
+          }
+        }
+      },
+      "retrieval": {
+        "candidate": {
+          "annotated_support_coverage": {
+            "count": 25,
+            "total": 25,
+            "percent": 100.0
+          },
+          "missing_support_ids": [],
+          "chunk_count_distribution": {
+            "1": 50
+          }
+        },
+        "reranked": {
+          "annotated_support_coverage": {
+            "count": 25,
+            "total": 25,
+            "percent": 100.0
+          },
+          "missing_support_ids": [],
+          "chunk_count_distribution": {
+            "1": 50
+          }
+        },
+        "presented": {
+          "annotated_support_coverage": {
+            "count": 25,
+            "total": 25,
+            "percent": 100.0
+          },
+          "missing_support_ids": [],
+          "chunk_count_distribution": {
+            "1": 50
+          }
+        }
+      },
+      "paired_changes": {
+        "first": {
+          "strict": {
+            "improved": [
+              "B016",
+              "B020",
+              "B042",
+              "B043",
+              "B044",
+              "B053",
+              "B054",
+              "B059",
+              "B063",
+              "B086",
+              "B087",
+              "B091",
+              "B095",
+              "B096"
+            ],
+            "regressed": [],
+            "net_count": 14,
+            "unchanged_count": 36,
+            "paired_exact_two_sided_p": 0.0001220703125
+          },
+          "semantic_and_citation": {
+            "improved": [
+              "B016",
+              "B020",
+              "B042",
+              "B043",
+              "B044",
+              "B053",
+              "B054",
+              "B059",
+              "B063",
+              "B086",
+              "B087",
+              "B091",
+              "B095",
+              "B096"
+            ],
+            "regressed": [],
+            "net_count": 14,
+            "unchanged_count": 36,
+            "paired_exact_two_sided_p": 0.0001220703125
+          },
+          "language": {
+            "improved": [
+              "B086"
+            ],
+            "regressed": [],
+            "net_count": 1,
+            "unchanged_count": 49,
+            "paired_exact_two_sided_p": 1.0
+          },
+          "value": {
+            "improved": [
+              "B020",
+              "B042",
+              "B044",
+              "B053",
+              "B054",
+              "B059",
+              "B063",
+              "B086",
+              "B087",
+              "B096"
+            ],
+            "regressed": [],
+            "net_count": 10,
+            "unchanged_count": 40,
+            "paired_exact_two_sided_p": 0.001953125
+          },
+          "citation": {
+            "improved": [
+              "B016",
+              "B020",
+              "B042",
+              "B043",
+              "B044",
+              "B053",
+              "B054",
+              "B059",
+              "B063",
+              "B086",
+              "B087",
+              "B091",
+              "B095",
+              "B096"
+            ],
+            "regressed": [],
+            "net_count": 14,
+            "unchanged_count": 36,
+            "paired_exact_two_sided_p": 0.0001220703125
+          },
+          "positive_value": {
+            "improved": [],
+            "regressed": [],
+            "net_count": 0,
+            "unchanged_count": 25,
+            "paired_exact_two_sided_p": 1.0
+          },
+          "positive_supported": {
+            "improved": [
+              "B016",
+              "B043",
+              "B091",
+              "B095"
+            ],
+            "regressed": [],
+            "net_count": 4,
+            "unchanged_count": 21,
+            "paired_exact_two_sided_p": 0.125
+          },
+          "positive_strict": {
+            "improved": [
+              "B016",
+              "B043",
+              "B091",
+              "B095"
+            ],
+            "regressed": [],
+            "net_count": 4,
+            "unchanged_count": 21,
+            "paired_exact_two_sided_p": 0.125
+          },
+          "correct_refusal": {
+            "improved": [
+              "B020",
+              "B042",
+              "B044",
+              "B053",
+              "B054",
+              "B059",
+              "B063",
+              "B086",
+              "B087",
+              "B096"
+            ],
+            "regressed": [],
+            "net_count": 10,
+            "unchanged_count": 15,
+            "paired_exact_two_sided_p": 0.001953125
+          }
+        },
+        "final": {
+          "strict": {
+            "improved": [
+              "B016",
+              "B043",
+              "B044",
+              "B063",
+              "B086",
+              "B091",
+              "B095"
+            ],
+            "regressed": [],
+            "net_count": 7,
+            "unchanged_count": 43,
+            "paired_exact_two_sided_p": 0.015625
+          },
+          "semantic_and_citation": {
+            "improved": [
+              "B016",
+              "B043",
+              "B044",
+              "B063",
+              "B086",
+              "B091",
+              "B095"
+            ],
+            "regressed": [],
+            "net_count": 7,
+            "unchanged_count": 43,
+            "paired_exact_two_sided_p": 0.015625
+          },
+          "language": {
+            "improved": [
+              "B086"
+            ],
+            "regressed": [],
+            "net_count": 1,
+            "unchanged_count": 49,
+            "paired_exact_two_sided_p": 1.0
+          },
+          "value": {
+            "improved": [
+              "B044",
+              "B063",
+              "B086"
+            ],
+            "regressed": [],
+            "net_count": 3,
+            "unchanged_count": 47,
+            "paired_exact_two_sided_p": 0.25
+          },
+          "citation": {
+            "improved": [
+              "B016",
+              "B043",
+              "B044",
+              "B063",
+              "B086",
+              "B091",
+              "B095"
+            ],
+            "regressed": [],
+            "net_count": 7,
+            "unchanged_count": 43,
+            "paired_exact_two_sided_p": 0.015625
+          },
+          "positive_value": {
+            "improved": [],
+            "regressed": [],
+            "net_count": 0,
+            "unchanged_count": 25,
+            "paired_exact_two_sided_p": 1.0
+          },
+          "positive_supported": {
+            "improved": [
+              "B016",
+              "B043",
+              "B091",
+              "B095"
+            ],
+            "regressed": [],
+            "net_count": 4,
+            "unchanged_count": 21,
+            "paired_exact_two_sided_p": 0.125
+          },
+          "positive_strict": {
+            "improved": [
+              "B016",
+              "B043",
+              "B091",
+              "B095"
+            ],
+            "regressed": [],
+            "net_count": 4,
+            "unchanged_count": 21,
+            "paired_exact_two_sided_p": 0.125
+          },
+          "correct_refusal": {
+            "improved": [
+              "B044",
+              "B063",
+              "B086"
+            ],
+            "regressed": [],
+            "net_count": 3,
+            "unchanged_count": 22,
+            "paired_exact_two_sided_p": 0.25
+          }
+        }
+      }
+    }
+  }
+}

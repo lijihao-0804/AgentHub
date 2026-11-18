@@ -1,0 +1,369 @@
+{
+  "questions": 14,
+  "previous": "union of previously successful arms, including language",
+  "answerable": 10,
+  "stages": {
+    "first": {
+      "strict": 14,
+      "refusal": 4,
+      "supported_positive": 10,
+      "language": 14,
+      "valid": 14,
+      "supported_cited": 10,
+      "cited": 10,
+      "gained": [],
+      "regressed": [],
+      "unresolved": []
+    },
+    "final": {
+      "strict": 14,
+      "refusal": 4,
+      "supported_positive": 10,
+      "language": 14,
+      "valid": 14,
+      "supported_cited": 10,
+      "cited": 10,
+      "gained": [],
+      "regressed": [],
+      "unresolved": []
+    }
+  },
+  "rows": [
+    {
+      "id": "W01",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "W02",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "W03",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "W04",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "W05",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "W06",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "W07",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "W08",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "W09",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "W10",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "W11",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "W12",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "W13",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "W14",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "W01",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "W02",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "W03",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "W04",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "W05",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "W06",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "W07",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "W08",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "W09",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "W10",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "W11",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "W12",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "W13",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "W14",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    }
+  ]
+}

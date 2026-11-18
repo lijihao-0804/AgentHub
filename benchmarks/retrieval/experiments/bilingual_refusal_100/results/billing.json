@@ -1,0 +1,99 @@
+{
+  "runs": {
+    "old100": {
+      "arms": {
+        "candidate": {
+          "calls": 101,
+          "http": 100,
+          "corrections": 1,
+          "input_tokens": 69517,
+          "cached_input_tokens": 25344,
+          "output_tokens": 7819,
+          "estimated_cny": "0.1559668"
+        }
+      },
+      "total": {
+        "calls": 101,
+        "http": 100,
+        "corrections": 1,
+        "input_tokens": 69517,
+        "cached_input_tokens": 25344,
+        "output_tokens": 7819,
+        "estimated_cny": "0.1559668"
+      },
+      "source_commit": "a81e88ea4ed77a258ec00f54add052f416fac8c6",
+      "registered_cases_sha256": "5773c6abc639d38db7b4d80fec5457045fff1c432f8c071d133f732ee2765098",
+      "receipts_file_sha256": "c19934d9435856e3c4269316dad028089004c495e4f2df0aec14f7ac83eec629"
+    },
+    "wai14": {
+      "arms": {
+        "candidate": {
+          "calls": 14,
+          "http": 14,
+          "corrections": 0,
+          "input_tokens": 31008,
+          "cached_input_tokens": 3584,
+          "output_tokens": 1188,
+          "estimated_cny": "0.0650688"
+        }
+      },
+      "total": {
+        "calls": 14,
+        "http": 14,
+        "corrections": 0,
+        "input_tokens": 31008,
+        "cached_input_tokens": 3584,
+        "output_tokens": 1188,
+        "estimated_cny": "0.0650688"
+      },
+      "source_commit": "a81e88ea4ed77a258ec00f54add052f416fac8c6",
+      "registered_cases_sha256": "940e317050c6413d90cebaf8d449fe0786bc15c13f68b50b087596c7c1180cd3",
+      "receipts_file_sha256": "ad1a5e3c75cce3d793290be5a3ff15ffc1b017cb8db0d17abcf3e89e8de123f2"
+    },
+    "independent": {
+      "arms": {
+        "candidate": {
+          "calls": 101,
+          "http": 100,
+          "corrections": 1,
+          "input_tokens": 69164,
+          "cached_input_tokens": 24320,
+          "output_tokens": 7693,
+          "estimated_cny": "0.1560960"
+        },
+        "baseline": {
+          "calls": 119,
+          "http": 100,
+          "corrections": 19,
+          "input_tokens": 66012,
+          "cached_input_tokens": 7424,
+          "output_tokens": 13158,
+          "estimated_cny": "0.2239248"
+        }
+      },
+      "total": {
+        "calls": 220,
+        "http": 200,
+        "corrections": 20,
+        "input_tokens": 135176,
+        "cached_input_tokens": 31744,
+        "output_tokens": 20851,
+        "estimated_cny": "0.3800208"
+      },
+      "source_commit": "a81e88ea4ed77a258ec00f54add052f416fac8c6",
+      "registered_cases_sha256": "9c80fe161866687dc348a3061144b8bf24a22eaee75ccb5ab49ae67fbdc2319b",
+      "receipts_file_sha256": "40bb294bd2244a04cad00a2158521e5ae3ba6f120b3191cd62971dacad947f75"
+    }
+  },
+  "total": {
+    "calls": 335,
+    "http": 314,
+    "corrections": 21,
+    "input_tokens": 235701,
+    "cached_input_tokens": 60672,
+    "output_tokens": 29858,
+    "estimated_cny": "0.6010564"
+  },
+  "unique_confirmed_receipts": 335,
+  "unknown": 0
+}

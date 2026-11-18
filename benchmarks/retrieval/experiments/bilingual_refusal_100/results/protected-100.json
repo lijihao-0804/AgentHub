@@ -1,0 +1,2440 @@
+{
+  "questions": 100,
+  "previous": "union of previously successful arms, including language",
+  "answerable": 50,
+  "stages": {
+    "first": {
+      "strict": 99,
+      "refusal": 50,
+      "supported_positive": 49,
+      "language": 99,
+      "valid": 99,
+      "supported_cited": 49,
+      "cited": 49,
+      "gained": [
+        "R027",
+        "R089"
+      ],
+      "regressed": [
+        "R092"
+      ],
+      "unresolved": []
+    },
+    "final": {
+      "strict": 100,
+      "refusal": 50,
+      "supported_positive": 50,
+      "language": 100,
+      "valid": 100,
+      "supported_cited": 50,
+      "cited": 50,
+      "gained": [
+        "R027"
+      ],
+      "regressed": [],
+      "unresolved": []
+    }
+  },
+  "rows": [
+    {
+      "id": "R001",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R002",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R003",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R004",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R005",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R006",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R007",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R008",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R009",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R010",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R011",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R012",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R013",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R014",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R015",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R016",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R017",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R018",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R019",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R020",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R021",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R022",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R023",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R024",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R025",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R026",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R027",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": false,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R028",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R029",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R030",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R031",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R032",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R033",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R034",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R035",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R036",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R037",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R038",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R039",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R040",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R041",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R042",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R043",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R044",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R045",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R046",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R047",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R048",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R049",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R050",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R051",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R052",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R053",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R054",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R055",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R056",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R057",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R058",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R059",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R060",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R061",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R062",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R063",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R064",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R065",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R066",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R067",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R068",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R069",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R070",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R071",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R072",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R073",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R074",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R075",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R076",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R077",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R078",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R079",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R080",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R081",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R082",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R083",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R084",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R085",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R086",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R087",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R088",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R089",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": false,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R090",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R091",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R092",
+      "stage": "first",
+      "state": "invalid",
+      "current": false,
+      "previous_success": true,
+      "review": {
+        "value": null,
+        "support": null,
+        "language_match": null
+      }
+    },
+    {
+      "id": "R093",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R094",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R095",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R096",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R097",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R098",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R099",
+      "stage": "first",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R100",
+      "stage": "first",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R001",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R002",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R003",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R004",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R005",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R006",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R007",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R008",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R009",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R010",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R011",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R012",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R013",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R014",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R015",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R016",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R017",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R018",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R019",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R020",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R021",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R022",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R023",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R024",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R025",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R026",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R027",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": false,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R028",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R029",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R030",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R031",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R032",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R033",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R034",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R035",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R036",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R037",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R038",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R039",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R040",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R041",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R042",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R043",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R044",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R045",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R046",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R047",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R048",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R049",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R050",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R051",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R052",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R053",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R054",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R055",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R056",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R057",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R058",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R059",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R060",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R061",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R062",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R063",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R064",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R065",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R066",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R067",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R068",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R069",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R070",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R071",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R072",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R073",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R074",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R075",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R076",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R077",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R078",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R079",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R080",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R081",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R082",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R083",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R084",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R085",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R086",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R087",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R088",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R089",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R090",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R091",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R092",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R093",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R094",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R095",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R096",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R097",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R098",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R099",
+      "stage": "final",
+      "state": "answer",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    },
+    {
+      "id": "R100",
+      "stage": "final",
+      "state": "refusal",
+      "current": true,
+      "previous_success": true,
+      "review": {
+        "value": true,
+        "support": true,
+        "language_match": true
+      }
+    }
+  ]
+}
