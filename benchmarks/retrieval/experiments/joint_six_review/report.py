@@ -9,7 +9,7 @@ from decimal import Decimal
 from pathlib import Path
 from statistics import median
 
-from .packets import GROUPS, ROOT, load, rows, save
+from .packets import GROUPS, ROOT, cases, load, rows, save
 
 ARCHIVE = "85563aebcc3f9e9ee302bec951fdff71a6977c2e"
 PREFIX = "benchmarks/retrieval/experiments/bilingual_refusal_100/results/"
@@ -79,6 +79,61 @@ def metrics(results):
     }
 
 
+def compare_pairs(base, candidate, ids, predicate):
+    gains, losses = [], []
+    both_true = 0
+    for q in ids:
+        before, after = predicate(base[q]), predicate(candidate[q])
+        if before and after:
+            both_true += 1
+        elif before:
+            losses.append(q)
+        elif after:
+            gains.append(q)
+    different = len(gains) + len(losses)
+    tail = sum(math.comb(different, i) for i in range(1 + min(len(gains), len(losses))))
+    return dict(
+        pairs=len(ids),
+        baseline=both_true + len(losses),
+        candidate=both_true + len(gains),
+        tied_positive=both_true,
+        tied_negative=len(ids) - both_true - different,
+        gains=gains,
+        losses=losses,
+        mcnemar_two_sided_exact=min(1, 2 * tail / 2**different) if ids else None,
+    )
+
+
+def subgroup_pairs(base, candidate, common, strata):
+    def strict(r):
+        return r["strict"]
+
+    def correct_refusal(r):
+        return r["valid"] and r["refused"] and r["value"]
+
+    answerable = [q for q in common if base[q]["answerable"]]
+    negatives = [q for q in common if not base[q]["answerable"]]
+    results = dict(
+        strict_all=compare_pairs(base, candidate, common, strict),
+        strict_answerable=compare_pairs(base, candidate, answerable, strict),
+        correct_refusal=compare_pairs(base, candidate, negatives, correct_refusal),
+        support_when_both_assert=compare_pairs(
+            base,
+            candidate,
+            [
+                q
+                for q in common
+                if all(r["valid"] and not r["refused"] for r in (base[q], candidate[q]))
+            ],
+            lambda r: r["support"],
+        ),
+    )
+    for stratum in sorted(set(strata.values())):
+        subset = [q for q in common if strata[q] == stratum]
+        results[stratum] = compare_pairs(base, candidate, subset, strict)
+    return results
+
+
 def adjudicate(directory, packet_dir, judgments, ledger):
     packets = {r["uid"]: r for path in packet_dir.glob("blind-*.json") for r in load(path)}
     labels = {}
@@ -98,12 +153,14 @@ def adjudicate(directory, packet_dir, judgments, ledger):
     totals = {"/".join(key): metrics(group) for key, group in groups.items()}
     paired, historical = {}, {}
     protected = protections()
+    strata = {r["id"]: r["stratum"] for r in cases("fresh")}
     for stage in ("first", "final"):
         base = {r["id"]: r for r in groups["fresh", "baseline", stage]}
         candidate = {r["id"]: r for r in groups["fresh", "candidate", stage]}
         common = sorted(base.keys() & candidate.keys())
         paired[stage] = dict(
             pairs=len(common),
+            comparisons=subgroup_pairs(base, candidate, common, strata),
             new_correct=[q for q in common if candidate[q]["strict"] and not base[q]["strict"]],
             lost_correct=[q for q in common if base[q]["strict"] and not candidate[q]["strict"]],
             lost_support_on_assertions=[
