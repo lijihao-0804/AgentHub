@@ -38,6 +38,7 @@ from packages.knowledge.evidence_records import MAX_EVIDENCE_EXCERPT_CHARS, Evid
 from packages.knowledge.refusal_consistency import (
     echoed_count_refusal,
     explicit_abstention,
+    first_whole_refusal,
     recover_whole_refusal,
     refuses_requested_comparison,
 )
@@ -564,12 +565,51 @@ def resolve_citation_answer(
     output_limit_reached: bool,
     answer_contract_v1: bool = False,
     contextual: bool = False,
+    first_refusal_contract: bool = False,
+    evidence_texts: Mapping[int, str] | None = None,
 ) -> CitationAnswerReceipt:
     """Resolve one provider response; never dispatches a model request."""
     allowed = frozenset(visible_ids)
     output = _parse_model_output(content, output_limit_reached=output_limit_reached)
     rule = None
-    if answer_contract_v1:
+    # A verbatim status or label may literally read "Insufficient evidence".
+    source_text_answer = False
+    if first_refusal_contract and not output.insufficient_evidence and output.citation_ids:
+        literal = explicit_abstention(query, output.answer, contextual=False)
+        if literal:
+            words = re.escape(" ".join(literal.casefold().split()).strip(" .!?。！？"))
+            # A quoted sentence, a standalone line, or a field value. A longer
+            # sentence merely containing these words is not a verbatim status.
+            wording = re.compile(
+                rf"(?:^|[“‘\"'「【:：\n]|(?:reads?|says?|displays?)\s+|(?:显示|写着|填为|填写为))"
+                rf"\s*{words}\s*[.!?。！？]?(?=$|[”’\"'」】\n.!?。！？])",
+                re.I | re.M,
+            )
+            source_text_answer = evidence_texts is None or any(
+                n not in evidence_texts or wording.search(evidence_texts[n])
+                for n in output.citation_ids
+            )
+    if first_refusal_contract and not source_text_answer:
+        # A declared refusal sometimes lists its references only in the prose.
+        # Check both channels independently before omitting any attributed text.
+        canonical = re.compile(r"\[([1-9][0-9]*)\]")
+        markers = set(canonical.findall(output.answer))
+        listed = {str(n) for n in output.citation_ids}
+        if (
+            (markers or listed or not output.insufficient_evidence)
+            and not re.search(r"[\[\]［］【】]", canonical.sub("", output.answer))
+            and (markers | listed) <= {str(n) for n in allowed}
+            and (markers == listed or (output.insufficient_evidence and markers and not listed))
+        ):
+            refusal = first_whole_refusal(
+                query, output.answer, declared=output.insufficient_evidence
+            )
+            if refusal:
+                output = output.model_copy(
+                    update={"answer": refusal, "citation_ids": [], "insufficient_evidence": True}
+                )
+                rule = "first_whole_refusal"
+    if answer_contract_v1 and rule is None:
         # Numeric bracket groups are reserved for references. Do not silently
         # strip a malformed group or a citation present only in the ID array.
         if not set(output.citation_ids).issubset(allowed):
@@ -582,7 +622,7 @@ def resolve_citation_answer(
             raise _InvalidCitationAnswer(
                 _QaFailure.CITATION_OUT_OF_RANGE, "Unseen citation marker."
             )
-        repair = recover_whole_refusal(query, output.answer)
+        repair = None if source_text_answer else recover_whole_refusal(query, output.answer)
         # On ordinary answers a disagreement between the two reference channels
         # is never repaired. A declared refusal may have redundant references.
         if repair and (
@@ -616,11 +656,13 @@ def resolve_citation_answer(
                 "An explicit refusal of the requested comparison contains attributable facts.",
             )
     ids = _validate_model_output(output, evidence_count=len(allowed), visible_ids=allowed)
-    count_refusal = echoed_count_refusal(query, output.answer) if ids else None
+    count_refusal = (
+        echoed_count_refusal(query, output.answer) if ids and not source_text_answer else None
+    )
     if count_refusal is not None:
         answer, insufficient, ids = count_refusal, True, ()
         rule = "explicit_missing_count"
-    elif answer_contract_v1:
+    elif answer_contract_v1 or source_text_answer:
         answer, insufficient = output.answer, output.insufficient_evidence
     else:
         answer, insufficient, ids = _normalize_validated_answer(
@@ -654,6 +696,7 @@ class CitationQaService:
         output_mode: CitationOutputMode = "JSON_SCHEMA",
         verify_refusal_consistency: bool = False,
         answer_contract_v1: bool = False,
+        first_refusal_contract: bool = False,
         retrieval_profile: Mapping[str, int] | None = None,
         model_plan_resolver: Callable[
             [AsyncSession, WorkspaceExecutionContext, UUID],
@@ -687,6 +730,7 @@ class CitationQaService:
         self.output_mode = output_mode
         self.verify_refusal_consistency = verify_refusal_consistency
         self.answer_contract_v1 = answer_contract_v1
+        self.first_refusal_contract = first_refusal_contract
         self.model_plan_resolver = model_plan_resolver or partial(
             _resolve_model_plan, output_mode=output_mode
         )
@@ -761,6 +805,7 @@ class CitationQaService:
         )
         selected = _select_evidence(retrieval.evidence, max_chars=self.max_evidence_chars)
         evidence_prompt = None
+        evidence_texts = {item.id: item.text for item in selected}
         if selected and self.evidence_projection == "compact_v1":
             records, references = [], []
             for item in selected:
@@ -803,8 +848,10 @@ class CitationQaService:
             if evidence_plan is None:
                 selected = ()
             else:
-                visible = {int(item["id"]) for item in evidence_plan.payload["results"]}
-                selected = tuple(item for item in selected if item.id in visible)
+                evidence_texts = {
+                    int(item["id"]): item["snippet"] for item in evidence_plan.payload["results"]
+                }
+                selected = tuple(item for item in selected if item.id in evidence_texts)
                 evidence_prompt = f"Question:\n{query}\n\nUntrusted reference data:\n" + json.dumps(
                     evidence_plan.payload,
                     ensure_ascii=False,
@@ -867,8 +914,14 @@ class CitationQaService:
                     output_limit_reached=response.finish_reason == "length",
                     answer_contract_v1=self.answer_contract_v1,
                     contextual=self.verify_refusal_consistency,
+                    first_refusal_contract=self.first_refusal_contract and attempt == 0,
+                    evidence_texts=evidence_texts,
                 )
-                if receipt.rule and self.answer_contract_v1 and self.trace_sink is not None:
+                if (
+                    receipt.rule
+                    and (self.answer_contract_v1 or receipt.rule == "first_whole_refusal")
+                    and self.trace_sink is not None
+                ):
                     try:
                         span = await self.trace_sink.start_span(
                             "knowledge.qa.output_normalized",
