@@ -22,7 +22,7 @@ def load(path):
 
 
 def save(path, data):
-    with path.open("x", encoding="utf8") as stream:
+    with path.open("x", encoding="utf8", newline="\n") as stream:
         json.dump(data, stream, ensure_ascii=False, indent=2)
         stream.write("\n")
 
@@ -34,7 +34,8 @@ def rows(path):
 def cases(group):
     if group == "fresh":
         return [
-            r for r in load(PRIVATE / "joint-six-20261118/matched.json")["cases"]
+            r
+            for r in load(PRIVATE / "joint-six-20261118/matched.json")["cases"]
             if r["cohort"] != "smoke"
         ]
     if group == "W":

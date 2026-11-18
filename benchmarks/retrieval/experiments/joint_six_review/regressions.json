@@ -1,0 +1,483 @@
+{
+  "first": {
+    "fresh_lost_prompt_equal": [
+      "2hop__385043_53794",
+      "2hop__389498_7666",
+      "2hop__446183_21489"
+    ],
+    "archive_lost_prompt_equal": [
+      "B002",
+      "B011",
+      "B019",
+      "B033",
+      "B037",
+      "B041",
+      "B045",
+      "B054",
+      "B058",
+      "B059",
+      "B060",
+      "B072",
+      "B080",
+      "B082",
+      "B084",
+      "B086",
+      "B089",
+      "B093",
+      "B097",
+      "B098",
+      "R004",
+      "R005",
+      "R011",
+      "R018",
+      "R023",
+      "R025",
+      "R027",
+      "R028",
+      "R031",
+      "R032",
+      "R038",
+      "R047",
+      "R048",
+      "R053",
+      "R056",
+      "R057",
+      "R064",
+      "R065",
+      "R069",
+      "R076",
+      "R079",
+      "R089",
+      "R090",
+      "R096",
+      "R100"
+    ],
+    "case_details": {
+      "2hop__385043_53794": {
+        "current_prompts_equal": true,
+        "defects": [
+          "citations_on_refusal"
+        ]
+      },
+      "2hop__181212_701819": {
+        "current_prompts_equal": false,
+        "defects": [
+          "empty_output"
+        ]
+      },
+      "2hop__446183_21489": {
+        "current_prompts_equal": true,
+        "defects": [
+          "json_parse"
+        ]
+      },
+      "2hop__389498_7666": {
+        "current_prompts_equal": true,
+        "defects": [
+          "citations_on_refusal"
+        ]
+      },
+      "2hop__638520_90677": {
+        "current_prompts_equal": false,
+        "defects": [
+          "empty_output"
+        ]
+      },
+      "2hop__822362_18120": {
+        "current_prompts_equal": false,
+        "defects": [
+          "json_parse"
+        ]
+      },
+      "2hop__746150_728372": {
+        "current_prompts_equal": false,
+        "defects": [
+          "json_parse"
+        ]
+      },
+      "R004": {
+        "current_prompts_equal": true,
+        "defects": [
+          "citations_on_refusal"
+        ]
+      },
+      "R005": {
+        "current_prompts_equal": true,
+        "defects": [
+          "json_parse"
+        ]
+      },
+      "R011": {
+        "current_prompts_equal": true,
+        "defects": [
+          "citations_on_refusal"
+        ]
+      },
+      "R018": {
+        "current_prompts_equal": true,
+        "defects": [
+          "citations_on_refusal"
+        ]
+      },
+      "R023": {
+        "current_prompts_equal": true,
+        "defects": [
+          "citations_on_refusal"
+        ]
+      },
+      "R025": {
+        "current_prompts_equal": true,
+        "defects": [
+          "citations_on_refusal"
+        ]
+      },
+      "R026": {
+        "current_prompts_equal": false,
+        "defects": [
+          "citations_on_refusal"
+        ]
+      },
+      "R027": {
+        "current_prompts_equal": true,
+        "defects": [
+          "citations_on_refusal"
+        ]
+      },
+      "R028": {
+        "current_prompts_equal": true,
+        "defects": [
+          "citations_on_refusal"
+        ]
+      },
+      "R031": {
+        "current_prompts_equal": true,
+        "defects": [
+          "citations_on_refusal"
+        ]
+      },
+      "R032": {
+        "current_prompts_equal": true,
+        "defects": [
+          "citations_on_refusal"
+        ]
+      },
+      "R038": {
+        "current_prompts_equal": true,
+        "defects": [
+          "json_parse"
+        ]
+      },
+      "R047": {
+        "current_prompts_equal": true,
+        "defects": [
+          "citations_on_refusal"
+        ]
+      },
+      "R048": {
+        "current_prompts_equal": true,
+        "defects": [
+          "citations_on_refusal"
+        ]
+      },
+      "R053": {
+        "current_prompts_equal": true,
+        "defects": [
+          "citations_on_refusal"
+        ]
+      },
+      "R056": {
+        "current_prompts_equal": true,
+        "defects": [
+          "citations_on_refusal"
+        ]
+      },
+      "R057": {
+        "current_prompts_equal": true,
+        "defects": [
+          "citations_on_refusal"
+        ]
+      },
+      "R064": {
+        "current_prompts_equal": true,
+        "defects": [
+          "citations_on_refusal"
+        ]
+      },
+      "R065": {
+        "current_prompts_equal": true,
+        "defects": [
+          "citations_on_refusal"
+        ]
+      },
+      "R069": {
+        "current_prompts_equal": true,
+        "defects": [
+          "citations_on_refusal"
+        ]
+      },
+      "R076": {
+        "current_prompts_equal": true,
+        "defects": [
+          "citations_on_refusal"
+        ]
+      },
+      "R079": {
+        "current_prompts_equal": true,
+        "defects": [
+          "citations_on_refusal"
+        ]
+      },
+      "R089": {
+        "current_prompts_equal": true,
+        "defects": [
+          "citations_on_refusal"
+        ]
+      },
+      "R090": {
+        "current_prompts_equal": true,
+        "defects": [
+          "json_parse"
+        ]
+      },
+      "R092": {
+        "current_prompts_equal": true,
+        "defects": []
+      },
+      "R096": {
+        "current_prompts_equal": true,
+        "defects": [
+          "citations_on_refusal"
+        ]
+      },
+      "R100": {
+        "current_prompts_equal": true,
+        "defects": [
+          "citations_on_refusal"
+        ]
+      },
+      "B002": {
+        "current_prompts_equal": true,
+        "defects": [
+          "citations_on_refusal"
+        ]
+      },
+      "B006": {
+        "current_prompts_equal": true,
+        "defects": []
+      },
+      "B011": {
+        "current_prompts_equal": true,
+        "defects": [
+          "citations_on_refusal"
+        ]
+      },
+      "B019": {
+        "current_prompts_equal": true,
+        "defects": [
+          "citations_on_refusal"
+        ]
+      },
+      "B033": {
+        "current_prompts_equal": true,
+        "defects": [
+          "citations_on_refusal"
+        ]
+      },
+      "B037": {
+        "current_prompts_equal": true,
+        "defects": [
+          "citations_on_refusal"
+        ]
+      },
+      "B041": {
+        "current_prompts_equal": true,
+        "defects": [
+          "citations_on_refusal"
+        ]
+      },
+      "B045": {
+        "current_prompts_equal": true,
+        "defects": [
+          "citations_on_refusal"
+        ]
+      },
+      "B054": {
+        "current_prompts_equal": true,
+        "defects": [
+          "citations_on_refusal"
+        ]
+      },
+      "B058": {
+        "current_prompts_equal": true,
+        "defects": [
+          "citations_on_refusal"
+        ]
+      },
+      "B059": {
+        "current_prompts_equal": true,
+        "defects": [
+          "citations_on_refusal"
+        ]
+      },
+      "B060": {
+        "current_prompts_equal": true,
+        "defects": [
+          "citations_on_refusal"
+        ]
+      },
+      "B072": {
+        "current_prompts_equal": true,
+        "defects": [
+          "citations_on_refusal"
+        ]
+      },
+      "B080": {
+        "current_prompts_equal": true,
+        "defects": [
+          "citations_on_refusal"
+        ]
+      },
+      "B082": {
+        "current_prompts_equal": true,
+        "defects": [
+          "citations_on_refusal"
+        ]
+      },
+      "B084": {
+        "current_prompts_equal": true,
+        "defects": [
+          "citations_on_refusal"
+        ]
+      },
+      "B086": {
+        "current_prompts_equal": true,
+        "defects": [
+          "citations_on_refusal"
+        ]
+      },
+      "B089": {
+        "current_prompts_equal": true,
+        "defects": [
+          "citations_on_refusal"
+        ]
+      },
+      "B093": {
+        "current_prompts_equal": true,
+        "defects": [
+          "citations_on_refusal"
+        ]
+      },
+      "B097": {
+        "current_prompts_equal": true,
+        "defects": [
+          "citations_on_refusal"
+        ]
+      },
+      "B098": {
+        "current_prompts_equal": true,
+        "defects": [
+          "citations_on_refusal"
+        ]
+      },
+      "W04": {
+        "current_prompts_equal": false,
+        "defects": [
+          "citation_mismatch"
+        ]
+      },
+      "W13": {
+        "current_prompts_equal": false,
+        "defects": [
+          "incorrect_content"
+        ]
+      }
+    }
+  },
+  "final": {
+    "fresh_lost_prompt_equal": [
+      "2hop__138166_34844",
+      "2hop__446183_21489"
+    ],
+    "archive_lost_prompt_equal": [
+      "R005",
+      "R038",
+      "R090"
+    ],
+    "case_details": {
+      "2hop__181212_701819": {
+        "current_prompts_equal": false,
+        "defects": [
+          "MODEL_BAD_RESPONSE"
+        ]
+      },
+      "2hop__446183_21489": {
+        "current_prompts_equal": true,
+        "defects": [
+          "CITATION_QA_INVALID_MODEL_OUTPUT"
+        ]
+      },
+      "2hop__138166_34844": {
+        "current_prompts_equal": true,
+        "defects": [
+          "MODEL_BAD_RESPONSE"
+        ]
+      },
+      "2hop__638520_90677": {
+        "current_prompts_equal": false,
+        "defects": [
+          "MODEL_BAD_RESPONSE"
+        ]
+      },
+      "2hop__822362_18120": {
+        "current_prompts_equal": false,
+        "defects": [
+          "CITATION_QA_INVALID_MODEL_OUTPUT"
+        ]
+      },
+      "2hop__430752_55607": {
+        "current_prompts_equal": false,
+        "defects": [
+          "CITATION_QA_INVALID_MODEL_OUTPUT"
+        ]
+      },
+      "2hop__746150_728372": {
+        "current_prompts_equal": false,
+        "defects": [
+          "CITATION_QA_INVALID_MODEL_OUTPUT"
+        ]
+      },
+      "R005": {
+        "current_prompts_equal": true,
+        "defects": [
+          "CITATION_QA_INVALID_MODEL_OUTPUT"
+        ]
+      },
+      "R038": {
+        "current_prompts_equal": true,
+        "defects": [
+          "CITATION_QA_INVALID_MODEL_OUTPUT"
+        ]
+      },
+      "R090": {
+        "current_prompts_equal": true,
+        "defects": [
+          "CITATION_QA_INVALID_MODEL_OUTPUT"
+        ]
+      },
+      "R092": {
+        "current_prompts_equal": true,
+        "defects": []
+      },
+      "B006": {
+        "current_prompts_equal": true,
+        "defects": []
+      },
+      "W13": {
+        "current_prompts_equal": false,
+        "defects": [
+          "incorrect_content"
+        ]
+      }
+    }
+  }
+}

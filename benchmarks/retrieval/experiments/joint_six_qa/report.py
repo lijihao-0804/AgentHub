@@ -56,6 +56,41 @@ def historical_messages():
     return summary
 
 
+def error_usage(exchanges, confirmed):
+    """Describe the final wire response for each known API error."""
+    groups = defaultdict(list)
+    for row in exchanges:
+        if row["http"] != 200:
+            event = row["events"][-1]
+            code = row["body"]["error"]["code"]
+            groups[(row["http"], code, event["finish"])].append(confirmed[event["id"]])
+    result = []
+    for (http, error, finish), receipts in sorted(groups.items()):
+        details = [r["usage"].get("completion_tokens_details") or {} for r in receipts]
+        ranges = {}
+        for name in ("reasoning_tokens", "text_tokens"):
+            values = [d[name] for d in details if type(d.get(name)) is int]
+            if values:
+                ranges[name] = dict(
+                    reported=len(values),
+                    total=sum(values),
+                    minimum=min(values),
+                    maximum=max(values),
+                )
+        result.append(
+            dict(
+                http=http,
+                error=error,
+                finish=finish,
+                count=len(receipts),
+                output_min=min(r["output"] for r in receipts),
+                output_max=max(r["output"] for r in receipts),
+                completion_token_details=ranges,
+            )
+        )
+    return result
+
+
 def stage_summary(stage):
     directory = STUDY / ("paid-" + stage)
     freeze_path = STUDY / (stage + "-freeze.json")
@@ -64,6 +99,7 @@ def stage_summary(stage):
     if load(directory / "billing.json") != billing:
         raise ValueError("Final billing differs from the raw ledger")
     raw = rows(directory / "ledger.jsonl")
+    confirmed = {r["id"]: r for r in raw if r["state"] == "confirmed"}
     receipt_counts = Counter(r["state"] for r in raw)
     groups = {}
     for group in ("smoke",) if stage == "smoke" else FORMAL:
@@ -84,6 +120,7 @@ def stage_summary(stage):
                 **costs,
                 logical=len(exchanges),
                 http_status=dict(sorted(Counter(r["http"] for r in exchanges).items())),
+                final_error_usage=error_usage(exchanges, confirmed),
                 median_ms=round(statistics.median(times), 1),
                 p95_nearest_rank_ms=round(times[math.ceil(0.95 * len(times)) - 1], 1),
             )
@@ -141,7 +178,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
     summary = report()
     if args.save:
-        with Path(__file__).with_name("execution.json").open("x", encoding="utf8") as out:
+        with (
+            Path(__file__)
+            .with_name("execution.json")
+            .open("x", encoding="utf8", newline="\n") as out
+        ):
             json.dump(summary, out, indent=2)
             out.write("\n")
     else:

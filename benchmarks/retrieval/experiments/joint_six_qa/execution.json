@@ -1,0 +1,449 @@
+{
+  "schema": 1,
+  "model": "deepseek-v4.1-flash-1017",
+  "region": "cn-beijing",
+  "main_baseline": "4a0daa2ed29540ed0a0b46500c9a7e78671b55a6",
+  "manifest_sha256": "5f1a72ad8967d6153e669f11f5251e4491e47aa5ce883e35b110d074b78311bf",
+  "formal_snapshot_rates": {
+    "region": "cn-beijing",
+    "timezone": "Asia/Shanghai",
+    "peak_hours": "[08:00,22:00)",
+    "peak_cny_per_million": {
+      "miss": "2",
+      "hit": "0.04",
+      "output": "8"
+    },
+    "offpeak_cny_per_million": {
+      "miss": "1",
+      "hit": "0.02",
+      "output": "4"
+    },
+    "verified_date": "2026-11-18",
+    "sources": [
+      "https://help.aliyun.com/zh/model-studio/deepseek-v4-1-flash"
+    ]
+  },
+  "archived_live_vs_current_preflight_first_messages": {
+    "R": {
+      "baseline": {
+        "checked": 100,
+        "system_equal": 100,
+        "user_equal": 100,
+        "system_and_user_equal": 100,
+        "user_changed_ids": []
+      },
+      "candidate": {
+        "checked": 100,
+        "system_equal": 0,
+        "user_equal": 96,
+        "system_and_user_equal": 0,
+        "user_changed_ids": [
+          "R026",
+          "R034",
+          "R036",
+          "R098"
+        ]
+      },
+      "archived_candidate_to_current_main": {
+        "checked": 100,
+        "system_equal": 0,
+        "user_equal": 100,
+        "system_and_user_equal": 0,
+        "user_changed_ids": []
+      }
+    },
+    "B": {
+      "baseline": {
+        "checked": 100,
+        "system_equal": 100,
+        "user_equal": 100,
+        "system_and_user_equal": 100,
+        "user_changed_ids": []
+      },
+      "candidate": {
+        "checked": 100,
+        "system_equal": 0,
+        "user_equal": 100,
+        "system_and_user_equal": 0,
+        "user_changed_ids": []
+      },
+      "archived_candidate_to_current_main": {
+        "checked": 100,
+        "system_equal": 0,
+        "user_equal": 100,
+        "system_and_user_equal": 0,
+        "user_changed_ids": []
+      }
+    },
+    "W": {
+      "baseline": {
+        "checked": 0,
+        "system_equal": 0,
+        "user_equal": 0,
+        "system_and_user_equal": 0,
+        "user_changed_ids": []
+      },
+      "candidate": {
+        "checked": 14,
+        "system_equal": 0,
+        "user_equal": 1,
+        "system_and_user_equal": 0,
+        "user_changed_ids": [
+          "W01",
+          "W02",
+          "W04",
+          "W05",
+          "W06",
+          "W07",
+          "W08",
+          "W09",
+          "W10",
+          "W11",
+          "W12",
+          "W13",
+          "W14"
+        ]
+      },
+      "archived_candidate_to_current_main": {
+        "checked": 14,
+        "system_equal": 0,
+        "user_equal": 11,
+        "system_and_user_equal": 0,
+        "user_changed_ids": [
+          "W06",
+          "W07",
+          "W12"
+        ]
+      }
+    }
+  },
+  "latency_unit": "Milliseconds from product API dispatch to response, including local retrieval and provider generation.",
+  "smoke": {
+    "code_commit": "01ac6e796e00dc1c86fa0a9fb1c9588b0c774796",
+    "freeze_sha256": "4a26d989f0a49a4595a996fe6cdca8f9eee1758367f71c48ad3e4ec8d0be9a50",
+    "input_set_sha256": "86bd4c52b4ae3f052f61dcb255b02c568ce2c2ab9d855b8a46286a75103985bb",
+    "private_artifact_sha256": {
+      "smoke": {
+        "bindings": "5e6826ca959a036bcb0178c484b50a7f6b0f870a17de68705a7a05b46fae31e3",
+        "offline": "5f0facbdff9f290a28a3a0000cf492d57e6d9c2fae15e42a5471e41f387bb07c"
+      }
+    },
+    "ledger_sha256": "b9ab285f9f8a87ba0aa82a3619872ef0213de4a079f9a23150f8111f21ea02e3",
+    "max_http": 1,
+    "max_wire": 1,
+    "max_peak_cny": "0.014618",
+    "billing": {
+      "state": "COMPLETE",
+      "reserved": 1,
+      "confirmed": 1,
+      "unknown": 0,
+      "corrections": 0,
+      "confirmed_cny": "0.004892",
+      "outstanding_cny": "0",
+      "cumulative_with_reserves_cny": "1.2672716",
+      "unique_current_receipts": 1,
+      "input": 1702,
+      "output": 186,
+      "cached": 0,
+      "logical_complete": 1
+    },
+    "raw_ledger_state_counts": {
+      "reserved": 1,
+      "confirmed": 1
+    },
+    "current_main_equal_prior_offline_main": {},
+    "groups": {
+      "smoke/baseline": {
+        "confirmed": 1,
+        "input": 1702,
+        "output": 186,
+        "cached": 0,
+        "cny": "0.004892",
+        "corrections": 0,
+        "logical": 1,
+        "http_status": {
+          "200": 1
+        },
+        "final_error_usage": [],
+        "median_ms": 34722.5,
+        "p95_nearest_rank_ms": 34722.5
+      }
+    }
+  },
+  "formal": {
+    "code_commit": "8df28c79396ab0f280ac20b5ce3debf56571ff48",
+    "freeze_sha256": "9455ee2e3447358343adce8cc33bf9950fcfe5d2f68e79c40b9b07028de33d4b",
+    "input_set_sha256": "86bd4c52b4ae3f052f61dcb255b02c568ce2c2ab9d855b8a46286a75103985bb",
+    "private_artifact_sha256": {
+      "fresh": {
+        "bindings": "d5af7304a7f2badd745306803b10749b832bf0ba39ecb1968b6520cf325a5e0d",
+        "offline": "b369a81fbbf6bf93f3465a461c024cc5d85789c8d5f26b4b3e5f93089dbe7d91"
+      },
+      "R": {
+        "bindings": "01b637d2f13806b5dbf7fba26062ac94435bf95cae2b795fd303fb6e41f9c242",
+        "offline": "292487dd09b15b77dea135dd77a342424835342436ad2ff0ea413baa4c4ada8e"
+      },
+      "B": {
+        "bindings": "3d819efbcce57bba67b5078d62387fae2a4ceb46b7e1a14925f983942b00ee11",
+        "offline": "68d9ec4c6159d5103ebfd3b24f8c7427181a48d616f8677f11e479d58ecfc960"
+      },
+      "W": {
+        "bindings": "90af267f6b9918b2a468038889731604304a1cebe75e5cc259f3333d28755a83",
+        "offline": "dbd9fbab3522ad9cc4110c696ef12976a6515873a8db7870312ff2b0180794a1"
+      },
+      "paid_smoke_ledger": "b9ab285f9f8a87ba0aa82a3619872ef0213de4a079f9a23150f8111f21ea02e3"
+    },
+    "ledger_sha256": "0d5b3bb1fc3fb233981d4d2311bf044bff346bef9f49b06059ae7ec09d144510",
+    "max_http": 342,
+    "max_wire": 684,
+    "max_peak_cny": "10.071196",
+    "billing": {
+      "state": "COMPLETE",
+      "reserved": 401,
+      "confirmed": 401,
+      "unknown": 0,
+      "corrections": 59,
+      "confirmed_cny": "0.82946512",
+      "outstanding_cny": "0",
+      "cumulative_with_reserves_cny": "2.09673672",
+      "unique_current_receipts": 401,
+      "input": 386156,
+      "output": 55013,
+      "cached": 85760,
+      "logical_complete": 342
+    },
+    "raw_ledger_state_counts": {
+      "reserved": 401,
+      "confirmed": 401
+    },
+    "current_main_equal_prior_offline_main": {
+      "R": {
+        "checked": 100,
+        "equal": 100
+      },
+      "B": {
+        "checked": 100,
+        "equal": 100
+      },
+      "W": {
+        "checked": 14,
+        "equal": 14
+      }
+    },
+    "groups": {
+      "fresh/baseline": {
+        "confirmed": 70,
+        "input": 109749,
+        "output": 13938,
+        "cached": 36096,
+        "cny": "0.26025384",
+        "corrections": 6,
+        "logical": 64,
+        "http_status": {
+          "200": 39,
+          "502": 25
+        },
+        "final_error_usage": [
+          {
+            "http": 502,
+            "error": "CITATION_QA_INVALID_MODEL_OUTPUT",
+            "finish": "length",
+            "count": 8,
+            "output_min": 256,
+            "output_max": 256,
+            "completion_token_details": {
+              "reasoning_tokens": {
+                "reported": 8,
+                "total": 1849,
+                "minimum": 206,
+                "maximum": 247
+              },
+              "text_tokens": {
+                "reported": 8,
+                "total": 191,
+                "minimum": 8,
+                "maximum": 49
+              }
+            }
+          },
+          {
+            "http": 502,
+            "error": "MODEL_BAD_RESPONSE",
+            "finish": "length",
+            "count": 17,
+            "output_min": 256,
+            "output_max": 256,
+            "completion_token_details": {
+              "reasoning_tokens": {
+                "reported": 17,
+                "total": 4352,
+                "minimum": 256,
+                "maximum": 256
+              },
+              "text_tokens": {
+                "reported": 17,
+                "total": 0,
+                "minimum": 0,
+                "maximum": 0
+              }
+            }
+          }
+        ],
+        "median_ms": 3046.0,
+        "p95_nearest_rank_ms": 4772.6
+      },
+      "fresh/candidate": {
+        "confirmed": 73,
+        "input": 115629,
+        "output": 14388,
+        "cached": 42752,
+        "cny": "0.26256808",
+        "corrections": 9,
+        "logical": 64,
+        "http_status": {
+          "200": 32,
+          "502": 32
+        },
+        "final_error_usage": [
+          {
+            "http": 502,
+            "error": "CITATION_QA_INVALID_MODEL_OUTPUT",
+            "finish": "length",
+            "count": 10,
+            "output_min": 256,
+            "output_max": 256,
+            "completion_token_details": {
+              "reasoning_tokens": {
+                "reported": 10,
+                "total": 2224,
+                "minimum": 167,
+                "maximum": 250
+              },
+              "text_tokens": {
+                "reported": 10,
+                "total": 326,
+                "minimum": 5,
+                "maximum": 88
+              }
+            }
+          },
+          {
+            "http": 502,
+            "error": "MODEL_BAD_RESPONSE",
+            "finish": "length",
+            "count": 22,
+            "output_min": 256,
+            "output_max": 256,
+            "completion_token_details": {
+              "reasoning_tokens": {
+                "reported": 22,
+                "total": 5632,
+                "minimum": 256,
+                "maximum": 256
+              },
+              "text_tokens": {
+                "reported": 22,
+                "total": 0,
+                "minimum": 0,
+                "maximum": 0
+              }
+            }
+          }
+        ],
+        "median_ms": 3168.8,
+        "p95_nearest_rank_ms": 5230.4
+      },
+      "R/candidate": {
+        "confirmed": 123,
+        "input": 67524,
+        "output": 12832,
+        "cached": 2816,
+        "cny": "0.16198328",
+        "corrections": 23,
+        "logical": 100,
+        "http_status": {
+          "200": 97,
+          "502": 3
+        },
+        "final_error_usage": [
+          {
+            "http": 502,
+            "error": "CITATION_QA_INVALID_MODEL_OUTPUT",
+            "finish": "length",
+            "count": 1,
+            "output_min": 256,
+            "output_max": 256,
+            "completion_token_details": {
+              "reasoning_tokens": {
+                "reported": 1,
+                "total": 180,
+                "minimum": 180,
+                "maximum": 180
+              },
+              "text_tokens": {
+                "reported": 1,
+                "total": 75,
+                "minimum": 75,
+                "maximum": 75
+              }
+            }
+          },
+          {
+            "http": 502,
+            "error": "CITATION_QA_INVALID_MODEL_OUTPUT",
+            "finish": "stop",
+            "count": 2,
+            "output_min": 78,
+            "output_max": 79,
+            "completion_token_details": {
+              "reasoning_tokens": {
+                "reported": 2,
+                "total": 31,
+                "minimum": 13,
+                "maximum": 18
+              },
+              "text_tokens": {
+                "reported": 2,
+                "total": 124,
+                "minimum": 60,
+                "maximum": 64
+              }
+            }
+          }
+        ],
+        "median_ms": 1872.8,
+        "p95_nearest_rank_ms": 4529.6
+      },
+      "B/candidate": {
+        "confirmed": 120,
+        "input": 66677,
+        "output": 12717,
+        "cached": 2560,
+        "cny": "0.11503620",
+        "corrections": 20,
+        "logical": 100,
+        "http_status": {
+          "200": 100
+        },
+        "final_error_usage": [],
+        "median_ms": 1841.3,
+        "p95_nearest_rank_ms": 4065.2
+      },
+      "W/candidate": {
+        "confirmed": 15,
+        "input": 26577,
+        "output": 1138,
+        "cached": 1536,
+        "cny": "0.02962372",
+        "corrections": 1,
+        "logical": 14,
+        "http_status": {
+          "200": 14
+        },
+        "final_error_usage": [],
+        "median_ms": 2020.4,
+        "p95_nearest_rank_ms": 3819.1
+      }
+    }
+  }
+}
