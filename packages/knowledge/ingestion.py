@@ -75,6 +75,7 @@ async def claim_ingestion_job(
     settings: Settings | None = None,
 ) -> ClaimedIngestionJob | None:
     now = _now()
+    settings = settings or get_settings()
     lease_token = secrets.token_urlsafe(32)[:64]
     lease_expires_at = now + timedelta(seconds=lease_seconds)
     due = or_(IngestionJob.next_attempt_at.is_(None), IngestionJob.next_attempt_at <= now)
@@ -93,7 +94,11 @@ async def claim_ingestion_job(
     )
     result = await session.execute(
         update(IngestionJob)
-        .where(IngestionJob.id == job_id, claimable)
+        .where(
+            IngestionJob.id == job_id,
+            claimable,
+            IngestionJob.attempt_count < settings.knowledge_ingestion_max_attempts,
+        )
         .values(
             status=IngestionJobStatus.PROCESSING,
             lease_token=lease_token,
@@ -106,7 +111,18 @@ async def claim_ingestion_job(
     )
     job = result.scalar_one_or_none()
     if job is None:
-        await session.rollback()
+        # Active owners (including the final legal attempt) remain undisturbed.
+        exhausted = await session.scalar(
+            select(IngestionJob)
+            .where(IngestionJob.id == job_id, claimable,
+                   IngestionJob.attempt_count >= settings.knowledge_ingestion_max_attempts)
+            .with_for_update()
+        )
+        if exhausted is not None:
+            await _exhaust_attempts(session, exhausted, now)
+            await session.commit()
+        else:
+            await session.rollback()
         return None
 
     revision = await session.scalar(
@@ -125,7 +141,7 @@ async def claim_ingestion_job(
         # Freeze it on the first claim, before parsing can be retried. Never
         # infer parameters for historical chunks already being embedded/indexed.
         legacy = ChunkingPolicy.resolve(
-            ChunkingStrategy.FIXED, revision.media_type, settings or get_settings()
+            ChunkingStrategy.FIXED, revision.media_type, settings
         )
         revision.chunking_strategy = legacy.strategy
         revision.chunk_size_chars = legacy.size_chars
@@ -397,6 +413,22 @@ async def fail_ingestion_job(
     return True
 
 
+async def _exhaust_attempts(session: AsyncSession, job: IngestionJob, now: datetime) -> None:
+    """Finish a locked, claimable job without incrementing successful claims."""
+    job.next_attempt_at = None
+    job.status = IngestionJobStatus.FAILED
+    job.lease_token = None
+    job.lease_expires_at = None
+    job.last_error_code = "MAX_ATTEMPTS_EXCEEDED"
+    job.safe_error_message = "The ingestion job exceeded its retry limit."
+    job.updated_at = now
+    await session.execute(
+        update(DocumentRevision)
+        .where(DocumentRevision.id == job.document_revision_id)
+        .values(ingestion_status=RevisionIngestionStatus.FAILED)
+    )
+
+
 async def reconcile_ingestion_jobs(
     session: AsyncSession,
     *,
@@ -428,17 +460,7 @@ async def reconcile_ingestion_jobs(
     failed: list[UUID] = []
     for job in jobs:
         if job.attempt_count >= settings.knowledge_ingestion_max_attempts:
-            job.status = IngestionJobStatus.FAILED
-            job.lease_token = None
-            job.lease_expires_at = None
-            job.last_error_code = "MAX_ATTEMPTS_EXCEEDED"
-            job.safe_error_message = "The ingestion job exceeded its retry limit."
-            job.updated_at = now
-            await session.execute(
-                update(DocumentRevision)
-                .where(DocumentRevision.id == job.document_revision_id)
-                .values(ingestion_status=RevisionIngestionStatus.FAILED)
-            )
+            await _exhaust_attempts(session, job, now)
             failed.append(job.id)
             continue
         job.status = IngestionJobStatus.PENDING

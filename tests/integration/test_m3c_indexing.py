@@ -35,6 +35,7 @@ from packages.knowledge.models import (
     Document,
     DocumentChunk,
     DocumentRevision,
+    DocumentVectorCache,
     IngestionJob,
     IngestionJobStatus,
     IngestionStage,
@@ -589,3 +590,123 @@ async def test_ready_revision_replacement_is_ordered_by_revision_number(
         second = await session.get(DocumentRevision, second_revision_record.id)
     assert first is not None and first.lifecycle_status == RevisionLifecycleStatus.RETIRED
     assert second is not None and second.lifecycle_status == RevisionLifecycleStatus.ACTIVE
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("pause_at", ["dense", "cached_dense", "upsert"])
+async def test_takeover_during_inflight_batch_stops_stale_worker(
+    db_factory, tmp_path, monkeypatch, pause_at
+):
+    import asyncio
+    import threading
+
+    from apps.worker.tasks import knowledge as worker
+
+    job_id, revision_id, document_id = await _seed_revision(
+        db_factory,
+        blob_root=tmp_path,
+        stage=IngestionStage.INDEXING,
+        with_chunk=True,
+    )
+    async with db_factory() as session:
+        first = await session.scalar(
+            select(DocumentChunk).where(DocumentChunk.document_revision_id == revision_id)
+        )
+        session.add(
+            DocumentChunk(
+                chunk_id=f"m3c-{uuid4().hex}",
+                workspace_id=first.workspace_id,
+                knowledge_base_id=first.knowledge_base_id,
+                document_id=document_id,
+                document_revision_id=revision_id,
+                ordinal=1,
+                normalized_content_hash="b" * 64,
+                text="second batch",
+                locator={},
+            )
+        )
+        await session.commit()
+        old = await claim_ingestion_job(session, job_id=job_id, lease_seconds=60)
+    entered = asyncio.Event()
+    resume = threading.Event()
+    loop = asyncio.get_running_loop()
+    calls = []
+
+    def pause(name):
+        calls.append(name)
+        if name == pause_at.removeprefix("cached_"):
+            loop.call_soon_threadsafe(entered.set)
+            assert resume.wait(15)
+
+    class Dense(DeterministicFakeDenseEmbedder):
+        def document_cache_fingerprint(self):
+            return "a" * 64
+
+        def embed_documents(self, texts):
+            pause("dense")
+            return super().embed_documents(texts)
+
+    class Sparse(DeterministicFakeSparseEncoder):
+        def encode_documents(self, texts):
+            pause("sparse")
+            return super().encode_documents(texts)
+
+    class Index:
+        points = set()
+
+        def ensure_collection(self):
+            return None
+
+        def upsert(self, records):
+            pause("upsert")
+            self.points.update(r.point_id for r in records)
+
+    index = Index()
+    monkeypatch.setattr(worker, "_INDEX_BATCH_SIZE", 1)
+    stale_task = asyncio.create_task(
+        worker._index_claim(
+            db_factory,
+            old,
+            dense=Dense(dimension=8),
+            sparse=Sparse(),
+            index=index,
+            cache_enabled=pause_at == "cached_dense",
+            guard=worker._ClaimGuard(db_factory, old),
+        )
+    )
+    try:
+        await asyncio.wait_for(entered.wait(), timeout=15)
+        async with db_factory() as session:
+            await session.execute(
+                update(IngestionJob)
+                .where(IngestionJob.id == job_id)
+                .values(lease_expires_at=datetime.now(UTC) - timedelta(seconds=1))
+            )
+            await session.commit()
+            owner = await claim_ingestion_job(session, job_id=job_id, lease_seconds=60)
+        assert owner is not None and owner.lease_token != old.lease_token
+    finally:
+        resume.set()
+    outcome = await stale_task
+    assert outcome.stale
+    assert calls == (["dense"] if pause_at != "upsert" else ["dense", "sparse", "upsert"])
+    assert len(index.points) == (0 if pause_at != "upsert" else 1)
+    async with db_factory() as session:
+        job = await session.get(IngestionJob, job_id)
+        assert job.status == "PROCESSING" and job.lease_token == owner.lease_token
+        if pause_at == "cached_dense":
+            assert not await session.scalar(select(DocumentVectorCache.text_hash).where(
+                DocumentVectorCache.workspace_id == old.workspace_id
+            ))
+    completed = await worker._index_claim(
+        db_factory,
+        owner,
+        dense=DeterministicFakeDenseEmbedder(dimension=8),
+        sparse=DeterministicFakeSparseEncoder(),
+        index=index,
+        cache_enabled=False,
+        guard=worker._ClaimGuard(db_factory, owner),
+    )
+    assert not completed.stale and completed.point_count == len(index.points) == 2
+    async with db_factory() as session:
+        assert (await session.get(DocumentRevision, revision_id)).ingestion_status == "READY"
