@@ -1,0 +1,18 @@
+{
+  "caps": [
+    8192,
+    16384
+  ],
+  "code": "9308fbc136a15b978b643cf9647dfe33d7ab5e68d713f85ef0ee40a7a4a9557d",
+  "eligibility": "Confirmed historical final HTTP 502 at the immediately preceding cap, final physical finish length, full completion cap, empty gateway body or strictly unparseable visible JSON.",
+  "historical_population": 57,
+  "logical_limit": "one exchange per qualifying original arm per cap, with product correction",
+  "main_exchanges": 511,
+  "main_freeze": "e9edd73ebea75144837bb718e80eac23baa018afc1c2400a29a9a036fc5a8ed5",
+  "main_input_hash": "f116868a36665af6719cae8bee5d99fb9163379780a9627f622fa88d088d2ed0",
+  "max_cumulative_cny": "30.00000000",
+  "prior_observation": "Two all-reasoning empty 2048 completions were observed before designing this exploration.",
+  "promotion_gate": false,
+  "public_name": "exploratory residual output-limit recovery",
+  "route": "same verified Beijing project route as main"
+}
