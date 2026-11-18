@@ -168,8 +168,29 @@ _PROMPT_JSON_SYSTEM = (
 )
 
 
-def citation_system_prompt(mode: CitationOutputMode, *, answer_contract_v1: bool = False) -> str:
+_REFUSAL_BRANCH_PROMPT = (
+    """
+Choose the response branch before drafting the answer.
+If the evidence answers any part actually requested, answer that part and cite its evidence.
+A supported "no", zero, a documented bound, or the words printed in a record are answers.
+If another requested part is unknown, identify that limit and keep insufficient_evidence false.
+If the evidence answers none of the request, return only the refusal object below in the
+question's language. Do not recap evidence or add a citation to explain a missing fact.
+"""
+    'English: {"answer":"The supplied evidence is insufficient to answer this question.",'
+    '"citation_ids":[],"insufficient_evidence":true}\n'
+    'Chinese: {"answer":"所给证据不足，无法回答这个问题。",'
+    '"citation_ids":[],"insufficient_evidence":true}\n'
+    "For other languages translate only the refusal sentence.\n"
+)
+
+
+def citation_system_prompt(
+    mode: CitationOutputMode, *, answer_contract_v1: bool = False, refusal_prompt: bool = False
+) -> str:
     base = _SYSTEM_PROMPT if mode == "JSON_SCHEMA" else _PROMPT_JSON_SYSTEM
+    if refusal_prompt:
+        base += _REFUSAL_BRANCH_PROMPT
     if not answer_contract_v1:
         return base
     return base + (
@@ -694,6 +715,7 @@ class CitationQaService:
         superseded_rank_penalty: float = 0.0,
         evidence_projection: str | None = None,
         output_mode: CitationOutputMode = "JSON_SCHEMA",
+        refusal_prompt: bool = False,
         verify_refusal_consistency: bool = False,
         answer_contract_v1: bool = False,
         first_refusal_contract: bool = False,
@@ -728,6 +750,7 @@ class CitationQaService:
         if output_mode not in {"JSON_SCHEMA", "PROMPT_JSON"}:
             raise ValueError("invalid citation output mode")
         self.output_mode = output_mode
+        self.refusal_prompt = refusal_prompt
         self.verify_refusal_consistency = verify_refusal_consistency
         self.answer_contract_v1 = answer_contract_v1
         self.first_refusal_contract = first_refusal_contract
@@ -870,7 +893,9 @@ class CitationQaService:
             ModelMessage(
                 role="system",
                 content=citation_system_prompt(
-                    self.output_mode, answer_contract_v1=self.answer_contract_v1
+                    self.output_mode,
+                    answer_contract_v1=self.answer_contract_v1,
+                    refusal_prompt=self.refusal_prompt,
                 ),
             ),
             ModelMessage(role="user", content=evidence_prompt or _evidence_prompt(query, selected)),

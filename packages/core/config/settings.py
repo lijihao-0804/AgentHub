@@ -94,6 +94,7 @@ class Settings(BaseSettings):
     knowledge_chunk_overlap_chars: int = Field(default=200, ge=0, le=99_999)
     knowledge_qa_max_evidence_chars: int = Field(default=16_000, ge=1_000, le=100_000)
     knowledge_qa_contextual_abstention: bool = False
+    knowledge_qa_refusal_prompt: bool = False
     knowledge_qa_answer_contract_v1: bool = False
     knowledge_qa_first_refusal_contract: bool = False
     knowledge_ingestion_max_attempts: int = Field(default=3, ge=1, le=100)
