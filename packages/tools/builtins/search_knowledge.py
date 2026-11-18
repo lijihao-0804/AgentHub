@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+from dataclasses import asdict
 from typing import Any
 from uuid import UUID
 
@@ -11,14 +12,18 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.knowledge.composition import retrieval_model_identity_mismatches
+from packages.knowledge.context_selection import select_budgeted_records
 from packages.knowledge.contracts import (
     KnowledgeRetriever,
     RetrievalQuery,
     RetrievalResult,
     RetrievalStrategy,
+    RetrievedEvidence,
     SectionSelector,
 )
+from packages.knowledge.evidence_plan import assemble_evidence_plan
 from packages.knowledge.evidence_records import (
+    EvidenceAdmission,
     drop_overlapping_records,
     evidence_record,
     evidence_reference,
@@ -120,6 +125,55 @@ async def _snapshot_queries(
     return queries
 
 
+def _budgeted_snapshot_union(
+    ranked: list[tuple[RetrievedEvidence, dict[str, str]]],
+    *,
+    budget: int,
+    limit: int,
+    compact: bool,
+) -> tuple[list[dict], list[dict]]:
+    # Keep the highest-ranked snapshot reference for each immutable source chunk.
+    sources = {}
+    for item, ref in ranked:
+        sources.setdefault((item.document_revision_id, item.chunk_id), (item, ref))
+    if not compact:
+        selected = select_budgeted_records(
+            [asdict(item) for item, _ in sources.values()],
+            max_bytes=budget,
+            max_items=limit,
+            evidence_admission=EvidenceAdmission(),
+        )
+        pairs = [
+            sources[(record["document_revision_id"], record["chunk_id"])] for record in selected
+        ]
+        return [evidence_record(item) for item, _ in pairs], [ref for _, ref in pairs]
+
+    records, references = [], []
+    for item, ref in sources.values():
+        if len(records) == limit:
+            break
+        record = evidence_record(item, snapshot_id=ref["snapshot_id"])
+        # A union can exceed the compact planner's 100-input limit. Each trial
+        # prices the actual deliverable view of at most 10 records, including
+        # its citation IDs. Only already-delivered records can suppress a tail.
+        proposal = [*records, record]
+        plan = assemble_evidence_plan(
+            proposal,
+            [*references, ref],
+            budget=budget,
+            estimator=lambda text: len(text.encode("utf-8")),
+            citation_prefix="R00001E",
+            max_items=limit,
+            evidence_admission=EvidenceAdmission(),
+        )
+        if plan is None:
+            return [], []
+        if len(plan.registry) == len(proposal):
+            records.append(record)
+            references.append(ref)
+    return records, references
+
+
 async def search_knowledge(
     context: ToolExecutionContext,
     definition: ToolDefinition,
@@ -203,13 +257,21 @@ async def search_knowledge(
     include_snapshot_ids = retrieval_config.get("evidence_projection") == "compact_v1"
     # A shared revision can occur in two pinned snapshots. Keep the winning
     # reference with the record; reselecting by a set of chunk IDs restores both.
-    records, references = drop_overlapping_records(
-        [
-            evidence_record(item, snapshot_id=ref["snapshot_id"] if include_snapshot_ids else None)
-            for item, ref in evidence
-        ],
-        [ref for _, ref in evidence],
-    )
+    budget = retrieval_config.get("context_budget_bytes")
+    if len(queries) > 1 and budget is not None:
+        records, references = _budgeted_snapshot_union(
+            evidence, budget=budget, limit=limit, compact=include_snapshot_ids
+        )
+    else:
+        records, references = drop_overlapping_records(
+            [
+                evidence_record(
+                    item, snapshot_id=ref["snapshot_id"] if include_snapshot_ids else None
+                )
+                for item, ref in evidence
+            ],
+            [ref for _, ref in evidence],
+        )
     return {
         "evidence_refs": references[:limit],
         "results": records[:limit],
