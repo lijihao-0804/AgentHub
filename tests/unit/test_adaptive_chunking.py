@@ -191,6 +191,34 @@ def test_page_and_plain_paragraphs_do_not_cross_source_boundaries():
     assert all("heading_char_start" not in c.locator for c in chunks)
 
 
+@pytest.mark.parametrize("strategy", [ChunkingStrategy.STRUCTURAL, ChunkingStrategy.ADAPTIVE])
+@pytest.mark.parametrize("newline", ["\n", "\r", "\r\n"], ids=["lf", "cr", "crlf"])
+def test_wrapped_policy_and_its_qualifier_stay_in_one_paragraph(strategy, newline):
+    lines = ["Reimbursement is capped at EUR 400", "per traveler for overnight stays."]
+    second = "Receipts are required."
+    source = newline.join([*lines, " \t", second])
+    document = _text(source, base=37)
+
+    chunks = ChunkingPolicy(strategy, 120, 0).build(REVISION, document, media_type="text/plain")
+
+    assert [chunk.text for chunk in chunks] == ["\n".join(lines), second]
+    assert chunks[1].locator["char_start"] == 37 + source.index(second)
+    _check_slices(document.blocks[0], chunks)
+
+
+def test_markdown_section_fits_at_its_normalized_character_limit():
+    lines = ["Reimbursement", "is capped at EUR 400.", "", "Send receipts."]
+    expected = "\n".join(lines)
+    document = _text("\r\n".join(lines), base=37)
+
+    chunks = build_adaptive_chunks(
+        REVISION, document, media_type="text/markdown", chunk_size_chars=len(expected)
+    )
+
+    assert [chunk.text for chunk in chunks] == [expected]
+    _check_slices(document.blocks[0], chunks)
+
+
 @pytest.mark.parametrize("strategy", list(ChunkingStrategy))
 def test_layout_cells_are_clipped_against_raw_crlf_and_nfc_offsets_in_every_strategy(strategy):
     text = "Cafe\u0301\r\norigin | 金额=54 | South"

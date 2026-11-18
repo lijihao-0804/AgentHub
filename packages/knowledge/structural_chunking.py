@@ -22,7 +22,8 @@ from packages.knowledge.chunking import (
 )
 from packages.knowledge.parser import ParsedBlock, ParsedDocument
 
-_PARAGRAPH_BREAK = re.compile(r"(?:\r\n|\r|\n)[ \t]*(?:\r\n|\r|\n)")
+# A CRLF is one logical line ending. Commit to it before looking for the second.
+_PARAGRAPH_BREAK = re.compile(r"(?>\r\n|[\r\n])[ \t]*(?:\r\n|[\r\n])")
 _MARKDOWN_HEADING = re.compile(r"[ \t]{0,3}#{1,6}(?:[ \t]+|$)")
 _WHITESPACE = re.compile(r"\s+")
 _CHINESE_SENTENCE_TERMINALS = frozenset("。！？")

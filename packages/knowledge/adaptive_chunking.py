@@ -170,7 +170,7 @@ def _append_markdown(
         region = replace(block, locator=locator)
         if kind == "section":
             local = ParsedBlock(block.text[span.start : span.end], _candidate_locator(region, span))
-            if len(local.text.strip()) <= cap:
+            if len(normalize_chunk_text(local.text)) <= cap:
                 _append_piece(out, revision, local, _Span(0, len(local.text)), cap)
             else:
                 _append_block_candidates(
