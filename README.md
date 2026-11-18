@@ -212,6 +212,8 @@ Credential 和 Model Profile。在 Agent 草稿中选择模型、发布 AgentVer
 
 文档修订入库时，同一工作区内编码输入完全相同、编码器指纹一致的块可以复用向量。稠密与稀疏分别判断，每个修订仍生成自己的块 ID 和引用位置。部署时先执行 `alembic upgrade head`；缓存从部署后的编码开始积累。可在 worker 设置 `AGENTHUB_KNOWLEDGE_VECTOR_CACHE_ENABLED=false` 运行全量重算对照。
 
+新版工作台支持按应用发起多行任务与键盘查找页面。新建智能体默认启用按用户隔离的长期记忆；评测详情可逐题检查候选退步和缺失配对，发布门禁支持配对区间与非劣性。复杂表格导入会保留多层列名及单元格定位。[工作区升级、截图与配对实验](docs/reviews/workspace-quality-20261118.md)
+
 候选召回评测逐题追踪分块、稠密与稀疏排名、融合、BGE 重排、证据句覆盖和实际引文。克隆仓库后，用 Python 标准库即可复核来源与证据的变化。实验也覆盖先按文章融合再回原文选段，以及单独用标题或完整摘要召回。在 SciFact 第 753 题，按文章融合找回了排在第 11 的标注论文，回选原段后仍只排重排第 19。[原 13 道漏例](docs/reviews/candidate-recall-20261114.md) · [文章级检索、独立验证与真实问答](benchmarks/public_rag/results/published/article-recall-20261114/README.md)
 
 引用问答还单独验证了首答可靠性：将九条历史 502 定位到网关或 JSON 校验，再从真实入口比较输出额度、思考模式和回答范围。评测分别统计可用首答、完整有据的答案、正确拒答以及能在原文定位的引文。[逐条 502、独立题对照和离线复核](benchmarks/public_rag/results/published/qa-first-response-20261114/README.md)
