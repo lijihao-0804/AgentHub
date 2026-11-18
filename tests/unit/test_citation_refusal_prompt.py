@@ -24,24 +24,26 @@ def test_paired_prompt_reproduces_the_original_and_restores_the_factory():
             citation_qa.citation_system_prompt("PROMPT_JSON", answer_contract_v1=True)
     assert citation_qa.citation_system_prompt is factory
     assert candidate != original
-    assert candidate == factory("PROMPT_JSON")
+    assert candidate == citation_qa._PROMPT_JSON_REFUSAL_SYSTEM
+    assert original == factory("PROMPT_JSON")
     assert factory("JSON_SCHEMA") == citation_qa._SYSTEM_PROMPT
     assert candidate not in factory("PROMPT_JSON", answer_contract_v1=True)
 
 
 @pytest.mark.asyncio
 async def test_prompt_json_refusal_example_passes_the_service_verbatim_in_one_attempt():
-    prompt = citation_qa.citation_system_prompt("PROMPT_JSON")
+    prompt = citation_qa._PROMPT_JSON_REFUSAL_SYSTEM
     example = prompt.splitlines()[-1]
     refusal = json.loads(example)
     session = _FakeSession(evidence_text="The archive opened in June.")
     gateway = _FakeModelGateway(example)
-    result = await _answer(
-        make_service(session, gateway, output_mode="PROMPT_JSON"),
-        session,
-        gateway,
-        query="Who funded the archive?",
-    )
+    with policy("candidate"):
+        result = await _answer(
+            make_service(session, gateway, output_mode="PROMPT_JSON"),
+            session,
+            gateway,
+            query="Who funded the archive?",
+        )
     assert len(gateway.requests) == 1 and gateway.requests[0].messages[0].content == prompt
     assert result.insufficient_evidence and result.citations == ()
     assert result.answer == refusal["answer"]

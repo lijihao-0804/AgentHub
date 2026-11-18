@@ -127,22 +127,86 @@ _PROMPT_JSON_SYSTEM = (
     + json.dumps(_OUTPUT_SCHEMA.json_schema, separators=(",", ":"), ensure_ascii=False)
 )
 
-_PROMPT_JSON_REFUSAL_SYSTEM = (
-    _PROMPT_JSON_SYSTEM
-    + "\nIf the evidence answers any part of the question, give the supported answer, including "
+_SUPPORTED_PARTS = (
+    "\nIf the evidence answers any part of the question, give the supported answer, including "
     "an explicitly supported negative, with its [n] citations and insufficient_evidence=false. "
     "Related facts that do not answer what was asked do not count as a partial answer. "
-    "If no requested part is supported, return exactly this object, translating only the "
+)
+
+# Kept byte-for-byte for the frozen first-refusal comparison.
+_PROMPT_JSON_REFUSAL_SYSTEM = (
+    _PROMPT_JSON_SYSTEM
+    + _SUPPORTED_PARTS
+    + "If no requested part is supported, return exactly this object, translating only the "
     "refusal sentence into the language of the question. Omit explanations and related facts.\n"
     '{"answer":"Insufficient evidence to answer this question.","citation_ids":[], '
     '"insufficient_evidence":true}'
 )
 
 
+_ENGLISH_REQUEST = re.compile(
+    r"\b(?:what|which|whose|whom?|where|when|why|how|does|did|could|should|"
+    r"please|according to|tell me|describe|explain|identify|summarize|list the)\b"
+    r"|\b(?:is|are|was|were|do|can|will|has|have) (?:the|this|that|there|these|those|it|we|you)\b",
+    re.ASCII | re.IGNORECASE,
+)
+_CHINESE_REQUEST = re.compile(
+    r"什么|什麼|如何|多少|为何|為何|为什么|為什麼|怎样|怎樣|怎么|怎麼|是否|能否|有无|有無|"
+    r"何时|何時|何种|何種|哪些|哪个|哪個|哪一|哪位|哪里|哪裡|哪儿|哪兒|哪种|哪種|哪年|"
+    r"请问|請問|请列|請列|请说|請說|请解|請解|请给|請給|[吗嗎呢谁誰几幾]"
+)
+_KANA_OR_HANGUL = re.compile(r"[\u3040-\u30ff\u31f0-\u31ff\u1100-\u11ff\uac00-\ud7af]")
+_QUOTED_TITLE = re.compile(r'"[^"\n]+"|“[^”\n]+”|«[^»\n]+»|「[^」\n]+」|《[^》\n]+》')
+_REFUSAL_SENTENCES = {
+    "English": "Insufficient evidence to answer this question.",
+    "Chinese": "目前提供的材料不足以回答。",
+}
+
+
+def _question_language_hint(query: str) -> str | None:
+    """Use question grammar. A name, a writing system or a quote alone is ambiguous."""
+    query = _QUOTED_TITLE.sub(" ", query)
+    if _KANA_OR_HANGUL.search(query):
+        return None
+    english, chinese = _ENGLISH_REQUEST.search(query), _CHINESE_REQUEST.search(query)
+    if english and not chinese:
+        return "English"
+    if chinese and not english:
+        return "Chinese"
+    return None
+
+
+def citation_question_language_prompt(query: str) -> str:
+    """Build instructions from the question alone, before budgeting or generating tokens."""
+    base = _PROMPT_JSON_SYSTEM + _SUPPORTED_PARTS
+    language = _question_language_hint(query)
+    if language is None:
+        return base + (
+            "Write the answer in the language requested by the user, or otherwise the "
+            "language of the question, even if the evidence uses another language. "
+            "If no requested part is supported, write one short sentence in that same "
+            "language saying the evidence is insufficient. Set insufficient_evidence=true "
+            "and citation_ids=[]. Omit explanations, related facts and citation markers."
+        )
+    refusal = json.dumps(
+        {"answer": _REFUSAL_SENTENCES[language], "citation_ids": [], "insufficient_evidence": True},
+        ensure_ascii=False,
+        separators=(",", ":"),
+    )
+    return base + (
+        f"Use {language} for all answer prose, even if the evidence is in another language. "
+        "An explicit request by the user for a different answer language takes precedence. "
+        "Keep names, quoted terms, and identifiers accurate. If no requested part is "
+        "supported, return this exact JSON object. Copy the answer sentence verbatim unless "
+        "the user explicitly requests another language. Omit explanations and related facts.\n"
+        + refusal
+    )
+
+
 def citation_system_prompt(mode: CitationOutputMode, *, answer_contract_v1: bool = False) -> str:
     base = _SYSTEM_PROMPT if mode == "JSON_SCHEMA" else _PROMPT_JSON_SYSTEM
     if not answer_contract_v1:
-        return _PROMPT_JSON_REFUSAL_SYSTEM if mode == "PROMPT_JSON" else base
+        return base
     return base + (
         "\nSet insufficient_evidence=false for a supported positive or negative answer. "
         "For a partly answerable request, give each supported part with its citation, "
@@ -609,6 +673,7 @@ class CitationQaService:
         output_mode: CitationOutputMode = "JSON_SCHEMA",
         verify_refusal_consistency: bool = False,
         answer_contract_v1: bool = False,
+        question_language_prompt: bool = False,
         retrieval_profile: Mapping[str, int] | None = None,
         model_plan_resolver: Callable[
             [AsyncSession, WorkspaceExecutionContext, UUID],
@@ -642,6 +707,9 @@ class CitationQaService:
         self.output_mode = output_mode
         self.verify_refusal_consistency = verify_refusal_consistency
         self.answer_contract_v1 = answer_contract_v1
+        self.question_language_prompt = (
+            question_language_prompt and output_mode == "PROMPT_JSON" and not answer_contract_v1
+        )
         self.model_plan_resolver = model_plan_resolver or partial(
             _resolve_model_plan, output_mode=output_mode
         )
@@ -764,19 +832,27 @@ class CitationQaService:
                     separators=(",", ":"),
                 )
         if not selected:
+            fallback = _INSUFFICIENT_EVIDENCE
+            if self.question_language_prompt and _question_language_hint(query) == "Chinese":
+                fallback = _REFUSAL_SENTENCES["Chinese"]
             return CitationQaResult(
-                answer=_INSUFFICIENT_EVIDENCE,
+                answer=fallback,
                 insufficient_evidence=True,
                 citations=(),
                 retrieval_trace=retrieval.trace,
             )
 
+        system_prompt = (
+            citation_question_language_prompt(query)
+            if self.question_language_prompt
+            else citation_system_prompt(
+                self.output_mode, answer_contract_v1=self.answer_contract_v1
+            )
+        )
         request_messages = (
             ModelMessage(
                 role="system",
-                content=citation_system_prompt(
-                    self.output_mode, answer_contract_v1=self.answer_contract_v1
-                ),
+                content=system_prompt,
             ),
             ModelMessage(role="user", content=evidence_prompt or _evidence_prompt(query, selected)),
         )
