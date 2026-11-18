@@ -1,0 +1,97 @@
+{
+  "source": "data/external/rag-public-20261021/musique/extracted/data/musique_ans_v1.0_train.jsonl",
+  "source_sha256": "83a75b1e11e4e9bb8f8308e72ac40ca617ae4431b3a0d955b61cab259248490a",
+  "seed": "agenthub-output-limit-independent-long-20261119-v1",
+  "exposure_id_count": 2912,
+  "exposure_id_set_sha256": "30e8c9abe6590f80aa6712ead6d6313b17a0db12cba52fd7e8dc4b6907a0889a",
+  "predispatch_exclusion": {
+    "2hop__135820_89563": "Full Throttle Saloon states the general rally timing"
+  },
+  "selected": [
+    {
+      "id": "2hop__92918_62145",
+      "answerable": true
+    },
+    {
+      "id": "2hop__758612_422982",
+      "answerable": true
+    },
+    {
+      "id": "2hop__277930_46042",
+      "answerable": false
+    },
+    {
+      "id": "2hop__137037_31260",
+      "answerable": true
+    },
+    {
+      "id": "2hop__132411_760193",
+      "answerable": true
+    },
+    {
+      "id": "2hop__13957_14002",
+      "answerable": false
+    },
+    {
+      "id": "2hop__761843_781580",
+      "answerable": true
+    },
+    {
+      "id": "2hop__727699_83854",
+      "answerable": true
+    },
+    {
+      "id": "2hop__149704_107869",
+      "answerable": false
+    },
+    {
+      "id": "2hop__59025_383079",
+      "answerable": true
+    },
+    {
+      "id": "2hop__382894_776061",
+      "answerable": true
+    },
+    {
+      "id": "2hop__8556_47169",
+      "answerable": false
+    },
+    {
+      "id": "2hop__617917_53910",
+      "answerable": true
+    },
+    {
+      "id": "2hop__61204_71972",
+      "answerable": true
+    },
+    {
+      "id": "2hop__130410_91983",
+      "answerable": false
+    },
+    {
+      "id": "2hop__664573_36741",
+      "answerable": true
+    },
+    {
+      "id": "2hop__637508_269657",
+      "answerable": true
+    },
+    {
+      "id": "2hop__604082_3994",
+      "answerable": false
+    },
+    {
+      "id": "2hop__554911_856165",
+      "answerable": true
+    },
+    {
+      "id": "2hop__68083_86951",
+      "answerable": true
+    },
+    {
+      "id": "2hop__191818_112624",
+      "answerable": false
+    }
+  ],
+  "derived_sha256": "7819fb7ca4be3fd81bb52a443ad2432ccf5eab05ec1c6afb1feee06e369eef89"
+}
