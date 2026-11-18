@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import json
 import re
+import time
 from collections.abc import Awaitable, Callable, Mapping
 from contextlib import nullcontext
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from enum import StrEnum
 from functools import partial
 from typing import Any
@@ -28,13 +30,17 @@ from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.knowledge.composition import RetrievalComponents
 from packages.knowledge.contracts import (
+    MAX_SELECTION_CANDIDATES,
     CitationOutputMode,
     RetrievalQuery,
     RetrievalTrace,
+    RetrievalTraceResult,
+    RetrievalTraceStage,
     RetrievedEvidence,
 )
 from packages.knowledge.evidence_plan import assemble_evidence_plan
 from packages.knowledge.evidence_records import MAX_EVIDENCE_EXCERPT_CHARS
+from packages.knowledge.joint_evidence import MAX_JOINT_ITEMS, select_joint_evidence
 from packages.knowledge.refusal_consistency import (
     explicit_abstention,
     recover_whole_refusal,
@@ -257,6 +263,64 @@ def _evidence_prompt(query: str, evidence: tuple[_NumberedEvidence, ...]) -> str
     return "\n".join(sections)
 
 
+def _render_qa_evidence(
+    query: str,
+    selected: tuple[_NumberedEvidence, ...],
+    *,
+    projection: str | None,
+    knowledge_base_id: UUID,
+    knowledge_snapshot_id: UUID,
+) -> tuple[tuple[_NumberedEvidence, ...], str]:
+    if projection != "compact_v1":
+        return selected, _evidence_prompt(query, selected)
+    records, references = [], []
+    for item in selected:
+        records.append(
+            {
+                "chunk_id": item.evidence.chunk_id,
+                "document_revision_id": item.evidence.document_revision_id,
+                "snapshot_id": str(knowledge_snapshot_id),
+                "snippet": item.text,
+                "document_name": item.evidence.metadata.get("document_name"),
+                "effective_date": item.evidence.metadata.get("effective_date"),
+                "superseded": bool(item.evidence.metadata.get("superseded", False)),
+                "locator": dict(item.evidence.locator),
+            }
+        )
+        references.append(
+            {
+                "snapshot_id": str(knowledge_snapshot_id),
+                "knowledge_base_id": str(knowledge_base_id),
+                "document_revision_id": item.evidence.document_revision_id,
+                "chunk_id": item.evidence.chunk_id,
+            }
+        )
+    # This projection has historically admitted complete bodies before serialization.
+    source_bytes = len(
+        json.dumps(
+            {"records": records, "references": references},
+            ensure_ascii=False,
+            separators=(",", ":"),
+            allow_nan=False,
+        ).encode("utf-8")
+    )
+    evidence_plan = assemble_evidence_plan(
+        records,
+        references,
+        budget=source_bytes + 1_024,
+        estimator=lambda text: len(text.encode("utf-8")),
+        citation_prefix="",
+    )
+    if evidence_plan is None:
+        return (), ""
+    visible = {int(item["id"]) for item in evidence_plan.payload["results"]}
+    admitted = tuple(item for item in selected if item.id in visible)
+    prompt = f"Question:\n{query}\n\nUntrusted reference data:\n" + json.dumps(
+        evidence_plan.payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")
+    )
+    return admitted, prompt
+
+
 async def _resolve_model_plan(
     session: AsyncSession,
     context: WorkspaceExecutionContext,
@@ -316,7 +380,7 @@ def _deny_oversized(
     categories: tuple[ContextCategory, ...],
     *,
     response_schema: StructuredOutputSchema | None,
-) -> None:
+) -> int:
     estimator = ApproxTokenEstimator()
     policy = ContextBudgetPolicy(plan, estimator=estimator)
     context_limit = policy.context_limit
@@ -367,6 +431,65 @@ def _deny_oversized(
             "The complete question and evidence exceed the frozen model input budget.",
             422,
         )
+    return admission.usage.available_input - admission.usage.estimated_input_after - schema_cost
+
+
+def _pack_joint_qa_evidence(
+    query: str,
+    candidates: tuple[RetrievedEvidence, ...],
+    *,
+    max_items: int,
+    max_tokens: int,
+    render: Callable[[tuple[_NumberedEvidence, ...]], tuple[tuple[_NumberedEvidence, ...], str]],
+    system_message: ModelMessage,
+    plan: ResolvedModelExecutionPlan,
+    output_mode: CitationOutputMode,
+) -> tuple[tuple[_NumberedEvidence, ...], str]:
+    def numbered(records: tuple[RetrievedEvidence, ...]) -> tuple[_NumberedEvidence, ...]:
+        return tuple(
+            _NumberedEvidence(i, record, record.text) for i, record in enumerate(records, 1)
+        )
+
+    def headroom(prompt: str) -> int:
+        messages = (system_message, ModelMessage(role="user", content=prompt))
+        return _deny_oversized(
+            plan,
+            messages,
+            (ContextCategory.SYSTEM_PROMPT, ContextCategory.RAG_EVIDENCE),
+            response_schema=_OUTPUT_SCHEMA if output_mode == "JSON_SCHEMA" else None,
+        )
+
+    select = partial(
+        select_joint_evidence, query, candidates, max_items=max_items, max_tokens=max_tokens
+    )
+    selected, prompt = render(numbered(select()))
+    if not selected:
+        return selected, prompt
+    try:
+        headroom(prompt)
+    except AgentHubError as exc:
+        if exc.code != "CITATION_QA_CONTEXT_BUDGET_EXCEEDED":
+            raise
+        # Body admission does not include source locators, lifecycle, question,
+        # system, schema or output reserve. Price the actual projection inside
+        # the smaller model window and consider the full eligible pool again.
+        _, empty = render(())
+        available = headroom(empty)
+        estimator = ApproxTokenEstimator()
+        empty_tokens = estimator.estimate(empty)
+        costs = {}
+        for record in candidates:
+            visible, singleton = render(numbered((record,)))
+            # Two units for each additional record cover a comma and estimator
+            # rounding across independently measured sections. A single record
+            # is charged exactly. All possible citation ids are single-digit.
+            costs[record.chunk_id] = (
+                estimator.estimate(singleton) - empty_tokens + 2 if visible else available + 3
+            )
+        selected, prompt = render(numbered(select(prompt_budget=available + 2, prompt_costs=costs)))
+        if not selected:
+            raise
+    return selected, prompt
 
 
 def _output_requirements(mode: CitationOutputMode) -> CapabilityRequirements:
@@ -598,6 +721,7 @@ class CitationQaService:
         output_mode: CitationOutputMode = "JSON_SCHEMA",
         verify_refusal_consistency: bool = False,
         answer_contract_v1: bool = False,
+        joint_six_v1: bool = False,
         retrieval_profile: Mapping[str, int] | None = None,
         model_plan_resolver: Callable[
             [AsyncSession, WorkspaceExecutionContext, UUID],
@@ -631,6 +755,7 @@ class CitationQaService:
         self.output_mode = output_mode
         self.verify_refusal_consistency = verify_refusal_consistency
         self.answer_contract_v1 = answer_contract_v1
+        self.joint_six_v1 = joint_six_v1
         self.model_plan_resolver = model_plan_resolver or partial(
             _resolve_model_plan, output_mode=output_mode
         )
@@ -678,6 +803,8 @@ class CitationQaService:
             self.session_factory() if self.session_factory else nullcontext(self.session) as session
         ):
             plan = await self.model_plan_resolver(session, context, model_profile_id)
+        final_k = self.retrieval_profile["final_top_k"]
+        candidate_k = self.retrieval_profile["candidate_top_k"]
         retrieval = await HybridKnowledgeRetriever(
             session=self.session,
             session_factory=self.session_factory,
@@ -696,79 +823,75 @@ class CitationQaService:
                 knowledge_snapshot_id=str(knowledge_snapshot_id),
                 dense_top_k=self.retrieval_profile["dense_top_k"],
                 sparse_top_k=self.retrieval_profile["sparse_top_k"],
-                candidate_top_k=self.retrieval_profile["candidate_top_k"],
-                final_top_k=self.retrieval_profile["final_top_k"],
+                candidate_top_k=candidate_k,
+                final_top_k=min(candidate_k, MAX_SELECTION_CANDIDATES)
+                if self.joint_six_v1 and final_k > 0
+                else final_k,
             ),
         )
-        selected = _select_evidence(retrieval.evidence, max_chars=self.max_evidence_chars)
-        evidence_prompt = None
-        if selected and self.evidence_projection == "compact_v1":
-            records, references = [], []
-            for item in selected:
-                record = {
-                    "chunk_id": item.evidence.chunk_id,
-                    "document_revision_id": item.evidence.document_revision_id,
-                    "snapshot_id": str(knowledge_snapshot_id),
-                    "snippet": item.text,
-                    "document_name": item.evidence.metadata.get("document_name"),
-                    "effective_date": item.evidence.metadata.get("effective_date"),
-                    "superseded": bool(item.evidence.metadata.get("superseded", False)),
-                    "locator": dict(item.evidence.locator),
-                }
-                records.append(record)
-                references.append(
+        render = partial(
+            _render_qa_evidence,
+            query,
+            projection=self.evidence_projection,
+            knowledge_base_id=knowledge_base_id,
+            knowledge_snapshot_id=knowledge_snapshot_id,
+        )
+        system_message = ModelMessage(
+            role="system",
+            content=citation_system_prompt(
+                self.output_mode, answer_contract_v1=self.answer_contract_v1
+            ),
+        )
+        trace = retrieval.trace
+        if self.joint_six_v1:
+            started = time.perf_counter()
+            selected, evidence_prompt = await asyncio.to_thread(
+                _pack_joint_qa_evidence,
+                query,
+                retrieval.evidence,
+                max_items=min(MAX_JOINT_ITEMS, final_k),
+                max_tokens=self.max_evidence_chars,
+                render=render,
+                system_message=system_message,
+                plan=plan,
+                output_mode=self.output_mode,
+            )
+            elapsed = (time.perf_counter() - started) * 1_000
+            trace = replace(
+                trace,
+                total_latency_ms=trace.total_latency_ms + elapsed,
+                evidence_set=RetrievalTraceStage(
+                    elapsed,
+                    tuple(
+                        RetrievalTraceResult(
+                            item.evidence.chunk_id,
+                            item.id,
+                            item.evidence.rerank_score
+                            if item.evidence.rerank_score is not None
+                            else item.evidence.retrieval_score,
+                        )
+                        for item in selected
+                    ),
                     {
-                        "snapshot_id": str(knowledge_snapshot_id),
-                        "knowledge_base_id": str(knowledge_base_id),
-                        "document_revision_id": item.evidence.document_revision_id,
-                        "chunk_id": item.evidence.chunk_id,
-                    }
-                )
-            # Keep the existing body-character contract; this bound includes
-            # serialization overhead rather than silently reducing its text.
-            source_bytes = len(
-                json.dumps(
-                    {"records": records, "references": references},
-                    ensure_ascii=False,
-                    separators=(",", ":"),
-                    allow_nan=False,
-                ).encode("utf-8")
+                        "selector": "joint_six_v1",
+                        "candidate_count": len(retrieval.evidence),
+                        "body_token_limit": self.max_evidence_chars,
+                    },
+                ),
             )
-            evidence_plan = assemble_evidence_plan(
-                records,
-                references,
-                budget=source_bytes + 1_024,
-                estimator=lambda text: len(text.encode("utf-8")),
-                citation_prefix="",
+        else:
+            selected, evidence_prompt = render(
+                _select_evidence(retrieval.evidence, max_chars=self.max_evidence_chars)
             )
-            if evidence_plan is None:
-                selected = ()
-            else:
-                visible = {int(item["id"]) for item in evidence_plan.payload["results"]}
-                selected = tuple(item for item in selected if item.id in visible)
-                evidence_prompt = f"Question:\n{query}\n\nUntrusted reference data:\n" + json.dumps(
-                    evidence_plan.payload,
-                    ensure_ascii=False,
-                    sort_keys=True,
-                    separators=(",", ":"),
-                )
         if not selected:
             return CitationQaResult(
                 answer=_INSUFFICIENT_EVIDENCE,
                 insufficient_evidence=True,
                 citations=(),
-                retrieval_trace=retrieval.trace,
+                retrieval_trace=trace,
             )
 
-        request_messages = (
-            ModelMessage(
-                role="system",
-                content=citation_system_prompt(
-                    self.output_mode, answer_contract_v1=self.answer_contract_v1
-                ),
-            ),
-            ModelMessage(role="user", content=evidence_prompt or _evidence_prompt(query, selected)),
-        )
+        request_messages = (system_message, ModelMessage(role="user", content=evidence_prompt))
         request_categories = (
             ContextCategory.SYSTEM_PROMPT,
             ContextCategory.RAG_EVIDENCE,
@@ -860,7 +983,11 @@ class CitationQaService:
                 chunk_id=by_id[identifier].evidence.chunk_id,
                 source=by_id[identifier].evidence.source,
                 locator=dict(by_id[identifier].evidence.locator),
-                excerpt=by_id[identifier].text[:MAX_EVIDENCE_EXCERPT_CHARS],
+                excerpt=(
+                    by_id[identifier].text
+                    if self.joint_six_v1
+                    else by_id[identifier].text[:MAX_EVIDENCE_EXCERPT_CHARS]
+                ),
                 retrieval_score=by_id[identifier].evidence.retrieval_score,
                 rerank_score=by_id[identifier].evidence.rerank_score,
             )
@@ -871,7 +998,7 @@ class CitationQaService:
             insufficient_evidence=receipt.insufficient_evidence,
             answer_receipt=receipt,
             citations=citations,
-            retrieval_trace=retrieval.trace,
+            retrieval_trace=trace,
         )
 
 

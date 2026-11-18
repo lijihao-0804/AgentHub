@@ -12,6 +12,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 DEFAULT_AUTH_JWT_SECRET = "local-dev-only-change-me-32-characters"
 EXAMPLE_AUTH_JWT_SECRET = "replace-with-your-own-generated-local-secret"
 DEVELOPMENT_ENVIRONMENTS = frozenset({"local", "test", "testing", "development", "dev"})
+MAX_KNOWLEDGE_CHUNK_CHARS = 100_000
 
 
 class Settings(BaseSettings):
@@ -90,11 +91,12 @@ class Settings(BaseSettings):
     knowledge_parser_timeout_seconds: float = Field(default=60, gt=0, le=3_600)
     knowledge_max_pdf_pages: int = Field(default=500, ge=1, le=100_000)
     knowledge_max_parsed_chars: int = Field(default=2_000_000, ge=1, le=50_000_000)
-    knowledge_chunk_size_chars: int = Field(default=1_200, ge=1, le=100_000)
+    knowledge_chunk_size_chars: int = Field(default=1_200, ge=1, le=MAX_KNOWLEDGE_CHUNK_CHARS)
     knowledge_chunk_overlap_chars: int = Field(default=200, ge=0, le=99_999)
     knowledge_qa_max_evidence_chars: int = Field(default=16_000, ge=1_000, le=100_000)
     knowledge_qa_contextual_abstention: bool = False
     knowledge_qa_answer_contract_v1: bool = False
+    knowledge_qa_joint_six_v1: bool = False
     knowledge_ingestion_max_attempts: int = Field(default=3, ge=1, le=100)
     knowledge_ingestion_retry_base_seconds: int = Field(default=30, ge=1, le=86_400)
     knowledge_reconciliation_batch_size: int = Field(default=100, ge=1, le=10_000)

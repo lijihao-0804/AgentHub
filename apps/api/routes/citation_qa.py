@@ -9,9 +9,10 @@ from apps.api.knowledge_dependencies import (
     get_query_workspace_context,
     get_retrieval_components,
 )
-from apps.api.retrieval_projection import project_retrieval_trace
+from apps.api.retrieval_projection import project_retrieval_stage, project_retrieval_trace
 from apps.api.schemas.citation_qa import (
     CitationQaCitationResponse,
+    CitationQaJointStages,
     CitationQaRequest,
     CitationQaResponse,
     CitationQaRetrievalTraceResponse,
@@ -45,6 +46,7 @@ async def citation_qa(
         output_mode=payload.output_mode,
         verify_refusal_consistency=request.app.state.settings.knowledge_qa_contextual_abstention,
         answer_contract_v1=request.app.state.settings.knowledge_qa_answer_contract_v1,
+        joint_six_v1=request.app.state.settings.knowledge_qa_joint_six_v1,
         max_evidence_chars=request.app.state.settings.knowledge_qa_max_evidence_chars,
         min_rerank_score=request.app.state.settings.knowledge_min_rerank_score,
         superseded_rank_penalty=request.app.state.settings.knowledge_superseded_rank_penalty,
@@ -61,6 +63,12 @@ async def citation_qa(
 
 
 def _response(result: CitationQaResult) -> CitationQaResponse:
+    stages = project_retrieval_trace(result.retrieval_trace)
+    if result.retrieval_trace.evidence_set is not None:
+        stages = CitationQaJointStages(
+            **stages.model_dump(),
+            evidence_set=project_retrieval_stage(result.retrieval_trace.evidence_set),
+        )
     return CitationQaResponse(
         answer=result.answer,
         insufficient_evidence=result.insufficient_evidence,
@@ -80,7 +88,7 @@ def _response(result: CitationQaResult) -> CitationQaResponse:
         ],
         retrieval_trace=CitationQaRetrievalTraceResponse(
             snapshot_id=result.retrieval_trace.snapshot_id,
-            stages=project_retrieval_trace(result.retrieval_trace),
+            stages=stages,
             total_latency_ms=result.retrieval_trace.total_latency_ms,
         ),
     )

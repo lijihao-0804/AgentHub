@@ -4,9 +4,9 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from apps.api.schemas.knowledge import RetrievalPlaygroundStages
+from apps.api.schemas.knowledge import RetrievalPlaygroundStage, RetrievalPlaygroundStages
+from packages.core.config.settings import MAX_KNOWLEDGE_CHUNK_CHARS
 from packages.knowledge.contracts import CitationOutputMode
-from packages.knowledge.evidence_records import MAX_EVIDENCE_EXCERPT_CHARS
 
 
 class CitationQaRequest(BaseModel):
@@ -29,16 +29,20 @@ class CitationQaCitationResponse(BaseModel):
     chunk_id: str = Field(min_length=1)
     source: str = Field(min_length=1)
     locator: dict[str, object]
-    excerpt: str = Field(max_length=MAX_EVIDENCE_EXCERPT_CHARS)
+    excerpt: str = Field(max_length=MAX_KNOWLEDGE_CHUNK_CHARS)
     retrieval_score: float
     rerank_score: float | None
+
+
+class CitationQaJointStages(RetrievalPlaygroundStages):
+    evidence_set: RetrievalPlaygroundStage
 
 
 class CitationQaRetrievalTraceResponse(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     snapshot_id: UUID
-    stages: RetrievalPlaygroundStages
+    stages: CitationQaJointStages | RetrievalPlaygroundStages
     total_latency_ms: float
 
 
