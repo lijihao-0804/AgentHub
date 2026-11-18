@@ -81,6 +81,89 @@ _NUMBER_OR_BOUND = re.compile(
     re.I,
 )
 
+# Count questions often elicit a table recap even when the requested column is
+# missing. Only discard a recap whose *entire* content enumerates different
+# named measures. A bound, a partial count or unknown vocabulary stays intact.
+_TABLE_MEASURES = {
+    "produced": "production",
+    "sold": "sales",
+    "returned": "returns",
+    "shipped": "shipments",
+    "ordered": "orders",
+}
+_TABLE_COUNT = re.compile(
+    r"how many (?P<items>[\w -]{1,100}?) (?:are|were|was|is) (?P<measure>[a-z]+) "
+    r"(?:on|in|at|from|to) (?P<place>[\w -]{1,100})\?",
+    re.I,
+)
+_COUNT_DENIAL = re.compile(
+    r"the (?:(?:provided|supplied|available) )?(?:evidence|table|data|text) "
+    r"(?:does not|doesn't) (?:report|specify|give|state|show) (.+)\.",
+    re.I,
+)
+_TABLE_RECAP = re.compile(
+    r"the table only (?:gives|lists|shows) (?P<measures>[a-z]+(?: and [a-z]+)*) "
+    r"(?:figures|counts) for (?P<items>[\w -]{1,100}?)\s+[—–]\s+(?P<cells>.+?)\s+[—–]\s+"
+    r"but no (?P<measure>[a-z]+) (?:quantity|count|total) is (?:stated|given|reported)"
+    r"(?: anywhere)? in the (?:(?:supplied|provided|available) )?(?:evidence|table|data)\.",
+    re.I,
+)
+_LABELED_COUNT = re.compile(r"([\w -]{1,100}?)\s*/\s*([a-z]+):\s*[0-9]+(?:,[0-9]{3})*", re.I)
+
+
+def echoed_count_refusal(query: str, answer: str) -> str | None:
+    """A single count explicitly declined in full, optionally with other table measures."""
+    question = query.strip()
+    count = _TABLE_COUNT.fullmatch(question)
+    if (
+        not count
+        or _QUALIFIED_REQUEST.search(question[8:])
+        or re.search(
+            r"\b(?:not|excluding|including|within|before|after|versus|compared)\b", question, re.I
+        )
+    ):
+        return None
+    first, *rest = _SENTENCES.split(_CITATION.sub("", answer).strip())
+    denial = _COUNT_DENIAL.fullmatch(first)
+    if not denial or denial[1].casefold() != question[:-1].casefold():
+        return None
+    if not rest:
+        return first
+    wanted = count["measure"].casefold()
+    if len(rest) != 1 or wanted not in _TABLE_MEASURES:
+        return None
+    summary = rest[0].casefold()
+    other_fields = set(_TABLE_MEASURES.values()) - {_TABLE_MEASURES[wanted]}
+    named = re.fullmatch(
+        r"only ([a-z]+(?: and [a-z]+)*) (?:is|are) (?:reported|listed|given)\.", summary
+    )
+    if named:
+        return first if set(named[1].split(" and ")) <= other_fields else None
+    listed = re.fullmatch(r"(?:it|the table) (?:only )?(?:lists|shows|gives) (.+)\.", summary)
+    if listed and all(
+        (pair := re.fullmatch(r"[0-9]+(?:,[0-9]{3})* ([a-z]+)", term))
+        and _TABLE_MEASURES.get(pair[1]) in other_fields
+        for term in listed[1].split(" and ")
+    ):
+        return first
+    aside = _TABLE_RECAP.fullmatch(rest[0])
+    if (
+        not aside
+        or aside["measure"].casefold() != wanted
+        or aside["items"].casefold() != count["items"].casefold()
+    ):
+        return None
+    fields = set()
+    for cell in re.split(r" and ", aside["cells"], flags=re.I):
+        parsed = _LABELED_COUNT.fullmatch(cell)
+        if not parsed or parsed[1].casefold() != count["place"].casefold():
+            return None
+        field = parsed[2].casefold()
+        if field not in _TABLE_MEASURES or field == wanted:
+            return None
+        fields.add(_TABLE_MEASURES[field])
+    return first if fields == set(aside["measures"].casefold().split(" and ")) else None
+
 
 def explicit_abstention(query: str, answer: str, *, contextual: bool = True) -> str | None:
     """Return the original refusal sentence only when the prose declines the complete request.

@@ -34,8 +34,9 @@ from packages.knowledge.contracts import (
     RetrievedEvidence,
 )
 from packages.knowledge.evidence_plan import assemble_evidence_plan
-from packages.knowledge.evidence_records import MAX_EVIDENCE_EXCERPT_CHARS
+from packages.knowledge.evidence_records import MAX_EVIDENCE_EXCERPT_CHARS, EvidenceTextBudget
 from packages.knowledge.refusal_consistency import (
+    echoed_count_refusal,
     explicit_abstention,
     recover_whole_refusal,
     refuses_requested_comparison,
@@ -63,7 +64,45 @@ from packages.observability.contracts import TraceSink
 
 _INSUFFICIENT_EVIDENCE = "Insufficient evidence to answer from the selected knowledge snapshot."
 _CITATION_MARKER = re.compile(r"\[(-?\d+)\]")
+_NUMERIC_GROUP = re.compile(
+    r"\[\s*[+−-]?\d+(?:[ \t]*[,，;；–—-][ \t]*[+−-]?\d+)*[ \t]*"
+    r"(?:\]|(?=[.!?。！？](?:\s|$)|$))"
+)
+_LITERAL_GROUP_CONTEXT = re.compile(
+    r"(?:[=∈]|\b(?:array|list|interval|range|vector|coordinates|matrix|tuple|bounds|indices|values)"
+    r"(?:\s+(?:is|are|of|equals?)|\s*[:：])|(?:数[组組]|区间|區間|向量|列表|坐[标標])(?:为|為|是|[:：]))\s*$",
+    re.I,
+)
 _MAX_ANSWER_CHARS = 8_000
+
+
+def _no_evidence_answer(query: str) -> str:
+    # Ignore titles embedded in a question, but retain an entirely quoted question.
+    words = re.sub(r'"[^"\n]+"|“[^”\n]+”|《[^》\n]+》|「[^」\n]+」', " ", query).strip(" \t\n?？")
+    words = words or query.strip(' “”"「」《》?？')
+    if re.search(
+        r"用(?:英文|英语|英語)(?:回答|作答)|(?:answer|respond|reply) in English", words, re.I
+    ):
+        return _INSUFFICIENT_EVIDENCE
+    chinese = "所选知识快照中的证据不足，无法回答这个问题。"
+    if re.search(
+        r"用(?:中文|汉语|漢語)(?:回答|作答)|(?:answer|respond|reply) in Chinese", words, re.I
+    ):
+        return chinese
+    if re.search(r"[\u3040-\u30ff\uac00-\ud7af]", words):
+        return _INSUFFICIENT_EVIDENCE
+    starts_with_acronym = re.match(r"^[A-Z]{2,}\s+[\u3400-\u9fff]", words)
+    if not starts_with_acronym and re.match(
+        r"(?:what|which|when|where|who|whose|why|how|do|does|did|can|could|"
+        r"should|would|is|are|was|were|has|have|will|please)\s+(?!\s|的)",
+        words,
+        re.I,
+    ):
+        return _INSUFFICIENT_EVIDENCE
+    if len(re.findall(r"[\u3400-\u9fff]", words)) > len(re.findall(r"[a-zA-Z]+", words)):
+        return chinese
+    return _INSUFFICIENT_EVIDENCE
+
 
 # Single source of truth for this entrance's retrieval shape. The agent tool
 # entrance reads the same knobs from ``retrieval_config`` (see
@@ -209,8 +248,6 @@ def _select_evidence(
     # One accounting everywhere: the evidence bound counts approx-token
     # units, not characters, so Chinese capacity equals English capacity
     # (FIX-05). ``max_chars`` keeps its setting name for compatibility.
-    from packages.agent_runtime.context_budget import ApproxTokenEstimator
-
     estimator = ApproxTokenEstimator()
     selected: list[_NumberedEvidence] = []
     used = 0
@@ -434,6 +471,21 @@ def _validate_model_output(
     allowed = visible_ids if visible_ids is not None else frozenset(range(1, evidence_count + 1))
     max_digits = len(str(max(allowed, default=0)))
     marker_set = set()
+    for group in _NUMERIC_GROUP.finditer(output.answer):
+        if _CITATION_MARKER.fullmatch(group[0]):
+            continue
+        left = output.answer[: group.start()]
+        right = output.answer[group.end() :]
+        if group[0].endswith("]") and (
+            _LITERAL_GROUP_CONTEXT.search(left)
+            or (not left.strip() and re.fullmatch(r"(?:\s*\[\d+\])+[.!。！]?\s*", right))
+            or (left.endswith("`") and right.startswith("`"))
+        ):
+            continue
+        raise _InvalidCitationAnswer(
+            _QaFailure.CITATION_MISMATCH,
+            "Numeric citation groups must use one numbered marker per source.",
+        )
     for marker in _CITATION_MARKER.findall(output.answer):
         # Bound conversion even for an adversarial digit string in an otherwise valid answer.
         digits = marker.lstrip("0") or "0"
@@ -564,7 +616,11 @@ def resolve_citation_answer(
                 "An explicit refusal of the requested comparison contains attributable facts.",
             )
     ids = _validate_model_output(output, evidence_count=len(allowed), visible_ids=allowed)
-    if answer_contract_v1:
+    count_refusal = echoed_count_refusal(query, output.answer) if ids else None
+    if count_refusal is not None:
+        answer, insufficient, ids = count_refusal, True, ()
+        rule = "explicit_missing_count"
+    elif answer_contract_v1:
         answer, insufficient = output.answer, output.insufficient_evidence
     else:
         answer, insufficient, ids = _normalize_validated_answer(
@@ -699,6 +755,9 @@ class CitationQaService:
                 candidate_top_k=self.retrieval_profile["candidate_top_k"],
                 final_top_k=self.retrieval_profile["final_top_k"],
             ),
+            text_budget=EvidenceTextBudget(
+                self.max_evidence_chars, ApproxTokenEstimator().estimate
+            ),
         )
         selected = _select_evidence(retrieval.evidence, max_chars=self.max_evidence_chars)
         evidence_prompt = None
@@ -754,7 +813,7 @@ class CitationQaService:
                 )
         if not selected:
             return CitationQaResult(
-                answer=_INSUFFICIENT_EVIDENCE,
+                answer=_no_evidence_answer(query),
                 insufficient_evidence=True,
                 citations=(),
                 retrieval_trace=retrieval.trace,
