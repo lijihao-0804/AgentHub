@@ -339,3 +339,29 @@ async def test_enqueue_loss_keeps_pending_and_reconciliation_requeues_real_job(
             ).all()
         )
     assert len(chunks) == 1
+
+@pytest.mark.asyncio
+async def test_atomic_claim_budget_under_concurrent_delivery(db_factory, tmp_path):
+    job_id, revision_id = await _create_pending_job(db_factory, tmp_path)
+    settings = Settings(knowledge_ingestion_max_attempts=1)
+
+    async def claim():
+        async with db_factory() as session:
+            return await claim_ingestion_job(session, job_id=job_id, lease_seconds=60, settings=settings)
+
+    claims = await asyncio.gather(*(claim() for _ in range(8)))
+    winners = [item for item in claims if item]
+    assert len(winners) == 1 and winners[0].attempt_count == 1
+    assert winners[0].chunking_policy is not None
+    async with db_factory() as session:
+        job = await session.get(IngestionJob, job_id)
+        assert job.status == "PROCESSING" and job.lease_token == winners[0].lease_token
+        job.lease_expires_at = datetime.now(UTC) - timedelta(seconds=1)
+        await session.commit()
+    assert await asyncio.gather(*(claim() for _ in range(8))) == [None] * 8
+    async with db_factory() as session:
+        job = await session.get(IngestionJob, job_id)
+        revision = await session.get(DocumentRevision, revision_id)
+        assert job.status == revision.ingestion_status == "FAILED"
+        assert job.attempt_count == 1 and job.last_error_code == "MAX_ATTEMPTS_EXCEEDED"
+        assert job.lease_token is job.next_attempt_at is job.lease_expires_at is None
