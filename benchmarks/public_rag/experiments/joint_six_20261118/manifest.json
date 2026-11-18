@@ -1,0 +1,2437 @@
+{
+  "schema": 1,
+  "seed": "agenthub-joint-six-independent-v1-20261118",
+  "history": {
+    "previous_commit": "b7cdb0a5cdb4f19cab215e27591ff1ef9d48261b",
+    "previous_questions": 24,
+    "protected_controls": 214,
+    "historical_strings": 2870,
+    "matched_upstream_ids": 2868,
+    "unmatched_id_strings": [
+      "2hop__33326_44",
+      "3hop1__159886_1286_1922"
+    ],
+    "hop_ids": 3677,
+    "normalized_paragraphs": 42498,
+    "normalized_supports": 3528,
+    "protected_titles": 1084,
+    "files": {
+      "benchmarks/public_rag/results/aliyun-delivery-20261024/current-replay-1/prepared.jsonl": "b23c4093aabd3ccab12347f9c3a6040ee8bbeb9b8736a7813f0cc97e7e9a8259",
+      "benchmarks/public_rag/results/aliyun-delivery-20261024/execution-1/events.jsonl": "b723cc11d5c6c2834db76f738b40371c146845ef26b62680b361501ed6e7a9e1",
+      "benchmarks/public_rag/results/aliyun-delivery-20261024/execution-1/report.json": "159f7d5f0f30e9d158945e4420e47707acbe8ab5adf0ab096e12131d372293a5",
+      "benchmarks/public_rag/results/aliyun-delivery-20261024/execution-1/responses.jsonl": "5b044a954fce3435b2f3ae2da177f11958be20199fd08c78edc76fed73b34a2c",
+      "benchmarks/public_rag/results/aliyun-delivery-20261024/execution-1/results.jsonl": "0913724ea866ce307f5f85c617f6d18aab91bd1fb470894defe1c3c03ce29a3d",
+      "benchmarks/public_rag/results/aliyun-delivery-20261024/frozen-inputs.json": "18c1011bbb90bbf959fbc81ad2a5c050624fccc438e1f5a7938bcd2337155486",
+      "benchmarks/public_rag/results/aliyun-delivery-20261024/historical-replay-1/prepared.jsonl": "30c152e2b198e78d0b4fda227e769c4b3116a75c542933cb6f5de051e9bea8fc",
+      "benchmarks/public_rag/results/aliyun-delivery-20261024/posthoc-diagnostics-report.json": "fb335624bb33578e88248093cd92aa016a291bea9df33456c2ca138638c58842",
+      "benchmarks/public_rag/results/attributed-reader-20261023/development-diagnostics.json": "4e9d69f28ce8ae0431caac31d6ac97df93d5ec7af57b066d32691672334eecce",
+      "benchmarks/public_rag/results/attributed-reader-20261023/development-run-1/api-events.jsonl": "84d274524d446d5381914cf7248dc1f03e2a90e0874bfa829decbf2b24393ee9",
+      "benchmarks/public_rag/results/attributed-reader-20261023/development-run-1/run.jsonl": "c16396738f97f55848f24af530fe87d7f0f2323b78031505f61128b62ad5077b",
+      "benchmarks/public_rag/results/consumer-rag-20261023/clean-development-answers-1/api-events.jsonl": "656e56c2038a1311bf87eea0a066c7e8abad8f6eb692f846f2028f08abef093d",
+      "benchmarks/public_rag/results/consumer-rag-20261023/clean-development-answers-1/run.jsonl": "7cd5616d966cc45f727bc6e20c0995494330eddae22fd9d885eea1250cf0bc43",
+      "benchmarks/public_rag/results/consumer-rag-20261023/clean-development-prepared-1/prepared.jsonl": "1da3261dbca91f32c38d95162673187969664a486e9fda03cf1c8ee3b295729f",
+      "benchmarks/public_rag/results/consumer-rag-20261023/confirmation-answers-1/api-events.jsonl": "9a34305b5b5adc1d9da178c3e1b932f3a540b2752ce4619cba54eb53c9aff822",
+      "benchmarks/public_rag/results/consumer-rag-20261023/confirmation-answers-1/run.jsonl": "917444f6f38f735964e5e70690598d0b4f3622e703621d16be9e31b310c2effd",
+      "benchmarks/public_rag/results/consumer-rag-20261023/confirmation-candidate-frozen.json": "94ea022b347733dc3d990128ba395bf63f3cdd535f58b4892b4554e2d172cae4",
+      "benchmarks/public_rag/results/consumer-rag-20261023/confirmation-candidate-protocol.json": "d832316b7d4a1198c3eab56193c592b771e14d3967567a2ce25f57b22232950b",
+      "benchmarks/public_rag/results/consumer-rag-20261023/confirmation-candidates-1/label-access.json": "50cd8816b15e5ec5992ce6a04d585425be4d827d09fb18b32b02bb3929228180",
+      "benchmarks/public_rag/results/consumer-rag-20261023/confirmation-candidates-1/meta.json": "f69d516098bb4c4b83ee9b23ab6e81f09ffec5a93db2872360bf80acdeb0a1a9",
+      "benchmarks/public_rag/results/consumer-rag-20261023/confirmation-candidates-1/run.jsonl": "d735dbd53b466878d4d922ea4f1cf13fd7164ca937a8c997becb6d3b04a5450e",
+      "benchmarks/public_rag/results/consumer-rag-20261023/confirmation-prepared-1/prepared.jsonl": "3d3cab4bfb3b47304483da0a3d1bf9a6ad08a13491622ff378c90b1b8bdabbf8",
+      "benchmarks/public_rag/results/consumer-rag-20261023/confirmation-sampling-receipt.json": "d01d1213bb2717bffadf518f1e289b09eb0785145edf9d79983474e2ac9555bc",
+      "benchmarks/public_rag/results/consumer-rag-20261023/development-answers-1/api-events.jsonl": "c9378ca12b628e85a5ad6b0d614ea0fc13576461ed7a77797c697ea05424dc16",
+      "benchmarks/public_rag/results/consumer-rag-20261023/development-answers-1/run.jsonl": "d71111c834dd0d17065b9e1e638733f1416644018566d42da9b88000de99e70a",
+      "benchmarks/public_rag/results/consumer-rag-20261023/development-answers-continued-1/api-events.jsonl": "93e2000c8e10d82f9677112f47e31516dd3d8a0b70c46c15c9e3a39575f91f4d",
+      "benchmarks/public_rag/results/consumer-rag-20261023/development-answers-continued-1/run.jsonl": "c29f5aa7148dcd411c46cb17effc79b4ff7a0f23dc6e676291784e46a4b87f76",
+      "benchmarks/public_rag/results/consumer-rag-20261023/development-prepared-1/prepared.jsonl": "dfe58635c54eb805f6238fad7bde83f55e45c3f5656736d8fcc79621f5d1d704",
+      "benchmarks/public_rag/results/e0-onyx-20261024/gate-questions.json": "e10913f66b2fc3d797c81e895a8ac8be1f4ea014b5a0cec01baaa24b995dd9b2",
+      "benchmarks/public_rag/results/e0-onyx-20261024/live-smoke.json": "64f8180d3956f406b1c6fef743ea1cf22aa0b83d7e16e6f51f431f73d01a8c50",
+      "benchmarks/public_rag/results/evidence-plan-20261023/development-answers-1/api-events.jsonl": "3bd2e0e40cba331996c716b83cc8fad5421dad8ead6751375da85bfcd635ed81",
+      "benchmarks/public_rag/results/evidence-plan-20261023/development-answers-1/run.jsonl": "96113e146a5f1c804a1086fb16c8fa8829c52d9bc42a9852162fa0eb60cd25d7",
+      "benchmarks/public_rag/results/evidence-plan-20261023/development-hardened-replay-1/prepared.jsonl": "375fe01f092cb88f538ed165ddbeee9f4d537aec392eb866f57904d7addc77cf",
+      "benchmarks/public_rag/results/evidence-plan-20261023/development-prepared-1/prepared.jsonl": "375fe01f092cb88f538ed165ddbeee9f4d537aec392eb866f57904d7addc77cf",
+      "benchmarks/public_rag/results/evidence-set-20261023/acceptance.json": "21bfc0d7ae72027467f680b65a721d312a84249517a64007415acf902ac7a032",
+      "benchmarks/public_rag/results/evidence-set-20261023/confirmation-answers-1/api-events.jsonl": "c850bdf24903929b22f4e76fea407a5677671ece6eeb25b150237208443a3a8e",
+      "benchmarks/public_rag/results/evidence-set-20261023/confirmation-answers-1/run.jsonl": "577d5393983eb895885f0e71c731624cb40190cf41be2041492f44f88ee995f7",
+      "benchmarks/public_rag/results/evidence-set-20261023/confirmation-candidate-frozen.json": "f5ab1d22a866a49c4fdd88dead5b177d447b2d444f703a8046a55eb5c3c433d4",
+      "benchmarks/public_rag/results/evidence-set-20261023/confirmation-candidate-protocol.json": "ab83de9f070d62a6f9975232303d5c797f5d130fb34b670dc56d34dcd48c7cd2",
+      "benchmarks/public_rag/results/evidence-set-20261023/confirmation-candidates-1/label-access.json": "79e1a3e5eb75d658324ce8a5b7ef27a0776a61440439ede9664c38a786eff7e5",
+      "benchmarks/public_rag/results/evidence-set-20261023/confirmation-candidates-1/meta.json": "11f255729e0c1bb39f2ccd69a6117d630cc8f534a835c8563fec0f9b12c928e3",
+      "benchmarks/public_rag/results/evidence-set-20261023/confirmation-candidates-1/run.jsonl": "69561d9de5b437912b30eae07955867d32a136b15a39c75c1e634d0027aef348",
+      "benchmarks/public_rag/results/evidence-set-20261023/confirmation-prepared-1/input-snapshot.json": "dd2f59470afbda62b773d8386830d2663f570394f64fdcaa9196a63e95c7ebce",
+      "benchmarks/public_rag/results/evidence-set-20261023/confirmation-prepared-1/prepared.jsonl": "72f11f783ef14231460b393ad0c13aba7208d6805571b95be9cedc23a03a9b9c",
+      "benchmarks/public_rag/results/evidence-set-20261023/confirmation-prepared-1/selection-events.jsonl": "61c553bb62e09cdf42526f40440b293104cba571c22dc1910100efd5c3b87884",
+      "benchmarks/public_rag/results/evidence-set-20261023/confirmation-sampling.json": "7dacf9aca24a6d09ad4f49b2e239f7bc80640f98d2daeabcd504585be12fa66c",
+      "benchmarks/public_rag/results/evidence-set-20261023/development-answers-1/api-events.jsonl": "65defa8e728899da65d556c804a3a39dde4602d0d937ad1d0f5b63b98d0bedb4",
+      "benchmarks/public_rag/results/evidence-set-20261023/development-answers-1/run.jsonl": "0c39f96c07f48c3936497ca91f87ac936ef8216019c52de0fb4c700b8813b6f7",
+      "benchmarks/public_rag/results/evidence-set-20261023/development-prepared-1/prepared.jsonl": "62030433c53d5b89e97d052ba594fd2540dddf7aa097c9b9d60a60ce21a6dc12",
+      "benchmarks/public_rag/results/evidence-set-20261023/development-prepared-1/selection-events.jsonl": "174520e4cf5f6edc07c6330a4b0f3c8f34821391ee0ccca1d9d445676f4f48fc",
+      "benchmarks/public_rag/results/evidence-set-20261023/development-prepared-2/prepared.jsonl": "f1a68122e9d7ca363a0a2b2b5afa2b2d7d4ca1c931f9a27054849e042faecdd8",
+      "benchmarks/public_rag/results/evidence-set-20261023/development-prepared-2/selection-events.jsonl": "09ca769fa63d56b2a8dde09b344702f38c0f0b19b677313c65d4ffea509d12b4",
+      "benchmarks/public_rag/results/evidence-set-20261023/development-prepared-3/prepared.jsonl": "a62f83d8dc5f42cd90ccce2d2d0aa89d5d10774dc04136c50cbd459695a3dc47",
+      "benchmarks/public_rag/results/evidence-set-20261023/development-prepared-3/selection-events.jsonl": "2a0020b362ae1864cd574412d4dde822b16e49ab140129078078066526f4fa3f",
+      "benchmarks/public_rag/results/generation-audit-20261025/exam.json": "d6f5953f1369cdd7ea33b335abfc38ee392139fc3e6079df1645cf81aae007f5",
+      "benchmarks/public_rag/results/generation-audit-20261025/gen1-exam.json": "f3fb2f6967e8fe8db79e43d42666cd7ffc73a2e887a99bf6aff0b0425c60e315",
+      "benchmarks/public_rag/results/generation-audit-20261025/generation-audit-report.json": "e094a5dd9311ab90d43d2f82fe767ae659a210a3fa8b78cc66bbdf1c37120437",
+      "benchmarks/public_rag/results/prompt-trial-20261023/completion-run-1/amendment.json": "b30662017935e1ae1fb2ee91db1542d521c255014385e32b22bc978b9c8e616c",
+      "benchmarks/public_rag/results/prompt-trial-20261023/completion-run-1/api-events.jsonl": "cada92efe445db3237329f2a48975b73e63f822cbe8df5590fcfd159ae5b3adb",
+      "benchmarks/public_rag/results/prompt-trial-20261023/completion-run-1/report.json": "b1e8997d764ad1dfa0200e2a83f5eec42c997d1d152c025497068a7fd6e3c11f",
+      "benchmarks/public_rag/results/prompt-trial-20261023/completion-run-1/run.json": "d33072395ccb58bf7dd8a4b6b1d77ed929a9b44ed9c0f5ddf16147630c2c3e2d",
+      "benchmarks/public_rag/results/prompt-trial-20261023/development-diagnostics.json": "a0007f5a171ba0bcd49d2e16331ac1c8d696f344b575cd89f54ca6b6ea3899bb",
+      "benchmarks/public_rag/results/prompt-trial-20261023/development-run-1/api-events.jsonl": "140b5c5b712f895f821b2558dbf3c2c3cb28794d1396a8e9dbe6075dd2d2e4ac",
+      "benchmarks/public_rag/results/prompt-trial-20261023/development-run-1/report.json": "4e235be995ce7d05a6ec78f1b7fb5201c46fc5de351e873e1f706b5cabc4dc0f",
+      "benchmarks/public_rag/results/prompt-trial-20261023/development-run-1/run.json": "f0dfec5df11f37e2ed3c35ae0275572f52a43bab9afce245529e1127e8b32e92",
+      "benchmarks/public_rag/results/prompt-trial-20261023/frozen-dataset.json": "271f797400112d5a82f60aedc46e8414330644faa4c5b4364c94b17d720a4aaa",
+      "benchmarks/public_rag/results/prompt-trial-20261023/parent-contrast-review.json": "0010bb87940a57da1f098d68b80eb65b110ce4896f88ade97ca7f0070be281a2",
+      "benchmarks/public_rag/results/prompt-trial-20261023/proposed-extra-contrasts.json": "56b3e578cdde51cbc99a2447f9c2d264d14832c925ef686cb8c4eb1e41f65f29",
+      "benchmarks/public_rag/results/prompt-trial-20261023/result-review.json": "0917b422ddbf23e974003b2cfdbc3c84aaa100d896a90cb59099ec4d9e8740ea",
+      "benchmarks/public_rag/results/published/relation-reader-20261023/acceptance.json": "5241b075610ffa55c97447753ff59e448e33f7a3954ea09ecc59bb8ee184a6be",
+      "benchmarks/public_rag/results/query-decompose-20261024/decompositions.jsonl": "ebf45b4e6584204816acd5b73256be7f178c5426a1732850394b8ab6972c90e5",
+      "benchmarks/public_rag/results/query-decompose-20261024/per-question.jsonl": "d781a4002ad7368b3d618c62bf272847fb2c716bdfa04cd6de43e566e1549f78",
+      "benchmarks/public_rag/results/query-decompose-b-20261025/per-question.jsonl": "d889a22e5dcb7b155bff1d8fe47cb2c067b6dcbed38fd3481f9edc3f0bc27fa0",
+      "benchmarks/public_rag/results/rag-final-20261026/f-bucket-after.json": "f42a8c4ec23512990d89029f10fcc7af96aecc378639e1fd533eb1772fdbf2e7",
+      "benchmarks/public_rag/results/rag-final-20261026/f2-merged-records.json": "1426988976e5a3e49169257b377065cd69d00d2eb9c739632d2a36fc41fbbea5",
+      "benchmarks/public_rag/results/relation-reader-20261023/acceptance.json": "9c954e4980404c177234c2b5cf49d2aa53fe33d87454eac5192894bf16ce4ccb",
+      "benchmarks/public_rag/results/relation-reader-20261023/audit-packet.json": "1eb10a177db19e80d1b838d36988537c38dc8ea1f6835498dc0bcab551c52ed5",
+      "benchmarks/public_rag/results/relation-reader-20261023/audit-review.json": "51fcb2a2b8b556ec35173413d2a2f60501b967b92f538ae7c90230bdcaad1367",
+      "benchmarks/public_rag/results/relation-reader-20261023/audit-validation.json": "9b74c142b608507c915f22ee50e3b635ce032aaf5961b02c88c65253dffe6e23",
+      "benchmarks/public_rag/results/relation-reader-20261023/source-review-reconciliation.json": "8f14eb466b4e1cd60d72f67d753a0c1aad2a5c833f6a89378ba804b65c0f046f",
+      "benchmarks/public_rag/results/relation-reader-20261023/source-review.json": "5deb6363c2ae865c725b4e0b5f84a008d56a5f1cf77b341d5b2e6b396db19cbe",
+      "benchmarks/public_rag/results/relation-reader-20261023/source-trace-packet.json": "4983af753ab4be6367bca7bf9866785aa0f8354ff495ed99dab1a2911c647ef6",
+      "benchmarks/public_rag/results/relation-reader-20261023/source-visibility-trace.json": "8e02d98ebc9a3ed4f2de08751f763940249275534ed29bf311d28cefcf0c5fa0",
+      "benchmarks/public_rag/results/scenario-rag-20261023/musique-confirm-1/meta.json": "4698ee65ed0061a997fa40ac564e80104d0bb5afdcc16b48e84c2cea2fc7f38f",
+      "benchmarks/public_rag/results/scenario-rag-20261023/musique-confirm-1/report.json": "83a8e46d750c62557f87d3f62bb1eb211a44b66f37c7b64e8d5c3553522a9bda",
+      "benchmarks/public_rag/results/scenario-rag-20261023/musique-confirm-1/run.jsonl": "b8f1ef13911b94bb0b5a99246f4a8f623a5d5e788c068863b3897a6c9077aed2",
+      "benchmarks/public_rag/results/scenario-rag-20261023/musique-dev-1/meta.json": "daedc18d59594bf52754847ea83411fb20a2781b3d6ca762ea36eedeaad3e7c3",
+      "benchmarks/public_rag/results/scenario-rag-20261023/musique-dev-1/report.json": "a0c08c2fd489ff0fdeb85af89d9de72e44d90fe81b61cef18912868ff041d84e",
+      "benchmarks/public_rag/results/scenario-rag-20261023/musique-dev-1/run.jsonl": "e79aa206ca8bd5ce2afc7ce30e837581a7eede6705a9d350264de4335458d63c",
+      "benchmarks/public_rag/results/support-dataset-20261023/baseline-run-1/api-events.jsonl": "f2e3d5a16ab4c414001b5c54e1aed41d7c93e9876aeea7fa8202488ab82c54bb",
+      "benchmarks/public_rag/results/support-dataset-20261023/baseline-run-1/report.json": "a0611bf233954db957b0071dfec1f05c669e82e8eb47ddd455d2b6016c02f25d",
+      "benchmarks/public_rag/results/support-dataset-20261023/baseline-run-1/run.json": "c9d29110fccaf025063e06c78c4a796a9369cc98db2bdcad9fbcd5c6f2e3958a",
+      "benchmarks/public_rag/results/support-dataset-20261023/frozen-dataset-v2.json": "34aff313ffcb5ca02eccd9a73362b94cc5e7227a4daf6396f886aa019ee0d897",
+      "benchmarks/public_rag/results/support-dataset-20261023/frozen-dataset.json": "e36ed2054eac0577d74f23741860a2307dcb6b2658d73b014909e3c18f786084",
+      "benchmarks/public_rag/results/support-dataset-20261023/pair-review.json": "d2edd59a0331d20b16debb2d6587b7d9098470ca217713af8aaa9c0e3f26cbad",
+      "benchmarks/public_rag/results/support-dataset-20261023/proposed-dataset.json": "03cc87d2c316e8575ca435f01023c0547bd5f4e7580601bf2eb021a394ddd701",
+      ".scratch/merge-refill-fresh/matched.json": "52e871adf5176d1f93f7c5162b34661da0b4be606b93155543215c83ebc22e55",
+      ".scratch/first-refusal-100-docs/manifest.json": "92892e2c55f7e98fe54886c452a42c817181394728774cc5ea068f22b0aa926b",
+      ".scratch/first-refusal-100-author/options.json": "0db7ba9e69f01cb126cbe6e83b80283aab174bd0fde47d9b3bd24cc008c07263",
+      ".scratch/bilingual-refusal-100-docs/manifest.json": "0a3823f79116ea9007ead62f3caa3419c0ab2c1e5e43d8d2f3fdfba8977713a5",
+      ".scratch/bilingual-refusal-100-author/options.json": "d2e996fabd6c89420d2397e998c66fa00fefcd83f0365c5fedcc0c7e1f487ad7",
+      ".scratch/first-refusal-100-author/exclusions.json": "60a777a47ea2b1d594f438320d5e017c03d2be1e5c03307a80d1a0a241848db3",
+      "benchmarks/retrieval/table_header_protocol.json": "205debe64962844b00cb8bac32cf3155c210b8b2541dc51389c0dd3322df24d3",
+      ".scratch/rag-table-wai-20261118/irregular.html": "1b2dd359ca312b8b629704921a557792ef7892169e0ec4721385cb238468a3df"
+    }
+  },
+  "training_files": {
+    "musique_ans_v1.0_train.jsonl": "83a75b1e11e4e9bb8f8308e72ac40ca617ae4431b3a0d955b61cab259248490a",
+    "musique_full_v1.0_train.jsonl": "b1cd998f7e0e2838d6fda024e4ad1eb0e7fc3edefdadb0bd9b5b10b0907f2034"
+  },
+  "eligible_rows_before_mutual_exclusion": {
+    "primary_ordinary": 1824,
+    "primary_long": 126,
+    "missing_final": 1398,
+    "missing_bridge": 19
+  },
+  "cohorts": {
+    "primary_ordinary": 24,
+    "missing_bridge": 8,
+    "primary_long": 24,
+    "missing_final": 8,
+    "smoke": 1
+  },
+  "cases": [
+    {
+      "id": "2hop__40626_475429",
+      "file": "musique_ans_v1.0_train.jsonl",
+      "line": 9182,
+      "row_sha256": "64942dac9bf4f5dafddf88180e379e2fbb145ef72155283c6d9d65b44d6033fb",
+      "stratum": "primary_ordinary",
+      "cohort": "primary_ordinary",
+      "answerable": true,
+      "lexical_control": null,
+      "hops": [
+        40626,
+        475429
+      ],
+      "gold_in_hop_order": [
+        7,
+        12
+      ],
+      "gold_spans": [
+        {
+          "idx": 7,
+          "source_id": "2hop__40626_475429::paragraph::7",
+          "start": 0,
+          "end": 610,
+          "sha256": "444f24a8544c7dc22408fef82ea8acb119de07b7303bd5d88d18de6abc73df01"
+        },
+        {
+          "idx": 12,
+          "source_id": "2hop__40626_475429::paragraph::12",
+          "start": 0,
+          "end": 550,
+          "sha256": "e8f143755586e9c21f9320d9e2f88a6294cd06f34523e419fe59e525218dd853"
+        }
+      ],
+      "answer_and_aliases_sha256": "6d8fba76df37cab41ceee53c223d5f64563f744e73cd4b72a81de93cd41b59a4",
+      "question_sha256": "e6317726cde076a312b955eaa26ddfb4d84a2a79cd0d6f26dbafad574999681c",
+      "ordered_twenty_sources_sha256": "dd550d92290b47042bfa45d24bcb40ad6665c5ce3fb599f2eb6ef37375b39a61"
+    },
+    {
+      "id": "2hop__726988_83050",
+      "file": "musique_full_v1.0_train.jsonl",
+      "line": 34200,
+      "row_sha256": "44911b8b90606f71d2ca29ca2154c2d64db6c2bffd7d17c8db6b07ce80bd483c",
+      "stratum": "missing_bridge",
+      "cohort": "insufficient",
+      "answerable": false,
+      "lexical_control": "at_least_one_bridge_subject_word_absent_from_all_20_titles_and_bodies",
+      "hops": [
+        726988,
+        83050
+      ],
+      "gold_in_hop_order": [
+        null,
+        2
+      ],
+      "gold_spans": [
+        {
+          "idx": 2,
+          "source_id": "2hop__726988_83050::paragraph::2",
+          "start": 0,
+          "end": 160,
+          "sha256": "5b7db9d4d7baa4214e57c15c30bf700300f7e4febe3fc5c6d26cdc880555b1fd"
+        }
+      ],
+      "answer_and_aliases_sha256": "b6dd5c3643b45db120526dd1854b0b9fa95afdfecc828d62de1009d70bd6f321",
+      "question_sha256": "025267da9863388e1ba992dce427bfd27347dac50cc7195a71087cd94903a107",
+      "ordered_twenty_sources_sha256": "98d4c9f68963d893b0a7a9e5c68f1ffb509155b5b88c46ffa3da082fc7731c79"
+    },
+    {
+      "id": "2hop__71909_729660",
+      "file": "musique_ans_v1.0_train.jsonl",
+      "line": 283,
+      "row_sha256": "58395612cc33758abc0a6782ec062e7efedfa8c8c3814d74ad176b1cf33c40d3",
+      "stratum": "primary_ordinary",
+      "cohort": "primary_ordinary",
+      "answerable": true,
+      "lexical_control": null,
+      "hops": [
+        71909,
+        729660
+      ],
+      "gold_in_hop_order": [
+        9,
+        6
+      ],
+      "gold_spans": [
+        {
+          "idx": 6,
+          "source_id": "2hop__71909_729660::paragraph::6",
+          "start": 0,
+          "end": 518,
+          "sha256": "26b36cfa47297fa5d3d7ac797d9c3d21084033de78bef3f4d708362939880200"
+        },
+        {
+          "idx": 9,
+          "source_id": "2hop__71909_729660::paragraph::9",
+          "start": 0,
+          "end": 149,
+          "sha256": "f49c993c32e7b7179fe18712f491d43643e9725b9be044c1e5d5c580690f2ce7"
+        }
+      ],
+      "answer_and_aliases_sha256": "e571416b9e3649d491048f90853a8e3579b0c857a2ae81599c320648aa92caac",
+      "question_sha256": "9151edb6c413b13cba20b0a11454ed88593e120c5985f8616aefa85d358219cf",
+      "ordered_twenty_sources_sha256": "593986edc51bb9e344d816080f434daf45dcad154260f778eb28969ca3d7cf4d"
+    },
+    {
+      "id": "2hop__613265_495107",
+      "file": "musique_ans_v1.0_train.jsonl",
+      "line": 12441,
+      "row_sha256": "3703651e7b4021afa4cadd244b42bd5e53b242e7cb956356cd22088ef8d3176c",
+      "stratum": "primary_long",
+      "cohort": "primary_long",
+      "answerable": true,
+      "lexical_control": null,
+      "hops": [
+        613265,
+        495107
+      ],
+      "gold_in_hop_order": [
+        6,
+        0
+      ],
+      "gold_spans": [
+        {
+          "idx": 0,
+          "source_id": "2hop__613265_495107::paragraph::0",
+          "start": 0,
+          "end": 543,
+          "sha256": "96981ab766321f5c6a503d24d1cb5c7eee098b3d2ed3f6ad06c6f876b179103d"
+        },
+        {
+          "idx": 6,
+          "source_id": "2hop__613265_495107::paragraph::6",
+          "start": 0,
+          "end": 481,
+          "sha256": "1637abd0ad456d8079179128cd2512b3c554c4ba3c4a2267a379d56f4a8cc1b6"
+        }
+      ],
+      "answer_and_aliases_sha256": "9e35d154f8f1cd5f91dd878bfbd6c55f201736aa3a9cda34490caea0118ae4d7",
+      "question_sha256": "602199168d198929cc0014791e7b64981446e69c142f42961d5bc0b7d9f8db27",
+      "ordered_twenty_sources_sha256": "a68138a6d6c7b46adcb7192e5ea57daed6059982d666b47d59a396e2ba600669"
+    },
+    {
+      "id": "2hop__385043_53794",
+      "file": "musique_full_v1.0_train.jsonl",
+      "line": 14793,
+      "row_sha256": "da381df9bcdd8731b260541e19ec0082b71d2bfb3baaadff36a38534e69ec6ce",
+      "stratum": "missing_final",
+      "cohort": "insufficient",
+      "answerable": false,
+      "lexical_control": "terminal_value_absent_from_all_20_titles_and_bodies",
+      "hops": [
+        385043,
+        53794
+      ],
+      "gold_in_hop_order": [
+        3,
+        null
+      ],
+      "gold_spans": [
+        {
+          "idx": 3,
+          "source_id": "2hop__385043_53794::paragraph::3",
+          "start": 0,
+          "end": 643,
+          "sha256": "e2bd19a762d595270e0e2b12affd40b50d1a628c0830d086b521ff6720410b0c"
+        }
+      ],
+      "answer_and_aliases_sha256": "6fff985fb9d68f40b7be7f1c1d1344540b47f50d4f4599dd7c036c7a8961c1ca",
+      "question_sha256": "f16b230c3b25485a96cb22e7d240c637ac2c7106153001c5ab7ffe5e343604ea",
+      "ordered_twenty_sources_sha256": "8f8e51cbba99c15e5b4e2b9c1a789ee1880bc88da2b2c3315ff6019bba0205c4"
+    },
+    {
+      "id": "2hop__89253_49700",
+      "file": "musique_ans_v1.0_train.jsonl",
+      "line": 12838,
+      "row_sha256": "977e31b3f42ea532672d014aae7b4946feb5122b5b1796c5233b3223671595df",
+      "stratum": "primary_long",
+      "cohort": "primary_long",
+      "answerable": true,
+      "lexical_control": null,
+      "hops": [
+        89253,
+        49700
+      ],
+      "gold_in_hop_order": [
+        1,
+        2
+      ],
+      "gold_spans": [
+        {
+          "idx": 1,
+          "source_id": "2hop__89253_49700::paragraph::1",
+          "start": 0,
+          "end": 434,
+          "sha256": "1d66684dcf07bd94f80b6dd84dc2a02b626afbc03ae75d68ff93a1f68220598b"
+        },
+        {
+          "idx": 2,
+          "source_id": "2hop__89253_49700::paragraph::2",
+          "start": 0,
+          "end": 1353,
+          "sha256": "d8225bfc7b230e25b9e08be405157c7a215e8dc1a675cdd2d9c974e450ac3615"
+        }
+      ],
+      "answer_and_aliases_sha256": "afa8f92c8c1cbd05dd1f63fde7569ea19eb88bf2659b8ddf038c32ef3a1a12c7",
+      "question_sha256": "a95559d2bdc0ab7bf3b58af47618feeec55d8f4cf578645243e8d5cb0524a881",
+      "ordered_twenty_sources_sha256": "409931bdcba62ae7143e3cf5fa31d5c28d8456ce8f6db5bc02d79b39516a9162"
+    },
+    {
+      "id": "2hop__251620_54210",
+      "file": "musique_ans_v1.0_train.jsonl",
+      "line": 12773,
+      "row_sha256": "02d74918b8bed59714418038bec99e9a06959bab31430c458f00bc27c9ca3cc1",
+      "stratum": "primary_long",
+      "cohort": "primary_long",
+      "answerable": true,
+      "lexical_control": null,
+      "hops": [
+        251620,
+        54210
+      ],
+      "gold_in_hop_order": [
+        13,
+        15
+      ],
+      "gold_spans": [
+        {
+          "idx": 13,
+          "source_id": "2hop__251620_54210::paragraph::13",
+          "start": 0,
+          "end": 147,
+          "sha256": "aefaef95d1c1e810f8c3582006cb58ecd4c20695e364f9c3308523892c855352"
+        },
+        {
+          "idx": 15,
+          "source_id": "2hop__251620_54210::paragraph::15",
+          "start": 0,
+          "end": 543,
+          "sha256": "19ba93bde7b6fa44d23245288c369f66ef0ad653ec1bab9d38aec805b9ca1657"
+        }
+      ],
+      "answer_and_aliases_sha256": "e93241b7d527ff16abdd66143636c5b98fa87f8390294ab22c4841273eddcf9c",
+      "question_sha256": "96814474ee02c87756968e9a1fd60f74849b228d035ca4ec898064f957c0cdae",
+      "ordered_twenty_sources_sha256": "a5b50bc37cafd8effa877f266aa9f00508db3557de094421e7069e179c1b4219"
+    },
+    {
+      "id": "2hop__181212_701819",
+      "file": "musique_full_v1.0_train.jsonl",
+      "line": 27449,
+      "row_sha256": "41e43717145818ad593befae6bd81b6c3c7e9ebe2f295b3cb081bbac69fa86dc",
+      "stratum": "missing_bridge",
+      "cohort": "insufficient",
+      "answerable": false,
+      "lexical_control": "at_least_one_bridge_subject_word_absent_from_all_20_titles_and_bodies",
+      "hops": [
+        181212,
+        701819
+      ],
+      "gold_in_hop_order": [
+        null,
+        1
+      ],
+      "gold_spans": [
+        {
+          "idx": 1,
+          "source_id": "2hop__181212_701819::paragraph::1",
+          "start": 0,
+          "end": 139,
+          "sha256": "6cfdcf9556cda0685c017f7cdb4b93ecc18f973d649eb0a4d79bc3e253dbe115"
+        }
+      ],
+      "answer_and_aliases_sha256": "7a06fe1272f4c65866622a8309ece85a3214e2deeaa2e5ddeae7663dd415c554",
+      "question_sha256": "87af769d93ce0615e2042389dca5d4bbf28d5df72207211c14327f324890ba3b",
+      "ordered_twenty_sources_sha256": "a8063516a1c212feb83f3526a12a7604c6b4f873622c2f1ce3da08835be39a71"
+    },
+    {
+      "id": "2hop__145110_861627",
+      "file": "musique_ans_v1.0_train.jsonl",
+      "line": 13809,
+      "row_sha256": "20c18f2eb398536d0a08099588f12e65fe76453f530e59875727ac6d4516bd14",
+      "stratum": "primary_ordinary",
+      "cohort": "primary_ordinary",
+      "answerable": true,
+      "lexical_control": null,
+      "hops": [
+        145110,
+        861627
+      ],
+      "gold_in_hop_order": [
+        4,
+        19
+      ],
+      "gold_spans": [
+        {
+          "idx": 4,
+          "source_id": "2hop__145110_861627::paragraph::4",
+          "start": 0,
+          "end": 211,
+          "sha256": "96b13e6c98b7d66fc70e3a606bf98ac3f4700d12768c92870aa689066ba5027f"
+        },
+        {
+          "idx": 19,
+          "source_id": "2hop__145110_861627::paragraph::19",
+          "start": 0,
+          "end": 126,
+          "sha256": "58c64cdbc12d19929ccd82a0677b66021062bc6bd2105ff7098ff9f8eafe0cad"
+        }
+      ],
+      "answer_and_aliases_sha256": "2c51d36ba2a10bc054f3b7b9676ce2ea36dcee9c0b308310ef45f3e528921910",
+      "question_sha256": "78f8117b117a26f8bff7a792c6daddf5458d42d35f54eda49d56e672bd70b9a9",
+      "ordered_twenty_sources_sha256": "ba184733734b7eb7a5cba1ddd3278faef5494ea8b5e469fa8332e507d3324821"
+    },
+    {
+      "id": "2hop__446183_21489",
+      "file": "musique_ans_v1.0_train.jsonl",
+      "line": 15,
+      "row_sha256": "749429cca47dbbb016b06ef258bd87358a75d387744709553cad4d9520f181a9",
+      "stratum": "primary_ordinary",
+      "cohort": "primary_ordinary",
+      "answerable": true,
+      "lexical_control": null,
+      "hops": [
+        446183,
+        21489
+      ],
+      "gold_in_hop_order": [
+        17,
+        18
+      ],
+      "gold_spans": [
+        {
+          "idx": 17,
+          "source_id": "2hop__446183_21489::paragraph::17",
+          "start": 0,
+          "end": 335,
+          "sha256": "eeb315b6dbe2c762755b2cafa610aef4899d6f24b26cd3d3dec40d0972e9850a"
+        },
+        {
+          "idx": 18,
+          "source_id": "2hop__446183_21489::paragraph::18",
+          "start": 0,
+          "end": 1038,
+          "sha256": "5fd2628b1376e3d13ab77c410606a38f1d58b238029c1487117ea24d4d008b25"
+        }
+      ],
+      "answer_and_aliases_sha256": "5676bf7e7a4205ca5ce0097bf5646ec8cbf34a485f1906502277ae3adf86e4de",
+      "question_sha256": "12766ba229c9d0640ba134c311c1188a212fc6c5efdecd63b7a9cc72a7181397",
+      "ordered_twenty_sources_sha256": "a36d4647deccc1cfdaa833cff510609f45e8126c0b7eec2789a2d757566d5975"
+    },
+    {
+      "id": "2hop__543094_26789",
+      "file": "musique_ans_v1.0_train.jsonl",
+      "line": 594,
+      "row_sha256": "23fd9ba3c4e1d99ae231387bb5ad63472c3972f0709b54ac46ad2fab1755aacb",
+      "stratum": "primary_long",
+      "cohort": "primary_long",
+      "answerable": true,
+      "lexical_control": null,
+      "hops": [
+        543094,
+        26789
+      ],
+      "gold_in_hop_order": [
+        1,
+        5
+      ],
+      "gold_spans": [
+        {
+          "idx": 1,
+          "source_id": "2hop__543094_26789::paragraph::1",
+          "start": 0,
+          "end": 377,
+          "sha256": "dcb29657c1ac12670cfbc2f2eefd967d66adf29b44b46d989421dcbb4f3b71c7"
+        },
+        {
+          "idx": 5,
+          "source_id": "2hop__543094_26789::paragraph::5",
+          "start": 0,
+          "end": 1998,
+          "sha256": "8fd85fbb8615c5aa148902e0a7d9dcf85d31e0480cd3fd939c4dbf07b96fd8e2"
+        }
+      ],
+      "answer_and_aliases_sha256": "ce8c0926f90bd21bc88f870c49d728e01aeee87bedf48e11d16a6d65cee6e725",
+      "question_sha256": "54d2f5cf5167d619b058d48d0c4147aa5e28d2c70f82c9ed1a3161a7e7171c2f",
+      "ordered_twenty_sources_sha256": "564a16b2ddc5417bd083442895383f544312c1b17c55d429de29772a66c75836"
+    },
+    {
+      "id": "2hop__108596_863816",
+      "file": "musique_ans_v1.0_train.jsonl",
+      "line": 1246,
+      "row_sha256": "57878ea95fcfef0d8d6fc7c91b7d45b61907b251135c01fe419285e8f477600b",
+      "stratum": "primary_ordinary",
+      "cohort": "primary_ordinary",
+      "answerable": true,
+      "lexical_control": null,
+      "hops": [
+        108596,
+        863816
+      ],
+      "gold_in_hop_order": [
+        18,
+        19
+      ],
+      "gold_spans": [
+        {
+          "idx": 18,
+          "source_id": "2hop__108596_863816::paragraph::18",
+          "start": 0,
+          "end": 131,
+          "sha256": "99dc45a77eeaab532be5053f3e734f78aef98dfc361da3d5e15fc5d1fd9dc392"
+        },
+        {
+          "idx": 19,
+          "source_id": "2hop__108596_863816::paragraph::19",
+          "start": 0,
+          "end": 157,
+          "sha256": "5f9f0d119febccb88aad9850504848fb6f0def271fedce9f9c30e6eecdacf4f8"
+        }
+      ],
+      "answer_and_aliases_sha256": "7e552f08b89ceb3b3a84a5b6007a7750ce9170823a1a0608b772525d1c407b7c",
+      "question_sha256": "62d8f6dd3d6c39267d7e702d5dc70dd50809d2b8a262f0b47c16b5f270d36254",
+      "ordered_twenty_sources_sha256": "56f999ea243941ca9d19582c1e0e393ee9dbca7c087b52b55549142187e1fa63"
+    },
+    {
+      "id": "2hop__645827_52448",
+      "file": "musique_full_v1.0_train.jsonl",
+      "line": 32567,
+      "row_sha256": "f6bf0b241f4db21df2f8fa6e6ec87fe9209097cb9c790cafa459cc54a0d3ef9a",
+      "stratum": "missing_bridge",
+      "cohort": "insufficient",
+      "answerable": false,
+      "lexical_control": "at_least_one_bridge_subject_word_absent_from_all_20_titles_and_bodies",
+      "hops": [
+        645827,
+        52448
+      ],
+      "gold_in_hop_order": [
+        null,
+        9
+      ],
+      "gold_spans": [
+        {
+          "idx": 9,
+          "source_id": "2hop__645827_52448::paragraph::9",
+          "start": 0,
+          "end": 1697,
+          "sha256": "8a28db66ff0dfc41b70c844663068646ca2b4083d6b6c5bc5db1f7ab2678d4ef"
+        }
+      ],
+      "answer_and_aliases_sha256": "263284e380885f843012d9aff1d027ea7b3b16ee9c0bd4ef11db5bb5facc54a5",
+      "question_sha256": "20dfafa7a777fc56d9dab0a6751ef37649cbf98859ff4076c9fc1446a713dcea",
+      "ordered_twenty_sources_sha256": "0a0409c7e6e0f7d850b924fc6f260551cab03e4c1ba74a86b9ed4e6a175dcf34"
+    },
+    {
+      "id": "2hop__745795_79562",
+      "file": "musique_full_v1.0_train.jsonl",
+      "line": 21940,
+      "row_sha256": "bba65a8d3ff347952208d1ccc7812c601abe94e22f164bfe1a1171fac4cf15b6",
+      "stratum": "missing_bridge",
+      "cohort": "insufficient",
+      "answerable": false,
+      "lexical_control": "at_least_one_bridge_subject_word_absent_from_all_20_titles_and_bodies",
+      "hops": [
+        745795,
+        79562
+      ],
+      "gold_in_hop_order": [
+        null,
+        18
+      ],
+      "gold_spans": [
+        {
+          "idx": 18,
+          "source_id": "2hop__745795_79562::paragraph::18",
+          "start": 0,
+          "end": 716,
+          "sha256": "0dd96fefca106be1d395fa92f9a08df30756e4928f28050d26b600445e3731bc"
+        }
+      ],
+      "answer_and_aliases_sha256": "155f5f4b29160f6d09d7a3da4acee597c9ecc134b1edebb71f78768f4793e3ab",
+      "question_sha256": "c150ad05186817f8da50bfca994b4349124d29f4429402ec001684f21f4ac0bd",
+      "ordered_twenty_sources_sha256": "b820cb800cc289969c8dbd63081e3522d57b8bac00f19e786cafb77d6073f27f"
+    },
+    {
+      "id": "2hop__806218_14904",
+      "file": "musique_ans_v1.0_train.jsonl",
+      "line": 4407,
+      "row_sha256": "551a423305295f679042a70976c968c78329bdbd4e39f329d59d4bb36901f8d5",
+      "stratum": "primary_long",
+      "cohort": "primary_long",
+      "answerable": true,
+      "lexical_control": null,
+      "hops": [
+        806218,
+        14904
+      ],
+      "gold_in_hop_order": [
+        0,
+        11
+      ],
+      "gold_spans": [
+        {
+          "idx": 0,
+          "source_id": "2hop__806218_14904::paragraph::0",
+          "start": 0,
+          "end": 362,
+          "sha256": "70fdaa5a21876eba820ef3b9c306edd9c3a8569ea324b6ba9967b4807e74675d"
+        },
+        {
+          "idx": 11,
+          "source_id": "2hop__806218_14904::paragraph::11",
+          "start": 0,
+          "end": 1367,
+          "sha256": "66baaa1c33a6c9020b5847c30d5a87da5d85acbbe5898e3bc33d8b1bfe7ef13a"
+        }
+      ],
+      "answer_and_aliases_sha256": "2cc62fff0dbb05e04dd0501074f2926312d5400661a2aa243f589ed23ee7734d",
+      "question_sha256": "bdbc0bb2501de18f034ba70da5d485868f51d4c3dd602f546122181e32b25190",
+      "ordered_twenty_sources_sha256": "ee110d2b2ea916b24c48f4d0c3656b1255aaaa0bb028d342861cbe366576cf76"
+    },
+    {
+      "id": "2hop__36206_63835",
+      "file": "musique_ans_v1.0_train.jsonl",
+      "line": 6874,
+      "row_sha256": "e928b724f03189dbdcbef9c5c672005996c54fe18bb875d184637b1ddefbe0f0",
+      "stratum": "primary_long",
+      "cohort": "primary_long",
+      "answerable": true,
+      "lexical_control": null,
+      "hops": [
+        36206,
+        63835
+      ],
+      "gold_in_hop_order": [
+        13,
+        1
+      ],
+      "gold_spans": [
+        {
+          "idx": 1,
+          "source_id": "2hop__36206_63835::paragraph::1",
+          "start": 0,
+          "end": 571,
+          "sha256": "950ce70569fb717c4517c79f2ac33e3504a597a49ce12568659455f0a11f3363"
+        },
+        {
+          "idx": 13,
+          "source_id": "2hop__36206_63835::paragraph::13",
+          "start": 0,
+          "end": 875,
+          "sha256": "c47ad1e97278dc9bce62d5c27b4d5dac24187bfaa5d9ff9a9b9f7abce07cf2bb"
+        }
+      ],
+      "answer_and_aliases_sha256": "be478f51d4f552a5b0214cb737fad7817da81d462d87efbb8aebc0a853b45182",
+      "question_sha256": "f5c8d9de2ed28712eaf4afee4cc4f4f50a22fbdd843d7e3af851ca4d14fb6e45",
+      "ordered_twenty_sources_sha256": "a64401f67aeb9eb5c2e4e526f1c3e651e58cb4eed411f999242016300a6dcdfd"
+    },
+    {
+      "id": "2hop__106185_77138",
+      "file": "musique_ans_v1.0_train.jsonl",
+      "line": 12200,
+      "row_sha256": "ae1753a977a9cd9bc76e75486bc1ce2cbbc942c19063b50639fa560ff3910362",
+      "stratum": "primary_ordinary",
+      "cohort": "primary_ordinary",
+      "answerable": true,
+      "lexical_control": null,
+      "hops": [
+        106185,
+        77138
+      ],
+      "gold_in_hop_order": [
+        5,
+        4
+      ],
+      "gold_spans": [
+        {
+          "idx": 4,
+          "source_id": "2hop__106185_77138::paragraph::4",
+          "start": 0,
+          "end": 323,
+          "sha256": "db46c3e1a4e28d004ac2b2a71c0c728fa3c1d3ccc5cb9e613c51481b489219b4"
+        },
+        {
+          "idx": 5,
+          "source_id": "2hop__106185_77138::paragraph::5",
+          "start": 0,
+          "end": 139,
+          "sha256": "35b1cfeec7ce942d5f61bac2c31179d33374ecd0965243f8cb384ed509d6247c"
+        }
+      ],
+      "answer_and_aliases_sha256": "a12fa08ab7b013367ab1b69800bf8106ab6c04bfecca6f058f99168476a9d8b6",
+      "question_sha256": "566f2419e3f824bf99a313df9c6edd315dd7d1b125d2ff3d0a988a3e6d192e76",
+      "ordered_twenty_sources_sha256": "edf6bba168f2cbb10c42c224ab0304e7f77f958f96af0b2fe0ad000361474759"
+    },
+    {
+      "id": "2hop__494831_47314",
+      "file": "musique_ans_v1.0_train.jsonl",
+      "line": 4902,
+      "row_sha256": "4cbc524005d1d0ddabd79cd908f14c77512c12943f0765dc281fc547ed98d220",
+      "stratum": "primary_ordinary",
+      "cohort": "primary_ordinary",
+      "answerable": true,
+      "lexical_control": null,
+      "hops": [
+        494831,
+        47314
+      ],
+      "gold_in_hop_order": [
+        11,
+        15
+      ],
+      "gold_spans": [
+        {
+          "idx": 11,
+          "source_id": "2hop__494831_47314::paragraph::11",
+          "start": 0,
+          "end": 283,
+          "sha256": "7088612e1272cabfcb213b3aefe5469de8cab68b2b2197de38ae82d32fd95641"
+        },
+        {
+          "idx": 15,
+          "source_id": "2hop__494831_47314::paragraph::15",
+          "start": 0,
+          "end": 302,
+          "sha256": "f8bc04a115055539becc35adcef1542db008c4b5546c7025886f7869cb68264b"
+        }
+      ],
+      "answer_and_aliases_sha256": "222a265044af8a983ce0e4364c2ef90d14f617618410e49975f06ff2c695b1a4",
+      "question_sha256": "36fa0be2426691585eb1e3c51c753f05d72b32ef09c99544d69e83e8e90a78fb",
+      "ordered_twenty_sources_sha256": "3ae0b9aa329a0b389fb943501730e2fea133d9f8061544a86bb948ca14e6f2f8"
+    },
+    {
+      "id": "2hop__341145_75671",
+      "file": "musique_full_v1.0_train.jsonl",
+      "line": 38173,
+      "row_sha256": "776f8555cf64dbe64ff51811de93b503f1e555f5b4236a53d9cdac6528fed167",
+      "stratum": "missing_bridge",
+      "cohort": "insufficient",
+      "answerable": false,
+      "lexical_control": "at_least_one_bridge_subject_word_absent_from_all_20_titles_and_bodies",
+      "hops": [
+        341145,
+        75671
+      ],
+      "gold_in_hop_order": [
+        null,
+        7
+      ],
+      "gold_spans": [
+        {
+          "idx": 7,
+          "source_id": "2hop__341145_75671::paragraph::7",
+          "start": 0,
+          "end": 124,
+          "sha256": "7872962cb52dabdd51043976d1e11aabddc27941ff61085b2a39dd45d1ad555a"
+        }
+      ],
+      "answer_and_aliases_sha256": "565d7c45f6c9ff1e4d7ed2c4b2876670cd17adf98970009c7e6b0160025715dd",
+      "question_sha256": "5609fbec98bc59492213b997afeaa9c8358459cd3937cb0b090246f4e936c499",
+      "ordered_twenty_sources_sha256": "41e311a66f85b44a42141adc6b560149fb4258ebd3d07bc6f70dda8f2b41d8f0"
+    },
+    {
+      "id": "2hop__657848_91875",
+      "file": "musique_ans_v1.0_train.jsonl",
+      "line": 1775,
+      "row_sha256": "ac55d52ade64a686684eb0dd793350a83fe6d939d120d75c2768ec442dd44524",
+      "stratum": "smoke",
+      "cohort": "smoke",
+      "answerable": true,
+      "lexical_control": null,
+      "hops": [
+        657848,
+        91875
+      ],
+      "gold_in_hop_order": [
+        10,
+        16
+      ],
+      "gold_spans": [
+        {
+          "idx": 10,
+          "source_id": "2hop__657848_91875::paragraph::10",
+          "start": 0,
+          "end": 610,
+          "sha256": "3ac6bb84630917b2c4e9ca42fa5d4ad5dd3e2c415739c20086ef731d0a93be3b"
+        },
+        {
+          "idx": 16,
+          "source_id": "2hop__657848_91875::paragraph::16",
+          "start": 0,
+          "end": 257,
+          "sha256": "0be70ad6d839bf43aeba9e4fa99b5cfdd905432fe03cb0ab79d1b65f1d8ae91f"
+        }
+      ],
+      "answer_and_aliases_sha256": "3aea29e234a404112a4e6793c393f371dbb7b398b015f5fabda68aec7e6a5dfe",
+      "question_sha256": "e1bc729eeb287cd68d968ad93132c0b705375b37764d93231887829bf8fe86c0",
+      "ordered_twenty_sources_sha256": "81920f93afedddd6b4e91166785a38c7142f5386ef61a609a3bd132c0cf81d55"
+    },
+    {
+      "id": "2hop__138166_34844",
+      "file": "musique_full_v1.0_train.jsonl",
+      "line": 4358,
+      "row_sha256": "3ffc26f1074549bc08821fedec6b9ffe90f6b7975b7625eeb051cff66ccb08b0",
+      "stratum": "missing_final",
+      "cohort": "insufficient",
+      "answerable": false,
+      "lexical_control": "terminal_value_absent_from_all_20_titles_and_bodies",
+      "hops": [
+        138166,
+        34844
+      ],
+      "gold_in_hop_order": [
+        16,
+        null
+      ],
+      "gold_spans": [
+        {
+          "idx": 16,
+          "source_id": "2hop__138166_34844::paragraph::16",
+          "start": 0,
+          "end": 270,
+          "sha256": "ebc3de9760d6bb1bb78be30c197cfeabe66a94702975162f85d4010cd57bfd9d"
+        }
+      ],
+      "answer_and_aliases_sha256": "7e7f631396d71dd97eeb153641b88f9602101ff54f16890e2db5ad8105c8410e",
+      "question_sha256": "65b259d36465fc224c5e957ce521d54b490cdf9c63445f0c007df6da52b0a222",
+      "ordered_twenty_sources_sha256": "bbf34a6994c683352df4df23385b4cd27ccb7c1e38e6735fabf4caca2cf9aad9"
+    },
+    {
+      "id": "2hop__646909_321254",
+      "file": "musique_ans_v1.0_train.jsonl",
+      "line": 5233,
+      "row_sha256": "240f580fdab4a4614faddab1a35eb4500cc393ad35834576cd0bf9df72cfb658",
+      "stratum": "primary_ordinary",
+      "cohort": "primary_ordinary",
+      "answerable": true,
+      "lexical_control": null,
+      "hops": [
+        646909,
+        321254
+      ],
+      "gold_in_hop_order": [
+        7,
+        13
+      ],
+      "gold_spans": [
+        {
+          "idx": 7,
+          "source_id": "2hop__646909_321254::paragraph::7",
+          "start": 0,
+          "end": 375,
+          "sha256": "50a52756332cfcefd9010222a3a71fe4f48dfbb5b2b07c5af04ea2e682b93cf2"
+        },
+        {
+          "idx": 13,
+          "source_id": "2hop__646909_321254::paragraph::13",
+          "start": 0,
+          "end": 200,
+          "sha256": "d56559aae15298342fae4341466bc4f81d1390c9b4cb115c53ef6008c9e322d1"
+        }
+      ],
+      "answer_and_aliases_sha256": "a8892ce9c41fa321b99af30933a63590c56d1d357b40ff213d6566899dfed447",
+      "question_sha256": "0d85a1a338d95e721dea4c16aec5ca8a0f3e0da928026cf53c1f11c401e14780",
+      "ordered_twenty_sources_sha256": "d7baf6beccd91e9878f346de61e90e93a8200c9ec381b719bb7d42fdb0f8d4ad"
+    },
+    {
+      "id": "2hop__714809_127008",
+      "file": "musique_ans_v1.0_train.jsonl",
+      "line": 1391,
+      "row_sha256": "53949b882b2528b08d9b474239f754138677849a95c1f87a558c7cc96efa36b6",
+      "stratum": "primary_ordinary",
+      "cohort": "primary_ordinary",
+      "answerable": true,
+      "lexical_control": null,
+      "hops": [
+        714809,
+        127008
+      ],
+      "gold_in_hop_order": [
+        8,
+        4
+      ],
+      "gold_spans": [
+        {
+          "idx": 4,
+          "source_id": "2hop__714809_127008::paragraph::4",
+          "start": 0,
+          "end": 505,
+          "sha256": "2c85fac8c66dcf6f3f951d581ceb8c6be93d54b0ef7d15ff04d136e3ba491462"
+        },
+        {
+          "idx": 8,
+          "source_id": "2hop__714809_127008::paragraph::8",
+          "start": 0,
+          "end": 313,
+          "sha256": "eb7364c232e00382e957d723da5816dbc95d5b7d9c2ff82f54bcc1827d0cfdfa"
+        }
+      ],
+      "answer_and_aliases_sha256": "0e6b77f9b894235916a49b5f3dcf39c680d16b1d876254ac811f2da5d83950cb",
+      "question_sha256": "570603e9ea8fd35bcfa001d5c988af19cb67facc9a81420494c85acb0cf4b4aa",
+      "ordered_twenty_sources_sha256": "915ee2f9d436c31ce258b31ec9fc754b73a26f2e0c808e071a68631a7197167f"
+    },
+    {
+      "id": "2hop__279137_85512",
+      "file": "musique_ans_v1.0_train.jsonl",
+      "line": 1857,
+      "row_sha256": "d888118e6663e3b4d883e0b75484b1d10a99a08fcce391f303e69c8fa265c50b",
+      "stratum": "primary_long",
+      "cohort": "primary_long",
+      "answerable": true,
+      "lexical_control": null,
+      "hops": [
+        279137,
+        85512
+      ],
+      "gold_in_hop_order": [
+        11,
+        14
+      ],
+      "gold_spans": [
+        {
+          "idx": 11,
+          "source_id": "2hop__279137_85512::paragraph::11",
+          "start": 0,
+          "end": 187,
+          "sha256": "f880c6e55d5380fb279f6cfccdee00f18658877f21896caf852a39cfa7dd4c90"
+        },
+        {
+          "idx": 14,
+          "source_id": "2hop__279137_85512::paragraph::14",
+          "start": 0,
+          "end": 1324,
+          "sha256": "0e8b41c47d2328faa2a50254e2c98bba5423b27c35f8abc80c15f8fbece2157d"
+        }
+      ],
+      "answer_and_aliases_sha256": "ba92ce2e14c2bef35c56955820a34f946bf5a4ea1887e018bc283ef938c42bd5",
+      "question_sha256": "90ea056ccd010244eae5a90033457887531a955a68aacde00e4babf76f1e94a5",
+      "ordered_twenty_sources_sha256": "4c32114225a94cc2d0d6882da13bee03d253b6d8a9d9a46e09521981b26645c6"
+    },
+    {
+      "id": "2hop__389498_7666",
+      "file": "musique_full_v1.0_train.jsonl",
+      "line": 28319,
+      "row_sha256": "a905f80cd1d88d367aef3086226c48b4abc12b5f488d966d2aa29a63ea98398d",
+      "stratum": "missing_final",
+      "cohort": "insufficient",
+      "answerable": false,
+      "lexical_control": "terminal_value_absent_from_all_20_titles_and_bodies",
+      "hops": [
+        389498,
+        7666
+      ],
+      "gold_in_hop_order": [
+        14,
+        null
+      ],
+      "gold_spans": [
+        {
+          "idx": 14,
+          "source_id": "2hop__389498_7666::paragraph::14",
+          "start": 0,
+          "end": 632,
+          "sha256": "e1626fb48ea74f7a1b228fa8fdb9e45ab567b583e041e9cd57fa6db0d2f5b7c8"
+        }
+      ],
+      "answer_and_aliases_sha256": "81bf54216f6ac07bed8dcc57c3b3366c923e8f2484b0c1a731300a587f22dbd3",
+      "question_sha256": "3d22e0cd9a3977b6558a3331109fa5f631bacf12467cd7fdd487270e0ddd38e3",
+      "ordered_twenty_sources_sha256": "b5cb132323644ec2f44a3cc3b730a4f3c4a60a6c4763d865d5cd4ab68405e4de"
+    },
+    {
+      "id": "2hop__638520_90677",
+      "file": "musique_ans_v1.0_train.jsonl",
+      "line": 2821,
+      "row_sha256": "6e5b305d3728b106aa2ff97644ef9db4cd07269ad3d0b6cb14b5f0dc904b486e",
+      "stratum": "primary_long",
+      "cohort": "primary_long",
+      "answerable": true,
+      "lexical_control": null,
+      "hops": [
+        638520,
+        90677
+      ],
+      "gold_in_hop_order": [
+        15,
+        9
+      ],
+      "gold_spans": [
+        {
+          "idx": 9,
+          "source_id": "2hop__638520_90677::paragraph::9",
+          "start": 0,
+          "end": 1340,
+          "sha256": "4de683da2ed7541baf715362c6cfb2813281d702ac9f96965ee1134fc91f7ada"
+        },
+        {
+          "idx": 15,
+          "source_id": "2hop__638520_90677::paragraph::15",
+          "start": 0,
+          "end": 257,
+          "sha256": "150d858175418f1f635ed29f694eebbeb7f11f7cc65cef64c26c53f3086a3385"
+        }
+      ],
+      "answer_and_aliases_sha256": "44533e1db3f64fabf5a349a90038f9d4fe780fea1afff32abc3acd78ee368506",
+      "question_sha256": "50ad271f3376fc50e2eb80519c60232e2438cafd4dd85b81ae85cd09bcc9f1f9",
+      "ordered_twenty_sources_sha256": "f683bc1860bac8ce59293fd597a7c1c95e03bfc85a947d5c2a882f11a4dbdfb2"
+    },
+    {
+      "id": "2hop__659807_63963",
+      "file": "musique_ans_v1.0_train.jsonl",
+      "line": 3107,
+      "row_sha256": "f79e2fa18ae70f440c2e878e4d15cfb447d1a084a83bcbe39cefa440ff20c782",
+      "stratum": "primary_long",
+      "cohort": "primary_long",
+      "answerable": true,
+      "lexical_control": null,
+      "hops": [
+        659807,
+        63963
+      ],
+      "gold_in_hop_order": [
+        18,
+        3
+      ],
+      "gold_spans": [
+        {
+          "idx": 3,
+          "source_id": "2hop__659807_63963::paragraph::3",
+          "start": 0,
+          "end": 492,
+          "sha256": "89ac1ce20a11ee6e4a883b57c5bf15550176d22986f8681d7199a7c3024f0cb5"
+        },
+        {
+          "idx": 18,
+          "source_id": "2hop__659807_63963::paragraph::18",
+          "start": 0,
+          "end": 519,
+          "sha256": "6dc9193f770ef8bef42afb89402500bd9ce400c8fde332d46cd13157dd63a968"
+        }
+      ],
+      "answer_and_aliases_sha256": "fb1359b8bb6b884433de7512d655c6d8f9bea8d8765a3dbb11b5476a4594687c",
+      "question_sha256": "4f1e6b2b58251fe1a8ad1b60b06d19f4d438bf8042980c1c04e8647fff18f4eb",
+      "ordered_twenty_sources_sha256": "3c6e596644e5e92ad5a0f07e71f5fc449c0f5adbb260cdb902e84f27a8a55fe0"
+    },
+    {
+      "id": "2hop__511537_815069",
+      "file": "musique_ans_v1.0_train.jsonl",
+      "line": 5967,
+      "row_sha256": "334d95778b6577459139c754c60d3ab37bca763e0dcc5be1f9d14414282aa321",
+      "stratum": "primary_ordinary",
+      "cohort": "primary_ordinary",
+      "answerable": true,
+      "lexical_control": null,
+      "hops": [
+        511537,
+        815069
+      ],
+      "gold_in_hop_order": [
+        6,
+        15
+      ],
+      "gold_spans": [
+        {
+          "idx": 6,
+          "source_id": "2hop__511537_815069::paragraph::6",
+          "start": 0,
+          "end": 526,
+          "sha256": "e57095adab74f55e9f52bb42d899fe2b9288b2b4d0e9b44d427bd9466be952e9"
+        },
+        {
+          "idx": 15,
+          "source_id": "2hop__511537_815069::paragraph::15",
+          "start": 0,
+          "end": 148,
+          "sha256": "58ef0ce4edd2d64c0e19bab32651353e0ce62ec987f245cf223465ec1330d582"
+        }
+      ],
+      "answer_and_aliases_sha256": "00b54abc6efb87461ab2430634ded11466d967c8a1f5bf75dfc8d51f119d9cbe",
+      "question_sha256": "f386395f50eb2bdfef41d21769ac560787dc46a0b75c2e794786d712e10efea9",
+      "ordered_twenty_sources_sha256": "71625353f85bed6a5aa231c50de1e9af182002746583eb96ff624b7f80017e94"
+    },
+    {
+      "id": "2hop__291847_83687",
+      "file": "musique_ans_v1.0_train.jsonl",
+      "line": 3491,
+      "row_sha256": "ddec15dfb11233836b725fcf4f7c30c4ae39936391efa6701ac50317560b4ec5",
+      "stratum": "primary_long",
+      "cohort": "primary_long",
+      "answerable": true,
+      "lexical_control": null,
+      "hops": [
+        291847,
+        83687
+      ],
+      "gold_in_hop_order": [
+        1,
+        0
+      ],
+      "gold_spans": [
+        {
+          "idx": 0,
+          "source_id": "2hop__291847_83687::paragraph::0",
+          "start": 0,
+          "end": 423,
+          "sha256": "ff8aee8a0a86094746d787d60fe4fa37025b1dc83dc71089b126f08b1c3645ea"
+        },
+        {
+          "idx": 1,
+          "source_id": "2hop__291847_83687::paragraph::1",
+          "start": 0,
+          "end": 249,
+          "sha256": "cf59d4b13ca8090bb60a93379fbd9edc450d05d2eee756afa1ed5f935887b9f0"
+        }
+      ],
+      "answer_and_aliases_sha256": "d3acab3d6ba941b69146798d1c5aab3e70ae40e7c855f025244423d010e5d8cb",
+      "question_sha256": "7774127ed5152af078235edc5abb9f62e106a6ba40816ab10545690336f4be2e",
+      "ordered_twenty_sources_sha256": "e98c8eb1f566aa1b7f748d2c60234f6f27b8e3755c794bccc27aa5eb11475d49"
+    },
+    {
+      "id": "2hop__528151_829081",
+      "file": "musique_ans_v1.0_train.jsonl",
+      "line": 6274,
+      "row_sha256": "3da7427c22da1032fd7f2c7fb400a79bc57c5023680034c723d9e8e4cf6754df",
+      "stratum": "primary_ordinary",
+      "cohort": "primary_ordinary",
+      "answerable": true,
+      "lexical_control": null,
+      "hops": [
+        528151,
+        829081
+      ],
+      "gold_in_hop_order": [
+        12,
+        5
+      ],
+      "gold_spans": [
+        {
+          "idx": 5,
+          "source_id": "2hop__528151_829081::paragraph::5",
+          "start": 0,
+          "end": 389,
+          "sha256": "90d5a83995c196acd950252f473cfe0dbc4ce3d83e713eb04a4ff1153532488a"
+        },
+        {
+          "idx": 12,
+          "source_id": "2hop__528151_829081::paragraph::12",
+          "start": 0,
+          "end": 374,
+          "sha256": "1479f6873ab441f6fd9df834321327963276badf3cc12b64b51e003d248692a8"
+        }
+      ],
+      "answer_and_aliases_sha256": "75f40e089bc96fd3cbe3934226afa539bd877e483619f892d21e546cd2e1e07b",
+      "question_sha256": "f755abe7b02674b29363f1c0c516cd6b266fd1fa899b96cdd72f8dbf9b324a73",
+      "ordered_twenty_sources_sha256": "e9a313698dbc63823dec040d4f3b719571d97d9ee8d7b595e8f512004887f2a8"
+    },
+    {
+      "id": "2hop__830204_64214",
+      "file": "musique_ans_v1.0_train.jsonl",
+      "line": 4828,
+      "row_sha256": "c944022b954b48be78c0a45b2891c44c4b4f5424f6dc81e0097e7041b958f8df",
+      "stratum": "primary_ordinary",
+      "cohort": "primary_ordinary",
+      "answerable": true,
+      "lexical_control": null,
+      "hops": [
+        830204,
+        64214
+      ],
+      "gold_in_hop_order": [
+        19,
+        13
+      ],
+      "gold_spans": [
+        {
+          "idx": 13,
+          "source_id": "2hop__830204_64214::paragraph::13",
+          "start": 0,
+          "end": 631,
+          "sha256": "9c8463357a8ea3434a190924738a9533d1d3204d6243c67f8dc4fd95aa391bbd"
+        },
+        {
+          "idx": 19,
+          "source_id": "2hop__830204_64214::paragraph::19",
+          "start": 0,
+          "end": 801,
+          "sha256": "6a641aa6498f43a25679254c9484f53a44d098da99ee952dbc35a5ed1142f2a2"
+        }
+      ],
+      "answer_and_aliases_sha256": "5e05a1e248ee23864f597bd90cb816f4778431e86f80193562eccdb5b6e50de7",
+      "question_sha256": "da080ac67fe2120b8a1f2cf2a1a1841a8697ac4988d39165de53a872bc72a1a4",
+      "ordered_twenty_sources_sha256": "db0e4f26776c57c5f5912ad85e3f1efea9a6d6fecd50b52be9f6e46d9d2dc0b8"
+    },
+    {
+      "id": "2hop__60984_77561",
+      "file": "musique_ans_v1.0_train.jsonl",
+      "line": 13461,
+      "row_sha256": "8db18f1287d661850c74f5cb91e32913730bc91b46db5325701b12c0105873d9",
+      "stratum": "primary_long",
+      "cohort": "primary_long",
+      "answerable": true,
+      "lexical_control": null,
+      "hops": [
+        60984,
+        77561
+      ],
+      "gold_in_hop_order": [
+        10,
+        0
+      ],
+      "gold_spans": [
+        {
+          "idx": 0,
+          "source_id": "2hop__60984_77561::paragraph::0",
+          "start": 0,
+          "end": 600,
+          "sha256": "dd6440769a1aab8e170fa1f50f7265ef1c7266c22bd4f562cf98c0ec7d457a2c"
+        },
+        {
+          "idx": 10,
+          "source_id": "2hop__60984_77561::paragraph::10",
+          "start": 0,
+          "end": 439,
+          "sha256": "7fc97ab3664ca3af208604b414beffd93b93e8abb8d06497440efe51815704df"
+        }
+      ],
+      "answer_and_aliases_sha256": "9fc8f1e59492bca4fc6e7944e5be36d335e1dd9f890caa1ee573d0c555cf91ec",
+      "question_sha256": "9b0e3c967feac59cece8abc6da31ac2d91eafe2c1be6e591f1e1cf708471ac31",
+      "ordered_twenty_sources_sha256": "acd00ba6d6efb5f0e3bc1a102c28a274827de4cc3d3462501db362b80c5e9a9f"
+    },
+    {
+      "id": "2hop__68650_54580",
+      "file": "musique_ans_v1.0_train.jsonl",
+      "line": 12144,
+      "row_sha256": "fda1f5fdd1f78e24bc4c7b1f5e7384ee268c0ccecb6cf2dc99f01db95d7f8336",
+      "stratum": "primary_ordinary",
+      "cohort": "primary_ordinary",
+      "answerable": true,
+      "lexical_control": null,
+      "hops": [
+        68650,
+        54580
+      ],
+      "gold_in_hop_order": [
+        16,
+        12
+      ],
+      "gold_spans": [
+        {
+          "idx": 12,
+          "source_id": "2hop__68650_54580::paragraph::12",
+          "start": 0,
+          "end": 412,
+          "sha256": "61e04332cfc4762335c889c60be8ebd1ff086d97e96fb5733f05ab940e2aa8ae"
+        },
+        {
+          "idx": 16,
+          "source_id": "2hop__68650_54580::paragraph::16",
+          "start": 0,
+          "end": 1564,
+          "sha256": "59fc9deca2ed0c736c39f841176e639660f64fdaf13c415f2e953a0f52809033"
+        }
+      ],
+      "answer_and_aliases_sha256": "1d4c9883c5ccec00cbc2c2ea541137a6e7934de2511a262853d28ccb0dfe574a",
+      "question_sha256": "0c74357bb80acd5b14f963196e07d3138b654f3de26b6538fc020d4c01830052",
+      "ordered_twenty_sources_sha256": "28b3519e828caae593b8c1e06b5a256422c9af4602fb9eacdf2da4b86ffc64e5"
+    },
+    {
+      "id": "2hop__136744_70019",
+      "file": "musique_ans_v1.0_train.jsonl",
+      "line": 12633,
+      "row_sha256": "a30f06d7bce50452a77abbc2eae1b4c74244e8b0962d05140068987f76ffb962",
+      "stratum": "primary_ordinary",
+      "cohort": "primary_ordinary",
+      "answerable": true,
+      "lexical_control": null,
+      "hops": [
+        136744,
+        70019
+      ],
+      "gold_in_hop_order": [
+        11,
+        3
+      ],
+      "gold_spans": [
+        {
+          "idx": 3,
+          "source_id": "2hop__136744_70019::paragraph::3",
+          "start": 0,
+          "end": 251,
+          "sha256": "6ca09209a196a96ad33e74929bf3b806dea6abcf785c5c4f61481874492b4731"
+        },
+        {
+          "idx": 11,
+          "source_id": "2hop__136744_70019::paragraph::11",
+          "start": 0,
+          "end": 411,
+          "sha256": "1a7c240545abf8c60d4e7b15690d14a01928c10abd7d757f6bc88e95bf260932"
+        }
+      ],
+      "answer_and_aliases_sha256": "feebcfc6f088bee57726fd5cd3a23e15e3ea8c1b3c75a56c452b8a72148f61cf",
+      "question_sha256": "3866c05222020d2f0d9d49dac9ae6b6f576f0569e8cc651f432a3be1ee445554",
+      "ordered_twenty_sources_sha256": "7a16bd6c8e341cb55ad589bac0fcdc3d890b19bc6c47d1fd7c1c6b3455fea690"
+    },
+    {
+      "id": "2hop__107249_71652",
+      "file": "musique_full_v1.0_train.jsonl",
+      "line": 13782,
+      "row_sha256": "e3cc09e68967c3540b87888c89ac4a519281adffca26dc8803cabd9f24389e88",
+      "stratum": "missing_final",
+      "cohort": "insufficient",
+      "answerable": false,
+      "lexical_control": "terminal_value_absent_from_all_20_titles_and_bodies",
+      "hops": [
+        107249,
+        71652
+      ],
+      "gold_in_hop_order": [
+        5,
+        null
+      ],
+      "gold_spans": [
+        {
+          "idx": 5,
+          "source_id": "2hop__107249_71652::paragraph::5",
+          "start": 0,
+          "end": 146,
+          "sha256": "6a2a09db586ebbd09c3e9a8ad2853ee40b28a9489dd0d556d5ab5bd6881d1598"
+        }
+      ],
+      "answer_and_aliases_sha256": "92a1f940dca4bd7bdd82595dce15615d3d15726647829152ad2c9158b4561710",
+      "question_sha256": "28043ad8aa2b293210713b116852a1c440df3c173f0306c29298de7c193de268",
+      "ordered_twenty_sources_sha256": "f92e0378306c712a370bcb1debc387227a7759324e77dd9628c4c73abecc1292"
+    },
+    {
+      "id": "2hop__650310_526735",
+      "file": "musique_ans_v1.0_train.jsonl",
+      "line": 6720,
+      "row_sha256": "800b12029cccb6339768766752f7fb3fee4e29af381abf560197f1d55848e9be",
+      "stratum": "primary_long",
+      "cohort": "primary_long",
+      "answerable": true,
+      "lexical_control": null,
+      "hops": [
+        650310,
+        526735
+      ],
+      "gold_in_hop_order": [
+        4,
+        13
+      ],
+      "gold_spans": [
+        {
+          "idx": 4,
+          "source_id": "2hop__650310_526735::paragraph::4",
+          "start": 0,
+          "end": 146,
+          "sha256": "21ce91fc09efba4bf0ac46405d204d6745d342686becca67c000a84c481e9e2a"
+        },
+        {
+          "idx": 13,
+          "source_id": "2hop__650310_526735::paragraph::13",
+          "start": 0,
+          "end": 327,
+          "sha256": "38eebc81261fece491aa4f7250767b9fd08602501d8b8b60b386814350df2193"
+        }
+      ],
+      "answer_and_aliases_sha256": "bfeafd612517a9699986c85c0b1beb0fedb57d09c1482f62758036c21bb0c49d",
+      "question_sha256": "898af92ef3d12510f55f20eebf827e9a6b8eedca173261aa0191002fe8ced4c7",
+      "ordered_twenty_sources_sha256": "219e47663457859535471bd6e77bb396b36a424f78d11dc6490024b57a21fd5e"
+    },
+    {
+      "id": "2hop__440019_135304",
+      "file": "musique_full_v1.0_train.jsonl",
+      "line": 17418,
+      "row_sha256": "14d6be08bd3168027fc01ca8fcd0b00c8e4d59eb4a1cb5cedd5c0d7f71aa2cb1",
+      "stratum": "missing_bridge",
+      "cohort": "insufficient",
+      "answerable": false,
+      "lexical_control": "at_least_one_bridge_subject_word_absent_from_all_20_titles_and_bodies",
+      "hops": [
+        440019,
+        135304
+      ],
+      "gold_in_hop_order": [
+        null,
+        13
+      ],
+      "gold_spans": [
+        {
+          "idx": 13,
+          "source_id": "2hop__440019_135304::paragraph::13",
+          "start": 0,
+          "end": 507,
+          "sha256": "3459a341ace57fbe2d976903b5fec069a680f63937c43014e2be5afe376231af"
+        }
+      ],
+      "answer_and_aliases_sha256": "b2dcec719767c51060db0b80ea9b51ed699dd2d1c839b9f944c8b7ffc011157e",
+      "question_sha256": "152eb0fceceab3300362705e98d832beddb0a24ba88a0e12ba22cd7455ab5044",
+      "ordered_twenty_sources_sha256": "16a25fc301200bf423873f56c65e612aa1638e736daddbb98d44282928ff37a4"
+    },
+    {
+      "id": "2hop__130619_55098",
+      "file": "musique_ans_v1.0_train.jsonl",
+      "line": 13600,
+      "row_sha256": "919de8de4c2945eab9c5b9f134447107fa63b86532daedc253797f0435f46645",
+      "stratum": "primary_ordinary",
+      "cohort": "primary_ordinary",
+      "answerable": true,
+      "lexical_control": null,
+      "hops": [
+        130619,
+        55098
+      ],
+      "gold_in_hop_order": [
+        3,
+        8
+      ],
+      "gold_spans": [
+        {
+          "idx": 3,
+          "source_id": "2hop__130619_55098::paragraph::3",
+          "start": 0,
+          "end": 131,
+          "sha256": "df61358aa0708319ec4a1bcf2eede448dd7225e28c2e1d7d40dd3341af079f72"
+        },
+        {
+          "idx": 8,
+          "source_id": "2hop__130619_55098::paragraph::8",
+          "start": 0,
+          "end": 953,
+          "sha256": "7c5b87bb3574286da3b3b80a520a722e727d9ed4a56337ae19ab6de4574e48e5"
+        }
+      ],
+      "answer_and_aliases_sha256": "03525ec168bcba6f3d5bc9a5b222aa2a8c1e1b4b52e79741eabaacf104aa9e03",
+      "question_sha256": "a9a4de9476dab8537670c5b304c9698fd0b5c13643154dd5b1ba72f57af13578",
+      "ordered_twenty_sources_sha256": "0db724bd79946ebf5089643e799154b4b0e0fa6cf19766702d44b3bd8cf24950"
+    },
+    {
+      "id": "2hop__603468_92217",
+      "file": "musique_ans_v1.0_train.jsonl",
+      "line": 3227,
+      "row_sha256": "4ac42c3d51df5b9fc4d180dc4cc8c90732ae4434c9d6228c6bf9cf7a3c6743e0",
+      "stratum": "primary_ordinary",
+      "cohort": "primary_ordinary",
+      "answerable": true,
+      "lexical_control": null,
+      "hops": [
+        603468,
+        92217
+      ],
+      "gold_in_hop_order": [
+        1,
+        15
+      ],
+      "gold_spans": [
+        {
+          "idx": 1,
+          "source_id": "2hop__603468_92217::paragraph::1",
+          "start": 0,
+          "end": 194,
+          "sha256": "b4565062b72b2468c39827455a7925692fef760be3b184a88734e3f1831c2cd9"
+        },
+        {
+          "idx": 15,
+          "source_id": "2hop__603468_92217::paragraph::15",
+          "start": 0,
+          "end": 545,
+          "sha256": "303231042397c63151050730d45d8e61d824babbdf728e94206285bd4d60935e"
+        }
+      ],
+      "answer_and_aliases_sha256": "81f79d7797d97e4ccf3129141ff908fbb40988664d41aba42072260528a57ce1",
+      "question_sha256": "0085fcaa4b03c858aba6cd161b3d15c0bd33d75067f2bc9ac5b77c5604971ff6",
+      "ordered_twenty_sources_sha256": "ba7d5a02aae20691f19027407fdff9e753a614c9469969be261b668477a82751"
+    },
+    {
+      "id": "2hop__610518_74218",
+      "file": "musique_full_v1.0_train.jsonl",
+      "line": 28049,
+      "row_sha256": "08c2299ffed45791a07a2995d52d47a8106371d4a2b2ec86fdac4e67cf269ea1",
+      "stratum": "missing_bridge",
+      "cohort": "insufficient",
+      "answerable": false,
+      "lexical_control": "at_least_one_bridge_subject_word_absent_from_all_20_titles_and_bodies",
+      "hops": [
+        610518,
+        74218
+      ],
+      "gold_in_hop_order": [
+        null,
+        7
+      ],
+      "gold_spans": [
+        {
+          "idx": 7,
+          "source_id": "2hop__610518_74218::paragraph::7",
+          "start": 0,
+          "end": 1336,
+          "sha256": "da600ea1e5f9835569640fd98d32d86e457d8d0e60894140419b164b61998675"
+        }
+      ],
+      "answer_and_aliases_sha256": "b5571dae9287c7227552260bd988838abf52292e57331114eeaa0b4190fceab0",
+      "question_sha256": "e99120da69ebbcb5c0d3075264e9b072256aba908e3a46613f9fbcb460b910f9",
+      "ordered_twenty_sources_sha256": "d9611d7a6ac34615862c60986365ec52836ec41812b39e69d307f0fff101e3c8"
+    },
+    {
+      "id": "2hop__838624_4037",
+      "file": "musique_ans_v1.0_train.jsonl",
+      "line": 8479,
+      "row_sha256": "cd47484f760d5756fcf52d8454ac33266e9de8a9e1adc5fb7b20a86d8044e2c9",
+      "stratum": "primary_ordinary",
+      "cohort": "primary_ordinary",
+      "answerable": true,
+      "lexical_control": null,
+      "hops": [
+        838624,
+        4037
+      ],
+      "gold_in_hop_order": [
+        15,
+        13
+      ],
+      "gold_spans": [
+        {
+          "idx": 13,
+          "source_id": "2hop__838624_4037::paragraph::13",
+          "start": 0,
+          "end": 200,
+          "sha256": "d9ed8901b4dc5de372c51f7ee0e1256f37ee69586ce503c9916b2dc0cf50b51b"
+        },
+        {
+          "idx": 15,
+          "source_id": "2hop__838624_4037::paragraph::15",
+          "start": 0,
+          "end": 215,
+          "sha256": "3c3655f0f9f953fdd607f23345288fd2360afa6a514275a486e074f2750b90ed"
+        }
+      ],
+      "answer_and_aliases_sha256": "6ebfe73e7e4f0152c281984f229013141b6d2d48bbb424297e499498f7be69e1",
+      "question_sha256": "7b327e169ef557bea8f60a9b3b7da2f7cde077550f643c92f10068d103936a7d",
+      "ordered_twenty_sources_sha256": "55737318ab6bc30ea9238f73030c031a70bcc218d98456c43799bee9e3980f61"
+    },
+    {
+      "id": "2hop__505150_5418",
+      "file": "musique_full_v1.0_train.jsonl",
+      "line": 11030,
+      "row_sha256": "45f55aeaf7a8f60737c2b9ae2e914e69215f65518ab540d78a1df7b9995235d7",
+      "stratum": "missing_final",
+      "cohort": "insufficient",
+      "answerable": false,
+      "lexical_control": "terminal_value_absent_from_all_20_titles_and_bodies",
+      "hops": [
+        505150,
+        5418
+      ],
+      "gold_in_hop_order": [
+        17,
+        null
+      ],
+      "gold_spans": [
+        {
+          "idx": 17,
+          "source_id": "2hop__505150_5418::paragraph::17",
+          "start": 0,
+          "end": 698,
+          "sha256": "d6e1b54e888a4341f182fcca970bbfee690b6be9b8774bc43f2d1a40fefd7099"
+        }
+      ],
+      "answer_and_aliases_sha256": "a152fe9f6a9713572bba72ed0431be31251abb5b0a87394497b781f21277835b",
+      "question_sha256": "4db014078b618edd83bec035388b0a377b7c7700e3ede234c807d07daaff998c",
+      "ordered_twenty_sources_sha256": "0a177d77248679564049f17fb89c17e9f40283760e22c8206b5e2b76320d1db0"
+    },
+    {
+      "id": "2hop__108840_46285",
+      "file": "musique_ans_v1.0_train.jsonl",
+      "line": 458,
+      "row_sha256": "4fbb532e9a71aaebbf0f0baf13c0677ecd99464fbc7a3216aa7d2ed9746919a4",
+      "stratum": "primary_ordinary",
+      "cohort": "primary_ordinary",
+      "answerable": true,
+      "lexical_control": null,
+      "hops": [
+        108840,
+        46285
+      ],
+      "gold_in_hop_order": [
+        19,
+        7
+      ],
+      "gold_spans": [
+        {
+          "idx": 7,
+          "source_id": "2hop__108840_46285::paragraph::7",
+          "start": 0,
+          "end": 372,
+          "sha256": "51978ded33a73e27d6f1060bde47d169d00539141226cc22c9b927e477f1ffc7"
+        },
+        {
+          "idx": 19,
+          "source_id": "2hop__108840_46285::paragraph::19",
+          "start": 0,
+          "end": 226,
+          "sha256": "289947f0065fbbd6189ada270c4cecec38d96979d39dad86281413d3dee2ba7d"
+        }
+      ],
+      "answer_and_aliases_sha256": "e8908b01f80fe6b08e550f154e206af9bcbda91db6d3f99c2b2d8c8155b997c0",
+      "question_sha256": "ba2605c0f2c1474bb74a44148b99f4d73d55528eb831d8b8b6906fcd3fd9a839",
+      "ordered_twenty_sources_sha256": "78e461a73f557989f738280b60fa6ed40301379f15b51a6302dc711ce9f461ec"
+    },
+    {
+      "id": "2hop__245784_66879",
+      "file": "musique_ans_v1.0_train.jsonl",
+      "line": 891,
+      "row_sha256": "b83214a6a453d9f555c30fc63e01bd57751c290e7e5eca4cbabc9b80e36174bb",
+      "stratum": "primary_long",
+      "cohort": "primary_long",
+      "answerable": true,
+      "lexical_control": null,
+      "hops": [
+        245784,
+        66879
+      ],
+      "gold_in_hop_order": [
+        14,
+        5
+      ],
+      "gold_spans": [
+        {
+          "idx": 5,
+          "source_id": "2hop__245784_66879::paragraph::5",
+          "start": 0,
+          "end": 395,
+          "sha256": "7a67f5ce5676697ed19783888a80352610835c80be8b2d81457855d8dc154f7f"
+        },
+        {
+          "idx": 14,
+          "source_id": "2hop__245784_66879::paragraph::14",
+          "start": 0,
+          "end": 791,
+          "sha256": "709bbcd32df99d0bdbad357730ad9006243aba0f119d2774bc811e47252e0c56"
+        }
+      ],
+      "answer_and_aliases_sha256": "add154e9c2582a026e99ebe065c460eabaaa405f654a482f028b6f85c60fb15f",
+      "question_sha256": "38fb4c6bdc09144fea979f2d97ec89327dd5170a7ed85a0a3baabb6f817258d9",
+      "ordered_twenty_sources_sha256": "3613b8e3e73b45df2fea16876a40ce97b8493ad7e330651c817a4b95f8445989"
+    },
+    {
+      "id": "2hop__822362_18120",
+      "file": "musique_ans_v1.0_train.jsonl",
+      "line": 295,
+      "row_sha256": "a24701730842047d2538387b71fe48d93ff6716f66c6987477252a5f343591c1",
+      "stratum": "primary_long",
+      "cohort": "primary_long",
+      "answerable": true,
+      "lexical_control": null,
+      "hops": [
+        822362,
+        18120
+      ],
+      "gold_in_hop_order": [
+        16,
+        3
+      ],
+      "gold_spans": [
+        {
+          "idx": 3,
+          "source_id": "2hop__822362_18120::paragraph::3",
+          "start": 0,
+          "end": 1338,
+          "sha256": "de5d790691fea5bc5b81ab36bcc925403c74b4e24ecfc9e236f8a9168113aae1"
+        },
+        {
+          "idx": 16,
+          "source_id": "2hop__822362_18120::paragraph::16",
+          "start": 0,
+          "end": 218,
+          "sha256": "2c1341a27e851514cff03a8ccf1540f4b658ec949ff99f0eb79c3c1735c48142"
+        }
+      ],
+      "answer_and_aliases_sha256": "f7f52a457ae826b4238c403729e32739f0e8ecc3080be324c42d1e8d5da8f823",
+      "question_sha256": "108dae145624dfa5af79d6d980a74c70200e1b6f28807e0f5c06850f1dada086",
+      "ordered_twenty_sources_sha256": "b5565f1d43f45b3d9d804736f1f938299dbc3058fcffa8e8db527cabfdb682e4"
+    },
+    {
+      "id": "2hop__478833_47348",
+      "file": "musique_ans_v1.0_train.jsonl",
+      "line": 2456,
+      "row_sha256": "b3b293eb8b7e2eedadcd6f2b4e56c79470ab31f93f4936b5292abf2316ad0b5e",
+      "stratum": "primary_long",
+      "cohort": "primary_long",
+      "answerable": true,
+      "lexical_control": null,
+      "hops": [
+        478833,
+        47348
+      ],
+      "gold_in_hop_order": [
+        4,
+        8
+      ],
+      "gold_spans": [
+        {
+          "idx": 4,
+          "source_id": "2hop__478833_47348::paragraph::4",
+          "start": 0,
+          "end": 271,
+          "sha256": "8092b007ca952763646188af65e61c8424fc6aec6d35fe5f49090d0545ab2b15"
+        },
+        {
+          "idx": 8,
+          "source_id": "2hop__478833_47348::paragraph::8",
+          "start": 0,
+          "end": 1093,
+          "sha256": "fa479bea811e92a97da2c7f9c9054f5e42920a8c00610c8cba8fa7779bbb8c0f"
+        }
+      ],
+      "answer_and_aliases_sha256": "7bf3ea975654f36dd73d797ecbd2236fe349d46e48cd30c8bfac0f408c378de9",
+      "question_sha256": "cd9e5d0e793e2904e91fff687e761b62b5efcf013a3b96f78dbf400336be5f2f",
+      "ordered_twenty_sources_sha256": "66b32a46a2a7c9c378df75027c83bea27e2631c8160d9e030f482fe055d52c77"
+    },
+    {
+      "id": "2hop__365241_754472",
+      "file": "musique_ans_v1.0_train.jsonl",
+      "line": 13497,
+      "row_sha256": "22ac75b73d5a309581e4dd33f1bdf60030805ea78531b3ea7e65c4adc993eaa5",
+      "stratum": "primary_long",
+      "cohort": "primary_long",
+      "answerable": true,
+      "lexical_control": null,
+      "hops": [
+        365241,
+        754472
+      ],
+      "gold_in_hop_order": [
+        2,
+        0
+      ],
+      "gold_spans": [
+        {
+          "idx": 0,
+          "source_id": "2hop__365241_754472::paragraph::0",
+          "start": 0,
+          "end": 193,
+          "sha256": "3713442e9fee97ca1e2cffefd13f84b7d07737664a24bba2c34cb1998597aad9"
+        },
+        {
+          "idx": 2,
+          "source_id": "2hop__365241_754472::paragraph::2",
+          "start": 0,
+          "end": 340,
+          "sha256": "27f19c8955105995fde193df08aebab58a61c3e8d3b1133f3343b84da1cb71a4"
+        }
+      ],
+      "answer_and_aliases_sha256": "081ce7bc06f57ffd74df9fdcf49568e7c74141ca022c0445e4e652c2820ab818",
+      "question_sha256": "baf225f53edc91885b6c2979dd83548f4969d711e945365028a00941ae2d2e6c",
+      "ordered_twenty_sources_sha256": "8b3d809cc88dda289822f809437cbf26164764d31f536635fdcafca81b36dac6"
+    },
+    {
+      "id": "2hop__575733_500443",
+      "file": "musique_full_v1.0_train.jsonl",
+      "line": 10370,
+      "row_sha256": "ee999457809b2aaca6f7beb55cdd2b48c8fc234e3403cb6443d8bb6bfca83a59",
+      "stratum": "missing_final",
+      "cohort": "insufficient",
+      "answerable": false,
+      "lexical_control": "terminal_value_absent_from_all_20_titles_and_bodies",
+      "hops": [
+        575733,
+        500443
+      ],
+      "gold_in_hop_order": [
+        7,
+        null
+      ],
+      "gold_spans": [
+        {
+          "idx": 7,
+          "source_id": "2hop__575733_500443::paragraph::7",
+          "start": 0,
+          "end": 419,
+          "sha256": "80867265415c54f6593698a0bce2a43f77912744c281d8f1a01d1c597bf270e6"
+        }
+      ],
+      "answer_and_aliases_sha256": "f76c67c415795109bc7304b05997992a7b2451cbbd65cd6b60837060945dd33e",
+      "question_sha256": "af87dfa4a0e360fd2ebf7ec03bb4644eee5614ddb59f401762d8d715e8e91b98",
+      "ordered_twenty_sources_sha256": "e8f00296560aa7b3140d707c35c2fbb94250efcb08e89ef662a4316a8630b16e"
+    },
+    {
+      "id": "2hop__91230_66008",
+      "file": "musique_ans_v1.0_train.jsonl",
+      "line": 13132,
+      "row_sha256": "daa9fe99dbf101d6d145ec24e830848dfeecb70b854ef1db30fdbf1a2a5bd590",
+      "stratum": "primary_long",
+      "cohort": "primary_long",
+      "answerable": true,
+      "lexical_control": null,
+      "hops": [
+        91230,
+        66008
+      ],
+      "gold_in_hop_order": [
+        19,
+        11
+      ],
+      "gold_spans": [
+        {
+          "idx": 11,
+          "source_id": "2hop__91230_66008::paragraph::11",
+          "start": 0,
+          "end": 270,
+          "sha256": "9490429eb8c65d377e7251b17b630ca8a12632468559de1dc8716a832b550447"
+        },
+        {
+          "idx": 19,
+          "source_id": "2hop__91230_66008::paragraph::19",
+          "start": 0,
+          "end": 1476,
+          "sha256": "fc0249f7c45514ac8caf3fb07040e6950a320af30a6d84368e1c75097f866ec5"
+        }
+      ],
+      "answer_and_aliases_sha256": "bcec1d74ba55e894843d15c67c8c84969a5fa1232d2c7fb23f49671dee5bf8a7",
+      "question_sha256": "033d59b40c58a83a5c0c6d747f635930c8acebe427ca5f784a6c8d8de05ca6ef",
+      "ordered_twenty_sources_sha256": "706a1ce0d77b467cbb14a8c084a9512c31a751d74ce8ffdda02c8a21ee59cae5"
+    },
+    {
+      "id": "2hop__133289_449977",
+      "file": "musique_ans_v1.0_train.jsonl",
+      "line": 1623,
+      "row_sha256": "31db304f1e0d24a394ab9119e97c4eff1361777097f6e30a9434d26ca6fe8bf0",
+      "stratum": "primary_long",
+      "cohort": "primary_long",
+      "answerable": true,
+      "lexical_control": null,
+      "hops": [
+        133289,
+        449977
+      ],
+      "gold_in_hop_order": [
+        10,
+        15
+      ],
+      "gold_spans": [
+        {
+          "idx": 10,
+          "source_id": "2hop__133289_449977::paragraph::10",
+          "start": 0,
+          "end": 310,
+          "sha256": "b4e0fc2ab3ea9fc13aefb313b0c70b9390cf8ab7be56f21a9327b9c356c29461"
+        },
+        {
+          "idx": 15,
+          "source_id": "2hop__133289_449977::paragraph::15",
+          "start": 0,
+          "end": 412,
+          "sha256": "1f7ab6ce864181442fe5f3bac0e713de6702caa5fcccb0ec638bda94f9403c70"
+        }
+      ],
+      "answer_and_aliases_sha256": "3ea0067911327d898e63981256409fb2aacb80dd6575f8344481af07ee77c29d",
+      "question_sha256": "d2552254dbd0c28ddbbe9f468480893d63cf56f742192545aa1edac9e7afb554",
+      "ordered_twenty_sources_sha256": "401e2b9346e755d6eb3c90e285abae3023993237d9ea3658f83e74238ea2b2b8"
+    },
+    {
+      "id": "2hop__636562_141689",
+      "file": "musique_ans_v1.0_train.jsonl",
+      "line": 11413,
+      "row_sha256": "30594b3d076ca1974bf16e61ce7531dceaba206cd40533f363477b233eef10e4",
+      "stratum": "primary_ordinary",
+      "cohort": "primary_ordinary",
+      "answerable": true,
+      "lexical_control": null,
+      "hops": [
+        636562,
+        141689
+      ],
+      "gold_in_hop_order": [
+        9,
+        12
+      ],
+      "gold_spans": [
+        {
+          "idx": 9,
+          "source_id": "2hop__636562_141689::paragraph::9",
+          "start": 0,
+          "end": 289,
+          "sha256": "36383a5f9d9def48749fa3c36277f32d64da904aa1b9856cc5916175c457c9d7"
+        },
+        {
+          "idx": 12,
+          "source_id": "2hop__636562_141689::paragraph::12",
+          "start": 0,
+          "end": 218,
+          "sha256": "87d3fdd6a9a0d20e1c8ab6273afd4860ad86cfd31faac1103ee8d5a15d9a5e04"
+        }
+      ],
+      "answer_and_aliases_sha256": "75dc206ae75a9dd1fdfec62d070e882f9d018572e53578df04517a5c014c272c",
+      "question_sha256": "76601cc5eb3de4b7c7276110d7df7f1174c04709dca3eef0e72985c7cc9526e5",
+      "ordered_twenty_sources_sha256": "9bf33050ae0b0ff1b8baa96ab0f8b4a19aedbcd2817e51a27eeb80a328a9f5bd"
+    },
+    {
+      "id": "2hop__430752_55607",
+      "file": "musique_full_v1.0_train.jsonl",
+      "line": 4320,
+      "row_sha256": "034e39431f473598765abe80658c2cb3142869e34950bc62e849941d45af432d",
+      "stratum": "missing_final",
+      "cohort": "insufficient",
+      "answerable": false,
+      "lexical_control": "terminal_value_absent_from_all_20_titles_and_bodies",
+      "hops": [
+        430752,
+        55607
+      ],
+      "gold_in_hop_order": [
+        11,
+        null
+      ],
+      "gold_spans": [
+        {
+          "idx": 11,
+          "source_id": "2hop__430752_55607::paragraph::11",
+          "start": 0,
+          "end": 355,
+          "sha256": "31c2748a4fcc623e0fbc319c9e0ed2cbda724dee367104a0c2a68bc61717f592"
+        }
+      ],
+      "answer_and_aliases_sha256": "57f8d40a5f19840addefeffa26ce279211ab047b8f426634d79b7fad230b76aa",
+      "question_sha256": "5a6a1d6b81527ec52d433a95c802dbf8102efa4c7f8296d7c6b73ced2236579c",
+      "ordered_twenty_sources_sha256": "3879ab2c1a554e6d843a63573fb13b1bf838a084d76da84de226f5496535d7d3"
+    },
+    {
+      "id": "2hop__839424_160978",
+      "file": "musique_ans_v1.0_train.jsonl",
+      "line": 8144,
+      "row_sha256": "e642de0b2d438dabb9e3896ab3e1b9748227aa4ccb454a97cbbf5d412c80fe17",
+      "stratum": "primary_long",
+      "cohort": "primary_long",
+      "answerable": true,
+      "lexical_control": null,
+      "hops": [
+        839424,
+        160978
+      ],
+      "gold_in_hop_order": [
+        16,
+        0
+      ],
+      "gold_spans": [
+        {
+          "idx": 0,
+          "source_id": "2hop__839424_160978::paragraph::0",
+          "start": 0,
+          "end": 661,
+          "sha256": "ef01cb8550820a8405502f59d01310dcf1a75b45466dbaebf1afe31e795196e0"
+        },
+        {
+          "idx": 16,
+          "source_id": "2hop__839424_160978::paragraph::16",
+          "start": 0,
+          "end": 474,
+          "sha256": "8d342b84586233e4a59a00dd33750910ccb45051144078ce20286a86b33fa46e"
+        }
+      ],
+      "answer_and_aliases_sha256": "86c7b585e0fac0fea4ce0c0b2dc4ff13676cd087ec68a3d260ad1503f46cee05",
+      "question_sha256": "68bf871d8dce3ff057448f7ab201a442e4ac87379d63fb5e2021890ca07cd572",
+      "ordered_twenty_sources_sha256": "c1b940beb05d0478a5369ccda847412ee6aa5c55b2f9a706f63813f25869bcdf"
+    },
+    {
+      "id": "2hop__734554_32631",
+      "file": "musique_ans_v1.0_train.jsonl",
+      "line": 6979,
+      "row_sha256": "463ad11bf95d60371ed863ee38612f5bdd2618d5b22735a0d99c15dd1d404dfa",
+      "stratum": "primary_ordinary",
+      "cohort": "primary_ordinary",
+      "answerable": true,
+      "lexical_control": null,
+      "hops": [
+        734554,
+        32631
+      ],
+      "gold_in_hop_order": [
+        1,
+        10
+      ],
+      "gold_spans": [
+        {
+          "idx": 1,
+          "source_id": "2hop__734554_32631::paragraph::1",
+          "start": 0,
+          "end": 143,
+          "sha256": "e40488bb3999aa89ffec9f8d33b662879301cab5d8f37189c6c94cc8d460981d"
+        },
+        {
+          "idx": 10,
+          "source_id": "2hop__734554_32631::paragraph::10",
+          "start": 0,
+          "end": 943,
+          "sha256": "63116597668d7a0b267a826a9a78ec8eb0bf7213e2ed9309380cb8717bef4413"
+        }
+      ],
+      "answer_and_aliases_sha256": "c6b4edd5e85ddd59631e634bc3bf19e6a10b4320f71ee20d54de2828f78347f3",
+      "question_sha256": "55ff4bfb33a62493b6a233634a0fcf5e2ee2caea548818966325c5eb084f0810",
+      "ordered_twenty_sources_sha256": "836a0015243e5533b20c45eb892198f8646038a1c74e968572265093879583d2"
+    },
+    {
+      "id": "2hop__746150_728372",
+      "file": "musique_full_v1.0_train.jsonl",
+      "line": 24258,
+      "row_sha256": "d459ad2bf3c5ac5c3740931ca454cf477b4a8702376d38b85cdb403c7ffc729e",
+      "stratum": "missing_bridge",
+      "cohort": "insufficient",
+      "answerable": false,
+      "lexical_control": "at_least_one_bridge_subject_word_absent_from_all_20_titles_and_bodies",
+      "hops": [
+        746150,
+        728372
+      ],
+      "gold_in_hop_order": [
+        null,
+        9
+      ],
+      "gold_spans": [
+        {
+          "idx": 9,
+          "source_id": "2hop__746150_728372::paragraph::9",
+          "start": 0,
+          "end": 102,
+          "sha256": "3ac1e329555aaad11ba456701277929a96336a1bdcac92f1c734865e8083fbff"
+        }
+      ],
+      "answer_and_aliases_sha256": "86d7f9bb526790758da3ee5ffc9b05b6c90f530f44fc3454de5f5cb5525fab0c",
+      "question_sha256": "40c2b5198c0897304d84b6a73d72b9d244529098c5031387de7b0ba4ac32af67",
+      "ordered_twenty_sources_sha256": "8fea69e0b1866512015367a0e6be6457926edd4b53255b702242cfd40cd114eb"
+    },
+    {
+      "id": "2hop__120705_4688",
+      "file": "musique_ans_v1.0_train.jsonl",
+      "line": 11220,
+      "row_sha256": "77eab383f65f28753d51e6c5e89b1dab774a3b2114b12454d508f78efa3bacac",
+      "stratum": "primary_long",
+      "cohort": "primary_long",
+      "answerable": true,
+      "lexical_control": null,
+      "hops": [
+        120705,
+        4688
+      ],
+      "gold_in_hop_order": [
+        8,
+        0
+      ],
+      "gold_spans": [
+        {
+          "idx": 0,
+          "source_id": "2hop__120705_4688::paragraph::0",
+          "start": 0,
+          "end": 363,
+          "sha256": "8dded9e7d866088d01d4404aaf132f9be1fbd5cc2122a663fcef7c2665c3ce12"
+        },
+        {
+          "idx": 8,
+          "source_id": "2hop__120705_4688::paragraph::8",
+          "start": 0,
+          "end": 126,
+          "sha256": "b901bc5d88b209aa3a8ad1c4f57144b103f859eaeab7b9065d7b207d12fd60ea"
+        }
+      ],
+      "answer_and_aliases_sha256": "670e111389ae23915b674e2b7197db1c906d552e6d5014a43125864285f8bbdf",
+      "question_sha256": "feed03511591144df0199fab2aafa8e01efd55bd29e34cdb88dd1306c64b65d9",
+      "ordered_twenty_sources_sha256": "951aa3df1ede0fabdeab35fc4252a9b87dab35f2385688c01041c5b61664947a"
+    },
+    {
+      "id": "2hop__11874_25017",
+      "file": "musique_ans_v1.0_train.jsonl",
+      "line": 7034,
+      "row_sha256": "896ba38380371d7bc8872fec40b3356bce2682d1e172125f0d3d799c9735ec25",
+      "stratum": "primary_long",
+      "cohort": "primary_long",
+      "answerable": true,
+      "lexical_control": null,
+      "hops": [
+        11874,
+        25017
+      ],
+      "gold_in_hop_order": [
+        17,
+        7
+      ],
+      "gold_spans": [
+        {
+          "idx": 7,
+          "source_id": "2hop__11874_25017::paragraph::7",
+          "start": 0,
+          "end": 616,
+          "sha256": "b52eb02cfbaaf26ebb8a778612f38fe4d62b9e7cb57c24531df609ea161ddb18"
+        },
+        {
+          "idx": 17,
+          "source_id": "2hop__11874_25017::paragraph::17",
+          "start": 0,
+          "end": 1483,
+          "sha256": "d1c0675b52958e930c37ead02c6f72b22fa9999ea55c1bee0f17aaf9fbdad7d7"
+        }
+      ],
+      "answer_and_aliases_sha256": "a92648a3a05ec2502027779e29d247caf501aeabfbaaab725f07b2abe07b90a2",
+      "question_sha256": "86f256ce06416e498076b711dce4f9dbede8bedc7eb04901fc02277b26c6eb35",
+      "ordered_twenty_sources_sha256": "fc6fc27687aa17a5e2e018f800f78d56c51a491992bb12d1768f28bfe59b8db7"
+    },
+    {
+      "id": "2hop__68362_709757",
+      "file": "musique_full_v1.0_train.jsonl",
+      "line": 20869,
+      "row_sha256": "f521a25bc42c46f438c3489c745b5fd550e20a93cd4bc6d9523114d4d1e65a25",
+      "stratum": "missing_final",
+      "cohort": "insufficient",
+      "answerable": false,
+      "lexical_control": "terminal_value_absent_from_all_20_titles_and_bodies",
+      "hops": [
+        68362,
+        709757
+      ],
+      "gold_in_hop_order": [
+        19,
+        null
+      ],
+      "gold_spans": [
+        {
+          "idx": 19,
+          "source_id": "2hop__68362_709757::paragraph::19",
+          "start": 0,
+          "end": 1148,
+          "sha256": "debeb5806b20e4d2af53c4554f951a7da61aba64f634b1f7a6a849c7711c848a"
+        }
+      ],
+      "answer_and_aliases_sha256": "475fcf14296817797670530017e2a7de9854f17c3955f8cbc63f53e8e68ddfe3",
+      "question_sha256": "27a367d5bd7a9273f83ab44e0ba421727afb376fb08db218b0f8a9d1740db7f6",
+      "ordered_twenty_sources_sha256": "954506becfa37fd1af5b48dcbb99e4fcc9ac43a677d7d0275567cf45473e128b"
+    },
+    {
+      "id": "2hop__293573_91818",
+      "file": "musique_ans_v1.0_train.jsonl",
+      "line": 12814,
+      "row_sha256": "7aaa577b88a5541c53c5eb14c1edc32565fdc002c1925b973fc0bd1d0a66faa4",
+      "stratum": "primary_ordinary",
+      "cohort": "primary_ordinary",
+      "answerable": true,
+      "lexical_control": null,
+      "hops": [
+        293573,
+        91818
+      ],
+      "gold_in_hop_order": [
+        0,
+        1
+      ],
+      "gold_spans": [
+        {
+          "idx": 0,
+          "source_id": "2hop__293573_91818::paragraph::0",
+          "start": 0,
+          "end": 341,
+          "sha256": "7df269cb75e4f3d0215accbea44990f6c589ebb226e2763e365ddfb3e0aa45bd"
+        },
+        {
+          "idx": 1,
+          "source_id": "2hop__293573_91818::paragraph::1",
+          "start": 0,
+          "end": 478,
+          "sha256": "3310f0d280708376e57d141d5d0c883c45118c4867a47e4825964bc973b471c8"
+        }
+      ],
+      "answer_and_aliases_sha256": "419d8341b6c7296b344f46e15777d34a69644c58900f623094533ea4d88c5a82",
+      "question_sha256": "257c07335aea8de90454a7f9c089a5a1f789bef8179cca544dd6540e6d4748c8",
+      "ordered_twenty_sources_sha256": "94baf491185179a97740a84e26121889e31bf58ca41579fde7d0339b2dd341f6"
+    },
+    {
+      "id": "2hop__57390_44352",
+      "file": "musique_ans_v1.0_train.jsonl",
+      "line": 13463,
+      "row_sha256": "557f0e58f506c4d1174a8e4a5f3cb74df4e3a868b9e51ee9d33eb260a4263329",
+      "stratum": "primary_long",
+      "cohort": "primary_long",
+      "answerable": true,
+      "lexical_control": null,
+      "hops": [
+        57390,
+        44352
+      ],
+      "gold_in_hop_order": [
+        9,
+        14
+      ],
+      "gold_spans": [
+        {
+          "idx": 9,
+          "source_id": "2hop__57390_44352::paragraph::9",
+          "start": 0,
+          "end": 510,
+          "sha256": "50be7489f4b85dff8bf3824bb71b2c3fa20f7887073e856c5ef2d7eafbd75e27"
+        },
+        {
+          "idx": 14,
+          "source_id": "2hop__57390_44352::paragraph::14",
+          "start": 0,
+          "end": 471,
+          "sha256": "e6efbd88d3392236aeed755cd6e225fc6e910f1621bac0f0b0851ce764903b89"
+        }
+      ],
+      "answer_and_aliases_sha256": "f07b963f39e9f77210f009b4761f469524bfbf6223bccd41679bfff35bb481f4",
+      "question_sha256": "72cbffd139b89c3851ac4ba90e2c56c47c365b839146041c981ba033df871221",
+      "ordered_twenty_sources_sha256": "e2339bf3b7745af435dd3999302a1b40c573b8041da82509ffaf67d463c07629"
+    },
+    {
+      "id": "2hop__304266_3953",
+      "file": "musique_ans_v1.0_train.jsonl",
+      "line": 5254,
+      "row_sha256": "011015d6d7cdcba12528953fd5d099ec010c429a5361f5469e16da51fd501301",
+      "stratum": "primary_long",
+      "cohort": "primary_long",
+      "answerable": true,
+      "lexical_control": null,
+      "hops": [
+        304266,
+        3953
+      ],
+      "gold_in_hop_order": [
+        5,
+        14
+      ],
+      "gold_spans": [
+        {
+          "idx": 5,
+          "source_id": "2hop__304266_3953::paragraph::5",
+          "start": 0,
+          "end": 288,
+          "sha256": "365a6b24af8d087cf17f4940ffa0467304b61e88b994873fd953ccd74ae39bd1"
+        },
+        {
+          "idx": 14,
+          "source_id": "2hop__304266_3953::paragraph::14",
+          "start": 0,
+          "end": 425,
+          "sha256": "890ec77357d55acc2820fc143b295bc26f02d9bb38bb3bde1ccf1ab7e7e658e5"
+        }
+      ],
+      "answer_and_aliases_sha256": "fc43ba8a3faa891eb52194eee98a483b97d9e17ba591574f6af7c24b9ed62202",
+      "question_sha256": "3f84fd6ec590e2c3878d370b721963777388b14081b99523faa79c5ed56159e7",
+      "ordered_twenty_sources_sha256": "dfd30f8558d83348b95aeb22a14ee992ca119df16f94f282583546b17c601025"
+    },
+    {
+      "id": "2hop__145631_92216",
+      "file": "musique_ans_v1.0_train.jsonl",
+      "line": 13389,
+      "row_sha256": "a83c6e3668bd02a96d35bf5bdee796767546a3db724e0abb9374e1ad973fa2b9",
+      "stratum": "primary_ordinary",
+      "cohort": "primary_ordinary",
+      "answerable": true,
+      "lexical_control": null,
+      "hops": [
+        145631,
+        92216
+      ],
+      "gold_in_hop_order": [
+        18,
+        11
+      ],
+      "gold_spans": [
+        {
+          "idx": 11,
+          "source_id": "2hop__145631_92216::paragraph::11",
+          "start": 0,
+          "end": 728,
+          "sha256": "ef840a4877c0e7429d62d7477ffb79df7807678cd79e365b63aae7bb29213921"
+        },
+        {
+          "idx": 18,
+          "source_id": "2hop__145631_92216::paragraph::18",
+          "start": 0,
+          "end": 296,
+          "sha256": "08f8699b94c60e3141d900d1901ff06e408bb88373e954e1c58e99f34e2323a0"
+        }
+      ],
+      "answer_and_aliases_sha256": "105a07b1526c7fac67f0e06feeebc2636dd0d598257bd23e1f4ac51be06b6c05",
+      "question_sha256": "ebb6f74104a2ff08400491a4231d21adf8743db2936ab4ae4ec6952c352d7265",
+      "ordered_twenty_sources_sha256": "277711a64d427c0ac1b3e7fa324d5970cb2986cd298470127e3f52c32fc8753f"
+    },
+    {
+      "id": "2hop__145169_516766",
+      "file": "musique_ans_v1.0_train.jsonl",
+      "line": 8147,
+      "row_sha256": "e709e418b172b27fa7fc7557e01c630c2543db1b5be010830cb86c20830e069e",
+      "stratum": "primary_ordinary",
+      "cohort": "primary_ordinary",
+      "answerable": true,
+      "lexical_control": null,
+      "hops": [
+        145169,
+        516766
+      ],
+      "gold_in_hop_order": [
+        16,
+        7
+      ],
+      "gold_spans": [
+        {
+          "idx": 7,
+          "source_id": "2hop__145169_516766::paragraph::7",
+          "start": 0,
+          "end": 308,
+          "sha256": "bcefff6993728d8704c96fab096c31bbd27fd0b9f372aa132e74d7e7ae930836"
+        },
+        {
+          "idx": 16,
+          "source_id": "2hop__145169_516766::paragraph::16",
+          "start": 0,
+          "end": 183,
+          "sha256": "68c8a28c5f91ddd22beef2e1a7a4cbb70b2d90b5e73a4b99a738f874ef79ad48"
+        }
+      ],
+      "answer_and_aliases_sha256": "acb56ea019a8c6055327ffe4ad20a4f0b3f621dedd951c3c2adf3e02bff0bae0",
+      "question_sha256": "f128ce3bfb5433c9894e714543ff0252f58c190afe49ded8452a4b05c44c2e77",
+      "ordered_twenty_sources_sha256": "f70abcb6c39ff082d59666b8841ef7ef16380aed8f5f06ad333eb4360a393362"
+    },
+    {
+      "id": "2hop__159801_59031",
+      "file": "musique_ans_v1.0_train.jsonl",
+      "line": 19406,
+      "row_sha256": "0ce1fafbf5a074ceff6b79760d0399dd52340185051f4b4150bfdc027df55387",
+      "stratum": "primary_long",
+      "cohort": "primary_long",
+      "answerable": true,
+      "lexical_control": null,
+      "hops": [
+        159801,
+        59031
+      ],
+      "gold_in_hop_order": [
+        4,
+        1
+      ],
+      "gold_spans": [
+        {
+          "idx": 1,
+          "source_id": "2hop__159801_59031::paragraph::1",
+          "start": 0,
+          "end": 935,
+          "sha256": "c4816978ed5305e27d5ac50d2a876f0f0690a79e1c88aa79cc622a41feb753ab"
+        },
+        {
+          "idx": 4,
+          "source_id": "2hop__159801_59031::paragraph::4",
+          "start": 0,
+          "end": 1269,
+          "sha256": "7ea0b3c536b076629532069ff445f8c36b98f35c1c465389b3325957f6ea5957"
+        }
+      ],
+      "answer_and_aliases_sha256": "e2fb83f1dee24da3a67b556aefdf1ccae5e12843d5e02963a2ae2097c6a4786b",
+      "question_sha256": "37f4a4db0cb56a711b525eb012985da6d8c9ae7fbddd26ae5d3f75c74739fd41",
+      "ordered_twenty_sources_sha256": "84b74073bca6bbbc9db0236a37cd4c1ad1cfbc3f99d2fda6067ce3be336b1e93"
+    },
+    {
+      "id": "2hop__296387_5111",
+      "file": "musique_ans_v1.0_train.jsonl",
+      "line": 451,
+      "row_sha256": "80693cfd8a53d1e32d8f15841f4ad4695f5f05c294f3c81c5314e233e2992604",
+      "stratum": "primary_ordinary",
+      "cohort": "primary_ordinary",
+      "answerable": true,
+      "lexical_control": null,
+      "hops": [
+        296387,
+        5111
+      ],
+      "gold_in_hop_order": [
+        14,
+        12
+      ],
+      "gold_spans": [
+        {
+          "idx": 12,
+          "source_id": "2hop__296387_5111::paragraph::12",
+          "start": 0,
+          "end": 723,
+          "sha256": "6c4ade3b40a923a10db733533eb98949a5a101e906f76f4ff67ef42a60f5a331"
+        },
+        {
+          "idx": 14,
+          "source_id": "2hop__296387_5111::paragraph::14",
+          "start": 0,
+          "end": 425,
+          "sha256": "62db9c31da3e16dd21a26401ba4a594830f411d785eb4d79d840d504872d471f"
+        }
+      ],
+      "answer_and_aliases_sha256": "8116aa934da342f8b169986200ddf34eb0a0a4a4743fc574374f6cbdc45ff4b8",
+      "question_sha256": "4b2d7ec85bb4867da7782a02d46343c744be351a31e3719eaa5005732da20627",
+      "ordered_twenty_sources_sha256": "56c37f4b4a721fc87b2a11802e1959d95e16eca5acedec4983861fce33f8aeec"
+    }
+  ]
+}

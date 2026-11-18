@@ -33,7 +33,10 @@ def rows(path):
 
 def cases(group):
     if group == "fresh":
-        return load(PRIVATE / "joint-six-20261118/matched.json")["cases"]
+        return [
+            r for r in load(PRIVATE / "joint-six-20261118/matched.json")["cases"]
+            if r["cohort"] != "smoke"
+        ]
     if group == "W":
         return [
             dict(id=f"W{i:02}", question=r[0], value=r[3], cell=r[4], answerable=r[3] is not None)
