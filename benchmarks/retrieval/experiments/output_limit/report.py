@@ -96,7 +96,10 @@ def gold_passages_fully_visible(case):
 
 
 def public_grade(grade):
-    return {k: grade[k] for k in ("valid", "refused", "value", "support", "language", "strict")}
+    return {
+        k: grade[k]
+        for k in ("valid", "refused", "value", "support", "language", "strict", "reason")
+    }
 
 
 def parseable(event):
@@ -203,6 +206,15 @@ def observations(cases, outcomes, grades, ledger, control_labels):
                 http=res["http"],
                 first_json_parseable=parseable(events[0]),
                 first_finish=events[0]["finish"],
+                final_finish=events[-1]["finish"],
+                final_error_code=(res["body"].get("error") or {}).get("code"),
+                first_completion_tokens=events[0]["usage"]["completion_tokens"],
+                first_reasoning_tokens=events[0]["usage"]
+                .get("completion_tokens_details", {})
+                .get("reasoning_tokens"),
+                first_visible_tokens=events[0]["usage"]
+                .get("completion_tokens_details", {})
+                .get("text_tokens"),
                 elapsed_ms=round(res["elapsed_ms"], 3),
                 physical=len(events),
                 cost_units=cost,
@@ -434,8 +446,13 @@ def build(cases, outcomes, grades, ledger, control_labels=None):
     total = sum(r["cost_units"] for r in rows)
     if OPENING + total > CAP:
         raise ValueError("Campaign exceeded its registered cumulative budget")
+    independent = [r for r in rows if r["cohort"] in {"fresh", "fresh_long"}]
     return dict(
         groups=groups,
+        independent_combined={
+            "arms": {str(c): summarize([r for r in independent if r["cap"] == c]) for c in CAPS},
+            "paired": paired(independent),
+        },
         protected_stages=retention,
         gate_checks=gates,
         passes_registered_gate=all(gates.values()),

@@ -1,0 +1,100 @@
+{
+  "main_freeze": "e9edd73ebea75144837bb718e80eac23baa018afc1c2400a29a9a036fc5a8ed5",
+  "tail_freeze": "761a4326d42e2100f7587805068464e69cab026cabf56f376d3f891e30f76253",
+  "tail_preregistration": "4066d90535c0e93afee95792a1770e4049905bcbc9f59c668873da05e0e4a18e",
+  "unique_provider_receipts": 3,
+  "unsettled_physical": 0,
+  "cost_cny": "0.03090792",
+  "latency_ms": {
+    "p50": 18669.81,
+    "p95": 32730.23
+  },
+  "rows": [
+    {
+      "id": "historical/2hop__806218_14904/candidate",
+      "cap": 8192,
+      "http": 200,
+      "original_class": "truncated",
+      "elapsed_ms": 3047.116,
+      "physical": [
+        {
+          "cost_units": 116072,
+          "finish": "stop",
+          "input_tokens": 1710,
+          "cached_tokens": 1536,
+          "output_tokens": 239,
+          "reasoning_tokens": 141,
+          "text_tokens": 97
+        },
+        {
+          "cost_units": 95972,
+          "finish": "stop",
+          "input_tokens": 1865,
+          "cached_tokens": 1536,
+          "output_tokens": 150,
+          "reasoning_tokens": 47,
+          "text_tokens": 102
+        }
+      ],
+      "first": {
+        "valid": false,
+        "refused": false,
+        "value": false,
+        "support": false,
+        "language": false,
+        "strict": false,
+        "reason": "citations_on_refusal"
+      },
+      "final": {
+        "valid": true,
+        "refused": true,
+        "value": false,
+        "support": false,
+        "language": true,
+        "strict": false,
+        "reason": null
+      }
+    },
+    {
+      "id": "historical/2hop__839424_160978/baseline",
+      "cap": 8192,
+      "http": 200,
+      "original_class": "truncated",
+      "elapsed_ms": 34292.501,
+      "physical": [
+        {
+          "cost_units": 2878748,
+          "finish": "stop",
+          "input_tokens": 1663,
+          "cached_tokens": 1024,
+          "output_tokens": 7032,
+          "reasoning_tokens": 6984,
+          "text_tokens": 47
+        }
+      ],
+      "first": {
+        "valid": true,
+        "refused": true,
+        "value": false,
+        "support": false,
+        "language": true,
+        "strict": false,
+        "reason": null
+      },
+      "final": {
+        "valid": true,
+        "refused": true,
+        "value": false,
+        "support": false,
+        "language": true,
+        "strict": false,
+        "reason": null
+      }
+    }
+  ],
+  "logical_this_round": 513,
+  "physical_this_round": 624,
+  "cost_this_round_cny": "0.91141016",
+  "cumulative_including_prior_reserves_cny": "3.00814688",
+  "remaining_cny": "26.99185312"
+}

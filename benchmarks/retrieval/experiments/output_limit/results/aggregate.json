@@ -1,0 +1,3899 @@
+{
+  "groups": {
+    "historical_empty": {
+      "distinct_questions": 28,
+      "distinct_messages": 35,
+      "arms": {
+        "256": {
+          "logical": 39,
+          "distinct_questions": 28,
+          "http_200": {
+            "n": 11,
+            "denominator": 39,
+            "percent": 28.21
+          },
+          "first_json_parseable": {
+            "n": 11,
+            "denominator": 39,
+            "percent": 28.21
+          },
+          "physical": 43,
+          "corrections": 4,
+          "cost_cny": "0.07039024",
+          "latency_ms": {
+            "p50": 2457.19,
+            "p95": 3833.0
+          },
+          "input_tokens": 68164,
+          "output_tokens": 10090,
+          "cached_tokens": 38912,
+          "first": {
+            "valid": {
+              "n": 7,
+              "denominator": 39,
+              "percent": 17.95
+            },
+            "strict": {
+              "n": 1,
+              "denominator": 39,
+              "percent": 2.56
+            },
+            "value": {
+              "n": 2,
+              "denominator": 39,
+              "percent": 5.13
+            },
+            "language": {
+              "n": 7,
+              "denominator": 39,
+              "percent": 17.95
+            },
+            "refused": {
+              "n": 6,
+              "denominator": 39,
+              "percent": 15.38
+            },
+            "supported_among_substantive": {
+              "n": 0,
+              "denominator": 1,
+              "percent": 0.0
+            },
+            "correct_refusals": {
+              "n": 1,
+              "denominator": 4,
+              "percent": 25.0
+            },
+            "false_refusals": {
+              "n": 5,
+              "denominator": 35,
+              "percent": 14.29
+            }
+          },
+          "final": {
+            "valid": {
+              "n": 11,
+              "denominator": 39,
+              "percent": 28.21
+            },
+            "strict": {
+              "n": 2,
+              "denominator": 39,
+              "percent": 5.13
+            },
+            "value": {
+              "n": 3,
+              "denominator": 39,
+              "percent": 7.69
+            },
+            "language": {
+              "n": 11,
+              "denominator": 39,
+              "percent": 28.21
+            },
+            "refused": {
+              "n": 10,
+              "denominator": 39,
+              "percent": 25.64
+            },
+            "supported_among_substantive": {
+              "n": 0,
+              "denominator": 1,
+              "percent": 0.0
+            },
+            "correct_refusals": {
+              "n": 2,
+              "denominator": 4,
+              "percent": 50.0
+            },
+            "false_refusals": {
+              "n": 8,
+              "denominator": 35,
+              "percent": 22.86
+            }
+          }
+        },
+        "2048": {
+          "logical": 39,
+          "distinct_questions": 28,
+          "http_200": {
+            "n": 39,
+            "denominator": 39,
+            "percent": 100.0
+          },
+          "first_json_parseable": {
+            "n": 39,
+            "denominator": 39,
+            "percent": 100.0
+          },
+          "physical": 42,
+          "corrections": 3,
+          "cost_cny": "0.12194644",
+          "latency_ms": {
+            "p50": 3453.71,
+            "p95": 7961.88
+          },
+          "input_tokens": 66765,
+          "output_tokens": 20820,
+          "cached_tokens": 28672,
+          "first": {
+            "valid": {
+              "n": 36,
+              "denominator": 39,
+              "percent": 92.31
+            },
+            "strict": {
+              "n": 12,
+              "denominator": 39,
+              "percent": 30.77
+            },
+            "value": {
+              "n": 19,
+              "denominator": 39,
+              "percent": 48.72
+            },
+            "language": {
+              "n": 36,
+              "denominator": 39,
+              "percent": 92.31
+            },
+            "refused": {
+              "n": 16,
+              "denominator": 39,
+              "percent": 41.03
+            },
+            "supported_among_substantive": {
+              "n": 9,
+              "denominator": 20,
+              "percent": 45.0
+            },
+            "correct_refusals": {
+              "n": 3,
+              "denominator": 4,
+              "percent": 75.0
+            },
+            "false_refusals": {
+              "n": 13,
+              "denominator": 35,
+              "percent": 37.14
+            }
+          },
+          "final": {
+            "valid": {
+              "n": 39,
+              "denominator": 39,
+              "percent": 100.0
+            },
+            "strict": {
+              "n": 12,
+              "denominator": 39,
+              "percent": 30.77
+            },
+            "value": {
+              "n": 19,
+              "denominator": 39,
+              "percent": 48.72
+            },
+            "language": {
+              "n": 39,
+              "denominator": 39,
+              "percent": 100.0
+            },
+            "refused": {
+              "n": 19,
+              "denominator": 39,
+              "percent": 48.72
+            },
+            "supported_among_substantive": {
+              "n": 9,
+              "denominator": 20,
+              "percent": 45.0
+            },
+            "correct_refusals": {
+              "n": 3,
+              "denominator": 4,
+              "percent": 75.0
+            },
+            "false_refusals": {
+              "n": 16,
+              "denominator": 35,
+              "percent": 45.71
+            }
+          }
+        }
+      },
+      "paired": {
+        "http_200": {
+          "low_failures_recovered": {
+            "n": 28,
+            "denominator": 28,
+            "percent": 100.0
+          },
+          "lost": 0,
+          "net": 28,
+          "lost_qids": [],
+          "lost_ids": []
+        },
+        "first_json_parseable": {
+          "low_failures_recovered": {
+            "n": 28,
+            "denominator": 28,
+            "percent": 100.0
+          },
+          "lost": 0,
+          "net": 28,
+          "lost_qids": [],
+          "lost_ids": []
+        },
+        "first_strict": {
+          "low_failures_recovered": {
+            "n": 11,
+            "denominator": 38,
+            "percent": 28.95
+          },
+          "lost": 0,
+          "net": 11,
+          "lost_qids": [],
+          "lost_ids": []
+        },
+        "first_correct_refusal": {
+          "low_failures_recovered": {
+            "n": 2,
+            "denominator": 38,
+            "percent": 5.26
+          },
+          "lost": 0,
+          "net": 2,
+          "lost_qids": [],
+          "lost_ids": []
+        },
+        "first_supported_substantive": {
+          "low_failures_recovered": {
+            "n": 9,
+            "denominator": 39,
+            "percent": 23.08
+          },
+          "lost": 0,
+          "net": 9,
+          "lost_qids": [],
+          "lost_ids": []
+        },
+        "final_strict": {
+          "low_failures_recovered": {
+            "n": 10,
+            "denominator": 37,
+            "percent": 27.03
+          },
+          "lost": 0,
+          "net": 10,
+          "lost_qids": [],
+          "lost_ids": []
+        },
+        "final_correct_refusal": {
+          "low_failures_recovered": {
+            "n": 1,
+            "denominator": 37,
+            "percent": 2.7
+          },
+          "lost": 0,
+          "net": 1,
+          "lost_qids": [],
+          "lost_ids": []
+        },
+        "final_supported_substantive": {
+          "low_failures_recovered": {
+            "n": 9,
+            "denominator": 39,
+            "percent": 23.08
+          },
+          "lost": 0,
+          "net": 9,
+          "lost_qids": [],
+          "lost_ids": []
+        },
+        "among_current_256_http_502": {
+          "rows": 28,
+          "distinct_questions": 20,
+          "higher_http_200": {
+            "n": 28,
+            "denominator": 28,
+            "percent": 100.0
+          },
+          "higher_first_json_parseable": {
+            "n": 28,
+            "denominator": 28,
+            "percent": 100.0
+          },
+          "higher_first_strict": {
+            "n": 9,
+            "denominator": 28,
+            "percent": 32.14
+          },
+          "higher_final_strict": {
+            "n": 9,
+            "denominator": 28,
+            "percent": 32.14
+          }
+        }
+      }
+    },
+    "historical_truncated": {
+      "distinct_questions": 18,
+      "distinct_messages": 18,
+      "arms": {
+        "256": {
+          "logical": 18,
+          "distinct_questions": 18,
+          "http_200": {
+            "n": 5,
+            "denominator": 18,
+            "percent": 27.78
+          },
+          "first_json_parseable": {
+            "n": 5,
+            "denominator": 18,
+            "percent": 27.78
+          },
+          "physical": 18,
+          "corrections": 0,
+          "cost_cny": "0.03737172",
+          "latency_ms": {
+            "p50": 2309.91,
+            "p95": 3099.21
+          },
+          "input_tokens": 28173,
+          "output_tokens": 4244,
+          "cached_tokens": 7936,
+          "first": {
+            "valid": {
+              "n": 5,
+              "denominator": 18,
+              "percent": 27.78
+            },
+            "strict": {
+              "n": 5,
+              "denominator": 18,
+              "percent": 27.78
+            },
+            "value": {
+              "n": 5,
+              "denominator": 18,
+              "percent": 27.78
+            },
+            "language": {
+              "n": 5,
+              "denominator": 18,
+              "percent": 27.78
+            },
+            "refused": {
+              "n": 3,
+              "denominator": 18,
+              "percent": 16.67
+            },
+            "supported_among_substantive": {
+              "n": 2,
+              "denominator": 2,
+              "percent": 100.0
+            },
+            "correct_refusals": {
+              "n": 3,
+              "denominator": 5,
+              "percent": 60.0
+            },
+            "false_refusals": {
+              "n": 0,
+              "denominator": 13,
+              "percent": 0.0
+            }
+          },
+          "final": {
+            "valid": {
+              "n": 5,
+              "denominator": 18,
+              "percent": 27.78
+            },
+            "strict": {
+              "n": 5,
+              "denominator": 18,
+              "percent": 27.78
+            },
+            "value": {
+              "n": 5,
+              "denominator": 18,
+              "percent": 27.78
+            },
+            "language": {
+              "n": 5,
+              "denominator": 18,
+              "percent": 27.78
+            },
+            "refused": {
+              "n": 3,
+              "denominator": 18,
+              "percent": 16.67
+            },
+            "supported_among_substantive": {
+              "n": 2,
+              "denominator": 2,
+              "percent": 100.0
+            },
+            "correct_refusals": {
+              "n": 3,
+              "denominator": 5,
+              "percent": 60.0
+            },
+            "false_refusals": {
+              "n": 0,
+              "denominator": 13,
+              "percent": 0.0
+            }
+          }
+        },
+        "2048": {
+          "logical": 18,
+          "distinct_questions": 18,
+          "http_200": {
+            "n": 16,
+            "denominator": 18,
+            "percent": 88.89
+          },
+          "first_json_parseable": {
+            "n": 16,
+            "denominator": 18,
+            "percent": 88.89
+          },
+          "physical": 19,
+          "corrections": 1,
+          "cost_cny": "0.04884156",
+          "latency_ms": {
+            "p50": 2415.18,
+            "p95": 12727.79
+          },
+          "input_tokens": 29415,
+          "output_tokens": 8808,
+          "cached_tokens": 16128,
+          "first": {
+            "valid": {
+              "n": 15,
+              "denominator": 18,
+              "percent": 83.33
+            },
+            "strict": {
+              "n": 9,
+              "denominator": 18,
+              "percent": 50.0
+            },
+            "value": {
+              "n": 10,
+              "denominator": 18,
+              "percent": 55.56
+            },
+            "language": {
+              "n": 15,
+              "denominator": 18,
+              "percent": 83.33
+            },
+            "refused": {
+              "n": 7,
+              "denominator": 18,
+              "percent": 38.89
+            },
+            "supported_among_substantive": {
+              "n": 6,
+              "denominator": 8,
+              "percent": 75.0
+            },
+            "correct_refusals": {
+              "n": 4,
+              "denominator": 5,
+              "percent": 80.0
+            },
+            "false_refusals": {
+              "n": 3,
+              "denominator": 13,
+              "percent": 23.08
+            }
+          },
+          "final": {
+            "valid": {
+              "n": 16,
+              "denominator": 18,
+              "percent": 88.89
+            },
+            "strict": {
+              "n": 9,
+              "denominator": 18,
+              "percent": 50.0
+            },
+            "value": {
+              "n": 10,
+              "denominator": 18,
+              "percent": 55.56
+            },
+            "language": {
+              "n": 16,
+              "denominator": 18,
+              "percent": 88.89
+            },
+            "refused": {
+              "n": 8,
+              "denominator": 18,
+              "percent": 44.44
+            },
+            "supported_among_substantive": {
+              "n": 6,
+              "denominator": 8,
+              "percent": 75.0
+            },
+            "correct_refusals": {
+              "n": 4,
+              "denominator": 5,
+              "percent": 80.0
+            },
+            "false_refusals": {
+              "n": 4,
+              "denominator": 13,
+              "percent": 30.77
+            }
+          }
+        }
+      },
+      "paired": {
+        "http_200": {
+          "low_failures_recovered": {
+            "n": 11,
+            "denominator": 13,
+            "percent": 84.62
+          },
+          "lost": 0,
+          "net": 11,
+          "lost_qids": [],
+          "lost_ids": []
+        },
+        "first_json_parseable": {
+          "low_failures_recovered": {
+            "n": 11,
+            "denominator": 13,
+            "percent": 84.62
+          },
+          "lost": 0,
+          "net": 11,
+          "lost_qids": [],
+          "lost_ids": []
+        },
+        "first_strict": {
+          "low_failures_recovered": {
+            "n": 4,
+            "denominator": 13,
+            "percent": 30.77
+          },
+          "lost": 0,
+          "net": 4,
+          "lost_qids": [],
+          "lost_ids": []
+        },
+        "first_correct_refusal": {
+          "low_failures_recovered": {
+            "n": 1,
+            "denominator": 15,
+            "percent": 6.67
+          },
+          "lost": 0,
+          "net": 1,
+          "lost_qids": [],
+          "lost_ids": []
+        },
+        "first_supported_substantive": {
+          "low_failures_recovered": {
+            "n": 4,
+            "denominator": 16,
+            "percent": 25.0
+          },
+          "lost": 0,
+          "net": 4,
+          "lost_qids": [],
+          "lost_ids": []
+        },
+        "final_strict": {
+          "low_failures_recovered": {
+            "n": 4,
+            "denominator": 13,
+            "percent": 30.77
+          },
+          "lost": 0,
+          "net": 4,
+          "lost_qids": [],
+          "lost_ids": []
+        },
+        "final_correct_refusal": {
+          "low_failures_recovered": {
+            "n": 1,
+            "denominator": 15,
+            "percent": 6.67
+          },
+          "lost": 0,
+          "net": 1,
+          "lost_qids": [],
+          "lost_ids": []
+        },
+        "final_supported_substantive": {
+          "low_failures_recovered": {
+            "n": 4,
+            "denominator": 16,
+            "percent": 25.0
+          },
+          "lost": 0,
+          "net": 4,
+          "lost_qids": [],
+          "lost_ids": []
+        },
+        "among_current_256_http_502": {
+          "rows": 13,
+          "distinct_questions": 13,
+          "higher_http_200": {
+            "n": 11,
+            "denominator": 13,
+            "percent": 84.62
+          },
+          "higher_first_json_parseable": {
+            "n": 11,
+            "denominator": 13,
+            "percent": 84.62
+          },
+          "higher_first_strict": {
+            "n": 4,
+            "denominator": 13,
+            "percent": 30.77
+          },
+          "higher_final_strict": {
+            "n": 4,
+            "denominator": 13,
+            "percent": 30.77
+          }
+        }
+      }
+    },
+    "fresh": {
+      "distinct_questions": 40,
+      "distinct_messages": 40,
+      "arms": {
+        "256": {
+          "logical": 40,
+          "distinct_questions": 40,
+          "http_200": {
+            "n": 36,
+            "denominator": 40,
+            "percent": 90.0
+          },
+          "first_json_parseable": {
+            "n": 37,
+            "denominator": 40,
+            "percent": 92.5
+          },
+          "physical": 55,
+          "corrections": 15,
+          "cost_cny": "0.05447204",
+          "latency_ms": {
+            "p50": 1781.01,
+            "p95": 3590.4
+          },
+          "input_tokens": 29245,
+          "output_tokens": 7373,
+          "cached_tokens": 4352,
+          "first": {
+            "valid": {
+              "n": 22,
+              "denominator": 40,
+              "percent": 55.0
+            },
+            "strict": {
+              "n": 20,
+              "denominator": 40,
+              "percent": 50.0
+            },
+            "value": {
+              "n": 21,
+              "denominator": 40,
+              "percent": 52.5
+            },
+            "language": {
+              "n": 22,
+              "denominator": 40,
+              "percent": 55.0
+            },
+            "refused": {
+              "n": 1,
+              "denominator": 40,
+              "percent": 2.5
+            },
+            "supported_among_substantive": {
+              "n": 20,
+              "denominator": 21,
+              "percent": 95.24
+            },
+            "correct_refusals": {
+              "n": 1,
+              "denominator": 20,
+              "percent": 5.0
+            },
+            "false_refusals": {
+              "n": 0,
+              "denominator": 20,
+              "percent": 0.0
+            }
+          },
+          "final": {
+            "valid": {
+              "n": 36,
+              "denominator": 40,
+              "percent": 90.0
+            },
+            "strict": {
+              "n": 34,
+              "denominator": 40,
+              "percent": 85.0
+            },
+            "value": {
+              "n": 35,
+              "denominator": 40,
+              "percent": 87.5
+            },
+            "language": {
+              "n": 36,
+              "denominator": 40,
+              "percent": 90.0
+            },
+            "refused": {
+              "n": 15,
+              "denominator": 40,
+              "percent": 37.5
+            },
+            "supported_among_substantive": {
+              "n": 20,
+              "denominator": 21,
+              "percent": 95.24
+            },
+            "correct_refusals": {
+              "n": 15,
+              "denominator": 20,
+              "percent": 75.0
+            },
+            "false_refusals": {
+              "n": 0,
+              "denominator": 20,
+              "percent": 0.0
+            }
+          }
+        },
+        "2048": {
+          "logical": 40,
+          "distinct_questions": 40,
+          "http_200": {
+            "n": 40,
+            "denominator": 40,
+            "percent": 100.0
+          },
+          "first_json_parseable": {
+            "n": 40,
+            "denominator": 40,
+            "percent": 100.0
+          },
+          "physical": 54,
+          "corrections": 14,
+          "cost_cny": "0.05971468",
+          "latency_ms": {
+            "p50": 1767.25,
+            "p95": 3906.82
+          },
+          "input_tokens": 28599,
+          "output_tokens": 8657,
+          "cached_tokens": 3584,
+          "first": {
+            "valid": {
+              "n": 26,
+              "denominator": 40,
+              "percent": 65.0
+            },
+            "strict": {
+              "n": 22,
+              "denominator": 40,
+              "percent": 55.0
+            },
+            "value": {
+              "n": 23,
+              "denominator": 40,
+              "percent": 57.5
+            },
+            "language": {
+              "n": 26,
+              "denominator": 40,
+              "percent": 65.0
+            },
+            "refused": {
+              "n": 3,
+              "denominator": 40,
+              "percent": 7.5
+            },
+            "supported_among_substantive": {
+              "n": 21,
+              "denominator": 23,
+              "percent": 91.3
+            },
+            "correct_refusals": {
+              "n": 3,
+              "denominator": 20,
+              "percent": 15.0
+            },
+            "false_refusals": {
+              "n": 0,
+              "denominator": 20,
+              "percent": 0.0
+            }
+          },
+          "final": {
+            "valid": {
+              "n": 40,
+              "denominator": 40,
+              "percent": 100.0
+            },
+            "strict": {
+              "n": 36,
+              "denominator": 40,
+              "percent": 90.0
+            },
+            "value": {
+              "n": 37,
+              "denominator": 40,
+              "percent": 92.5
+            },
+            "language": {
+              "n": 40,
+              "denominator": 40,
+              "percent": 100.0
+            },
+            "refused": {
+              "n": 17,
+              "denominator": 40,
+              "percent": 42.5
+            },
+            "supported_among_substantive": {
+              "n": 21,
+              "denominator": 23,
+              "percent": 91.3
+            },
+            "correct_refusals": {
+              "n": 17,
+              "denominator": 20,
+              "percent": 85.0
+            },
+            "false_refusals": {
+              "n": 0,
+              "denominator": 20,
+              "percent": 0.0
+            }
+          }
+        }
+      },
+      "paired": {
+        "http_200": {
+          "low_failures_recovered": {
+            "n": 4,
+            "denominator": 4,
+            "percent": 100.0
+          },
+          "lost": 0,
+          "net": 4,
+          "lost_qids": [],
+          "lost_ids": []
+        },
+        "first_json_parseable": {
+          "low_failures_recovered": {
+            "n": 3,
+            "denominator": 3,
+            "percent": 100.0
+          },
+          "lost": 0,
+          "net": 3,
+          "lost_qids": [],
+          "lost_ids": []
+        },
+        "first_strict": {
+          "low_failures_recovered": {
+            "n": 3,
+            "denominator": 20,
+            "percent": 15.0
+          },
+          "lost": 1,
+          "net": 2,
+          "lost_qids": [
+            "N035"
+          ],
+          "lost_ids": [
+            "N035"
+          ]
+        },
+        "first_correct_refusal": {
+          "low_failures_recovered": {
+            "n": 3,
+            "denominator": 39,
+            "percent": 7.69
+          },
+          "lost": 1,
+          "net": 2,
+          "lost_qids": [
+            "N035"
+          ],
+          "lost_ids": [
+            "N035"
+          ]
+        },
+        "first_supported_substantive": {
+          "low_failures_recovered": {
+            "n": 1,
+            "denominator": 20,
+            "percent": 5.0
+          },
+          "lost": 0,
+          "net": 1,
+          "lost_qids": [],
+          "lost_ids": []
+        },
+        "final_strict": {
+          "low_failures_recovered": {
+            "n": 2,
+            "denominator": 6,
+            "percent": 33.33
+          },
+          "lost": 0,
+          "net": 2,
+          "lost_qids": [],
+          "lost_ids": []
+        },
+        "final_correct_refusal": {
+          "low_failures_recovered": {
+            "n": 2,
+            "denominator": 25,
+            "percent": 8.0
+          },
+          "lost": 0,
+          "net": 2,
+          "lost_qids": [],
+          "lost_ids": []
+        },
+        "final_supported_substantive": {
+          "low_failures_recovered": {
+            "n": 1,
+            "denominator": 20,
+            "percent": 5.0
+          },
+          "lost": 0,
+          "net": 1,
+          "lost_qids": [],
+          "lost_ids": []
+        },
+        "among_current_256_http_502": {
+          "rows": 4,
+          "distinct_questions": 4,
+          "higher_http_200": {
+            "n": 4,
+            "denominator": 4,
+            "percent": 100.0
+          },
+          "higher_first_json_parseable": {
+            "n": 4,
+            "denominator": 4,
+            "percent": 100.0
+          },
+          "higher_first_strict": {
+            "n": 2,
+            "denominator": 4,
+            "percent": 50.0
+          },
+          "higher_final_strict": {
+            "n": 2,
+            "denominator": 4,
+            "percent": 50.0
+          }
+        }
+      },
+      "answerable_all_gold_sources_visible": {
+        "n": 20,
+        "denominator": 20,
+        "percent": 100.0
+      },
+      "missing_gold_source_qids": [],
+      "answerable_all_gold_passages_fully_visible": {
+        "n": 20,
+        "denominator": 20,
+        "percent": 100.0
+      },
+      "correctness_by_gold_passage_visibility": {
+        "True": {
+          "256": {
+            "logical": 20,
+            "distinct_questions": 20,
+            "http_200": {
+              "n": 20,
+              "denominator": 20,
+              "percent": 100.0
+            },
+            "first_json_parseable": {
+              "n": 20,
+              "denominator": 20,
+              "percent": 100.0
+            },
+            "physical": 20,
+            "corrections": 0,
+            "cost_cny": "0.01849624",
+            "latency_ms": {
+              "p50": 1370.67,
+              "p95": 1719.7
+            },
+            "input_tokens": 9942,
+            "output_tokens": 2264,
+            "cached_tokens": 512,
+            "first": {
+              "valid": {
+                "n": 20,
+                "denominator": 20,
+                "percent": 100.0
+              },
+              "strict": {
+                "n": 19,
+                "denominator": 20,
+                "percent": 95.0
+              },
+              "value": {
+                "n": 20,
+                "denominator": 20,
+                "percent": 100.0
+              },
+              "language": {
+                "n": 20,
+                "denominator": 20,
+                "percent": 100.0
+              },
+              "refused": {
+                "n": 0,
+                "denominator": 20,
+                "percent": 0.0
+              },
+              "supported_among_substantive": {
+                "n": 19,
+                "denominator": 20,
+                "percent": 95.0
+              },
+              "correct_refusals": {
+                "n": 0,
+                "denominator": 0,
+                "percent": null
+              },
+              "false_refusals": {
+                "n": 0,
+                "denominator": 20,
+                "percent": 0.0
+              }
+            },
+            "final": {
+              "valid": {
+                "n": 20,
+                "denominator": 20,
+                "percent": 100.0
+              },
+              "strict": {
+                "n": 19,
+                "denominator": 20,
+                "percent": 95.0
+              },
+              "value": {
+                "n": 20,
+                "denominator": 20,
+                "percent": 100.0
+              },
+              "language": {
+                "n": 20,
+                "denominator": 20,
+                "percent": 100.0
+              },
+              "refused": {
+                "n": 0,
+                "denominator": 20,
+                "percent": 0.0
+              },
+              "supported_among_substantive": {
+                "n": 19,
+                "denominator": 20,
+                "percent": 95.0
+              },
+              "correct_refusals": {
+                "n": 0,
+                "denominator": 0,
+                "percent": null
+              },
+              "false_refusals": {
+                "n": 0,
+                "denominator": 20,
+                "percent": 0.0
+              }
+            }
+          },
+          "2048": {
+            "logical": 20,
+            "distinct_questions": 20,
+            "http_200": {
+              "n": 20,
+              "denominator": 20,
+              "percent": 100.0
+            },
+            "first_json_parseable": {
+              "n": 20,
+              "denominator": 20,
+              "percent": 100.0
+            },
+            "physical": 20,
+            "corrections": 0,
+            "cost_cny": "0.01792248",
+            "latency_ms": {
+              "p50": 1407.47,
+              "p95": 1651.99
+            },
+            "input_tokens": 9942,
+            "output_tokens": 2246,
+            "cached_tokens": 1024,
+            "first": {
+              "valid": {
+                "n": 20,
+                "denominator": 20,
+                "percent": 100.0
+              },
+              "strict": {
+                "n": 19,
+                "denominator": 20,
+                "percent": 95.0
+              },
+              "value": {
+                "n": 20,
+                "denominator": 20,
+                "percent": 100.0
+              },
+              "language": {
+                "n": 20,
+                "denominator": 20,
+                "percent": 100.0
+              },
+              "refused": {
+                "n": 0,
+                "denominator": 20,
+                "percent": 0.0
+              },
+              "supported_among_substantive": {
+                "n": 19,
+                "denominator": 20,
+                "percent": 95.0
+              },
+              "correct_refusals": {
+                "n": 0,
+                "denominator": 0,
+                "percent": null
+              },
+              "false_refusals": {
+                "n": 0,
+                "denominator": 20,
+                "percent": 0.0
+              }
+            },
+            "final": {
+              "valid": {
+                "n": 20,
+                "denominator": 20,
+                "percent": 100.0
+              },
+              "strict": {
+                "n": 19,
+                "denominator": 20,
+                "percent": 95.0
+              },
+              "value": {
+                "n": 20,
+                "denominator": 20,
+                "percent": 100.0
+              },
+              "language": {
+                "n": 20,
+                "denominator": 20,
+                "percent": 100.0
+              },
+              "refused": {
+                "n": 0,
+                "denominator": 20,
+                "percent": 0.0
+              },
+              "supported_among_substantive": {
+                "n": 19,
+                "denominator": 20,
+                "percent": 95.0
+              },
+              "correct_refusals": {
+                "n": 0,
+                "denominator": 0,
+                "percent": null
+              },
+              "false_refusals": {
+                "n": 0,
+                "denominator": 20,
+                "percent": 0.0
+              }
+            }
+          }
+        },
+        "False": {
+          "256": {
+            "logical": 0,
+            "distinct_questions": 0,
+            "http_200": {
+              "n": 0,
+              "denominator": 0,
+              "percent": null
+            },
+            "first_json_parseable": {
+              "n": 0,
+              "denominator": 0,
+              "percent": null
+            },
+            "physical": 0,
+            "corrections": 0,
+            "cost_cny": "0.00000000",
+            "latency_ms": {
+              "p50": null,
+              "p95": null
+            },
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "cached_tokens": 0,
+            "first": {
+              "valid": {
+                "n": 0,
+                "denominator": 0,
+                "percent": null
+              },
+              "strict": {
+                "n": 0,
+                "denominator": 0,
+                "percent": null
+              },
+              "value": {
+                "n": 0,
+                "denominator": 0,
+                "percent": null
+              },
+              "language": {
+                "n": 0,
+                "denominator": 0,
+                "percent": null
+              },
+              "refused": {
+                "n": 0,
+                "denominator": 0,
+                "percent": null
+              },
+              "supported_among_substantive": {
+                "n": 0,
+                "denominator": 0,
+                "percent": null
+              },
+              "correct_refusals": {
+                "n": 0,
+                "denominator": 0,
+                "percent": null
+              },
+              "false_refusals": {
+                "n": 0,
+                "denominator": 0,
+                "percent": null
+              }
+            },
+            "final": {
+              "valid": {
+                "n": 0,
+                "denominator": 0,
+                "percent": null
+              },
+              "strict": {
+                "n": 0,
+                "denominator": 0,
+                "percent": null
+              },
+              "value": {
+                "n": 0,
+                "denominator": 0,
+                "percent": null
+              },
+              "language": {
+                "n": 0,
+                "denominator": 0,
+                "percent": null
+              },
+              "refused": {
+                "n": 0,
+                "denominator": 0,
+                "percent": null
+              },
+              "supported_among_substantive": {
+                "n": 0,
+                "denominator": 0,
+                "percent": null
+              },
+              "correct_refusals": {
+                "n": 0,
+                "denominator": 0,
+                "percent": null
+              },
+              "false_refusals": {
+                "n": 0,
+                "denominator": 0,
+                "percent": null
+              }
+            }
+          },
+          "2048": {
+            "logical": 0,
+            "distinct_questions": 0,
+            "http_200": {
+              "n": 0,
+              "denominator": 0,
+              "percent": null
+            },
+            "first_json_parseable": {
+              "n": 0,
+              "denominator": 0,
+              "percent": null
+            },
+            "physical": 0,
+            "corrections": 0,
+            "cost_cny": "0.00000000",
+            "latency_ms": {
+              "p50": null,
+              "p95": null
+            },
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "cached_tokens": 0,
+            "first": {
+              "valid": {
+                "n": 0,
+                "denominator": 0,
+                "percent": null
+              },
+              "strict": {
+                "n": 0,
+                "denominator": 0,
+                "percent": null
+              },
+              "value": {
+                "n": 0,
+                "denominator": 0,
+                "percent": null
+              },
+              "language": {
+                "n": 0,
+                "denominator": 0,
+                "percent": null
+              },
+              "refused": {
+                "n": 0,
+                "denominator": 0,
+                "percent": null
+              },
+              "supported_among_substantive": {
+                "n": 0,
+                "denominator": 0,
+                "percent": null
+              },
+              "correct_refusals": {
+                "n": 0,
+                "denominator": 0,
+                "percent": null
+              },
+              "false_refusals": {
+                "n": 0,
+                "denominator": 0,
+                "percent": null
+              }
+            },
+            "final": {
+              "valid": {
+                "n": 0,
+                "denominator": 0,
+                "percent": null
+              },
+              "strict": {
+                "n": 0,
+                "denominator": 0,
+                "percent": null
+              },
+              "value": {
+                "n": 0,
+                "denominator": 0,
+                "percent": null
+              },
+              "language": {
+                "n": 0,
+                "denominator": 0,
+                "percent": null
+              },
+              "refused": {
+                "n": 0,
+                "denominator": 0,
+                "percent": null
+              },
+              "supported_among_substantive": {
+                "n": 0,
+                "denominator": 0,
+                "percent": null
+              },
+              "correct_refusals": {
+                "n": 0,
+                "denominator": 0,
+                "percent": null
+              },
+              "false_refusals": {
+                "n": 0,
+                "denominator": 0,
+                "percent": null
+              }
+            }
+          }
+        }
+      }
+    },
+    "fresh_long": {
+      "distinct_questions": 21,
+      "distinct_messages": 21,
+      "arms": {
+        "256": {
+          "logical": 21,
+          "distinct_questions": 21,
+          "http_200": {
+            "n": 13,
+            "denominator": 21,
+            "percent": 61.9
+          },
+          "first_json_parseable": {
+            "n": 13,
+            "denominator": 21,
+            "percent": 61.9
+          },
+          "physical": 28,
+          "corrections": 7,
+          "cost_cny": "0.04853548",
+          "latency_ms": {
+            "p50": 2696.45,
+            "p95": 3640.48
+          },
+          "input_tokens": 47075,
+          "output_tokens": 5320,
+          "cached_tokens": 20224,
+          "first": {
+            "valid": {
+              "n": 6,
+              "denominator": 21,
+              "percent": 28.57
+            },
+            "strict": {
+              "n": 3,
+              "denominator": 21,
+              "percent": 14.29
+            },
+            "value": {
+              "n": 4,
+              "denominator": 21,
+              "percent": 19.05
+            },
+            "language": {
+              "n": 6,
+              "denominator": 21,
+              "percent": 28.57
+            },
+            "refused": {
+              "n": 3,
+              "denominator": 21,
+              "percent": 14.29
+            },
+            "supported_among_substantive": {
+              "n": 2,
+              "denominator": 3,
+              "percent": 66.67
+            },
+            "correct_refusals": {
+              "n": 1,
+              "denominator": 7,
+              "percent": 14.29
+            },
+            "false_refusals": {
+              "n": 2,
+              "denominator": 14,
+              "percent": 14.29
+            }
+          },
+          "final": {
+            "valid": {
+              "n": 13,
+              "denominator": 21,
+              "percent": 61.9
+            },
+            "strict": {
+              "n": 8,
+              "denominator": 21,
+              "percent": 38.1
+            },
+            "value": {
+              "n": 9,
+              "denominator": 21,
+              "percent": 42.86
+            },
+            "language": {
+              "n": 13,
+              "denominator": 21,
+              "percent": 61.9
+            },
+            "refused": {
+              "n": 10,
+              "denominator": 21,
+              "percent": 47.62
+            },
+            "supported_among_substantive": {
+              "n": 2,
+              "denominator": 3,
+              "percent": 66.67
+            },
+            "correct_refusals": {
+              "n": 6,
+              "denominator": 7,
+              "percent": 85.71
+            },
+            "false_refusals": {
+              "n": 4,
+              "denominator": 14,
+              "percent": 28.57
+            }
+          }
+        },
+        "2048": {
+          "logical": 21,
+          "distinct_questions": 21,
+          "http_200": {
+            "n": 21,
+            "denominator": 21,
+            "percent": 100.0
+          },
+          "first_json_parseable": {
+            "n": 21,
+            "denominator": 21,
+            "percent": 100.0
+          },
+          "physical": 26,
+          "corrections": 5,
+          "cost_cny": "0.05378352",
+          "latency_ms": {
+            "p50": 2204.34,
+            "p95": 5104.66
+          },
+          "input_tokens": 43192,
+          "output_tokens": 7101,
+          "cached_tokens": 18176,
+          "first": {
+            "valid": {
+              "n": 16,
+              "denominator": 21,
+              "percent": 76.19
+            },
+            "strict": {
+              "n": 9,
+              "denominator": 21,
+              "percent": 42.86
+            },
+            "value": {
+              "n": 10,
+              "denominator": 21,
+              "percent": 47.62
+            },
+            "language": {
+              "n": 16,
+              "denominator": 21,
+              "percent": 76.19
+            },
+            "refused": {
+              "n": 10,
+              "denominator": 21,
+              "percent": 47.62
+            },
+            "supported_among_substantive": {
+              "n": 5,
+              "denominator": 6,
+              "percent": 83.33
+            },
+            "correct_refusals": {
+              "n": 4,
+              "denominator": 7,
+              "percent": 57.14
+            },
+            "false_refusals": {
+              "n": 6,
+              "denominator": 14,
+              "percent": 42.86
+            }
+          },
+          "final": {
+            "valid": {
+              "n": 21,
+              "denominator": 21,
+              "percent": 100.0
+            },
+            "strict": {
+              "n": 12,
+              "denominator": 21,
+              "percent": 57.14
+            },
+            "value": {
+              "n": 13,
+              "denominator": 21,
+              "percent": 61.9
+            },
+            "language": {
+              "n": 21,
+              "denominator": 21,
+              "percent": 100.0
+            },
+            "refused": {
+              "n": 15,
+              "denominator": 21,
+              "percent": 71.43
+            },
+            "supported_among_substantive": {
+              "n": 5,
+              "denominator": 6,
+              "percent": 83.33
+            },
+            "correct_refusals": {
+              "n": 7,
+              "denominator": 7,
+              "percent": 100.0
+            },
+            "false_refusals": {
+              "n": 8,
+              "denominator": 14,
+              "percent": 57.14
+            }
+          }
+        }
+      },
+      "paired": {
+        "http_200": {
+          "low_failures_recovered": {
+            "n": 8,
+            "denominator": 8,
+            "percent": 100.0
+          },
+          "lost": 0,
+          "net": 8,
+          "lost_qids": [],
+          "lost_ids": []
+        },
+        "first_json_parseable": {
+          "low_failures_recovered": {
+            "n": 8,
+            "denominator": 8,
+            "percent": 100.0
+          },
+          "lost": 0,
+          "net": 8,
+          "lost_qids": [],
+          "lost_ids": []
+        },
+        "first_strict": {
+          "low_failures_recovered": {
+            "n": 7,
+            "denominator": 18,
+            "percent": 38.89
+          },
+          "lost": 1,
+          "net": 6,
+          "lost_qids": [
+            "2hop__8556_47169"
+          ],
+          "lost_ids": [
+            "2hop__8556_47169"
+          ]
+        },
+        "first_correct_refusal": {
+          "low_failures_recovered": {
+            "n": 4,
+            "denominator": 20,
+            "percent": 20.0
+          },
+          "lost": 1,
+          "net": 3,
+          "lost_qids": [
+            "2hop__8556_47169"
+          ],
+          "lost_ids": [
+            "2hop__8556_47169"
+          ]
+        },
+        "first_supported_substantive": {
+          "low_failures_recovered": {
+            "n": 3,
+            "denominator": 19,
+            "percent": 15.79
+          },
+          "lost": 0,
+          "net": 3,
+          "lost_qids": [],
+          "lost_ids": []
+        },
+        "final_strict": {
+          "low_failures_recovered": {
+            "n": 4,
+            "denominator": 13,
+            "percent": 30.77
+          },
+          "lost": 0,
+          "net": 4,
+          "lost_qids": [],
+          "lost_ids": []
+        },
+        "final_correct_refusal": {
+          "low_failures_recovered": {
+            "n": 1,
+            "denominator": 15,
+            "percent": 6.67
+          },
+          "lost": 0,
+          "net": 1,
+          "lost_qids": [],
+          "lost_ids": []
+        },
+        "final_supported_substantive": {
+          "low_failures_recovered": {
+            "n": 3,
+            "denominator": 19,
+            "percent": 15.79
+          },
+          "lost": 0,
+          "net": 3,
+          "lost_qids": [],
+          "lost_ids": []
+        },
+        "among_current_256_http_502": {
+          "rows": 8,
+          "distinct_questions": 8,
+          "higher_http_200": {
+            "n": 8,
+            "denominator": 8,
+            "percent": 100.0
+          },
+          "higher_first_json_parseable": {
+            "n": 8,
+            "denominator": 8,
+            "percent": 100.0
+          },
+          "higher_first_strict": {
+            "n": 4,
+            "denominator": 8,
+            "percent": 50.0
+          },
+          "higher_final_strict": {
+            "n": 4,
+            "denominator": 8,
+            "percent": 50.0
+          }
+        }
+      },
+      "answerable_all_gold_sources_visible": {
+        "n": 10,
+        "denominator": 14,
+        "percent": 71.43
+      },
+      "missing_gold_source_qids": [
+        "2hop__59025_383079",
+        "2hop__61204_71972",
+        "2hop__68083_86951",
+        "2hop__727699_83854"
+      ],
+      "answerable_all_gold_passages_fully_visible": {
+        "n": 10,
+        "denominator": 14,
+        "percent": 71.43
+      },
+      "correctness_by_gold_passage_visibility": {
+        "True": {
+          "256": {
+            "logical": 10,
+            "distinct_questions": 10,
+            "http_200": {
+              "n": 5,
+              "denominator": 10,
+              "percent": 50.0
+            },
+            "first_json_parseable": {
+              "n": 5,
+              "denominator": 10,
+              "percent": 50.0
+            },
+            "physical": 11,
+            "corrections": 1,
+            "cost_cny": "0.02043136",
+            "latency_ms": {
+              "p50": 2410.17,
+              "p95": 3409.67
+            },
+            "input_tokens": 17884,
+            "output_tokens": 2393,
+            "cached_tokens": 7168,
+            "first": {
+              "valid": {
+                "n": 4,
+                "denominator": 10,
+                "percent": 40.0
+              },
+              "strict": {
+                "n": 2,
+                "denominator": 10,
+                "percent": 20.0
+              },
+              "value": {
+                "n": 3,
+                "denominator": 10,
+                "percent": 30.0
+              },
+              "language": {
+                "n": 4,
+                "denominator": 10,
+                "percent": 40.0
+              },
+              "refused": {
+                "n": 1,
+                "denominator": 10,
+                "percent": 10.0
+              },
+              "supported_among_substantive": {
+                "n": 2,
+                "denominator": 3,
+                "percent": 66.67
+              },
+              "correct_refusals": {
+                "n": 0,
+                "denominator": 0,
+                "percent": null
+              },
+              "false_refusals": {
+                "n": 1,
+                "denominator": 10,
+                "percent": 10.0
+              }
+            },
+            "final": {
+              "valid": {
+                "n": 5,
+                "denominator": 10,
+                "percent": 50.0
+              },
+              "strict": {
+                "n": 2,
+                "denominator": 10,
+                "percent": 20.0
+              },
+              "value": {
+                "n": 3,
+                "denominator": 10,
+                "percent": 30.0
+              },
+              "language": {
+                "n": 5,
+                "denominator": 10,
+                "percent": 50.0
+              },
+              "refused": {
+                "n": 2,
+                "denominator": 10,
+                "percent": 20.0
+              },
+              "supported_among_substantive": {
+                "n": 2,
+                "denominator": 3,
+                "percent": 66.67
+              },
+              "correct_refusals": {
+                "n": 0,
+                "denominator": 0,
+                "percent": null
+              },
+              "false_refusals": {
+                "n": 2,
+                "denominator": 10,
+                "percent": 20.0
+              }
+            }
+          },
+          "2048": {
+            "logical": 10,
+            "distinct_questions": 10,
+            "http_200": {
+              "n": 10,
+              "denominator": 10,
+              "percent": 100.0
+            },
+            "first_json_parseable": {
+              "n": 10,
+              "denominator": 10,
+              "percent": 100.0
+            },
+            "physical": 11,
+            "corrections": 1,
+            "cost_cny": "0.03102476",
+            "latency_ms": {
+              "p50": 2699.36,
+              "p95": 8181.76
+            },
+            "input_tokens": 17783,
+            "output_tokens": 4753,
+            "cached_tokens": 5888,
+            "first": {
+              "valid": {
+                "n": 9,
+                "denominator": 10,
+                "percent": 90.0
+              },
+              "strict": {
+                "n": 5,
+                "denominator": 10,
+                "percent": 50.0
+              },
+              "value": {
+                "n": 6,
+                "denominator": 10,
+                "percent": 60.0
+              },
+              "language": {
+                "n": 9,
+                "denominator": 10,
+                "percent": 90.0
+              },
+              "refused": {
+                "n": 3,
+                "denominator": 10,
+                "percent": 30.0
+              },
+              "supported_among_substantive": {
+                "n": 5,
+                "denominator": 6,
+                "percent": 83.33
+              },
+              "correct_refusals": {
+                "n": 0,
+                "denominator": 0,
+                "percent": null
+              },
+              "false_refusals": {
+                "n": 3,
+                "denominator": 10,
+                "percent": 30.0
+              }
+            },
+            "final": {
+              "valid": {
+                "n": 10,
+                "denominator": 10,
+                "percent": 100.0
+              },
+              "strict": {
+                "n": 5,
+                "denominator": 10,
+                "percent": 50.0
+              },
+              "value": {
+                "n": 6,
+                "denominator": 10,
+                "percent": 60.0
+              },
+              "language": {
+                "n": 10,
+                "denominator": 10,
+                "percent": 100.0
+              },
+              "refused": {
+                "n": 4,
+                "denominator": 10,
+                "percent": 40.0
+              },
+              "supported_among_substantive": {
+                "n": 5,
+                "denominator": 6,
+                "percent": 83.33
+              },
+              "correct_refusals": {
+                "n": 0,
+                "denominator": 0,
+                "percent": null
+              },
+              "false_refusals": {
+                "n": 4,
+                "denominator": 10,
+                "percent": 40.0
+              }
+            }
+          }
+        },
+        "False": {
+          "256": {
+            "logical": 4,
+            "distinct_questions": 4,
+            "http_200": {
+              "n": 2,
+              "denominator": 4,
+              "percent": 50.0
+            },
+            "first_json_parseable": {
+              "n": 2,
+              "denominator": 4,
+              "percent": 50.0
+            },
+            "physical": 5,
+            "corrections": 1,
+            "cost_cny": "0.00980420",
+            "latency_ms": {
+              "p50": 2363.59,
+              "p95": 3025.93
+            },
+            "input_tokens": 8353,
+            "output_tokens": 990,
+            "cached_tokens": 2560,
+            "first": {
+              "valid": {
+                "n": 1,
+                "denominator": 4,
+                "percent": 25.0
+              },
+              "strict": {
+                "n": 0,
+                "denominator": 4,
+                "percent": 0.0
+              },
+              "value": {
+                "n": 0,
+                "denominator": 4,
+                "percent": 0.0
+              },
+              "language": {
+                "n": 1,
+                "denominator": 4,
+                "percent": 25.0
+              },
+              "refused": {
+                "n": 1,
+                "denominator": 4,
+                "percent": 25.0
+              },
+              "supported_among_substantive": {
+                "n": 0,
+                "denominator": 0,
+                "percent": null
+              },
+              "correct_refusals": {
+                "n": 0,
+                "denominator": 0,
+                "percent": null
+              },
+              "false_refusals": {
+                "n": 1,
+                "denominator": 4,
+                "percent": 25.0
+              }
+            },
+            "final": {
+              "valid": {
+                "n": 2,
+                "denominator": 4,
+                "percent": 50.0
+              },
+              "strict": {
+                "n": 0,
+                "denominator": 4,
+                "percent": 0.0
+              },
+              "value": {
+                "n": 0,
+                "denominator": 4,
+                "percent": 0.0
+              },
+              "language": {
+                "n": 2,
+                "denominator": 4,
+                "percent": 50.0
+              },
+              "refused": {
+                "n": 2,
+                "denominator": 4,
+                "percent": 50.0
+              },
+              "supported_among_substantive": {
+                "n": 0,
+                "denominator": 0,
+                "percent": null
+              },
+              "correct_refusals": {
+                "n": 0,
+                "denominator": 0,
+                "percent": null
+              },
+              "false_refusals": {
+                "n": 2,
+                "denominator": 4,
+                "percent": 50.0
+              }
+            }
+          },
+          "2048": {
+            "logical": 4,
+            "distinct_questions": 4,
+            "http_200": {
+              "n": 4,
+              "denominator": 4,
+              "percent": 100.0
+            },
+            "first_json_parseable": {
+              "n": 4,
+              "denominator": 4,
+              "percent": 100.0
+            },
+            "physical": 5,
+            "corrections": 1,
+            "cost_cny": "0.00608664",
+            "latency_ms": {
+              "p50": 1993.03,
+              "p95": 3714.48
+            },
+            "input_tokens": 8358,
+            "output_tokens": 812,
+            "cached_tokens": 5632,
+            "first": {
+              "valid": {
+                "n": 3,
+                "denominator": 4,
+                "percent": 75.0
+              },
+              "strict": {
+                "n": 0,
+                "denominator": 4,
+                "percent": 0.0
+              },
+              "value": {
+                "n": 0,
+                "denominator": 4,
+                "percent": 0.0
+              },
+              "language": {
+                "n": 3,
+                "denominator": 4,
+                "percent": 75.0
+              },
+              "refused": {
+                "n": 3,
+                "denominator": 4,
+                "percent": 75.0
+              },
+              "supported_among_substantive": {
+                "n": 0,
+                "denominator": 0,
+                "percent": null
+              },
+              "correct_refusals": {
+                "n": 0,
+                "denominator": 0,
+                "percent": null
+              },
+              "false_refusals": {
+                "n": 3,
+                "denominator": 4,
+                "percent": 75.0
+              }
+            },
+            "final": {
+              "valid": {
+                "n": 4,
+                "denominator": 4,
+                "percent": 100.0
+              },
+              "strict": {
+                "n": 0,
+                "denominator": 4,
+                "percent": 0.0
+              },
+              "value": {
+                "n": 0,
+                "denominator": 4,
+                "percent": 0.0
+              },
+              "language": {
+                "n": 4,
+                "denominator": 4,
+                "percent": 100.0
+              },
+              "refused": {
+                "n": 4,
+                "denominator": 4,
+                "percent": 100.0
+              },
+              "supported_among_substantive": {
+                "n": 0,
+                "denominator": 0,
+                "percent": null
+              },
+              "correct_refusals": {
+                "n": 0,
+                "denominator": 0,
+                "percent": null
+              },
+              "false_refusals": {
+                "n": 4,
+                "denominator": 4,
+                "percent": 100.0
+              }
+            }
+          }
+        }
+      }
+    },
+    "target": {
+      "distinct_questions": 3,
+      "distinct_messages": 4,
+      "arms": {
+        "256": {
+          "logical": 4,
+          "distinct_questions": 3,
+          "http_200": {
+            "n": 3,
+            "denominator": 4,
+            "percent": 75.0
+          },
+          "first_json_parseable": {
+            "n": 3,
+            "denominator": 4,
+            "percent": 75.0
+          },
+          "physical": 5,
+          "corrections": 1,
+          "cost_cny": "0.00667972",
+          "latency_ms": {
+            "p50": 2117.41,
+            "p95": 2690.27
+          },
+          "input_tokens": 5413,
+          "output_tokens": 693,
+          "cached_tokens": 1536,
+          "first": {
+            "valid": {
+              "n": 2,
+              "denominator": 4,
+              "percent": 50.0
+            },
+            "strict": {
+              "n": 2,
+              "denominator": 4,
+              "percent": 50.0
+            },
+            "value": {
+              "n": 2,
+              "denominator": 4,
+              "percent": 50.0
+            },
+            "language": {
+              "n": 2,
+              "denominator": 4,
+              "percent": 50.0
+            },
+            "refused": {
+              "n": 1,
+              "denominator": 4,
+              "percent": 25.0
+            },
+            "supported_among_substantive": {
+              "n": 1,
+              "denominator": 1,
+              "percent": 100.0
+            },
+            "correct_refusals": {
+              "n": 1,
+              "denominator": 2,
+              "percent": 50.0
+            },
+            "false_refusals": {
+              "n": 0,
+              "denominator": 2,
+              "percent": 0.0
+            }
+          },
+          "final": {
+            "valid": {
+              "n": 3,
+              "denominator": 4,
+              "percent": 75.0
+            },
+            "strict": {
+              "n": 3,
+              "denominator": 4,
+              "percent": 75.0
+            },
+            "value": {
+              "n": 3,
+              "denominator": 4,
+              "percent": 75.0
+            },
+            "language": {
+              "n": 3,
+              "denominator": 4,
+              "percent": 75.0
+            },
+            "refused": {
+              "n": 1,
+              "denominator": 4,
+              "percent": 25.0
+            },
+            "supported_among_substantive": {
+              "n": 2,
+              "denominator": 2,
+              "percent": 100.0
+            },
+            "correct_refusals": {
+              "n": 1,
+              "denominator": 2,
+              "percent": 50.0
+            },
+            "false_refusals": {
+              "n": 0,
+              "denominator": 2,
+              "percent": 0.0
+            }
+          }
+        },
+        "2048": {
+          "logical": 4,
+          "distinct_questions": 3,
+          "http_200": {
+            "n": 4,
+            "denominator": 4,
+            "percent": 100.0
+          },
+          "first_json_parseable": {
+            "n": 4,
+            "denominator": 4,
+            "percent": 100.0
+          },
+          "physical": 6,
+          "corrections": 2,
+          "cost_cny": "0.00638152",
+          "latency_ms": {
+            "p50": 2082.97,
+            "p95": 3458.91
+          },
+          "input_tokens": 8994,
+          "output_tokens": 664,
+          "cached_tokens": 5376,
+          "first": {
+            "valid": {
+              "n": 2,
+              "denominator": 4,
+              "percent": 50.0
+            },
+            "strict": {
+              "n": 2,
+              "denominator": 4,
+              "percent": 50.0
+            },
+            "value": {
+              "n": 2,
+              "denominator": 4,
+              "percent": 50.0
+            },
+            "language": {
+              "n": 2,
+              "denominator": 4,
+              "percent": 50.0
+            },
+            "refused": {
+              "n": 0,
+              "denominator": 4,
+              "percent": 0.0
+            },
+            "supported_among_substantive": {
+              "n": 2,
+              "denominator": 2,
+              "percent": 100.0
+            },
+            "correct_refusals": {
+              "n": 0,
+              "denominator": 2,
+              "percent": 0.0
+            },
+            "false_refusals": {
+              "n": 0,
+              "denominator": 2,
+              "percent": 0.0
+            }
+          },
+          "final": {
+            "valid": {
+              "n": 4,
+              "denominator": 4,
+              "percent": 100.0
+            },
+            "strict": {
+              "n": 4,
+              "denominator": 4,
+              "percent": 100.0
+            },
+            "value": {
+              "n": 4,
+              "denominator": 4,
+              "percent": 100.0
+            },
+            "language": {
+              "n": 4,
+              "denominator": 4,
+              "percent": 100.0
+            },
+            "refused": {
+              "n": 2,
+              "denominator": 4,
+              "percent": 50.0
+            },
+            "supported_among_substantive": {
+              "n": 2,
+              "denominator": 2,
+              "percent": 100.0
+            },
+            "correct_refusals": {
+              "n": 2,
+              "denominator": 2,
+              "percent": 100.0
+            },
+            "false_refusals": {
+              "n": 0,
+              "denominator": 2,
+              "percent": 0.0
+            }
+          }
+        }
+      },
+      "paired": {
+        "http_200": {
+          "low_failures_recovered": {
+            "n": 1,
+            "denominator": 1,
+            "percent": 100.0
+          },
+          "lost": 0,
+          "net": 1,
+          "lost_qids": [],
+          "lost_ids": []
+        },
+        "first_json_parseable": {
+          "low_failures_recovered": {
+            "n": 1,
+            "denominator": 1,
+            "percent": 100.0
+          },
+          "lost": 0,
+          "net": 1,
+          "lost_qids": [],
+          "lost_ids": []
+        },
+        "first_strict": {
+          "low_failures_recovered": {
+            "n": 1,
+            "denominator": 2,
+            "percent": 50.0
+          },
+          "lost": 1,
+          "net": 0,
+          "lost_qids": [
+            "W13"
+          ],
+          "lost_ids": [
+            "W13-9c03df7c91a4"
+          ]
+        },
+        "first_correct_refusal": {
+          "low_failures_recovered": {
+            "n": 0,
+            "denominator": 3,
+            "percent": 0.0
+          },
+          "lost": 1,
+          "net": -1,
+          "lost_qids": [
+            "W13"
+          ],
+          "lost_ids": [
+            "W13-9c03df7c91a4"
+          ]
+        },
+        "first_supported_substantive": {
+          "low_failures_recovered": {
+            "n": 1,
+            "denominator": 3,
+            "percent": 33.33
+          },
+          "lost": 0,
+          "net": 1,
+          "lost_qids": [],
+          "lost_ids": []
+        },
+        "final_strict": {
+          "low_failures_recovered": {
+            "n": 1,
+            "denominator": 1,
+            "percent": 100.0
+          },
+          "lost": 0,
+          "net": 1,
+          "lost_qids": [],
+          "lost_ids": []
+        },
+        "final_correct_refusal": {
+          "low_failures_recovered": {
+            "n": 1,
+            "denominator": 3,
+            "percent": 33.33
+          },
+          "lost": 0,
+          "net": 1,
+          "lost_qids": [],
+          "lost_ids": []
+        },
+        "final_supported_substantive": {
+          "low_failures_recovered": {
+            "n": 0,
+            "denominator": 2,
+            "percent": 0.0
+          },
+          "lost": 0,
+          "net": 0,
+          "lost_qids": [],
+          "lost_ids": []
+        },
+        "among_current_256_http_502": {
+          "rows": 1,
+          "distinct_questions": 1,
+          "higher_http_200": {
+            "n": 1,
+            "denominator": 1,
+            "percent": 100.0
+          },
+          "higher_first_json_parseable": {
+            "n": 1,
+            "denominator": 1,
+            "percent": 100.0
+          },
+          "higher_first_strict": {
+            "n": 0,
+            "denominator": 1,
+            "percent": 0.0
+          },
+          "higher_final_strict": {
+            "n": 1,
+            "denominator": 1,
+            "percent": 100.0
+          }
+        }
+      },
+      "by_qid": {
+        "B006": {
+          "http_200": {
+            "low_failures_recovered": {
+              "n": 0,
+              "denominator": 0,
+              "percent": null
+            },
+            "lost": 0,
+            "net": 0,
+            "lost_qids": [],
+            "lost_ids": []
+          },
+          "first_json_parseable": {
+            "low_failures_recovered": {
+              "n": 0,
+              "denominator": 0,
+              "percent": null
+            },
+            "lost": 0,
+            "net": 0,
+            "lost_qids": [],
+            "lost_ids": []
+          },
+          "first_strict": {
+            "low_failures_recovered": {
+              "n": 1,
+              "denominator": 1,
+              "percent": 100.0
+            },
+            "lost": 0,
+            "net": 1,
+            "lost_qids": [],
+            "lost_ids": []
+          },
+          "first_correct_refusal": {
+            "low_failures_recovered": {
+              "n": 0,
+              "denominator": 1,
+              "percent": 0.0
+            },
+            "lost": 0,
+            "net": 0,
+            "lost_qids": [],
+            "lost_ids": []
+          },
+          "first_supported_substantive": {
+            "low_failures_recovered": {
+              "n": 1,
+              "denominator": 1,
+              "percent": 100.0
+            },
+            "lost": 0,
+            "net": 1,
+            "lost_qids": [],
+            "lost_ids": []
+          },
+          "final_strict": {
+            "low_failures_recovered": {
+              "n": 0,
+              "denominator": 0,
+              "percent": null
+            },
+            "lost": 0,
+            "net": 0,
+            "lost_qids": [],
+            "lost_ids": []
+          },
+          "final_correct_refusal": {
+            "low_failures_recovered": {
+              "n": 0,
+              "denominator": 1,
+              "percent": 0.0
+            },
+            "lost": 0,
+            "net": 0,
+            "lost_qids": [],
+            "lost_ids": []
+          },
+          "final_supported_substantive": {
+            "low_failures_recovered": {
+              "n": 0,
+              "denominator": 0,
+              "percent": null
+            },
+            "lost": 0,
+            "net": 0,
+            "lost_qids": [],
+            "lost_ids": []
+          },
+          "among_current_256_http_502": {
+            "rows": 0,
+            "distinct_questions": 0,
+            "higher_http_200": {
+              "n": 0,
+              "denominator": 0,
+              "percent": null
+            },
+            "higher_first_json_parseable": {
+              "n": 0,
+              "denominator": 0,
+              "percent": null
+            },
+            "higher_first_strict": {
+              "n": 0,
+              "denominator": 0,
+              "percent": null
+            },
+            "higher_final_strict": {
+              "n": 0,
+              "denominator": 0,
+              "percent": null
+            }
+          }
+        },
+        "R092": {
+          "http_200": {
+            "low_failures_recovered": {
+              "n": 0,
+              "denominator": 0,
+              "percent": null
+            },
+            "lost": 0,
+            "net": 0,
+            "lost_qids": [],
+            "lost_ids": []
+          },
+          "first_json_parseable": {
+            "low_failures_recovered": {
+              "n": 0,
+              "denominator": 0,
+              "percent": null
+            },
+            "lost": 0,
+            "net": 0,
+            "lost_qids": [],
+            "lost_ids": []
+          },
+          "first_strict": {
+            "low_failures_recovered": {
+              "n": 0,
+              "denominator": 0,
+              "percent": null
+            },
+            "lost": 0,
+            "net": 0,
+            "lost_qids": [],
+            "lost_ids": []
+          },
+          "first_correct_refusal": {
+            "low_failures_recovered": {
+              "n": 0,
+              "denominator": 1,
+              "percent": 0.0
+            },
+            "lost": 0,
+            "net": 0,
+            "lost_qids": [],
+            "lost_ids": []
+          },
+          "first_supported_substantive": {
+            "low_failures_recovered": {
+              "n": 0,
+              "denominator": 0,
+              "percent": null
+            },
+            "lost": 0,
+            "net": 0,
+            "lost_qids": [],
+            "lost_ids": []
+          },
+          "final_strict": {
+            "low_failures_recovered": {
+              "n": 0,
+              "denominator": 0,
+              "percent": null
+            },
+            "lost": 0,
+            "net": 0,
+            "lost_qids": [],
+            "lost_ids": []
+          },
+          "final_correct_refusal": {
+            "low_failures_recovered": {
+              "n": 0,
+              "denominator": 1,
+              "percent": 0.0
+            },
+            "lost": 0,
+            "net": 0,
+            "lost_qids": [],
+            "lost_ids": []
+          },
+          "final_supported_substantive": {
+            "low_failures_recovered": {
+              "n": 0,
+              "denominator": 0,
+              "percent": null
+            },
+            "lost": 0,
+            "net": 0,
+            "lost_qids": [],
+            "lost_ids": []
+          },
+          "among_current_256_http_502": {
+            "rows": 0,
+            "distinct_questions": 0,
+            "higher_http_200": {
+              "n": 0,
+              "denominator": 0,
+              "percent": null
+            },
+            "higher_first_json_parseable": {
+              "n": 0,
+              "denominator": 0,
+              "percent": null
+            },
+            "higher_first_strict": {
+              "n": 0,
+              "denominator": 0,
+              "percent": null
+            },
+            "higher_final_strict": {
+              "n": 0,
+              "denominator": 0,
+              "percent": null
+            }
+          }
+        },
+        "W13": {
+          "http_200": {
+            "low_failures_recovered": {
+              "n": 1,
+              "denominator": 1,
+              "percent": 100.0
+            },
+            "lost": 0,
+            "net": 1,
+            "lost_qids": [],
+            "lost_ids": []
+          },
+          "first_json_parseable": {
+            "low_failures_recovered": {
+              "n": 1,
+              "denominator": 1,
+              "percent": 100.0
+            },
+            "lost": 0,
+            "net": 1,
+            "lost_qids": [],
+            "lost_ids": []
+          },
+          "first_strict": {
+            "low_failures_recovered": {
+              "n": 0,
+              "denominator": 1,
+              "percent": 0.0
+            },
+            "lost": 1,
+            "net": -1,
+            "lost_qids": [
+              "W13"
+            ],
+            "lost_ids": [
+              "W13-9c03df7c91a4"
+            ]
+          },
+          "first_correct_refusal": {
+            "low_failures_recovered": {
+              "n": 0,
+              "denominator": 1,
+              "percent": 0.0
+            },
+            "lost": 1,
+            "net": -1,
+            "lost_qids": [
+              "W13"
+            ],
+            "lost_ids": [
+              "W13-9c03df7c91a4"
+            ]
+          },
+          "first_supported_substantive": {
+            "low_failures_recovered": {
+              "n": 0,
+              "denominator": 2,
+              "percent": 0.0
+            },
+            "lost": 0,
+            "net": 0,
+            "lost_qids": [],
+            "lost_ids": []
+          },
+          "final_strict": {
+            "low_failures_recovered": {
+              "n": 1,
+              "denominator": 1,
+              "percent": 100.0
+            },
+            "lost": 0,
+            "net": 1,
+            "lost_qids": [],
+            "lost_ids": []
+          },
+          "final_correct_refusal": {
+            "low_failures_recovered": {
+              "n": 1,
+              "denominator": 1,
+              "percent": 100.0
+            },
+            "lost": 0,
+            "net": 1,
+            "lost_qids": [],
+            "lost_ids": []
+          },
+          "final_supported_substantive": {
+            "low_failures_recovered": {
+              "n": 0,
+              "denominator": 2,
+              "percent": 0.0
+            },
+            "lost": 0,
+            "net": 0,
+            "lost_qids": [],
+            "lost_ids": []
+          },
+          "among_current_256_http_502": {
+            "rows": 1,
+            "distinct_questions": 1,
+            "higher_http_200": {
+              "n": 1,
+              "denominator": 1,
+              "percent": 100.0
+            },
+            "higher_first_json_parseable": {
+              "n": 1,
+              "denominator": 1,
+              "percent": 100.0
+            },
+            "higher_first_strict": {
+              "n": 0,
+              "denominator": 1,
+              "percent": 0.0
+            },
+            "higher_final_strict": {
+              "n": 1,
+              "denominator": 1,
+              "percent": 100.0
+            }
+          }
+        }
+      }
+    },
+    "protection": {
+      "distinct_questions": 241,
+      "distinct_messages": 267,
+      "arms": {
+        "2048": {
+          "logical": 267,
+          "distinct_questions": 241,
+          "http_200": {
+            "n": 266,
+            "denominator": 267,
+            "percent": 99.63
+          },
+          "first_json_parseable": {
+            "n": 266,
+            "denominator": 267,
+            "percent": 99.63
+          },
+          "physical": 325,
+          "corrections": 58,
+          "cost_cny": "0.37238532",
+          "latency_ms": {
+            "p50": 1457.57,
+            "p95": 3339.1
+          },
+          "input_tokens": 268449,
+          "output_tokens": 37650,
+          "cached_tokens": 47616,
+          "first": {
+            "valid": {
+              "n": 208,
+              "denominator": 267,
+              "percent": 77.9
+            },
+            "strict": {
+              "n": 204,
+              "denominator": 267,
+              "percent": 76.4
+            },
+            "value": {
+              "n": 205,
+              "denominator": 267,
+              "percent": 76.78
+            },
+            "language": {
+              "n": 208,
+              "denominator": 267,
+              "percent": 77.9
+            },
+            "refused": {
+              "n": 69,
+              "denominator": 267,
+              "percent": 25.84
+            },
+            "supported_among_substantive": {
+              "n": 138,
+              "denominator": 139,
+              "percent": 99.28
+            },
+            "correct_refusals": {
+              "n": 69,
+              "denominator": 129,
+              "percent": 53.49
+            },
+            "false_refusals": {
+              "n": 0,
+              "denominator": 138,
+              "percent": 0.0
+            }
+          },
+          "final": {
+            "valid": {
+              "n": 266,
+              "denominator": 267,
+              "percent": 99.63
+            },
+            "strict": {
+              "n": 261,
+              "denominator": 267,
+              "percent": 97.75
+            },
+            "value": {
+              "n": 262,
+              "denominator": 267,
+              "percent": 98.13
+            },
+            "language": {
+              "n": 266,
+              "denominator": 267,
+              "percent": 99.63
+            },
+            "refused": {
+              "n": 127,
+              "denominator": 267,
+              "percent": 47.57
+            },
+            "supported_among_substantive": {
+              "n": 138,
+              "denominator": 139,
+              "percent": 99.28
+            },
+            "correct_refusals": {
+              "n": 126,
+              "denominator": 129,
+              "percent": 97.67
+            },
+            "false_refusals": {
+              "n": 0,
+              "denominator": 138,
+              "percent": 0.0
+            }
+          }
+        }
+      }
+    }
+  },
+  "independent_combined": {
+    "arms": {
+      "256": {
+        "logical": 61,
+        "distinct_questions": 61,
+        "http_200": {
+          "n": 49,
+          "denominator": 61,
+          "percent": 80.33
+        },
+        "first_json_parseable": {
+          "n": 50,
+          "denominator": 61,
+          "percent": 81.97
+        },
+        "physical": 83,
+        "corrections": 22,
+        "cost_cny": "0.10300752",
+        "latency_ms": {
+          "p50": 2350.41,
+          "p95": 3640.48
+        },
+        "input_tokens": 76320,
+        "output_tokens": 12693,
+        "cached_tokens": 24576,
+        "first": {
+          "valid": {
+            "n": 28,
+            "denominator": 61,
+            "percent": 45.9
+          },
+          "strict": {
+            "n": 23,
+            "denominator": 61,
+            "percent": 37.7
+          },
+          "value": {
+            "n": 25,
+            "denominator": 61,
+            "percent": 40.98
+          },
+          "language": {
+            "n": 28,
+            "denominator": 61,
+            "percent": 45.9
+          },
+          "refused": {
+            "n": 4,
+            "denominator": 61,
+            "percent": 6.56
+          },
+          "supported_among_substantive": {
+            "n": 22,
+            "denominator": 24,
+            "percent": 91.67
+          },
+          "correct_refusals": {
+            "n": 2,
+            "denominator": 27,
+            "percent": 7.41
+          },
+          "false_refusals": {
+            "n": 2,
+            "denominator": 34,
+            "percent": 5.88
+          }
+        },
+        "final": {
+          "valid": {
+            "n": 49,
+            "denominator": 61,
+            "percent": 80.33
+          },
+          "strict": {
+            "n": 42,
+            "denominator": 61,
+            "percent": 68.85
+          },
+          "value": {
+            "n": 44,
+            "denominator": 61,
+            "percent": 72.13
+          },
+          "language": {
+            "n": 49,
+            "denominator": 61,
+            "percent": 80.33
+          },
+          "refused": {
+            "n": 25,
+            "denominator": 61,
+            "percent": 40.98
+          },
+          "supported_among_substantive": {
+            "n": 22,
+            "denominator": 24,
+            "percent": 91.67
+          },
+          "correct_refusals": {
+            "n": 21,
+            "denominator": 27,
+            "percent": 77.78
+          },
+          "false_refusals": {
+            "n": 4,
+            "denominator": 34,
+            "percent": 11.76
+          }
+        }
+      },
+      "2048": {
+        "logical": 61,
+        "distinct_questions": 61,
+        "http_200": {
+          "n": 61,
+          "denominator": 61,
+          "percent": 100.0
+        },
+        "first_json_parseable": {
+          "n": 61,
+          "denominator": 61,
+          "percent": 100.0
+        },
+        "physical": 80,
+        "corrections": 19,
+        "cost_cny": "0.11349820",
+        "latency_ms": {
+          "p50": 2024.13,
+          "p95": 4897.29
+        },
+        "input_tokens": 71791,
+        "output_tokens": 15758,
+        "cached_tokens": 21760,
+        "first": {
+          "valid": {
+            "n": 42,
+            "denominator": 61,
+            "percent": 68.85
+          },
+          "strict": {
+            "n": 31,
+            "denominator": 61,
+            "percent": 50.82
+          },
+          "value": {
+            "n": 33,
+            "denominator": 61,
+            "percent": 54.1
+          },
+          "language": {
+            "n": 42,
+            "denominator": 61,
+            "percent": 68.85
+          },
+          "refused": {
+            "n": 13,
+            "denominator": 61,
+            "percent": 21.31
+          },
+          "supported_among_substantive": {
+            "n": 26,
+            "denominator": 29,
+            "percent": 89.66
+          },
+          "correct_refusals": {
+            "n": 7,
+            "denominator": 27,
+            "percent": 25.93
+          },
+          "false_refusals": {
+            "n": 6,
+            "denominator": 34,
+            "percent": 17.65
+          }
+        },
+        "final": {
+          "valid": {
+            "n": 61,
+            "denominator": 61,
+            "percent": 100.0
+          },
+          "strict": {
+            "n": 48,
+            "denominator": 61,
+            "percent": 78.69
+          },
+          "value": {
+            "n": 50,
+            "denominator": 61,
+            "percent": 81.97
+          },
+          "language": {
+            "n": 61,
+            "denominator": 61,
+            "percent": 100.0
+          },
+          "refused": {
+            "n": 32,
+            "denominator": 61,
+            "percent": 52.46
+          },
+          "supported_among_substantive": {
+            "n": 26,
+            "denominator": 29,
+            "percent": 89.66
+          },
+          "correct_refusals": {
+            "n": 24,
+            "denominator": 27,
+            "percent": 88.89
+          },
+          "false_refusals": {
+            "n": 8,
+            "denominator": 34,
+            "percent": 23.53
+          }
+        }
+      }
+    },
+    "paired": {
+      "http_200": {
+        "low_failures_recovered": {
+          "n": 12,
+          "denominator": 12,
+          "percent": 100.0
+        },
+        "lost": 0,
+        "net": 12,
+        "lost_qids": [],
+        "lost_ids": []
+      },
+      "first_json_parseable": {
+        "low_failures_recovered": {
+          "n": 11,
+          "denominator": 11,
+          "percent": 100.0
+        },
+        "lost": 0,
+        "net": 11,
+        "lost_qids": [],
+        "lost_ids": []
+      },
+      "first_strict": {
+        "low_failures_recovered": {
+          "n": 10,
+          "denominator": 38,
+          "percent": 26.32
+        },
+        "lost": 2,
+        "net": 8,
+        "lost_qids": [
+          "2hop__8556_47169",
+          "N035"
+        ],
+        "lost_ids": [
+          "2hop__8556_47169",
+          "N035"
+        ]
+      },
+      "first_correct_refusal": {
+        "low_failures_recovered": {
+          "n": 7,
+          "denominator": 59,
+          "percent": 11.86
+        },
+        "lost": 2,
+        "net": 5,
+        "lost_qids": [
+          "2hop__8556_47169",
+          "N035"
+        ],
+        "lost_ids": [
+          "2hop__8556_47169",
+          "N035"
+        ]
+      },
+      "first_supported_substantive": {
+        "low_failures_recovered": {
+          "n": 4,
+          "denominator": 39,
+          "percent": 10.26
+        },
+        "lost": 0,
+        "net": 4,
+        "lost_qids": [],
+        "lost_ids": []
+      },
+      "final_strict": {
+        "low_failures_recovered": {
+          "n": 6,
+          "denominator": 19,
+          "percent": 31.58
+        },
+        "lost": 0,
+        "net": 6,
+        "lost_qids": [],
+        "lost_ids": []
+      },
+      "final_correct_refusal": {
+        "low_failures_recovered": {
+          "n": 3,
+          "denominator": 40,
+          "percent": 7.5
+        },
+        "lost": 0,
+        "net": 3,
+        "lost_qids": [],
+        "lost_ids": []
+      },
+      "final_supported_substantive": {
+        "low_failures_recovered": {
+          "n": 4,
+          "denominator": 39,
+          "percent": 10.26
+        },
+        "lost": 0,
+        "net": 4,
+        "lost_qids": [],
+        "lost_ids": []
+      },
+      "among_current_256_http_502": {
+        "rows": 12,
+        "distinct_questions": 12,
+        "higher_http_200": {
+          "n": 12,
+          "denominator": 12,
+          "percent": 100.0
+        },
+        "higher_first_json_parseable": {
+          "n": 12,
+          "denominator": 12,
+          "percent": 100.0
+        },
+        "higher_first_strict": {
+          "n": 6,
+          "denominator": 12,
+          "percent": 50.0
+        },
+        "higher_final_strict": {
+          "n": 6,
+          "denominator": 12,
+          "percent": 50.0
+        }
+      }
+    }
+  },
+  "protected_stages": {
+    "first": {
+      "retained": {
+        "n": 184,
+        "denominator": 224,
+        "percent": 82.14
+      },
+      "default_control_by_group": {
+        "B": {
+          "known_strict": 77,
+          "known_incorrect": 23,
+          "unscored": 0,
+          "lost_qids": [
+            "B010",
+            "B019",
+            "B022",
+            "B037",
+            "B041",
+            "B067",
+            "B078",
+            "B084",
+            "B097"
+          ]
+        },
+        "R": {
+          "known_strict": 80,
+          "known_incorrect": 20,
+          "unscored": 0,
+          "lost_qids": [
+            "R005",
+            "R015",
+            "R023",
+            "R025",
+            "R026",
+            "R030",
+            "R047",
+            "R053",
+            "R055",
+            "R069",
+            "R076",
+            "R077",
+            "R082",
+            "R098"
+          ]
+        },
+        "W": {
+          "known_strict": 0,
+          "known_incorrect": 0,
+          "unscored": 14,
+          "lost_qids": []
+        }
+      },
+      "historically_unscored": 13,
+      "historically_scored_incorrect": 33,
+      "previously_correct_refusal_losses": [
+        "2hop__385043_53794-cc7842ae00ff",
+        "2hop__389498_7666-7af71a8a5cd5",
+        "2hop__68362_709757-ed437ff359d8",
+        "B010-f9fa31f1feea",
+        "B012-4f71a4a57b57",
+        "B019-a6b33a1d64d1",
+        "B022-36d6257f5cd6",
+        "B037-c8d09c27daee",
+        "B041-95b383fa0e6e",
+        "B042-934c1768f5eb",
+        "B044-3924dafe8454",
+        "B063-de374be4dcce",
+        "B067-536528b18365",
+        "B078-bb49b058d175",
+        "B084-27c9295a5433",
+        "B087-62b7068afc5b",
+        "B096-8b74f40eb4b2",
+        "B097-3f5975fcd6e8",
+        "R003-e6e5955e569c",
+        "R005-9792395f4933",
+        "R015-54be4be58bd1",
+        "R023-d2c47efaca06",
+        "R025-6f3196d052c7",
+        "R026-ef534d9f9c11",
+        "R030-05542f26c1d2",
+        "R047-05c62fe543d0",
+        "R053-e7e2c2c7a0c6",
+        "R055-1bebd5763122",
+        "R060-1fdd25408d58",
+        "R066-e3bcaf46a5ad",
+        "R069-e41452412e02",
+        "R076-1319ecdbf297",
+        "R077-1f4fd59807b3",
+        "R081-f466c2bc4268",
+        "R082-8c1ff205c0e3",
+        "R098-19e1a79f4bf4",
+        "W14-7fdd3bacb871"
+      ],
+      "previously_supported_answer_losses": [
+        "2hop__106185_77138-713fc7bc40ca",
+        "2hop__636562_141689-6b313a4962b9",
+        "2hop__636562_141689-a6e10149915a"
+      ],
+      "lost_ids": [
+        "2hop__106185_77138-713fc7bc40ca",
+        "2hop__385043_53794-cc7842ae00ff",
+        "2hop__389498_7666-7af71a8a5cd5",
+        "2hop__636562_141689-6b313a4962b9",
+        "2hop__636562_141689-a6e10149915a",
+        "2hop__68362_709757-ed437ff359d8",
+        "B010-f9fa31f1feea",
+        "B012-4f71a4a57b57",
+        "B019-a6b33a1d64d1",
+        "B022-36d6257f5cd6",
+        "B037-c8d09c27daee",
+        "B041-95b383fa0e6e",
+        "B042-934c1768f5eb",
+        "B044-3924dafe8454",
+        "B063-de374be4dcce",
+        "B067-536528b18365",
+        "B078-bb49b058d175",
+        "B084-27c9295a5433",
+        "B087-62b7068afc5b",
+        "B096-8b74f40eb4b2",
+        "B097-3f5975fcd6e8",
+        "R003-e6e5955e569c",
+        "R005-9792395f4933",
+        "R015-54be4be58bd1",
+        "R023-d2c47efaca06",
+        "R025-6f3196d052c7",
+        "R026-ef534d9f9c11",
+        "R030-05542f26c1d2",
+        "R047-05c62fe543d0",
+        "R053-e7e2c2c7a0c6",
+        "R055-1bebd5763122",
+        "R060-1fdd25408d58",
+        "R066-e3bcaf46a5ad",
+        "R069-e41452412e02",
+        "R076-1319ecdbf297",
+        "R077-1f4fd59807b3",
+        "R081-f466c2bc4268",
+        "R082-8c1ff205c0e3",
+        "R098-19e1a79f4bf4",
+        "W14-7fdd3bacb871"
+      ],
+      "lost_qids": [
+        "2hop__106185_77138",
+        "2hop__385043_53794",
+        "2hop__389498_7666",
+        "2hop__636562_141689",
+        "2hop__68362_709757",
+        "B010",
+        "B012",
+        "B019",
+        "B022",
+        "B037",
+        "B041",
+        "B042",
+        "B044",
+        "B063",
+        "B067",
+        "B078",
+        "B084",
+        "B087",
+        "B096",
+        "B097",
+        "R003",
+        "R005",
+        "R015",
+        "R023",
+        "R025",
+        "R026",
+        "R030",
+        "R047",
+        "R053",
+        "R055",
+        "R060",
+        "R066",
+        "R069",
+        "R076",
+        "R077",
+        "R081",
+        "R082",
+        "R098",
+        "W14"
+      ]
+    },
+    "final": {
+      "retained": {
+        "n": 251,
+        "denominator": 257,
+        "percent": 97.67
+      },
+      "default_control_by_group": {
+        "B": {
+          "known_strict": 96,
+          "known_incorrect": 4,
+          "unscored": 0,
+          "lost_qids": [
+            "B097"
+          ]
+        },
+        "R": {
+          "known_strict": 98,
+          "known_incorrect": 2,
+          "unscored": 0,
+          "lost_qids": [
+            "R005"
+          ]
+        },
+        "W": {
+          "known_strict": 0,
+          "known_incorrect": 0,
+          "unscored": 14,
+          "lost_qids": []
+        }
+      },
+      "historically_unscored": 13,
+      "historically_scored_incorrect": 0,
+      "previously_correct_refusal_losses": [
+        "B097-3f5975fcd6e8",
+        "R005-9792395f4933",
+        "W14-7fdd3bacb871"
+      ],
+      "previously_supported_answer_losses": [
+        "2hop__106185_77138-713fc7bc40ca",
+        "2hop__636562_141689-6b313a4962b9",
+        "2hop__636562_141689-a6e10149915a"
+      ],
+      "lost_ids": [
+        "2hop__106185_77138-713fc7bc40ca",
+        "2hop__636562_141689-6b313a4962b9",
+        "2hop__636562_141689-a6e10149915a",
+        "B097-3f5975fcd6e8",
+        "R005-9792395f4933",
+        "W14-7fdd3bacb871"
+      ],
+      "lost_qids": [
+        "2hop__106185_77138",
+        "2hop__636562_141689",
+        "B097",
+        "R005",
+        "W14"
+      ]
+    }
+  },
+  "gate_checks": {
+    "all_registered_cohorts_observed": true,
+    "both_failure_classes_gain_final_structure": true,
+    "independent_net_strict_gain_at_first_or_final": true,
+    "no_independent_strict_losses": false,
+    "no_independent_refusal_or_support_losses": false,
+    "no_paired_correct_refusal_or_supported_answer_losses": false,
+    "no_archived_strict_losses": false
+  },
+  "passes_registered_gate": false,
+  "by_cap": {
+    "256": {
+      "logical": 122,
+      "distinct_questions": 102,
+      "http_200": {
+        "n": 68,
+        "denominator": 122,
+        "percent": 55.74
+      },
+      "first_json_parseable": {
+        "n": 69,
+        "denominator": 122,
+        "percent": 56.56
+      },
+      "physical": 149,
+      "corrections": 27,
+      "cost_cny": "0.21744920",
+      "latency_ms": {
+        "p50": 2401.46,
+        "p95": 3822.65
+      },
+      "input_tokens": 178070,
+      "output_tokens": 27720,
+      "cached_tokens": 72960,
+      "first": {
+        "valid": {
+          "n": 42,
+          "denominator": 122,
+          "percent": 34.43
+        },
+        "strict": {
+          "n": 31,
+          "denominator": 122,
+          "percent": 25.41
+        },
+        "value": {
+          "n": 34,
+          "denominator": 122,
+          "percent": 27.87
+        },
+        "language": {
+          "n": 42,
+          "denominator": 122,
+          "percent": 34.43
+        },
+        "refused": {
+          "n": 14,
+          "denominator": 122,
+          "percent": 11.48
+        },
+        "supported_among_substantive": {
+          "n": 25,
+          "denominator": 28,
+          "percent": 89.29
+        },
+        "correct_refusals": {
+          "n": 7,
+          "denominator": 38,
+          "percent": 18.42
+        },
+        "false_refusals": {
+          "n": 7,
+          "denominator": 84,
+          "percent": 8.33
+        }
+      },
+      "final": {
+        "valid": {
+          "n": 68,
+          "denominator": 122,
+          "percent": 55.74
+        },
+        "strict": {
+          "n": 52,
+          "denominator": 122,
+          "percent": 42.62
+        },
+        "value": {
+          "n": 55,
+          "denominator": 122,
+          "percent": 45.08
+        },
+        "language": {
+          "n": 68,
+          "denominator": 122,
+          "percent": 55.74
+        },
+        "refused": {
+          "n": 39,
+          "denominator": 122,
+          "percent": 31.97
+        },
+        "supported_among_substantive": {
+          "n": 26,
+          "denominator": 29,
+          "percent": 89.66
+        },
+        "correct_refusals": {
+          "n": 27,
+          "denominator": 38,
+          "percent": 71.05
+        },
+        "false_refusals": {
+          "n": 12,
+          "denominator": 84,
+          "percent": 14.29
+        }
+      }
+    },
+    "2048": {
+      "logical": 389,
+      "distinct_questions": 334,
+      "http_200": {
+        "n": 386,
+        "denominator": 389,
+        "percent": 99.23
+      },
+      "first_json_parseable": {
+        "n": 386,
+        "denominator": 389,
+        "percent": 99.23
+      },
+      "physical": 472,
+      "corrections": 83,
+      "cost_cny": "0.66305304",
+      "latency_ms": {
+        "p50": 1662.47,
+        "p95": 4894.22
+      },
+      "input_tokens": 445414,
+      "output_tokens": 83700,
+      "cached_tokens": 119552,
+      "first": {
+        "valid": {
+          "n": 303,
+          "denominator": 389,
+          "percent": 77.89
+        },
+        "strict": {
+          "n": 258,
+          "denominator": 389,
+          "percent": 66.32
+        },
+        "value": {
+          "n": 269,
+          "denominator": 389,
+          "percent": 69.15
+        },
+        "language": {
+          "n": 303,
+          "denominator": 389,
+          "percent": 77.89
+        },
+        "refused": {
+          "n": 105,
+          "denominator": 389,
+          "percent": 26.99
+        },
+        "supported_among_substantive": {
+          "n": 181,
+          "denominator": 198,
+          "percent": 91.41
+        },
+        "correct_refusals": {
+          "n": 83,
+          "denominator": 167,
+          "percent": 49.7
+        },
+        "false_refusals": {
+          "n": 22,
+          "denominator": 222,
+          "percent": 9.91
+        }
+      },
+      "final": {
+        "valid": {
+          "n": 386,
+          "denominator": 389,
+          "percent": 99.23
+        },
+        "strict": {
+          "n": 334,
+          "denominator": 389,
+          "percent": 85.86
+        },
+        "value": {
+          "n": 345,
+          "denominator": 389,
+          "percent": 88.69
+        },
+        "language": {
+          "n": 386,
+          "denominator": 389,
+          "percent": 99.23
+        },
+        "refused": {
+          "n": 188,
+          "denominator": 389,
+          "percent": 48.33
+        },
+        "supported_among_substantive": {
+          "n": 181,
+          "denominator": 198,
+          "percent": 91.41
+        },
+        "correct_refusals": {
+          "n": 159,
+          "denominator": 167,
+          "percent": 95.21
+        },
+        "false_refusals": {
+          "n": 28,
+          "denominator": 222,
+          "percent": 12.61
+        }
+      }
+    }
+  },
+  "ledger": {
+    "physical": 621,
+    "cost_cny": "0.88050224",
+    "opening_cny": "2.09673672",
+    "cumulative_with_opening_cny": "2.97723896",
+    "remaining_cny": "27.02276104"
+  }
+}
