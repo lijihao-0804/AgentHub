@@ -1,0 +1,946 @@
+{
+  "code": "518804b",
+  "entry": "POST /api/v1/knowledge/query / real configured SQL gateway / two frozen public tables",
+  "model": {
+    "model": "deepseek-v4.1-flash-1017",
+    "revision": "deepseek-v4.1-flash-1017",
+    "mode": "PROMPT_JSON",
+    "include_citation_examples": false,
+    "max_new_tokens": 256
+  },
+  "protocol_sha256": "2f5511b92d48e380e723073d243c7d49c8de5f401fa265e42bb60de625cc4454",
+  "table_sha256": [
+    "3ed26b0425b164965c2df45ef6a9f37465eb304d743763991595cd8d1c90760d",
+    "3a814dde4888488643a2a722f0ab26d989ebe092006256612f45dcbc038790a4"
+  ],
+  "baseline_parser": "f2822c3ae0ff9d6f0c6a24547c58472142fde3af",
+  "embedding": "5617a9f61b028005a4858fdac845db406aefb181",
+  "reranker": "953dc6f6f85a1b2dbfca4c34a2796e7dde08d41e",
+  "device": "cpu",
+  "dispatches": 35,
+  "distinct_receipts": 35,
+  "input_tokens": 74056,
+  "cached_input_tokens": 19200,
+  "output_tokens": 4285,
+  "estimated_cny": "0.1478320",
+  "arms": {
+    "baseline": {
+      "target_row_top1": 10,
+      "value_correct": 3,
+      "cited_cell": 8,
+      "joint": 3,
+      "correct_refusals": 3,
+      "pass_ids": [
+        5,
+        9,
+        10,
+        11,
+        12,
+        14
+      ],
+      "http200": 11,
+      "provider_first_pass": 3,
+      "provider_calls": 17,
+      "fail_ids": [
+        1,
+        2,
+        3,
+        4,
+        6,
+        7,
+        8,
+        13
+      ]
+    },
+    "candidate": {
+      "target_row_top1": 10,
+      "value_correct": 10,
+      "cited_cell": 10,
+      "joint": 10,
+      "correct_refusals": 4,
+      "pass_ids": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ],
+      "http200": 14,
+      "provider_first_pass": 10,
+      "provider_calls": 18,
+      "fail_ids": []
+    }
+  },
+  "cases": [
+    {
+      "arm": "baseline",
+      "case": 1,
+      "positive": true,
+      "stage_row_rank": {
+        "dense": 1,
+        "sparse": 1,
+        "fused": 1,
+        "rerank": 1,
+        "selection": 1
+      },
+      "final_row_rank": 1,
+      "http": 502,
+      "refused": false,
+      "value_correct": false,
+      "cited_cell": false,
+      "joint": false,
+      "calls": 1,
+      "receipts": [
+        {
+          "call": 1,
+          "input": 2090,
+          "output": 256,
+          "cached": 0,
+          "estimated_cny": "0.006228"
+        }
+      ],
+      "error": "CITATION_QA_INVALID_MODEL_OUTPUT"
+    },
+    {
+      "arm": "baseline",
+      "case": 2,
+      "positive": true,
+      "stage_row_rank": {
+        "dense": 1,
+        "sparse": 1,
+        "fused": 1,
+        "rerank": 1,
+        "selection": 1
+      },
+      "final_row_rank": 1,
+      "http": 200,
+      "refused": false,
+      "value_correct": false,
+      "cited_cell": true,
+      "joint": false,
+      "calls": 1,
+      "receipts": [
+        {
+          "call": 2,
+          "input": 2035,
+          "output": 253,
+          "cached": 0,
+          "estimated_cny": "0.006094"
+        }
+      ],
+      "error": null
+    },
+    {
+      "arm": "baseline",
+      "case": 3,
+      "positive": true,
+      "stage_row_rank": {
+        "dense": 1,
+        "sparse": 1,
+        "fused": 1,
+        "rerank": 1,
+        "selection": 1
+      },
+      "final_row_rank": 1,
+      "http": 200,
+      "refused": false,
+      "value_correct": false,
+      "cited_cell": true,
+      "joint": false,
+      "calls": 1,
+      "receipts": [
+        {
+          "call": 3,
+          "input": 2035,
+          "output": 220,
+          "cached": 256,
+          "estimated_cny": "0.0053692"
+        }
+      ],
+      "error": null
+    },
+    {
+      "arm": "baseline",
+      "case": 4,
+      "positive": true,
+      "stage_row_rank": {
+        "dense": 1,
+        "sparse": 1,
+        "fused": 1,
+        "rerank": 1,
+        "selection": 1
+      },
+      "final_row_rank": 1,
+      "http": 200,
+      "refused": false,
+      "value_correct": false,
+      "cited_cell": true,
+      "joint": false,
+      "calls": 1,
+      "receipts": [
+        {
+          "call": 4,
+          "input": 2035,
+          "output": 256,
+          "cached": 256,
+          "estimated_cny": "0.0056572"
+        }
+      ],
+      "error": null
+    },
+    {
+      "arm": "baseline",
+      "case": 5,
+      "positive": true,
+      "stage_row_rank": {
+        "dense": 1,
+        "sparse": 1,
+        "fused": 1,
+        "rerank": 1,
+        "selection": 1
+      },
+      "final_row_rank": 1,
+      "http": 200,
+      "refused": false,
+      "value_correct": true,
+      "cited_cell": true,
+      "joint": true,
+      "calls": 1,
+      "receipts": [
+        {
+          "call": 5,
+          "input": 2035,
+          "output": 155,
+          "cached": 0,
+          "estimated_cny": "0.00531"
+        }
+      ],
+      "error": null
+    },
+    {
+      "arm": "baseline",
+      "case": 6,
+      "positive": true,
+      "stage_row_rank": {
+        "dense": 1,
+        "sparse": 1,
+        "fused": 1,
+        "rerank": 1,
+        "selection": 1
+      },
+      "final_row_rank": 1,
+      "http": 502,
+      "refused": false,
+      "value_correct": false,
+      "cited_cell": false,
+      "joint": false,
+      "calls": 1,
+      "receipts": [
+        {
+          "call": 6,
+          "input": 2035,
+          "output": 256,
+          "cached": 256,
+          "estimated_cny": "0.0056572"
+        }
+      ],
+      "error": "MODEL_BAD_RESPONSE"
+    },
+    {
+      "arm": "baseline",
+      "case": 7,
+      "positive": true,
+      "stage_row_rank": {
+        "dense": 2,
+        "sparse": 1,
+        "fused": 1,
+        "rerank": 1,
+        "selection": 1
+      },
+      "final_row_rank": 1,
+      "http": 200,
+      "refused": false,
+      "value_correct": false,
+      "cited_cell": true,
+      "joint": false,
+      "calls": 1,
+      "receipts": [
+        {
+          "call": 7,
+          "input": 2035,
+          "output": 254,
+          "cached": 256,
+          "estimated_cny": "0.0056412"
+        }
+      ],
+      "error": null
+    },
+    {
+      "arm": "baseline",
+      "case": 8,
+      "positive": true,
+      "stage_row_rank": {
+        "dense": 1,
+        "sparse": 1,
+        "fused": 1,
+        "rerank": 1,
+        "selection": 1
+      },
+      "final_row_rank": 1,
+      "http": 200,
+      "refused": false,
+      "value_correct": false,
+      "cited_cell": true,
+      "joint": false,
+      "calls": 1,
+      "receipts": [
+        {
+          "call": 8,
+          "input": 2035,
+          "output": 212,
+          "cached": 256,
+          "estimated_cny": "0.0053052"
+        }
+      ],
+      "error": null
+    },
+    {
+      "arm": "baseline",
+      "case": 9,
+      "positive": true,
+      "stage_row_rank": {
+        "dense": 2,
+        "sparse": 1,
+        "fused": 1,
+        "rerank": 1,
+        "selection": 1
+      },
+      "final_row_rank": 1,
+      "http": 200,
+      "refused": false,
+      "value_correct": true,
+      "cited_cell": true,
+      "joint": true,
+      "calls": 1,
+      "receipts": [
+        {
+          "call": 9,
+          "input": 2145,
+          "output": 53,
+          "cached": 0,
+          "estimated_cny": "0.004714"
+        }
+      ],
+      "error": null
+    },
+    {
+      "arm": "baseline",
+      "case": 10,
+      "positive": true,
+      "stage_row_rank": {
+        "dense": 2,
+        "sparse": 1,
+        "fused": 1,
+        "rerank": 1,
+        "selection": 1
+      },
+      "final_row_rank": 1,
+      "http": 200,
+      "refused": false,
+      "value_correct": true,
+      "cited_cell": true,
+      "joint": true,
+      "calls": 1,
+      "receipts": [
+        {
+          "call": 10,
+          "input": 2149,
+          "output": 47,
+          "cached": 0,
+          "estimated_cny": "0.004674"
+        }
+      ],
+      "error": null
+    },
+    {
+      "arm": "baseline",
+      "case": 11,
+      "positive": false,
+      "stage_row_rank": {
+        "dense": null,
+        "sparse": null,
+        "fused": null,
+        "rerank": null,
+        "selection": null
+      },
+      "final_row_rank": null,
+      "http": 200,
+      "refused": true,
+      "value_correct": true,
+      "cited_cell": true,
+      "joint": true,
+      "calls": 2,
+      "receipts": [
+        {
+          "call": 11,
+          "input": 2034,
+          "output": 230,
+          "cached": 256,
+          "estimated_cny": "0.0054472"
+        },
+        {
+          "call": 12,
+          "input": 2214,
+          "output": 103,
+          "cached": 1792,
+          "estimated_cny": "0.0020264"
+        }
+      ],
+      "error": null
+    },
+    {
+      "arm": "baseline",
+      "case": 12,
+      "positive": false,
+      "stage_row_rank": {
+        "dense": null,
+        "sparse": null,
+        "fused": null,
+        "rerank": null,
+        "selection": null
+      },
+      "final_row_rank": null,
+      "http": 200,
+      "refused": true,
+      "value_correct": true,
+      "cited_cell": true,
+      "joint": true,
+      "calls": 2,
+      "receipts": [
+        {
+          "call": 13,
+          "input": 2034,
+          "output": 97,
+          "cached": 0,
+          "estimated_cny": "0.004844"
+        },
+        {
+          "call": 14,
+          "input": 2169,
+          "output": 99,
+          "cached": 1792,
+          "estimated_cny": "0.0019044"
+        }
+      ],
+      "error": null
+    },
+    {
+      "arm": "baseline",
+      "case": 13,
+      "positive": false,
+      "stage_row_rank": {
+        "dense": null,
+        "sparse": null,
+        "fused": null,
+        "rerank": null,
+        "selection": null
+      },
+      "final_row_rank": null,
+      "http": 502,
+      "refused": false,
+      "value_correct": false,
+      "cited_cell": false,
+      "joint": false,
+      "calls": 1,
+      "receipts": [
+        {
+          "call": 15,
+          "input": 2090,
+          "output": 256,
+          "cached": 256,
+          "estimated_cny": "0.0057672"
+        }
+      ],
+      "error": "MODEL_BAD_RESPONSE"
+    },
+    {
+      "arm": "baseline",
+      "case": 14,
+      "positive": false,
+      "stage_row_rank": {
+        "dense": null,
+        "sparse": null,
+        "fused": null,
+        "rerank": null,
+        "selection": null
+      },
+      "final_row_rank": null,
+      "http": 200,
+      "refused": true,
+      "value_correct": true,
+      "cited_cell": true,
+      "joint": true,
+      "calls": 2,
+      "receipts": [
+        {
+          "call": 16,
+          "input": 2145,
+          "output": 111,
+          "cached": 256,
+          "estimated_cny": "0.0047172"
+        },
+        {
+          "call": 17,
+          "input": 2275,
+          "output": 98,
+          "cached": 2048,
+          "estimated_cny": "0.0016476"
+        }
+      ],
+      "error": null
+    },
+    {
+      "arm": "candidate",
+      "case": 1,
+      "positive": true,
+      "stage_row_rank": {
+        "dense": 1,
+        "sparse": 1,
+        "fused": 1,
+        "rerank": 1,
+        "selection": 1
+      },
+      "final_row_rank": 1,
+      "http": 200,
+      "refused": false,
+      "value_correct": true,
+      "cited_cell": true,
+      "joint": true,
+      "calls": 1,
+      "receipts": [
+        {
+          "call": 18,
+          "input": 2138,
+          "output": 36,
+          "cached": 256,
+          "estimated_cny": "0.0041032"
+        }
+      ],
+      "error": null
+    },
+    {
+      "arm": "candidate",
+      "case": 2,
+      "positive": true,
+      "stage_row_rank": {
+        "dense": 1,
+        "sparse": 1,
+        "fused": 1,
+        "rerank": 1,
+        "selection": 1
+      },
+      "final_row_rank": 1,
+      "http": 200,
+      "refused": false,
+      "value_correct": true,
+      "cited_cell": true,
+      "joint": true,
+      "calls": 1,
+      "receipts": [
+        {
+          "call": 19,
+          "input": 2083,
+          "output": 35,
+          "cached": 256,
+          "estimated_cny": "0.0039852"
+        }
+      ],
+      "error": null
+    },
+    {
+      "arm": "candidate",
+      "case": 3,
+      "positive": true,
+      "stage_row_rank": {
+        "dense": 1,
+        "sparse": 1,
+        "fused": 1,
+        "rerank": 1,
+        "selection": 1
+      },
+      "final_row_rank": 1,
+      "http": 200,
+      "refused": false,
+      "value_correct": true,
+      "cited_cell": true,
+      "joint": true,
+      "calls": 1,
+      "receipts": [
+        {
+          "call": 20,
+          "input": 2083,
+          "output": 65,
+          "cached": 256,
+          "estimated_cny": "0.0042252"
+        }
+      ],
+      "error": null
+    },
+    {
+      "arm": "candidate",
+      "case": 4,
+      "positive": true,
+      "stage_row_rank": {
+        "dense": 1,
+        "sparse": 1,
+        "fused": 1,
+        "rerank": 1,
+        "selection": 1
+      },
+      "final_row_rank": 1,
+      "http": 200,
+      "refused": false,
+      "value_correct": true,
+      "cited_cell": true,
+      "joint": true,
+      "calls": 1,
+      "receipts": [
+        {
+          "call": 21,
+          "input": 2083,
+          "output": 57,
+          "cached": 256,
+          "estimated_cny": "0.0041612"
+        }
+      ],
+      "error": null
+    },
+    {
+      "arm": "candidate",
+      "case": 5,
+      "positive": true,
+      "stage_row_rank": {
+        "dense": 1,
+        "sparse": 1,
+        "fused": 1,
+        "rerank": 1,
+        "selection": 1
+      },
+      "final_row_rank": 1,
+      "http": 200,
+      "refused": false,
+      "value_correct": true,
+      "cited_cell": true,
+      "joint": true,
+      "calls": 1,
+      "receipts": [
+        {
+          "call": 22,
+          "input": 2083,
+          "output": 43,
+          "cached": 256,
+          "estimated_cny": "0.0040492"
+        }
+      ],
+      "error": null
+    },
+    {
+      "arm": "candidate",
+      "case": 6,
+      "positive": true,
+      "stage_row_rank": {
+        "dense": 1,
+        "sparse": 1,
+        "fused": 1,
+        "rerank": 1,
+        "selection": 1
+      },
+      "final_row_rank": 1,
+      "http": 200,
+      "refused": false,
+      "value_correct": true,
+      "cited_cell": true,
+      "joint": true,
+      "calls": 1,
+      "receipts": [
+        {
+          "call": 23,
+          "input": 2083,
+          "output": 46,
+          "cached": 256,
+          "estimated_cny": "0.0040732"
+        }
+      ],
+      "error": null
+    },
+    {
+      "arm": "candidate",
+      "case": 7,
+      "positive": true,
+      "stage_row_rank": {
+        "dense": 1,
+        "sparse": 1,
+        "fused": 1,
+        "rerank": 1,
+        "selection": 1
+      },
+      "final_row_rank": 1,
+      "http": 200,
+      "refused": false,
+      "value_correct": true,
+      "cited_cell": true,
+      "joint": true,
+      "calls": 1,
+      "receipts": [
+        {
+          "call": 24,
+          "input": 2083,
+          "output": 55,
+          "cached": 256,
+          "estimated_cny": "0.0041452"
+        }
+      ],
+      "error": null
+    },
+    {
+      "arm": "candidate",
+      "case": 8,
+      "positive": true,
+      "stage_row_rank": {
+        "dense": 1,
+        "sparse": 1,
+        "fused": 1,
+        "rerank": 1,
+        "selection": 1
+      },
+      "final_row_rank": 1,
+      "http": 200,
+      "refused": false,
+      "value_correct": true,
+      "cited_cell": true,
+      "joint": true,
+      "calls": 1,
+      "receipts": [
+        {
+          "call": 25,
+          "input": 2083,
+          "output": 44,
+          "cached": 256,
+          "estimated_cny": "0.0040572"
+        }
+      ],
+      "error": null
+    },
+    {
+      "arm": "candidate",
+      "case": 9,
+      "positive": true,
+      "stage_row_rank": {
+        "dense": 2,
+        "sparse": 1,
+        "fused": 1,
+        "rerank": 1,
+        "selection": 1
+      },
+      "final_row_rank": 1,
+      "http": 200,
+      "refused": false,
+      "value_correct": true,
+      "cited_cell": true,
+      "joint": true,
+      "calls": 1,
+      "receipts": [
+        {
+          "call": 26,
+          "input": 2157,
+          "output": 61,
+          "cached": 256,
+          "estimated_cny": "0.0043412"
+        }
+      ],
+      "error": null
+    },
+    {
+      "arm": "candidate",
+      "case": 10,
+      "positive": true,
+      "stage_row_rank": {
+        "dense": 2,
+        "sparse": 1,
+        "fused": 1,
+        "rerank": 1,
+        "selection": 1
+      },
+      "final_row_rank": 1,
+      "http": 200,
+      "refused": false,
+      "value_correct": true,
+      "cited_cell": true,
+      "joint": true,
+      "calls": 1,
+      "receipts": [
+        {
+          "call": 27,
+          "input": 2161,
+          "output": 94,
+          "cached": 256,
+          "estimated_cny": "0.0046132"
+        }
+      ],
+      "error": null
+    },
+    {
+      "arm": "candidate",
+      "case": 11,
+      "positive": false,
+      "stage_row_rank": {
+        "dense": null,
+        "sparse": null,
+        "fused": null,
+        "rerank": null,
+        "selection": null
+      },
+      "final_row_rank": null,
+      "http": 200,
+      "refused": true,
+      "value_correct": true,
+      "cited_cell": true,
+      "joint": true,
+      "calls": 2,
+      "receipts": [
+        {
+          "call": 28,
+          "input": 2082,
+          "output": 104,
+          "cached": 256,
+          "estimated_cny": "0.0045352"
+        },
+        {
+          "call": 29,
+          "input": 2216,
+          "output": 86,
+          "cached": 2048,
+          "estimated_cny": "0.0014336"
+        }
+      ],
+      "error": null
+    },
+    {
+      "arm": "candidate",
+      "case": 12,
+      "positive": false,
+      "stage_row_rank": {
+        "dense": null,
+        "sparse": null,
+        "fused": null,
+        "rerank": null,
+        "selection": null
+      },
+      "final_row_rank": null,
+      "http": 200,
+      "refused": true,
+      "value_correct": true,
+      "cited_cell": true,
+      "joint": true,
+      "calls": 2,
+      "receipts": [
+        {
+          "call": 30,
+          "input": 2082,
+          "output": 143,
+          "cached": 0,
+          "estimated_cny": "0.005308"
+        },
+        {
+          "call": 31,
+          "input": 2215,
+          "output": 112,
+          "cached": 2048,
+          "estimated_cny": "0.0016396"
+        }
+      ],
+      "error": null
+    },
+    {
+      "arm": "candidate",
+      "case": 13,
+      "positive": false,
+      "stage_row_rank": {
+        "dense": null,
+        "sparse": null,
+        "fused": null,
+        "rerank": null,
+        "selection": null
+      },
+      "final_row_rank": null,
+      "http": 200,
+      "refused": true,
+      "value_correct": true,
+      "cited_cell": true,
+      "joint": true,
+      "calls": 2,
+      "receipts": [
+        {
+          "call": 32,
+          "input": 2138,
+          "output": 93,
+          "cached": 256,
+          "estimated_cny": "0.0045592"
+        },
+        {
+          "call": 33,
+          "input": 2261,
+          "output": 110,
+          "cached": 2048,
+          "estimated_cny": "0.0017156"
+        }
+      ],
+      "error": null
+    },
+    {
+      "arm": "candidate",
+      "case": 14,
+      "positive": false,
+      "stage_row_rank": {
+        "dense": null,
+        "sparse": null,
+        "fused": null,
+        "rerank": null,
+        "selection": null
+      },
+      "final_row_rank": null,
+      "http": 200,
+      "refused": true,
+      "value_correct": true,
+      "cited_cell": true,
+      "joint": true,
+      "calls": 2,
+      "receipts": [
+        {
+          "call": 34,
+          "input": 2157,
+          "output": 64,
+          "cached": 256,
+          "estimated_cny": "0.0043652"
+        },
+        {
+          "call": 35,
+          "input": 2278,
+          "output": 81,
+          "cached": 2048,
+          "estimated_cny": "0.0015176"
+        }
+      ],
+      "error": null
+    }
+  ]
+}
