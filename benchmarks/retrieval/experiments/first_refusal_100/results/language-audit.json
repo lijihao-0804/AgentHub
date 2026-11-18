@@ -1,0 +1,430 @@
+{
+  "scope": "Post-unblinding supplement for the 100 frozen English questions. The preregistered rubric scored semantics and citations. Language is an additional criterion here.",
+  "language_screen": "Two manually verified Chinese refusal sentences fail this English-question screen when they form the whole reply. Other visible answers are treated as compatible with English for this narrow check. A missing answer field is unassessable.",
+  "metric_definition": "Value, support and joint success counts also require a language match. State counts and false refusals use the original definitions.",
+  "inputs_sha256": {
+    "canonical_cases": "39bdbced4526a0fe37afa24b1e9b4a11eea416aff4019b5f2edfe85ac6c0dc99",
+    "wire": "e3f9cd2770805cdd2b9359aabd56e1fc4aca2e52d656c0841682ef27053d1394",
+    "http": "a086cee332f2abcca0690987f8419cfe6ffca72057a8483828c71e42055d8f9b",
+    "reviewed_file_lf": "17e2a81591e39290bd3cf54022489015f1dafc817769b938ee5fc70f0f5e0650"
+  },
+  "arms": {
+    "baseline": {
+      "first": {
+        "strict_all": {
+          "count": 80,
+          "total": 100,
+          "percent": 80.0
+        },
+        "positive_value": {
+          "count": 49,
+          "total": 50,
+          "percent": 98.0
+        },
+        "positive_supported": {
+          "count": 49,
+          "total": 50,
+          "percent": 98.0
+        },
+        "correct_refusal": {
+          "count": 31,
+          "total": 50,
+          "percent": 62.0
+        },
+        "refusal_all": {
+          "count": 31,
+          "total": 100,
+          "percent": 31.0
+        },
+        "false_refusals": {
+          "count": 0,
+          "total": 50,
+          "percent": 0.0
+        },
+        "cited_answer_support": {
+          "count": 49,
+          "total": 49,
+          "percent": 100.0
+        },
+        "states": {
+          "answer": 49,
+          "invalid": 20,
+          "refusal": 31
+        },
+        "language_screen": {
+          "compatible": 99,
+          "mismatch": 0,
+          "unassessable": 1
+        }
+      },
+      "final": {
+        "strict_all": {
+          "count": 98,
+          "total": 100,
+          "percent": 98.0
+        },
+        "positive_value": {
+          "count": 49,
+          "total": 50,
+          "percent": 98.0
+        },
+        "positive_supported": {
+          "count": 49,
+          "total": 50,
+          "percent": 98.0
+        },
+        "correct_refusal": {
+          "count": 49,
+          "total": 50,
+          "percent": 98.0
+        },
+        "refusal_all": {
+          "count": 50,
+          "total": 100,
+          "percent": 50.0
+        },
+        "false_refusals": {
+          "count": 0,
+          "total": 50,
+          "percent": 0.0
+        },
+        "cited_answer_support": {
+          "count": 49,
+          "total": 49,
+          "percent": 100.0
+        },
+        "states": {
+          "answer": 49,
+          "error": 1,
+          "refusal": 50
+        },
+        "language_screen": {
+          "compatible": 99,
+          "mismatch": 0,
+          "unassessable": 1
+        }
+      }
+    },
+    "candidate": {
+      "first": {
+        "strict_all": {
+          "count": 97,
+          "total": 100,
+          "percent": 97.0
+        },
+        "positive_value": {
+          "count": 50,
+          "total": 50,
+          "percent": 100.0
+        },
+        "positive_supported": {
+          "count": 50,
+          "total": 50,
+          "percent": 100.0
+        },
+        "correct_refusal": {
+          "count": 47,
+          "total": 50,
+          "percent": 94.0
+        },
+        "refusal_all": {
+          "count": 50,
+          "total": 100,
+          "percent": 50.0
+        },
+        "false_refusals": {
+          "count": 0,
+          "total": 50,
+          "percent": 0.0
+        },
+        "cited_answer_support": {
+          "count": 50,
+          "total": 50,
+          "percent": 100.0
+        },
+        "states": {
+          "answer": 50,
+          "refusal": 50
+        },
+        "language_screen": {
+          "compatible": 97,
+          "mismatch": 3,
+          "unassessable": 0
+        }
+      },
+      "final": {
+        "strict_all": {
+          "count": 97,
+          "total": 100,
+          "percent": 97.0
+        },
+        "positive_value": {
+          "count": 50,
+          "total": 50,
+          "percent": 100.0
+        },
+        "positive_supported": {
+          "count": 50,
+          "total": 50,
+          "percent": 100.0
+        },
+        "correct_refusal": {
+          "count": 47,
+          "total": 50,
+          "percent": 94.0
+        },
+        "refusal_all": {
+          "count": 50,
+          "total": 100,
+          "percent": 50.0
+        },
+        "false_refusals": {
+          "count": 0,
+          "total": 50,
+          "percent": 0.0
+        },
+        "cited_answer_support": {
+          "count": 50,
+          "total": 50,
+          "percent": 100.0
+        },
+        "states": {
+          "answer": 50,
+          "refusal": 50
+        },
+        "language_screen": {
+          "compatible": 97,
+          "mismatch": 3,
+          "unassessable": 0
+        }
+      }
+    }
+  },
+  "paired_changes": {
+    "first": {
+      "strict": {
+        "improved": [
+          "R003",
+          "R004",
+          "R011",
+          "R012",
+          "R031",
+          "R032",
+          "R038",
+          "R045",
+          "R057",
+          "R060",
+          "R064",
+          "R065",
+          "R066",
+          "R079",
+          "R081",
+          "R087",
+          "R090",
+          "R096"
+        ],
+        "regressed": [
+          "R005"
+        ],
+        "unchanged_count": 81,
+        "net_count": 17
+      },
+      "positive_value": {
+        "improved": [
+          "R012"
+        ],
+        "regressed": [],
+        "unchanged_count": 49,
+        "net_count": 1
+      },
+      "positive_supported": {
+        "improved": [
+          "R012"
+        ],
+        "regressed": [],
+        "unchanged_count": 49,
+        "net_count": 1
+      },
+      "correct_refusal": {
+        "improved": [
+          "R003",
+          "R004",
+          "R011",
+          "R031",
+          "R032",
+          "R038",
+          "R045",
+          "R057",
+          "R060",
+          "R064",
+          "R065",
+          "R066",
+          "R079",
+          "R081",
+          "R087",
+          "R090",
+          "R096"
+        ],
+        "regressed": [
+          "R005"
+        ],
+        "unchanged_count": 32,
+        "net_count": 16
+      }
+    },
+    "final": {
+      "strict": {
+        "improved": [
+          "R012"
+        ],
+        "regressed": [
+          "R005",
+          "R089"
+        ],
+        "unchanged_count": 97,
+        "net_count": -1
+      },
+      "positive_value": {
+        "improved": [
+          "R012"
+        ],
+        "regressed": [],
+        "unchanged_count": 49,
+        "net_count": 1
+      },
+      "positive_supported": {
+        "improved": [
+          "R012"
+        ],
+        "regressed": [],
+        "unchanged_count": 49,
+        "net_count": 1
+      },
+      "correct_refusal": {
+        "improved": [],
+        "regressed": [
+          "R005",
+          "R089"
+        ],
+        "unchanged_count": 48,
+        "net_count": -2
+      }
+    }
+  },
+  "mismatching_questions": [
+    {
+      "id": "R005",
+      "question": "What maximum ceiling height does the description give for Ingalls Rink?",
+      "baseline": {
+        "first": {
+          "state": "refusal",
+          "language_matches_question": true,
+          "reviewed_semantic_and_citation_pass": true,
+          "pass_with_language": true,
+          "review_note": "Correctly identifies the missing measurement in the broken height sentence and gives no guessed value or citation."
+        },
+        "final": {
+          "state": "refusal",
+          "language_matches_question": true,
+          "reviewed_semantic_and_citation_pass": true,
+          "pass_with_language": true,
+          "review_note": "Correctly identifies the missing measurement in the broken height sentence and gives no guessed value or citation."
+        }
+      },
+      "candidate": {
+        "first": {
+          "state": "refusal",
+          "language_matches_question": false,
+          "reviewed_semantic_and_citation_pass": true,
+          "pass_with_language": false,
+          "review_note": "The height field is blank. The uncited Chinese response correctly says the evidence is insufficient.",
+          "answer": "证据不足以回答此问题。"
+        },
+        "final": {
+          "state": "refusal",
+          "language_matches_question": false,
+          "reviewed_semantic_and_citation_pass": true,
+          "pass_with_language": false,
+          "review_note": "The height field is blank. The uncited Chinese response correctly says the evidence is insufficient.",
+          "answer": "证据不足以回答此问题。"
+        }
+      }
+    },
+    {
+      "id": "R027",
+      "question": "Who designed the original Lou Seal mascot costume for the San Francisco Giants?",
+      "baseline": {
+        "first": {
+          "state": "invalid",
+          "language_matches_question": true,
+          "reviewed_semantic_and_citation_pass": false,
+          "pass_with_language": false,
+          "review_note": "The first reply declared a refusal and cited evidence."
+        },
+        "final": {
+          "state": "refusal",
+          "language_matches_question": true,
+          "reviewed_semantic_and_citation_pass": false,
+          "pass_with_language": false,
+          "review_note": "The refusal about the designer is correct. Its explanation attributes the club reference to the name, although the text assigns that reference to the species and describes the name as a play on Lucille."
+        }
+      },
+      "candidate": {
+        "first": {
+          "state": "refusal",
+          "language_matches_question": false,
+          "reviewed_semantic_and_citation_pass": true,
+          "pass_with_language": false,
+          "review_note": "The Chinese sentence is a clear uncited refusal, appropriate because the designer is unidentified.",
+          "answer": "证据不足以回答此问题。"
+        },
+        "final": {
+          "state": "refusal",
+          "language_matches_question": false,
+          "reviewed_semantic_and_citation_pass": true,
+          "pass_with_language": false,
+          "review_note": "The Chinese sentence is a clear uncited refusal, appropriate because the designer is unidentified.",
+          "answer": "证据不足以回答此问题。"
+        }
+      }
+    },
+    {
+      "id": "R089",
+      "question": "By how many points did Hueytown win the state championship during Winston's junior year?",
+      "baseline": {
+        "first": {
+          "state": "invalid",
+          "language_matches_question": true,
+          "reviewed_semantic_and_citation_pass": false,
+          "pass_with_language": false,
+          "review_note": "The first reply declared a refusal and cited evidence."
+        },
+        "final": {
+          "state": "refusal",
+          "language_matches_question": true,
+          "reviewed_semantic_and_citation_pass": true,
+          "pass_with_language": true,
+          "review_note": "The title is attributed to Winston's junior year, but no score or margin is given."
+        }
+      },
+      "candidate": {
+        "first": {
+          "state": "refusal",
+          "language_matches_question": false,
+          "reviewed_semantic_and_citation_pass": true,
+          "pass_with_language": false,
+          "review_note": "The Chinese refusal correctly withholds a point margin that the source never reports.",
+          "answer": "证据不足，无法回答这个问题。"
+        },
+        "final": {
+          "state": "refusal",
+          "language_matches_question": false,
+          "reviewed_semantic_and_citation_pass": true,
+          "pass_with_language": false,
+          "review_note": "The Chinese refusal correctly withholds a point margin that the source never reports.",
+          "answer": "证据不足，无法回答这个问题。"
+        }
+      }
+    }
+  ]
+}
