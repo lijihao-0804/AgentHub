@@ -127,11 +127,22 @@ _PROMPT_JSON_SYSTEM = (
     + json.dumps(_OUTPUT_SCHEMA.json_schema, separators=(",", ":"), ensure_ascii=False)
 )
 
+_PROMPT_JSON_REFUSAL_SYSTEM = (
+    _PROMPT_JSON_SYSTEM
+    + "\nIf the evidence answers any part of the question, give the supported answer, including "
+    "an explicitly supported negative, with its [n] citations and insufficient_evidence=false. "
+    "Related facts that do not answer what was asked do not count as a partial answer. "
+    "If no requested part is supported, return exactly this object, translating only the "
+    "refusal sentence into the language of the question. Omit explanations and related facts.\n"
+    '{"answer":"Insufficient evidence to answer this question.","citation_ids":[], '
+    '"insufficient_evidence":true}'
+)
+
 
 def citation_system_prompt(mode: CitationOutputMode, *, answer_contract_v1: bool = False) -> str:
     base = _SYSTEM_PROMPT if mode == "JSON_SCHEMA" else _PROMPT_JSON_SYSTEM
     if not answer_contract_v1:
-        return base
+        return _PROMPT_JSON_REFUSAL_SYSTEM if mode == "PROMPT_JSON" else base
     return base + (
         "\nSet insufficient_evidence=false for a supported positive or negative answer. "
         "For a partly answerable request, give each supported part with its citation, "
