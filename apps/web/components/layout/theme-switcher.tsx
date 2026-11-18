@@ -32,7 +32,7 @@ const MoonIcon = (
  * aria-pressed rather than colour alone.
  */
 export default function ThemeSwitcher() {
-  const { theme, setTheme } = useTheme();
+  const { mode, setMode } = useTheme();
   const { t } = useI18n();
   return (
     // Shares the pill styling with the language switch; the second class is
@@ -41,20 +41,20 @@ export default function ThemeSwitcher() {
       <button
         type="button"
         className="lang-option theme-option"
-        aria-pressed={theme === "light"}
+        aria-pressed={mode === "light"}
         aria-label={t("shell.themeLight")}
         title={t("shell.themeLight")}
-        onClick={() => setTheme("light")}
+        onClick={() => setMode("light")}
       >
         {SunIcon}
       </button>
       <button
         type="button"
         className="lang-option theme-option"
-        aria-pressed={theme === "dark"}
+        aria-pressed={mode === "dark"}
         aria-label={t("shell.themeDark")}
         title={t("shell.themeDark")}
-        onClick={() => setTheme("dark")}
+        onClick={() => setMode("dark")}
       >
         {MoonIcon}
       </button>

@@ -43,6 +43,12 @@
   --btn-primary-bg: #3458aa;
   --btn-primary-ink: #ffffff;
   --btn-primary-hover: #25458d;
+  --composer-surface: #29477f;
+  --composer-ink: #fff;
+  --composer-muted: #dce6ff;
+  --composer-highlight: #ffcf91;
+  --composer-highlight-hover: #ffe2bb;
+  --composer-highlight-ink: #382b19;
 
   --success: #18794e;
   --success-soft: #e7f5ed;
@@ -144,6 +150,7 @@
   --btn-primary-bg: #a0baff;
   --btn-primary-ink: #142346;
   --btn-primary-hover: #b9caff;
+  --composer-surface: #293e69;
 
   --success: #61d39a;
   --success-soft: rgba(97, 211, 154, 0.12);
@@ -160,6 +167,57 @@
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.24);
   --shadow: 0 20px 52px rgba(0, 0, 0, 0.32);
   --shadow-popover: 0 18px 48px rgba(0, 0, 0, 0.4);
+}
+
+/* Accent roles change together; success, warning and danger keep their meanings. */
+:root[data-accent]:not([data-accent="#3458aa"]) {
+  --accent: color-mix(in srgb, var(--user-accent) 37%, black);
+  --accent-hover: color-mix(in srgb, var(--accent) 85%, black);
+  --accent-ink: #fff;
+  --accent-soft: color-mix(in srgb, var(--accent) 11%, var(--surface));
+  --accent-2: var(--accent);
+  --accent-3: color-mix(in srgb, var(--accent) 60%, var(--surface));
+  --gradient-brand: linear-gradient(135deg, var(--accent), var(--accent-3));
+  --text-on-accent: var(--accent-ink);
+  --btn-primary-bg: var(--accent);
+  --btn-primary-ink: var(--accent-ink);
+  --btn-primary-hover: var(--accent-hover);
+  --border-focus: var(--accent);
+  --focus-ring: var(--accent);
+  --row-hover: color-mix(in srgb, var(--accent) 8%, transparent);
+  --surface-nav: color-mix(in srgb, var(--user-accent) 14%, #172031);
+  --sidebar-active: rgb(255 255 255 / 12%);
+  --sidebar-active-border: color-mix(in srgb, var(--user-accent) 32%, white);
+  --composer-surface: color-mix(in srgb, var(--user-accent) 28%, #162135);
+  --composer-muted: color-mix(in srgb, var(--user-accent) 13%, white);
+  --composer-highlight: var(--sidebar-active-border);
+  --composer-highlight-hover: color-mix(in srgb, var(--composer-highlight) 75%, white);
+  --composer-highlight-ink: #172031;
+}
+
+:root[data-theme="dark"][data-accent]:not([data-accent="#3458aa"]) {
+  --accent: color-mix(in srgb, var(--user-accent) 27%, white);
+  --accent-hover: color-mix(in srgb, var(--accent) 85%, white);
+  --accent-ink: #101827;
+}
+
+/* In XYZ D65, Y is sRGB relative luminance. Keep an already readable seed;
+   otherwise mix toward black or D65 white until links clear even tinted
+   surfaces. The conservative mixes above also work without relative colors. */
+@supports (color: color(from red xyz-d65 x y z)) {
+  :root[data-accent]:not([data-accent="#3458aa"]) {
+    --accent-shade: min(1, calc(0.115 / max(0.0001, y)));
+    --accent: color(from var(--user-accent) xyz-d65
+      calc(x * var(--accent-shade)) calc(y * var(--accent-shade)) calc(z * var(--accent-shade)));
+  }
+
+  :root[data-theme="dark"][data-accent]:not([data-accent="#3458aa"]) {
+    --accent-tint: max(0, calc((0.43 - y) / max(0.0001, (1 - y))));
+    --accent: color(from var(--user-accent) xyz-d65
+      calc(x + (0.950456 - x) * var(--accent-tint))
+      calc(y + (1 - y) * var(--accent-tint))
+      calc(z + (1.089058 - z) * var(--accent-tint)));
+  }
 }
 
 @media (prefers-contrast: more) {

@@ -195,6 +195,7 @@
 }
 
 .nav-link:focus-visible {
+  outline-color: var(--sidebar-active-border);
   outline-offset: -2px;
 }
 

@@ -7,86 +7,97 @@ import {
   useEffect,
   useLayoutEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
 
-/**
- * Application theme.
- *
- * This is the product's own theme, applied to every surface as a
- * `data-theme` attribute on <html> that swaps the colour tokens in
- * globals.css. It is unrelated to the Next.js dev-tools overlay, whose
- * own Theme control only repaints that overlay and does not exist in a
- * production build.
- *
- * Theme state is deliberately separate from FrontendSessionProvider:
- * switching theme repaints UI only and never touches the in-memory
- * workspace session or its credentials.
- */
+import {
+  ACCENT_STORAGE_KEY,
+  DARK_SCHEME_QUERY,
+  DEFAULT_APPEARANCE,
+  THEME_STORAGE_KEY,
+  applyAppearance,
+  parseAccent,
+  readAppearance,
+  type Appearance,
+  type ThemeMode,
+} from "@/lib/appearance";
 
-export type Theme = "dark" | "light";
-
-export const THEME_STORAGE_KEY = "agenthub.theme";
-
-const DEFAULT_THEME: Theme = "light";
-
-/**
- * The provider is rendered on the server, so use a browser-only layout effect
- * after hydration. It runs before the next paint and avoids the visible theme
- * swap that an ordinary effect can produce.
- */
-const useBrowserLayoutEffect =
-  typeof window === "undefined" ? useEffect : useLayoutEffect;
-
-type ThemeContextValue = {
-  theme: Theme;
-  setTheme: (theme: Theme) => void;
+type ThemeContextValue = Appearance & {
+  canPersist: boolean;
+  setMode: (mode: ThemeMode) => void;
+  setAccent: (accent: string) => void;
+  resetAppearance: () => void;
 };
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
+const useBrowserLayoutEffect = typeof window === "undefined" ? useEffect : useLayoutEffect;
 
-function isTheme(value: string | null): value is Theme {
-  return value === "dark" || value === "light";
+function savePreference(key: string, value: string) {
+  try {
+    window.localStorage.setItem(key, value);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  // The server and first client render agree on the product default. A saved
-  // preference is applied before the next browser paint.
-  const [theme, setThemeState] = useState<Theme>(DEFAULT_THEME);
+  const [appearance, setAppearance] = useState(DEFAULT_APPEARANCE);
+  const [canPersist, setCanPersist] = useState(true);
+  const current = useRef(appearance);
 
-  useBrowserLayoutEffect(() => {
-    let preferred: Theme | null = null;
-    try {
-      const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
-      if (isTheme(stored)) preferred = stored;
-    } catch {
-      // Storage unavailable (e.g. privacy mode) — fall through.
-    }
-    const resolved = preferred ?? DEFAULT_THEME;
-    document.documentElement.dataset.theme = resolved;
-    setThemeState(resolved);
+  const apply = useCallback((next: Appearance) => {
+    current.current = next;
+    applyAppearance(next, window.matchMedia(DARK_SCHEME_QUERY).matches);
+    setAppearance(next);
   }, []);
 
   useBrowserLayoutEffect(() => {
-    document.documentElement.dataset.theme = theme;
-  }, [theme]);
+    apply(readAppearance());
+    const media = window.matchMedia(DARK_SCHEME_QUERY);
+    const onSystemChange = () => {
+      if (current.current.mode === "system") applyAppearance(current.current, media.matches);
+    };
+    const onStorage = (event: StorageEvent) => {
+      if (event.key === null || event.key === THEME_STORAGE_KEY || event.key === ACCENT_STORAGE_KEY) {
+        apply(readAppearance());
+      }
+    };
+    media.addEventListener("change", onSystemChange);
+    window.addEventListener("storage", onStorage);
+    return () => {
+      media.removeEventListener("change", onSystemChange);
+      window.removeEventListener("storage", onStorage);
+    };
+  }, [apply]);
 
-  const setTheme = useCallback((next: Theme) => {
-    document.documentElement.dataset.theme = next;
-    setThemeState(next);
-    try {
-      window.localStorage.setItem(THEME_STORAGE_KEY, next);
-    } catch {
-      // Preference persistence is best-effort only.
-    }
-  }, []);
+  const setMode = useCallback((mode: ThemeMode) => {
+    apply({ ...current.current, mode });
+    setCanPersist(savePreference(THEME_STORAGE_KEY, mode));
+  }, [apply]);
 
-  const value = useMemo<ThemeContextValue>(() => ({ theme, setTheme }), [theme, setTheme]);
+  const setAccent = useCallback((value: string) => {
+    const accent = parseAccent(value);
+    if (!accent) return;
+    apply({ ...current.current, accent });
+    setCanPersist(savePreference(ACCENT_STORAGE_KEY, accent));
+  }, [apply]);
+
+  const resetAppearance = useCallback(() => {
+    apply(DEFAULT_APPEARANCE);
+    const savedMode = savePreference(THEME_STORAGE_KEY, DEFAULT_APPEARANCE.mode);
+    const savedAccent = savePreference(ACCENT_STORAGE_KEY, DEFAULT_APPEARANCE.accent);
+    setCanPersist(savedMode && savedAccent);
+  }, [apply]);
+
+  const value = useMemo(() => ({ ...appearance, canPersist, setMode, setAccent, resetAppearance }),
+    [appearance, canPersist, setMode, setAccent, resetAppearance]);
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
 
-export function useTheme(): ThemeContextValue {
+export function useTheme() {
   const value = useContext(ThemeContext);
   if (!value) throw new Error("useTheme must be used inside ThemeProvider");
   return value;

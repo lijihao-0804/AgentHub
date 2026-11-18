@@ -6,6 +6,7 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { InlineError, Panel } from "@/components/ui/states";
 import { CatalogPageHeader, CatalogStatStrip } from "@/components/catalog/catalog-layout";
 import { useFrontendSession } from "@/components/providers/session-provider";
+import AppearanceSettings from "@/components/layout/appearance-settings";
 import { ApiError, toApiError } from "@/lib/api/client";
 import { createOrganization, createWorkspace } from "@/lib/api/tenancy";
 import Select from "@/components/ui/select";
@@ -147,6 +148,8 @@ export default function SettingsPage() {
           { label: copy.activeContext, value: tenancyLoading ? copy.loading : activeWorkspace?.name ?? copy.none, href: activeWorkspace ? "/dashboard" : undefined },
         ]}
       />
+
+      <AppearanceSettings />
 
       <Panel ariaLabel={t("settings.context")} title={t("settings.context")}>
         {tenancyLoading && <p className="state-hint">{t("common.loading")}</p>}

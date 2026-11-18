@@ -121,7 +121,78 @@ async function testIngestionAndPreferences() {
   console.log('PASS personal delegation scope, revision strategy inheritance and table citation labels');
 }
 
+function testAppearance() {
+  const appearance = load('lib/appearance.ts');
+  const h = harness({ '@/lib/appearance': appearance });
+  // Load before the fake window is installed so the provider mounts with the
+  // harness's effect implementation, just as it would after server rendering.
+  const { ThemeProvider } = load('components/providers/theme-provider.tsx', h.mocks);
+  const current = () => h.render(ThemeProvider, { children: null }).props.value;
+  const media = Object.assign(new EventTarget(), { matches: true });
+  const stored = new Map([[appearance.THEME_STORAGE_KEY, 'dark']]);
+  const localStorage = {
+    getItem: (key) => stored.get(key) ?? null,
+    setItem: (key, value) => stored.set(key, value),
+  };
+  const root = { dataset: {}, style: new Map() };
+  root.style.setProperty = root.style.set;
+  const document = { documentElement: root };
+  const window = Object.assign(new EventTarget(), { matchMedia: () => media, localStorage });
+  const originalWindow = globalThis.window, originalDocument = globalThis.document;
+  Object.assign(globalThis, { window, document });
+  let unmount;
+  try {
+    const boot = new Function('document', 'localStorage', 'matchMedia', appearance.appearanceBootstrap);
+    for (const [mode, color, dark] of [
+      ['dark', null, true], ['system', ' Ab34cD ', false], ['system', '#FFFFFF', true],
+      ['unexpected', 'var(--danger)', true],
+    ]) {
+      stored.set(appearance.THEME_STORAGE_KEY, mode);
+      stored.set(appearance.ACCENT_STORAGE_KEY, color);
+      media.matches = dark;
+      boot(document, localStorage, window.matchMedia);
+      const firstPaint = { ...root.dataset };
+      appearance.applyAppearance(appearance.readAppearance(), dark);
+      assert.deepEqual(root.dataset, firstPaint, 'first paint must agree with hydration');
+    }
+    boot(document, { getItem() { throw Error('private browsing'); } }, window.matchMedia);
+    assert.deepEqual(root.dataset, { theme: 'light', accent: '#3458aa' });
+    stored.clear();
+    stored.set(appearance.THEME_STORAGE_KEY, 'dark');
+    current();
+    unmount = h.effects[0]();
+    assert.equal(current().mode, 'dark', 'existing explicit choice must survive');
+    current().setAccent('#6FdBAa');
+    current().setAccent('red; color:blue');
+    assert.equal(root.dataset.accent, '#6fdbaa');
+    assert.equal(stored.get(appearance.ACCENT_STORAGE_KEY), '#6fdbaa');
+    current().setMode('system');
+    media.matches = false;
+    media.dispatchEvent(new Event('change'));
+    assert.equal(root.dataset.theme, 'light');
+    current().setMode('dark');
+    media.dispatchEvent(new Event('change'));
+    assert.equal(root.dataset.theme, 'dark');
+    stored.set(appearance.ACCENT_STORAGE_KEY, '#ffffff');
+    window.dispatchEvent(Object.assign(new Event('storage'), { key: appearance.ACCENT_STORAGE_KEY }));
+    assert.equal(current().accent, '#ffffff');
+    current().resetAppearance();
+    assert.equal(root.dataset.accent, appearance.DEFAULT_APPEARANCE.accent);
+    assert.equal(stored.get(appearance.THEME_STORAGE_KEY), 'light');
+    localStorage.setItem = () => { throw Error('blocked'); };
+    current().setAccent('#000000');
+    assert.equal(current().canPersist, false);
+    assert.equal(root.dataset.accent, '#000000', 'blocked storage still allows a local preview');
+  } finally {
+    unmount?.();
+    if (originalWindow === undefined) delete globalThis.window; else globalThis.window = originalWindow;
+    if (originalDocument === undefined) delete globalThis.document; else globalThis.document = originalDocument;
+  }
+  console.log('PASS appearance first paint, legacy choice, live OS changes, accent persistence, storage events and private browsing');
+}
+
 async function main() {
+  testAppearance();
   await testIngestionAndPreferences();
   const { autoBreadcrumbs } = load('components/layout/breadcrumbs.tsx');
   const trialRun = '12345678-1234-4234-8234-123456789abc';

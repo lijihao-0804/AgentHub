@@ -508,32 +508,29 @@ a.catalog-stat:hover { background: var(--product-accent-soft); }
 
 .home-primary-grid { display: grid; gap: var(--space-4); grid-template-columns: minmax(0, 1.55fr) minmax(19rem, 0.8fr); }
 .home-launch {
-  --composer-ink: #fff;
-  --composer-muted: #dce6ff;
-  background: #29477f;
+  background: var(--composer-surface);
   border-radius: var(--radius-lg);
   color: var(--composer-ink);
   padding: clamp(1rem, 2.4vw, 2rem);
 }
-:root[data-theme="dark"] .home-launch { background: #293e69; }
 .home-launch-copy { align-items: center; display: flex; gap: var(--space-3); margin-bottom: var(--space-4); }
 .home-launch-copy h2 { font-size: clamp(1.4rem, 2vw, 1.8rem); }
 .home-launch-copy p { color: var(--composer-muted); line-height: 1.5; margin-top: 0.25rem; }
-.home-launch-mark { align-items: center; background: #ffcf91; color: #392e22; border-radius: 0.7rem; display: grid; flex: 0 0 2.75rem; height: 2.75rem; place-items: center; }
+.home-launch-mark { align-items: center; background: var(--composer-highlight); color: var(--composer-highlight-ink); border-radius: 0.7rem; display: grid; flex: 0 0 2.75rem; height: 2.75rem; place-items: center; }
 .home-task-form { display: grid; gap: var(--space-3); }
 .home-workflow-options { border: 0; display: flex; flex-wrap: wrap; gap: 0.3rem; margin: 0; padding: 0; }
 .home-workflow-options label { cursor: pointer; position: relative; }
 .home-workflow-options input { clip-path: inset(50%); height: 1px; position: absolute; width: 1px; }
 .home-workflow-options span { align-items: center; border: 1px solid transparent; border-radius: var(--radius-sm); color: var(--composer-muted); display: inline-flex; gap: 0.38rem; padding: 0.4rem 0.6rem; transition: background 130ms ease; }
 .home-workflow-options label:hover span { background: #ffffff18; }
-.home-workflow-options input:checked + span { background: #fff; color: #28457c; }
-.home-workflow-options input:focus-visible + span { outline: 2px solid #ffcf91; outline-offset: 2px; }
+.home-workflow-options input:checked + span { background: var(--composer-ink); color: var(--composer-surface); }
+.home-workflow-options input:focus-visible + span { outline: 2px solid var(--composer-highlight); outline-offset: 2px; }
 .home-task-field textarea { display: block; min-height: 6.2rem; padding: 0.75rem 0.9rem; }
 .home-task-controls { align-items: center; display: flex; gap: var(--space-2); justify-content: flex-end; }
 .home-task-destination { color: var(--composer-muted); display: none; font-size: var(--text-sm); gap: 0.25rem; }
-.home-task-controls .button { background: #ffcf91; border-color: transparent; color: #382b19; min-height: 2.55rem; }
-.home-task-controls .button:hover { background: #ffe2bb; }
-.home-launch :focus-visible { outline-color: #ffcf91; }
+.home-task-controls .button { background: var(--composer-highlight); border-color: transparent; color: var(--composer-highlight-ink); min-height: 2.55rem; }
+.home-task-controls .button:hover { background: var(--composer-highlight-hover); }
+.home-launch :focus-visible { outline-color: var(--composer-highlight); }
 .home-pulse {
   background: var(--product-surface);
   border: 1px solid var(--product-line);

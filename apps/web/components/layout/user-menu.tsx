@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { useI18n } from "@/i18n/provider";
@@ -77,6 +78,14 @@ export default function UserMenu() {
             <code>{shortUserId(userId)}</code>
           </p>
           <div className="ws-menu-divider" />
+          <Link
+            role="menuitem"
+            className="ws-menu-item"
+            href="/settings#appearance"
+            onClick={() => setOpen(false)}
+          >
+            {t("appearance.title")}
+          </Link>
           <button
             type="button"
             role="menuitem"
