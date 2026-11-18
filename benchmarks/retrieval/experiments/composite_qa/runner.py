@@ -322,12 +322,14 @@ async def run(args):
     expected = {}
     if args.dispatch:
         from .freeze import verify
+        from .wire_check import check
 
         if args.smoke or args.groups != list(GROUPS) or directory == PREFLIGHT:
             raise ValueError(
                 "Paid run requires all registered groups and a separate private directory."
             )
         expected = verify(args.freeze_sha)
+        await check(directory)
         save(PREFLIGHT / "dispatch-started.json", dict(sha=args.freeze_sha, groups=args.groups))
     models = (
         BgeM3DenseEmbedder(model_name=str(EMBED), device="cuda"),

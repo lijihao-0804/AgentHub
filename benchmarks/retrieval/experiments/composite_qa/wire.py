@@ -94,11 +94,19 @@ class Wire:
                         input_bound=bound,
                     ),
                 )
+                stage = "transport"
+                response = None
                 try:
                     response = await original(transport, request)
+                    stage = "read_body"
                     await response.aread()
-                    response.raise_for_status()
+                    stage = "http_status"
+                    # At the transport boundary HTTPX has not yet bound response.request.
+                    if not response.is_success:
+                        raise ValueError("Non-success provider status")
+                    stage = "json"
                     body = response.json()
+                    stage = "usage"
                     prompt, out, cached, cost = receipt_cost(
                         body, MODEL, max_input=bound, max_output=256
                     )
@@ -121,7 +129,7 @@ class Wire:
                             estimated_cny=str(cost),
                         ),
                     )
-                except BaseException:
+                except BaseException as exc:
                     self.halted = True
                     write_entry(
                         self.ledger,
@@ -130,6 +138,9 @@ class Wire:
                             key=self.key,
                             attempt=attempt,
                             state="unknown",
+                            failure_stage=stage,
+                            failure_type=type(exc).__name__,
+                            http_status=response.status_code if response is not None else None,
                             cny=str(reserve),
                             input_bound=bound,
                         ),
