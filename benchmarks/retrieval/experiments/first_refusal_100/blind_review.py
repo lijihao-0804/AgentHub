@@ -26,6 +26,7 @@ def prepare(run, dest):
     inputs = json.loads((run / "freeze.json").read_bytes())["inputs"]
     first = {e["key"]: e for e in rows(run / "wire-private.jsonl") if e["attempt"] == 1}
     items = defaultdict(dict)
+    visible = {}
     mapping = {}
     for item in rows(run / "http-private.jsonl"):
         if item["state"] != "returned":
@@ -34,6 +35,9 @@ def prepare(run, dest):
         qid = key.split("/")[0]
         case = cases[qid]
         doc = case["doc_id"]
+        evidence = [{"id": e["id"], "text": e["text"]} for e in item["evidence"]]
+        if visible.setdefault(qid, evidence) != evidence:
+            raise ValueError("Review would mix different visible evidence within a pair.")
         observations = {
             "first": read_attempt(first[key], item["evidence"]),
             "final": read_http(httpx.Response(item["http"], json=item["body"]), inputs[doc], doc),
@@ -61,6 +65,7 @@ def prepare(run, dest):
             {
                 "case": case,
                 "source": docs[case["doc_id"]]["text"],
+                "visible_evidence": visible[qid],
                 "outputs": [items[qid][k] for k in sorted(items[qid])],
             }
         )

@@ -1,0 +1,42 @@
+{
+  "case": 10,
+  "public_model_output": {
+    "answer": "For the Angels poster, A5 is listed with the color Sepia [1]. (The Angels poster in Black and white is listed only in sizes A1, A3 and A4 [2].)",
+    "citation_ids": [
+      1,
+      2
+    ],
+    "insufficient_evidence": false
+  },
+  "method": "offline replay through same QA route with stored visible response; fresh upload and matching top-five hash",
+  "replay_top5_sha256": "799972d6c4e041d8611e71cd184836f609c08b22b2d8cb541a4eaf65909a5884",
+  "replayed_cited_rows": {
+    "1": {
+      "text": "Poster name: Angels | Color: Sepia | Sizes available: A2 | Sizes available: A3 | Sizes available: A5",
+      "row": 6,
+      "page": 2
+    },
+    "2": {
+      "text": "Poster name: Angels | Color: Black and white | Sizes available: A1 | Sizes available: A3 | Sizes available: A4",
+      "row": 5,
+      "page": 2
+    }
+  },
+  "frozen_score": {
+    "http": 200,
+    "refused": false,
+    "value_correct": false,
+    "cited_cell": true,
+    "joint": false,
+    "calls": 1,
+    "output_shapes": [
+      "dict"
+    ]
+  },
+  "semantic_review": {
+    "answer_correct": true,
+    "every_citation_supports_claim": true,
+    "reason": "A5 is Sepia in row 6. The parenthetical correctly limits black and white to the three other sizes in row 5."
+  },
+  "external_calls": 0
+}

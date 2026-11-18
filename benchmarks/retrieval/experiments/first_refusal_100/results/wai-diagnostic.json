@@ -1,0 +1,315 @@
+{
+  "prior_visible_bodies_retained": false,
+  "baseline": {
+    "prompt_sha256": "9921923abe84909a433d1333667a6cb16f7ba0928080ec0b21136d1b12238499",
+    "calls": 6,
+    "estimated_cny": "0.0233672"
+  },
+  "candidate": {
+    "prompt_sha256": "0ac09ac99b732e92e8ae8d1d921eb828b17e722427c930a23c4483b71fbe15a6",
+    "calls": 14,
+    "estimated_cny": "0.0633944"
+  },
+  "diagnostic": [
+    {
+      "case": 11,
+      "question": "How many Board Games were produced on Jupiter?",
+      "prior": {
+        "calls": 2,
+        "http": 200,
+        "joint": true
+      },
+      "baseline_replay": {
+        "attempts": [
+          {
+            "validation": "citations_on_refusal",
+            "visible_content": "{\"answer\":\"The evidence does not contain any production figures for Jupiter. The table only covers Mars and Venus; for example, Board Games were produced on Mars (10,000) and Venus (12,000) [1], but no Jupiter column or value is provided. Therefore, the number of Board Games produced on Jupiter cannot be determined from the supplied evidence.\",\"citation_ids\":[1],\"insufficient_evidence\":true}",
+            "parsed": {
+              "answer": "The evidence does not contain any production figures for Jupiter. The table only covers Mars and Venus; for example, Board Games were produced on Mars (10,000) and Venus (12,000) [1], but no Jupiter column or value is provided. Therefore, the number of Board Games produced on Jupiter cannot be determined from the supplied evidence.",
+              "citation_ids": [
+                1
+              ],
+              "insufficient_evidence": true
+            }
+          },
+          {
+            "validation": "accepted",
+            "visible_content": "{\"answer\":\"The evidence is insufficient to determine how many Board Games were produced on Jupiter. The provided table only includes data for Mars and Venus, with no Jupiter column or value.\",\"citation_ids\":[],\"insufficient_evidence\":true}",
+            "parsed": {
+              "answer": "The evidence is insufficient to determine how many Board Games were produced on Jupiter. The provided table only includes data for Mars and Venus, with no Jupiter column or value.",
+              "citation_ids": [],
+              "insufficient_evidence": true
+            }
+          }
+        ],
+        "http": 200,
+        "final_joint": true,
+        "top5_sha256": "ba778211a795f9fd584d7f2f144af6249f8c2639aad89abca67a4edc488cfc43"
+      },
+      "candidate_replay": {
+        "attempts": [
+          {
+            "validation": "accepted",
+            "visible_content": "{\"answer\":\"Insufficient evidence to answer this question.\",\"citation_ids\":[],\"insufficient_evidence\":true}",
+            "parsed": {
+              "answer": "Insufficient evidence to answer this question.",
+              "citation_ids": [],
+              "insufficient_evidence": true
+            }
+          }
+        ],
+        "http": 200,
+        "final_joint": true,
+        "top5_sha256": "ba778211a795f9fd584d7f2f144af6249f8c2639aad89abca67a4edc488cfc43"
+      },
+      "same_top5": true
+    },
+    {
+      "case": 12,
+      "question": "How many bicycles were sold on Mars?",
+      "prior": {
+        "calls": 2,
+        "http": 200,
+        "joint": true
+      },
+      "baseline_replay": {
+        "attempts": [
+          {
+            "validation": "accepted",
+            "visible_content": "{\"answer\":\"The provided evidence does not contain any information about bicycles. It only includes table rows for Teddy Bears, Board Games, and posters (Zodiac), with produced and sold figures for Mars and Venus. Therefore, the number of bicycles sold on Mars cannot be determined from the evidence.\",\"citation_ids\":[],\"insufficient_evidence\":true}",
+            "parsed": {
+              "answer": "The provided evidence does not contain any information about bicycles. It only includes table rows for Teddy Bears, Board Games, and posters (Zodiac), with produced and sold figures for Mars and Venus. Therefore, the number of bicycles sold on Mars cannot be determined from the evidence.",
+              "citation_ids": [],
+              "insufficient_evidence": true
+            }
+          }
+        ],
+        "http": 200,
+        "final_joint": true,
+        "top5_sha256": "915271da68ea1ce84312c35e91fc18a2dbd69df520de085c7945d702c9676ea3"
+      },
+      "candidate_replay": {
+        "attempts": [
+          {
+            "validation": "accepted",
+            "visible_content": "{\"answer\":\"Insufficient evidence to answer this question.\",\"citation_ids\":[],\"insufficient_evidence\":true}",
+            "parsed": {
+              "answer": "Insufficient evidence to answer this question.",
+              "citation_ids": [],
+              "insufficient_evidence": true
+            }
+          }
+        ],
+        "http": 200,
+        "final_joint": true,
+        "top5_sha256": "915271da68ea1ce84312c35e91fc18a2dbd69df520de085c7945d702c9676ea3"
+      },
+      "same_top5": true
+    },
+    {
+      "case": 13,
+      "question": "How many Teddy Bears were returned on Venus?",
+      "prior": {
+        "calls": 2,
+        "http": 200,
+        "joint": true
+      },
+      "baseline_replay": {
+        "attempts": [
+          {
+            "validation": "citations_on_refusal",
+            "visible_content": "{\"answer\":\"The evidence does not provide the number of Teddy Bears returned on Venus. The table only lists Teddy Bears produced and sold on Venus (produced: 100,000; sold: 80,000), with no \\\"returned\\\" figure [1].\",\"citation_ids\":[],\"insufficient_evidence\":true}",
+            "parsed": {
+              "answer": "The evidence does not provide the number of Teddy Bears returned on Venus. The table only lists Teddy Bears produced and sold on Venus (produced: 100,000; sold: 80,000), with no \"returned\" figure [1].",
+              "citation_ids": [],
+              "insufficient_evidence": true
+            }
+          },
+          {
+            "validation": "accepted",
+            "visible_content": "{\"answer\":\"The evidence is insufficient to answer this question. The table only provides produced and sold figures for Teddy Bears on Venus, and it does not include any figure for the number returned.\",\"citation_ids\":[],\"insufficient_evidence\":true}",
+            "parsed": {
+              "answer": "The evidence is insufficient to answer this question. The table only provides produced and sold figures for Teddy Bears on Venus, and it does not include any figure for the number returned.",
+              "citation_ids": [],
+              "insufficient_evidence": true
+            }
+          }
+        ],
+        "http": 200,
+        "final_joint": true,
+        "top5_sha256": "5e44d9c6adff6253b2205f32ab3b5c425f1ebde6c2819d27ab7763c78c5c6c32"
+      },
+      "candidate_replay": {
+        "attempts": [
+          {
+            "validation": "accepted",
+            "visible_content": "{\"answer\":\"Insufficient evidence to answer this question.\",\"citation_ids\":[],\"insufficient_evidence\":true}",
+            "parsed": {
+              "answer": "Insufficient evidence to answer this question.",
+              "citation_ids": [],
+              "insufficient_evidence": true
+            }
+          }
+        ],
+        "http": 200,
+        "final_joint": true,
+        "top5_sha256": "5e44d9c6adff6253b2205f32ab3b5c425f1ebde6c2819d27ab7763c78c5c6c32"
+      },
+      "same_top5": true
+    },
+    {
+      "case": 14,
+      "question": "Which poster is available in neon green?",
+      "prior": {
+        "calls": 2,
+        "http": 200,
+        "joint": true
+      },
+      "baseline_replay": {
+        "attempts": [
+          {
+            "validation": "accepted",
+            "visible_content": "{\"answer\":\"The provided evidence does not list any poster available in neon green. The only colors mentioned are Sepia, Full color, and Black and white, so I cannot determine which poster is available in neon green.\",\"citation_ids\":[],\"insufficient_evidence\":true}",
+            "parsed": {
+              "answer": "The provided evidence does not list any poster available in neon green. The only colors mentioned are Sepia, Full color, and Black and white, so I cannot determine which poster is available in neon green.",
+              "citation_ids": [],
+              "insufficient_evidence": true
+            }
+          }
+        ],
+        "http": 200,
+        "final_joint": true,
+        "top5_sha256": "360607d4ca4573e485681d3df880eec9075d2f17a1e53cb146987dc25c96b6f2"
+      },
+      "candidate_replay": {
+        "attempts": [
+          {
+            "validation": "accepted",
+            "visible_content": "{\"answer\":\"Insufficient evidence to answer this question.\",\"citation_ids\":[],\"insufficient_evidence\":true}",
+            "parsed": {
+              "answer": "Insufficient evidence to answer this question.",
+              "citation_ids": [],
+              "insufficient_evidence": true
+            }
+          }
+        ],
+        "http": 200,
+        "final_joint": true,
+        "top5_sha256": "360607d4ca4573e485681d3df880eec9075d2f17a1e53cb146987dc25c96b6f2"
+      },
+      "same_top5": true
+    }
+  ],
+  "positive_controls": [
+    {
+      "case": 1,
+      "prior": {
+        "calls": 1,
+        "http": 200,
+        "joint": true
+      },
+      "candidate_http": 200,
+      "candidate_calls": 1,
+      "candidate_joint": true
+    },
+    {
+      "case": 2,
+      "prior": {
+        "calls": 1,
+        "http": 200,
+        "joint": true
+      },
+      "candidate_http": 200,
+      "candidate_calls": 1,
+      "candidate_joint": true
+    },
+    {
+      "case": 3,
+      "prior": {
+        "calls": 1,
+        "http": 200,
+        "joint": true
+      },
+      "candidate_http": 200,
+      "candidate_calls": 1,
+      "candidate_joint": true
+    },
+    {
+      "case": 4,
+      "prior": {
+        "calls": 1,
+        "http": 200,
+        "joint": true
+      },
+      "candidate_http": 200,
+      "candidate_calls": 1,
+      "candidate_joint": true
+    },
+    {
+      "case": 5,
+      "prior": {
+        "calls": 1,
+        "http": 200,
+        "joint": true
+      },
+      "candidate_http": 200,
+      "candidate_calls": 1,
+      "candidate_joint": true
+    },
+    {
+      "case": 6,
+      "prior": {
+        "calls": 1,
+        "http": 200,
+        "joint": true
+      },
+      "candidate_http": 200,
+      "candidate_calls": 1,
+      "candidate_joint": true
+    },
+    {
+      "case": 7,
+      "prior": {
+        "calls": 1,
+        "http": 200,
+        "joint": true
+      },
+      "candidate_http": 200,
+      "candidate_calls": 1,
+      "candidate_joint": true
+    },
+    {
+      "case": 8,
+      "prior": {
+        "calls": 1,
+        "http": 200,
+        "joint": true
+      },
+      "candidate_http": 200,
+      "candidate_calls": 1,
+      "candidate_joint": true
+    },
+    {
+      "case": 9,
+      "prior": {
+        "calls": 1,
+        "http": 200,
+        "joint": true
+      },
+      "candidate_http": 200,
+      "candidate_calls": 1,
+      "candidate_joint": true
+    },
+    {
+      "case": 10,
+      "prior": {
+        "calls": 1,
+        "http": 200,
+        "joint": true
+      },
+      "candidate_http": 200,
+      "candidate_calls": 1,
+      "candidate_joint": false
+    }
+  ]
+}
