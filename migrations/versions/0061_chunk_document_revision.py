@@ -40,7 +40,7 @@ def upgrade() -> None:
         raise RuntimeError(
             f"Document/revision mismatch for document_chunks.id={example['id']}: "
             f"document_id={example['document_id']}, revision_id={example['document_revision_id']}, "
-            f"revision owner={example['revision_owner']}. Review source provenance before upgrading."
+            f"revision owner={example['revision_owner']}. Review provenance before upgrading."
         )
     op.execute(f"ALTER TABLE document_chunks VALIDATE CONSTRAINT {NEW}")
     op.drop_constraint(OLD, "document_chunks", type_="foreignkey")
