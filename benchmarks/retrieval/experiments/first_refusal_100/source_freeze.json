@@ -1,0 +1,48 @@
+{
+  "schema": "first_refusal_100_source_freeze_v1",
+  "frozen_at_utc": "2026-11-18T04:54:53.561554+00:00",
+  "historical_repository_head": "ab2b5b046da86bb2b0bd0eb65f7bab3a59eff239",
+  "dataset": {
+    "cases": 100,
+    "distinct_documents": 100,
+    "max_document_bytes": 1530,
+    "cases_sha256": "39bdbced4526a0fe37afa24b1e9b4a11eea416aff4019b5f2edfe85ac6c0dc99",
+    "documents_sha256": "836188bf5218ecccfe5614f0a9d5ba82e6f9d37ab109a6be5385cbc15fb15d35",
+    "source_sha256": {
+      "musique": "83a75b1e11e4e9bb8f8308e72ac40ca617ae4431b3a0d955b61cab259248490a",
+      "qasper": "9458bfe76074a8fa8d1685af02bcc73537aa6d338ad20591dfaff1946bc88bf4"
+    }
+  },
+  "arms_observed_by_question_author_before_freeze": 0,
+  "study_design": {
+    "musique_answerable": 30,
+    "musique_unanswerable": 30,
+    "qasper_answerable": 20,
+    "qasper_unanswerable": 20,
+    "document_reuse_between_questions": 0
+  },
+  "exposure": {
+    "old_result_files": 934,
+    "old_result_tree_sha256": "42c02618a7bd086c54628f304a77aa855a73e990bb9ac0cbbfcd269b68bc85ec",
+    "old_musique_ids": 2579,
+    "old_qasper_train_papers": 235,
+    "excluded_musique_titles": 35392,
+    "upstream_train_question_texts": 36567,
+    "old_qasper_paper_overlaps": [],
+    "old_musique_record_overlaps": [],
+    "old_musique_title_overlaps": [],
+    "old_musique_paragraph_overlaps": [],
+    "upstream_question_text_overlaps": []
+  },
+  "source_selection_correction": "One provisionally selected MuSiQue article overlapped a 4-hop historical source. It was replaced before scoring or dispatch. The frozen source intersections are empty.",
+  "artifacts_lf_sha256": {
+    "cases.json": "f5d5a9df7d42474156ac74f11532b7d6f940f07c126bbb9322d4075463f5a64c",
+    "dataset.py": "d403fc0e4c1f7d4fd8f7d6ef9ac3157778be673ba740a93ebfb27d65319e4df4",
+    "scoring.py": "4187f6fa8ea6db771b2c48a35ba647d4ce094bf98d7441cb66bc3e11992b8207",
+    "verify.py": "b070d7153508da93d0b650d3d663206b3dcb9eba0873aaa5c9ead25b4a29702b",
+    "rubric.md": "5017c7b76b8d6004f5cf4ddf20eaa8182e383811ce817537ff4aaf11cb07f044"
+  },
+  "artifacts_bundle_sha256": "335ec0c2ba8f69e9df640b2dc0dbaef98b8eb7b7c8cf153cd388af68bd6d3b44",
+  "materialized_manifest_file_sha256": "92892e2c55f7e98fe54886c452a42c817181394728774cc5ea068f22b0aa926b",
+  "materialized_manifest_canonical_sha256": "fd4718fb94e3ded0e20d01d7795734e9c9e09cfb53f0bd205f243c19ba729564"
+}

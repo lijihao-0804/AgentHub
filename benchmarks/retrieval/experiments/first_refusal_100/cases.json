@@ -1,0 +1,2310 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "id": "R001",
+      "doc_id": "D304440ad3b60",
+      "source_kind": "musique",
+      "locator": {
+        "line": 12004,
+        "record": "2hop__20771_65151",
+        "paragraph": 14
+      },
+      "document_sha256": "aafe401ef92c000214015d33279f18af465ffdb6db1bced56e3ff05192d241ed",
+      "question": "What did the water-and-infield-soil mixture usually do to the leather on baseballs?",
+      "answerable": true,
+      "family": "mechanism",
+      "target": "It discoloured the leather.",
+      "facets": [
+        {
+          "aliases": [
+            "discolored",
+            "discoloured",
+            "discoloration",
+            "discolouration",
+            "changed the color",
+            "changed the colour",
+            "stained"
+          ],
+          "support": [
+            [
+              91,
+              176
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R002",
+      "doc_id": "D8cadd21472a4",
+      "source_kind": "musique",
+      "locator": {
+        "line": 15836,
+        "record": "3hop1__192838_852454_69874",
+        "paragraph": 16
+      },
+      "document_sha256": "76fd36f5b9fccaf162fe26089f56875c4bd73018976c0ae8b69e24b8f3b129b0",
+      "question": "Which cinematographer shared the directing credit on Actors and Sin?",
+      "answerable": true,
+      "family": "attribution",
+      "target": "Lee Garmes.",
+      "facets": [
+        {
+          "aliases": [
+            "Lee Garmes",
+            "Garmes"
+          ],
+          "support": [
+            [
+              326,
+              372
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R003",
+      "doc_id": "Dbf39edab1f0c",
+      "source_kind": "musique",
+      "locator": {
+        "line": 3340,
+        "record": "2hop__53674_63489",
+        "paragraph": 1
+      },
+      "document_sha256": "a9b6a3df8dba1a666d4269c006fdf16316beb7fef4b6ff462f9c5864b924f3b9",
+      "question": "At which recording studio did Ed Sheeran and Andrea Bocelli record Perfect Symphony?",
+      "answerable": false,
+      "family": "missing_place",
+      "target": "The passage identifies the collaborator and release date. It gives no recording studio.",
+      "facets": []
+    },
+    {
+      "id": "R004",
+      "doc_id": "D8ca132749987",
+      "source_kind": "musique",
+      "locator": {
+        "line": 578,
+        "record": "2hop__172461_126711",
+        "paragraph": 5
+      },
+      "document_sha256": "dbbc7cee3811a30aac1f2db30a232a3bacbcbc16fd82ea5ce72189b343cd5686",
+      "question": "In which city did Maggie Reilly record the vocals for Moonlight Shadow?",
+      "answerable": false,
+      "family": "missing_place",
+      "target": "The recording credits and release information do not identify a recording city.",
+      "facets": []
+    },
+    {
+      "id": "R005",
+      "doc_id": "D7a2441ddf4a9",
+      "source_kind": "musique",
+      "locator": {
+        "line": 9745,
+        "record": "2hop__79454_8773",
+        "paragraph": 7
+      },
+      "document_sha256": "07c9e1e8408aadf7b4d994ea8240f85370ae181b4958a0e84ca34bb445b49914",
+      "question": "What maximum ceiling height does the description give for Ingalls Rink?",
+      "answerable": false,
+      "family": "missing_measure",
+      "target": "The cached text breaks off after mentioning maximum height. The seating capacity and construction cost do not give the height.",
+      "facets": []
+    },
+    {
+      "id": "R006",
+      "doc_id": "De94f89845c24",
+      "source_kind": "musique",
+      "locator": {
+        "line": 17873,
+        "record": "3hop1__29929_42691_217606",
+        "paragraph": 9
+      },
+      "document_sha256": "fdf9858c0a276a8f91772324cafc070d4a8281664fd46bd6518df8ac492e24fe",
+      "question": "Which hiking trail does the Marlboro Mountains account recommend for a view of the Hudson Valley?",
+      "answerable": false,
+      "family": "missing_name",
+      "target": "The account describes views but identifies no trail or recommendation.",
+      "facets": []
+    },
+    {
+      "id": "R007",
+      "doc_id": "D06875776dcb0",
+      "source_kind": "musique",
+      "locator": {
+        "line": 7266,
+        "record": "2hop__618267_10690",
+        "paragraph": 10
+      },
+      "document_sha256": "14ec6888b35bafe09940108bb09247715481e5b72712615194e2330173a55935",
+      "question": "What spelling of Carriçal appears on Bellin's 1747 map?",
+      "answerable": true,
+      "family": "historical_name",
+      "target": "Currissal.",
+      "facets": [
+        {
+          "aliases": [
+            "Currissal"
+          ],
+          "support": [
+            [
+              319,
+              359
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R008",
+      "doc_id": "Df7b12cac2c89",
+      "source_kind": "musique",
+      "locator": {
+        "line": 1457,
+        "record": "2hop__65856_830306",
+        "paragraph": 6
+      },
+      "document_sha256": "0f744d187fd87a2ccf2a431da38769b6387f528eef6bb198d1802bceb3f0193e",
+      "question": "Comparing the Canadian RPM Top 100 and the US Billboard Hot 100, where did I Wish It Would Rain Down rank higher?",
+      "answerable": true,
+      "family": "comparison",
+      "target": "Canada, on the RPM chart.",
+      "facets": [
+        {
+          "aliases": [
+            "Canada",
+            "Canadian",
+            "RPM"
+          ],
+          "support": [
+            [
+              217,
+              307
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R009",
+      "doc_id": "D23f98df60f17",
+      "source_kind": "musique",
+      "locator": {
+        "line": 13749,
+        "record": "2hop__71102_23225",
+        "paragraph": 7
+      },
+      "document_sha256": "601e6c4686f291ba9f2b96036b59cd582c20811f4dcaabcb1eee39b723c9fb11",
+      "question": "Which satellite bus was used to build USA-166?",
+      "answerable": true,
+      "family": "component",
+      "target": "The AS-4000 bus.",
+      "facets": [
+        {
+          "aliases": [
+            "AS 4000",
+            "AS4000"
+          ],
+          "support": [
+            [
+              307,
+              338
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R010",
+      "doc_id": "D563a9b7eda4c",
+      "source_kind": "qasper",
+      "locator": {
+        "paper": "1808.09920"
+      },
+      "document_sha256": "b995615e602e11901eee69228336b561bbeb10fdea8bbac655bf7b0421609c9c",
+      "question": "In Entity-GCN's reading-comprehension graph, what does an individual node stand for?",
+      "answerable": true,
+      "family": "representation",
+      "target": "A mention of an entity.",
+      "facets": [
+        {
+          "aliases": [
+            "mentions of entities",
+            "entity mention",
+            "entity mentions",
+            "mention of an entity",
+            "mention of a named entity"
+          ],
+          "support": [
+            [
+              398,
+              442
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R011",
+      "doc_id": "D15319055afca",
+      "source_kind": "qasper",
+      "locator": {
+        "paper": "1709.05404"
+      },
+      "document_sha256": "145cff8287e0a917c7345b785522dd986920a535cfb2f596fb62b470b476ed19",
+      "question": "What numerical precision did the supervised sarcasm detector achieve on the debate-forum corpus?",
+      "answerable": false,
+      "family": "missing_measure",
+      "target": "The abstract reports higher precision but gives no precision value.",
+      "facets": []
+    },
+    {
+      "id": "R012",
+      "doc_id": "D09e3dcd5717b",
+      "source_kind": "qasper",
+      "locator": {
+        "paper": "2003.08897"
+      },
+      "document_sha256": "160cd7e7d7ecc761bc06818d6067cd7e229550c36b30be037b8498933b92a433",
+      "question": "What information about pairs of image objects is the GSA module meant to represent?",
+      "answerable": true,
+      "family": "representation",
+      "target": "Their relative geometry or spatial relationships.",
+      "facets": [
+        {
+          "aliases": [
+            "relative geometry",
+            "geometric relations",
+            "geometric relationships",
+            "spatial relations",
+            "spatial relationships",
+            "relative positions",
+            "relative spatial"
+          ],
+          "support": [
+            [
+              811,
+              884
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R013",
+      "doc_id": "Dcfc3ed413e6b",
+      "source_kind": "qasper",
+      "locator": {
+        "paper": "1607.03542"
+      },
+      "document_sha256": "b6fd8c48547b3644e5b3922e6ae8464889e430ec1ad1926116734b08dc313577",
+      "question": "Does the proposed open-vocabulary parser restrict the meanings it can express to the formal knowledge base's schema?",
+      "answerable": true,
+      "family": "supported_negative",
+      "target": "No, its representations can extend beyond that schema.",
+      "facets": [
+        {
+          "aliases": [
+            "no",
+            "not limited",
+            "not restricted",
+            "isn't limited",
+            "beyond",
+            "outside"
+          ],
+          "support": [
+            [
+              1157,
+              1206
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R014",
+      "doc_id": "D28879b13950f",
+      "source_kind": "qasper",
+      "locator": {
+        "paper": "1911.06191"
+      },
+      "document_sha256": "7b2e7d34459f7499a97b62009d66e1c7936b9f3f926ada5e45c76d27bd9bb992",
+      "question": "Which three language directions earned second place for Microsoft Research Asia at WMT19?",
+      "answerable": false,
+      "family": "missing_assignment",
+      "target": "The counts of first and second places are stated, but no directions are identified.",
+      "facets": []
+    },
+    {
+      "id": "R015",
+      "doc_id": "D5e577751bee8",
+      "source_kind": "qasper",
+      "locator": {
+        "paper": "1909.02480"
+      },
+      "document_sha256": "1d70e1baf1c523076dfda8721b61c854c69a915c4d1722ec6a892e32ad1918c7",
+      "question": "What are the names of the three translation benchmarks used to evaluate FlowSeq?",
+      "answerable": false,
+      "family": "missing_dataset",
+      "target": "The abstract counts three benchmark datasets but does not name them.",
+      "facets": []
+    },
+    {
+      "id": "R016",
+      "doc_id": "D93f58af64adf",
+      "source_kind": "musique",
+      "locator": {
+        "line": 4924,
+        "record": "2hop__861618_160851",
+        "paragraph": 17
+      },
+      "document_sha256": "003f3631f08ee659abefa4b37a1b094f16726b2f767d6a3299cdc32d04eb1376",
+      "question": "How many points did Ethel Armitage score in her Olympic archery event?",
+      "answerable": true,
+      "family": "quantity",
+      "target": "582 points.",
+      "facets": [
+        {
+          "aliases": [
+            "582",
+            "five hundred and eighty two",
+            "five hundred eighty two"
+          ],
+          "support": [
+            [
+              298,
+              341
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R017",
+      "doc_id": "D5eccc01baddc",
+      "source_kind": "qasper",
+      "locator": {
+        "paper": "2002.10832"
+      },
+      "document_sha256": "3bb96266c8f8fe0b0b7ba26e566a82cc378531d66334c0a8f185c11d98a178ff",
+      "question": "What is the name of the BERT-based text-generation architecture used to study transfer to vision?",
+      "answerable": true,
+      "family": "component",
+      "target": "BERT-gen.",
+      "facets": [
+        {
+          "aliases": [
+            "BERT gen",
+            "BERTgen"
+          ],
+          "support": [
+            [
+              714,
+              783
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R018",
+      "doc_id": "Dd820e5c7d405",
+      "source_kind": "qasper",
+      "locator": {
+        "paper": "1704.05572"
+      },
+      "document_sha256": "47f87ef879224bfc1ac22a8d3830cbd2fecd2fccf0a31cd60af87b71687bf651",
+      "question": "What was the name of the structured solver against which the complex-question Open IE model was compared?",
+      "answerable": false,
+      "family": "missing_name",
+      "target": "The comparison is reported without naming the previous solver.",
+      "facets": []
+    },
+    {
+      "id": "R019",
+      "doc_id": "D27b162380afc",
+      "source_kind": "qasper",
+      "locator": {
+        "paper": "1905.06512"
+      },
+      "document_sha256": "9c09de1a148ba5721def568836cd2c179270f453bfe98f09ecff0b6261475402",
+      "question": "How many word–sememe–definition triples are in CDM's training split?",
+      "answerable": false,
+      "family": "missing_sample",
+      "target": "The kind of triples in the corpus is given without a training-split count.",
+      "facets": []
+    },
+    {
+      "id": "R020",
+      "doc_id": "D38a44ca4541f",
+      "source_kind": "musique",
+      "locator": {
+        "line": 248,
+        "record": "2hop__2920_2741",
+        "paragraph": 12
+      },
+      "document_sha256": "33a133fee0fb11a177e826c9ae1165b0a3bd1ae1c68215f9d32dec7fdcc68e3f",
+      "question": "Whom did the Tallong petitioners ask to pay the teacher's salary in 1865?",
+      "answerable": true,
+      "family": "relation",
+      "target": "The National Board of Education.",
+      "facets": [
+        {
+          "aliases": [
+            "National Board of Education"
+          ],
+          "support": [
+            [
+              477,
+              571
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R021",
+      "doc_id": "Dbde8bf94987a",
+      "source_kind": "musique",
+      "locator": {
+        "line": 10561,
+        "record": "2hop__92155_11122",
+        "paragraph": 9
+      },
+      "document_sha256": "50aa888be0791d3dc08702dd0046e92a95ba125df4e1b45b38edde826582002a",
+      "question": "Approximately how far did the surface rupture of the 2001 Kunlun earthquake extend?",
+      "answerable": true,
+      "family": "quantity",
+      "target": "About 450 km.",
+      "facets": [
+        {
+          "aliases": [
+            "450 km",
+            "450 kilometers",
+            "450 kilometres",
+            "450 kilometer",
+            "450 kilometre"
+          ],
+          "support": [
+            [
+              513,
+              567
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R022",
+      "doc_id": "D4f33f071dbb4",
+      "source_kind": "musique",
+      "locator": {
+        "line": 7667,
+        "record": "2hop__641919_514685",
+        "paragraph": 3
+      },
+      "document_sha256": "579da5ea31f873d88ecd2f34cce98ee3fbd28c617140ea1023ee84ab85d78a17",
+      "question": "What reason does the Tzeltal passage give for the diaspora elsewhere in Mexico and the United States?",
+      "answerable": true,
+      "family": "causation",
+      "target": "Adverse economic conditions in Chiapas.",
+      "facets": [
+        {
+          "aliases": [
+            "economic conditions",
+            "economic hardship",
+            "economic difficulties",
+            "economic circumstances",
+            "economic factors",
+            "economic situation",
+            "economic pressures",
+            "economic problems"
+          ],
+          "support": [
+            [
+              536,
+              603
+            ]
+          ]
+        },
+        {
+          "aliases": [
+            "Chiapas"
+          ],
+          "support": [
+            [
+              536,
+              603
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R023",
+      "doc_id": "D8ebfd8f5e33b",
+      "source_kind": "qasper",
+      "locator": {
+        "paper": "1806.03191"
+      },
+      "document_sha256": "ce438c47e3091a17f63c9f021130fe1916a129f4bf7bfa1095f4485bcc298fa4",
+      "question": "Which benchmark dataset can you name for the comparison of pattern and distributional hypernym detection in the Hearst-pattern study?",
+      "answerable": false,
+      "family": "missing_dataset",
+      "target": "The abstract mentions common benchmarks without giving any dataset name.",
+      "facets": []
+    },
+    {
+      "id": "R024",
+      "doc_id": "Dcdd03b1d80fc",
+      "source_kind": "musique",
+      "locator": {
+        "line": 19293,
+        "record": "2hop__82586_75818",
+        "paragraph": 13
+      },
+      "document_sha256": "12205d4259715c2fe8b89ccc4dfadc47094167c302c5604e79257b9af4797b92",
+      "question": "Did the Lakers adopt a new team name when they moved to Los Angeles?",
+      "answerable": true,
+      "family": "supported_negative",
+      "target": "No. They kept their name.",
+      "facets": [
+        {
+          "aliases": [
+            "no",
+            "did not",
+            "didn't",
+            "kept",
+            "retained",
+            "unchanged",
+            "same name"
+          ],
+          "support": [
+            [
+              370,
+              429
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R025",
+      "doc_id": "Da310e9ae338c",
+      "source_kind": "musique",
+      "locator": {
+        "line": 4695,
+        "record": "2hop__122103_501351",
+        "paragraph": 16
+      },
+      "document_sha256": "fa5b3f13ba524c55f047fbdddc26871fe438eea880ce4d1f68529e8310568764",
+      "question": "What was the title of the dissertation Ernst Kunwald submitted for his law degree in Vienna?",
+      "answerable": false,
+      "family": "missing_work",
+      "target": "The paragraph supplies the institution, degree and year, with no dissertation title.",
+      "facets": []
+    },
+    {
+      "id": "R026",
+      "doc_id": "De5b137bd2916",
+      "source_kind": "qasper",
+      "locator": {
+        "paper": "1905.01976"
+      },
+      "document_sha256": "0ad0332790c918b4d045c835377fe5e14c1cb9e25fb956e1695d1e988e483160",
+      "question": "Which specific text-generation corpus was used to compare TextKD-GAN's Jensen-Shannon distance with the baseline?",
+      "answerable": false,
+      "family": "missing_dataset",
+      "target": "Experiments on different datasets are mentioned. The abstract does not identify a corpus for this metric.",
+      "facets": []
+    },
+    {
+      "id": "R027",
+      "doc_id": "D64481f661ff8",
+      "source_kind": "musique",
+      "locator": {
+        "line": 1078,
+        "record": "2hop__456111_10038",
+        "paragraph": 7
+      },
+      "document_sha256": "f5947be038b57bfa4f64ef8ab46436d66376845a6b3cd18cca613aec299ad0ee",
+      "question": "Who designed the original Lou Seal mascot costume for the San Francisco Giants?",
+      "answerable": false,
+      "family": "missing_credit",
+      "target": "The mascot's identity and club affiliation are described, with no costume designer named.",
+      "facets": []
+    },
+    {
+      "id": "R028",
+      "doc_id": "Da9db318f8a12",
+      "source_kind": "musique",
+      "locator": {
+        "line": 15726,
+        "record": "3hop1__125670_490579_579944",
+        "paragraph": 11
+      },
+      "document_sha256": "aeffe90da03856497907b295aaf791327d46c5c9b5d0f1686e96336220791e6e",
+      "question": "Which year did Charles Emmott first appear for England in rugby union?",
+      "answerable": false,
+      "family": "missing_time",
+      "target": "The playing decade and teams are given. The club's change of code is dated, the player's England debut is not.",
+      "facets": []
+    },
+    {
+      "id": "R029",
+      "doc_id": "D7fdb219cc8e8",
+      "source_kind": "musique",
+      "locator": {
+        "line": 8365,
+        "record": "2hop__314413_62031",
+        "paragraph": 17
+      },
+      "document_sha256": "45d81ac8545bff24f5949d8e3855e084786c9c9a5df0e92155ce75eaf2dd6154",
+      "question": "Which body chose the name Dream Island, as distinct from the team that surveyed it?",
+      "answerable": true,
+      "family": "attribution",
+      "target": "The UK Antarctic Place-Names Committee.",
+      "facets": [
+        {
+          "aliases": [
+            "UK Antarctic Place Names Committee",
+            "United Kingdom Antarctic Place Names Committee"
+          ],
+          "support": [
+            [
+              249,
+              296
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R030",
+      "doc_id": "D866187c55552",
+      "source_kind": "musique",
+      "locator": {
+        "line": 1014,
+        "record": "2hop__2222_631696",
+        "paragraph": 13
+      },
+      "document_sha256": "6034e018f649cd9decdf3bf13087420974bb2d2c5ab3c7a15bf1f2ea2bc8ef06",
+      "question": "What was the title of Charlie Ahearn's radio show?",
+      "answerable": false,
+      "family": "missing_work",
+      "target": "His work as a radio host is mentioned without naming a program.",
+      "facets": []
+    },
+    {
+      "id": "R031",
+      "doc_id": "Da9e8431351fd",
+      "source_kind": "qasper",
+      "locator": {
+        "paper": "1911.02711"
+      },
+      "document_sha256": "f535364316e8e86097d84b00d6b24935e852a586ea1e119af42c64d4a6ab217d",
+      "question": "Which automatic summarization system supplied replacement summaries in the review-sentiment experiment?",
+      "answerable": false,
+      "family": "missing_component",
+      "target": "An automatic summarizer is mentioned without its identity.",
+      "facets": []
+    },
+    {
+      "id": "R032",
+      "doc_id": "D83e3fe80bdc2",
+      "source_kind": "musique",
+      "locator": {
+        "line": 12237,
+        "record": "2hop__130034_609442",
+        "paragraph": 14
+      },
+      "document_sha256": "c557f7c98730f038a8e606486996dfd93fd443a11ac2cc28dbb7b2f209924702",
+      "question": "With which university was James E. Mercik affiliated during the South Pole winter described?",
+      "answerable": false,
+      "family": "missing_affiliation",
+      "target": "His research program and station are named. No university is specified.",
+      "facets": []
+    },
+    {
+      "id": "R033",
+      "doc_id": "D5a286d3da619",
+      "source_kind": "qasper",
+      "locator": {
+        "paper": "1904.09708"
+      },
+      "document_sha256": "31f3099947c9178fb174dafd2d7d1c0736deca149d937598394bb8543e505920",
+      "question": "How many SCAN training examples were used for the Syntactic Attention experiment?",
+      "answerable": false,
+      "family": "missing_sample",
+      "target": "The abstract names SCAN but gives no training set size.",
+      "facets": []
+    },
+    {
+      "id": "R034",
+      "doc_id": "D6396273b6124",
+      "source_kind": "qasper",
+      "locator": {
+        "paper": "1909.04625"
+      },
+      "document_sha256": "2bb7d5d21d7db90a4d89f376fd5e734ec98094abc57d9c3fce2d714bddf83bcb",
+      "question": "In the coordinated-noun-phrase study, which two languages were the neural models trained on?",
+      "answerable": true,
+      "family": "paired_entities",
+      "target": "English and French.",
+      "facets": [
+        {
+          "aliases": [
+            "English"
+          ],
+          "support": [
+            [
+              660,
+              696
+            ]
+          ]
+        },
+        {
+          "aliases": [
+            "French"
+          ],
+          "support": [
+            [
+              660,
+              696
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R035",
+      "doc_id": "D34855f0a9f0c",
+      "source_kind": "qasper",
+      "locator": {
+        "paper": "1907.11499"
+      },
+      "document_sha256": "ae4c23ec66e6a9f2e10bfebc248f2660d35ef8d1d6cb394787567a24f9e03189",
+      "question": "What learning method did the domain-detection authors use to bootstrap their classifiers?",
+      "answerable": true,
+      "family": "method",
+      "target": "Multiple instance learning.",
+      "facets": [
+        {
+          "aliases": [
+            "multiple instance learning",
+            "multiple instance",
+            "MIL"
+          ],
+          "support": [
+            [
+              451,
+              510
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R036",
+      "doc_id": "Ded01fc2d70d3",
+      "source_kind": "qasper",
+      "locator": {
+        "paper": "2001.06888"
+      },
+      "document_sha256": "f836d492bcd7b04a37d245882eaac504c07d2c4a49afce9da66dc04fd2a5aa62",
+      "question": "Which image-encoder backbone produced the visual features in the social-media named-entity recognition study?",
+      "answerable": false,
+      "family": "missing_component",
+      "target": "The abstract describes using related images, without specifying an encoder architecture.",
+      "facets": []
+    },
+    {
+      "id": "R037",
+      "doc_id": "Dca16b27b65c9",
+      "source_kind": "musique",
+      "locator": {
+        "line": 19332,
+        "record": "2hop__64618_78183",
+        "paragraph": 8
+      },
+      "document_sha256": "3490e741fa109596d90e0b432d9ab8706e78f155c1b43939a9a89988e2395ca2",
+      "question": "Which visitor estimated the number of miners at the Krishna River diggings?",
+      "answerable": true,
+      "family": "attribution",
+      "target": "Jean Baptiste Tavernier.",
+      "facets": [
+        {
+          "aliases": [
+            "Tavernier"
+          ],
+          "support": [
+            [
+              331,
+              412
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R038",
+      "doc_id": "Df494334dfa79",
+      "source_kind": "musique",
+      "locator": {
+        "line": 1858,
+        "record": "2hop__568377_86706",
+        "paragraph": 7
+      },
+      "document_sha256": "71d8a9dddae61c298342e77a8652905d288c711f26b8bb7bc840fbe2f2339f4a",
+      "question": "Which track on Virgin's High!/Kicks! did Kazuya Takase both compose and arrange?",
+      "answerable": false,
+      "family": "missing_assignment",
+      "target": "The passage reports that he did this for one song. It never specifies which track.",
+      "facets": []
+    },
+    {
+      "id": "R039",
+      "doc_id": "D21db70f03349",
+      "source_kind": "qasper",
+      "locator": {
+        "paper": "1808.02113"
+      },
+      "document_sha256": "67dca1509a4d8cc41a43902a984d442d72f6e21ed6f18e2582980eea62345425",
+      "question": "What did the attention weights look like at stopping points where the turn-taking visualizations failed to distinguish influential turns?",
+      "answerable": true,
+      "family": "mechanism",
+      "target": "They were uniform across turns.",
+      "facets": [
+        {
+          "aliases": [
+            "uniform",
+            "equal",
+            "same",
+            "identical"
+          ],
+          "support": [
+            [
+              494,
+              546
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R040",
+      "doc_id": "D564d1306b635",
+      "source_kind": "musique",
+      "locator": {
+        "line": 5732,
+        "record": "2hop__805108_406192",
+        "paragraph": 5
+      },
+      "document_sha256": "2a2153a351148e10db7c58063a589f5233434e27b97ec3d61a1f49b09996d5e9",
+      "question": "In what year did Money include Guilford among its top 100 US places to live?",
+      "answerable": true,
+      "family": "temporal",
+      "target": "2005.",
+      "facets": [
+        {
+          "aliases": [
+            "2005"
+          ],
+          "support": [
+            [
+              344,
+              415
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R041",
+      "doc_id": "Df5b551acdea5",
+      "source_kind": "musique",
+      "locator": {
+        "line": 5055,
+        "record": "2hop__720282_565529",
+        "paragraph": 6
+      },
+      "document_sha256": "274c33a21dd41650448253cee10cc6ce483914e03162bc991f626f6fa8e092f5",
+      "question": "How were the skating sound effects for Yuri on Ice obtained?",
+      "answerable": true,
+      "family": "method",
+      "target": "Kenji Miyamoto's own skating routines were recorded.",
+      "facets": [
+        {
+          "aliases": [
+            "Miyamoto",
+            "choreographer"
+          ],
+          "support": [
+            [
+              350,
+              455
+            ]
+          ]
+        },
+        {
+          "aliases": [
+            "recorded",
+            "recording",
+            "recordings"
+          ],
+          "support": [
+            [
+              375,
+              455
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R042",
+      "doc_id": "D09e57d2df19f",
+      "source_kind": "qasper",
+      "locator": {
+        "paper": "2003.01472"
+      },
+      "document_sha256": "71239dfaf1d67b945a0eff9ff9b38fe846988cc31c57cb5b58b3600c7369a8ae",
+      "question": "Which agreement measure does Seshat compute in double-annotation mode?",
+      "answerable": true,
+      "family": "metric",
+      "target": "Gamma.",
+      "facets": [
+        {
+          "aliases": [
+            "gamma",
+            "γ"
+          ],
+          "support": [
+            [
+              632,
+              683
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R043",
+      "doc_id": "D0d4111962801",
+      "source_kind": "qasper",
+      "locator": {
+        "paper": "1909.03242"
+      },
+      "document_sha256": "7572c2e2c42ccd111c6926d60e03170e6742980eba7e7e89a070a85b238163d2",
+      "question": "Who assigned the veracity labels to the factual claims collected for MultiFC?",
+      "answerable": true,
+      "family": "attribution",
+      "target": "Expert journalists.",
+      "facets": [
+        {
+          "aliases": [
+            "expert journalists",
+            "human journalists",
+            "journalists",
+            "professional fact checkers"
+          ],
+          "support": [
+            [
+              337,
+              386
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R044",
+      "doc_id": "Dfa74838bf665",
+      "source_kind": "qasper",
+      "locator": {
+        "paper": "1911.12569"
+      },
+      "document_sha256": "8f7d62f7aca366bb34610328bf4bfa523524db9402ef8160674508d2c69054b4",
+      "question": "What F-score gain did the emotion task show on Stance Sentiment Emotion Corpus, and what gain did sentiment show on SemEval?",
+      "answerable": true,
+      "family": "paired_values",
+      "target": "Emotion improved by 5 points and sentiment by 3.2 points.",
+      "facets": [
+        {
+          "aliases": [
+            "5",
+            "five"
+          ],
+          "support": [
+            [
+              866,
+              937
+            ]
+          ]
+        },
+        {
+          "aliases": [
+            "3.2"
+          ],
+          "support": [
+            [
+              750,
+              801
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R045",
+      "doc_id": "D7d1f0222d2eb",
+      "source_kind": "musique",
+      "locator": {
+        "line": 8207,
+        "record": "2hop__590408_88957",
+        "paragraph": 11
+      },
+      "document_sha256": "074ff8b2ae425438af98ac5a467ad7796ae6b5de2971c89444e227d54e3c3a31",
+      "question": "Which character did Jayapradha play in Shabdavedi?",
+      "answerable": false,
+      "family": "missing_role",
+      "target": "The cast listing names Jayapradha without a character name.",
+      "facets": []
+    },
+    {
+      "id": "R046",
+      "doc_id": "D0e26e15f50a8",
+      "source_kind": "musique",
+      "locator": {
+        "line": 12718,
+        "record": "2hop__691856_20644",
+        "paragraph": 10
+      },
+      "document_sha256": "89f555624cf7ed0421141b7e0da03066fd069ae7d97af2b69dd2098d2da1fd2d",
+      "question": "Which is the largest channel crossed by the three major bridges on Macapagal Boulevard?",
+      "answerable": true,
+      "family": "relation",
+      "target": "The Libertad Channel.",
+      "facets": [
+        {
+          "aliases": [
+            "Libertad"
+          ],
+          "support": [
+            [
+              404,
+              473
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R047",
+      "doc_id": "D404f74c05398",
+      "source_kind": "musique",
+      "locator": {
+        "line": 2728,
+        "record": "2hop__133176_653391",
+        "paragraph": 4
+      },
+      "document_sha256": "2bb211b70cb1040d526d582e5f577587d6eb3ffb2a9eead04c7162768a4d618a",
+      "question": "How many points of articulation did the 2013 Max Steel figures have?",
+      "answerable": false,
+      "family": "missing_measure",
+      "target": "The passage says the redesign reduced articulation but gives no count for the new figures.",
+      "facets": []
+    },
+    {
+      "id": "R048",
+      "doc_id": "D11ac4454a4bc",
+      "source_kind": "musique",
+      "locator": {
+        "line": 1700,
+        "record": "2hop__91652_78168",
+        "paragraph": 6
+      },
+      "document_sha256": "ec38413ccae22e98b625c0edc27682ce11d35800242a5c60b30ecdc12f6154cd",
+      "question": "In which cinema did Virudhagiri have its premiere?",
+      "answerable": false,
+      "family": "missing_place",
+      "target": "The release date is supplied but the venue is not.",
+      "facets": []
+    },
+    {
+      "id": "R049",
+      "doc_id": "D8e1bd8f5854d",
+      "source_kind": "qasper",
+      "locator": {
+        "paper": "1904.05862"
+      },
+      "document_sha256": "217394a365da3005b1aa2a4a3424c7d870bfa822e7c71c4455866ddc87811aa9",
+      "question": "What word error rate did wav2vec report on the nov92 test set?",
+      "answerable": true,
+      "family": "quantity",
+      "target": "2.43 percent.",
+      "facets": [
+        {
+          "aliases": [
+            "2.43"
+          ],
+          "support": [
+            [
+              602,
+              642
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R050",
+      "doc_id": "D6df599cb1f8b",
+      "source_kind": "qasper",
+      "locator": {
+        "paper": "1811.00942"
+      },
+      "document_sha256": "f5f356bd2f78a7460c81f86dd2e4d5d078f3ed8bdc92a46692324ab16a61d0aa",
+      "question": "On which computing platform was the disparity between energy/latency costs and perplexity changes more pronounced than on the desktop?",
+      "answerable": true,
+      "family": "comparison",
+      "target": "A Raspberry Pi.",
+      "facets": [
+        {
+          "aliases": [
+            "Raspberry Pi"
+          ],
+          "support": [
+            [
+              787,
+              964
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R051",
+      "doc_id": "Dc2bdfdb6f3ac",
+      "source_kind": "musique",
+      "locator": {
+        "line": 15758,
+        "record": "3hop1__310005_65665_490716",
+        "paragraph": 2
+      },
+      "document_sha256": "df417a96da974cccd966d2a6983e7b2a725f060b024143a32e3451d7b9c64aa5",
+      "question": "Did the shortened single of Fountain of Sorrow make the Billboard Hot 100?",
+      "answerable": true,
+      "family": "supported_negative",
+      "target": "No, it did not chart there.",
+      "facets": [
+        {
+          "aliases": [
+            "no",
+            "failed",
+            "did not",
+            "didn't",
+            "never",
+            "not chart"
+          ],
+          "support": [
+            [
+              322,
+              430
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R052",
+      "doc_id": "D050302f3279c",
+      "source_kind": "qasper",
+      "locator": {
+        "paper": "1908.06725"
+      },
+      "document_sha256": "64b4678563594bc79f791e365d857192f23208725fc7f3f16fb36be6cb15fb18",
+      "question": "Did AMS produce a larger absolute gain over BERT on CommonsenseQA than on the Winograd Schema Challenge?",
+      "answerable": false,
+      "family": "missing_comparison",
+      "target": "The abstract reports improvements on both tasks but does not compare their sizes.",
+      "facets": []
+    },
+    {
+      "id": "R053",
+      "doc_id": "Daa21b62fb8d4",
+      "source_kind": "musique",
+      "locator": {
+        "line": 18583,
+        "record": "4hop1__35260_8995_56750_1891",
+        "paragraph": 18
+      },
+      "document_sha256": "a40f452ddea800187fad984ee6a1937a76eb5635df985aab5247cd9d0ff741a7",
+      "question": "What acreage at Zekiah Swamp was the Maryland Department of Natural Resources authorized to buy?",
+      "answerable": false,
+      "family": "missing_measure",
+      "target": "The cached passage mentions additional land but omits the number of acres.",
+      "facets": []
+    },
+    {
+      "id": "R054",
+      "doc_id": "D62c35e02f4c3",
+      "source_kind": "musique",
+      "locator": {
+        "line": 1961,
+        "record": "2hop__143235_58450",
+        "paragraph": 11
+      },
+      "document_sha256": "9577178d6dcf3c26cdf816162fb13b0fcc32dbe88a9291a6c95b670dc6d4b89d",
+      "question": "On what date did the Maleficent cover of Once Upon a Dream become available for purchase?",
+      "answerable": true,
+      "family": "temporal",
+      "target": "February 4.",
+      "facets": [
+        {
+          "aliases": [
+            "February 4",
+            "February 4th",
+            "4 February",
+            "4th of February",
+            "Feb 4"
+          ],
+          "support": [
+            [
+              410,
+              477
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R055",
+      "doc_id": "Dcb8838915e7b",
+      "source_kind": "qasper",
+      "locator": {
+        "paper": "1808.03986"
+      },
+      "document_sha256": "bbdbc28f15449ac98d83412b3e73a5773fee821621878b81d9425d207e96f071",
+      "question": "On which of the four named metrics did the visual question generator achieve its largest numerical improvement?",
+      "answerable": false,
+      "family": "missing_comparison",
+      "target": "Several metrics improved. The abstract gives no individual improvements or ranking.",
+      "facets": []
+    },
+    {
+      "id": "R056",
+      "doc_id": "Debfd7f1cd8b5",
+      "source_kind": "musique",
+      "locator": {
+        "line": 10316,
+        "record": "2hop__621811_140822",
+        "paragraph": 0
+      },
+      "document_sha256": "1f8b8d833ad4a0e15d74ada5f9b6fd54e996f7ff849e00d55f454e245869e6ac",
+      "question": "On what day of the week did TNA Football air on WOIC?",
+      "answerable": false,
+      "family": "missing_schedule",
+      "target": "The station and launch month are given. No weekly broadcast day appears.",
+      "facets": []
+    },
+    {
+      "id": "R057",
+      "doc_id": "D1836f4ce58a8",
+      "source_kind": "qasper",
+      "locator": {
+        "paper": "1810.10254"
+      },
+      "document_sha256": "334a0d59ab55f6653db05bb2e7594dc8cb50c7eab58b7c3048aaeb97a73e82a8",
+      "question": "What absolute perplexity value did the augmented code-switching language model attain?",
+      "answerable": false,
+      "family": "missing_measure",
+      "target": "Only a relative improvement over the LSTM baseline is reported.",
+      "facets": []
+    },
+    {
+      "id": "R058",
+      "doc_id": "Db20639f5093e",
+      "source_kind": "musique",
+      "locator": {
+        "line": 18415,
+        "record": "4hop1__61078_374524_375457_49140",
+        "paragraph": 19
+      },
+      "document_sha256": "b1a202a08699d7c596daf7aed983b2b6d23bfcde6ad094e444b8b29a39a9a696",
+      "question": "On which two days does the complementary division of the Japanese School in Zurich meet?",
+      "answerable": true,
+      "family": "paired_entities",
+      "target": "Wednesdays and Saturdays.",
+      "facets": [
+        {
+          "aliases": [
+            "Wednesday",
+            "Wednesdays"
+          ],
+          "support": [
+            [
+              247,
+              314
+            ]
+          ]
+        },
+        {
+          "aliases": [
+            "Saturday",
+            "Saturdays"
+          ],
+          "support": [
+            [
+              247,
+              314
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R059",
+      "doc_id": "D2db475b1d26d",
+      "source_kind": "musique",
+      "locator": {
+        "line": 18018,
+        "record": "3hop1__132344_32223_38290",
+        "paragraph": 2
+      },
+      "document_sha256": "47418f1d5ddddb99b37235baca55ef3b34d46006288d2ed7ab4e3fc9d0914d25",
+      "question": "Of the 90 rooms at the Beau-Rivage Geneva, how many were not suites?",
+      "answerable": true,
+      "family": "arithmetic",
+      "target": "72 rooms.",
+      "facets": [
+        {
+          "aliases": [
+            "72",
+            "seventy two"
+          ],
+          "support": [
+            [
+              312,
+              340
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R060",
+      "doc_id": "D424c3045d68a",
+      "source_kind": "musique",
+      "locator": {
+        "line": 10197,
+        "record": "2hop__131328_91717",
+        "paragraph": 15
+      },
+      "document_sha256": "e15afdd6a465456c45f99c4d3fe31c4bd2e00a6b39a6909b9c4bff8c1f058e6a",
+      "question": "How many volumes are in the print collection at Penn State Harrisburg Library?",
+      "answerable": false,
+      "family": "missing_measure",
+      "target": "The text says there is a print collection but gives no volume count.",
+      "facets": []
+    },
+    {
+      "id": "R061",
+      "doc_id": "Dec3aec766345",
+      "source_kind": "musique",
+      "locator": {
+        "line": 1919,
+        "record": "2hop__76656_85807",
+        "paragraph": 18
+      },
+      "document_sha256": "92e4c436446ee3ee56857b0f2b69ba00f122dfb405de85c667ed1a431978f57a",
+      "question": "At what playing position did Johnny Rodgers line up for the Montreal Alouettes?",
+      "answerable": false,
+      "family": "missing_role",
+      "target": "The club is identified with no playing position.",
+      "facets": []
+    },
+    {
+      "id": "R062",
+      "doc_id": "Ded865e3425b0",
+      "source_kind": "qasper",
+      "locator": {
+        "paper": "1903.04715"
+      },
+      "document_sha256": "06b0cbee1b8db89f929f6a658af72f2df1bcdea8c396d895cc5f1334996ef3f6",
+      "question": "Which loss encourages the translation system to use additional context during learning?",
+      "answerable": true,
+      "family": "method",
+      "target": "A multilevel pairwise ranking loss.",
+      "facets": [
+        {
+          "aliases": [
+            "multilevel pair wise ranking",
+            "multilevel pairwise ranking",
+            "multi level pairwise ranking",
+            "multi level pair wise ranking"
+          ],
+          "support": [
+            [
+              504,
+              545
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R063",
+      "doc_id": "D314a26b28e83",
+      "source_kind": "musique",
+      "locator": {
+        "line": 7216,
+        "record": "2hop__122867_638959",
+        "paragraph": 4
+      },
+      "document_sha256": "fcf8723545cb732c0f8a4661151cc17a5a78e6447d71f2f69636cf1a9025cf55",
+      "question": "At which school did Felix Dodds teach before working at Harlington Community School?",
+      "answerable": true,
+      "family": "sequence",
+      "target": "Khartoum International Community School.",
+      "facets": [
+        {
+          "aliases": [
+            "Khartoum International Community School"
+          ],
+          "support": [
+            [
+              458,
+              565
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R064",
+      "doc_id": "D6fca12938ca6",
+      "source_kind": "qasper",
+      "locator": {
+        "paper": "1911.03562"
+      },
+      "document_sha256": "3749f467237d3a5a54c5191f2d12493912fa0368d57a8d2ccb93c0a2c0c35b50",
+      "question": "What cause did the ACL Anthology study establish for the lower average citation count of female first authors?",
+      "answerable": false,
+      "family": "missing_reason",
+      "target": "It reports a gap even after accounting for experience, without establishing a causal mechanism.",
+      "facets": []
+    },
+    {
+      "id": "R065",
+      "doc_id": "Ddfbb8099335d",
+      "source_kind": "qasper",
+      "locator": {
+        "paper": "1810.12885"
+      },
+      "document_sha256": "460312368a1faba353c4760729fec7cc2c0851511751533875852e952159b787",
+      "question": "By how many percentage points did humans outperform the MRC systems on ReCoRD?",
+      "answerable": false,
+      "family": "missing_measure",
+      "target": "The abstract states that humans did better without supplying either score or a numerical gap.",
+      "facets": []
+    },
+    {
+      "id": "R066",
+      "doc_id": "D756f85d7b83c",
+      "source_kind": "musique",
+      "locator": {
+        "line": 8354,
+        "record": "2hop__345849_297038",
+        "paragraph": 9
+      },
+      "document_sha256": "cc714f8b1dd5876b27d8666b4b5aa61531809c5abe1a28910a03be79d87cdd12",
+      "question": "In which year was the estimate of 13,184 residents in Campos Altos made?",
+      "answerable": false,
+      "family": "missing_time",
+      "target": "The year of municipal status appears, but the population estimate has no date.",
+      "facets": []
+    },
+    {
+      "id": "R067",
+      "doc_id": "D3ea032cd7946",
+      "source_kind": "musique",
+      "locator": {
+        "line": 6927,
+        "record": "2hop__617578_134827",
+        "paragraph": 18
+      },
+      "document_sha256": "4dcf3e92560ad810bf8eaf528565a2fede691c43b5fce6f36c4ed17fc30e0c2f",
+      "question": "How many Sanctuaries does Ness visit to gather the melodies in EarthBound?",
+      "answerable": true,
+      "family": "quantity",
+      "target": "Eight.",
+      "facets": [
+        {
+          "aliases": [
+            "8",
+            "eight"
+          ],
+          "support": [
+            [
+              379,
+              418
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R068",
+      "doc_id": "D02ebd361615a",
+      "source_kind": "qasper",
+      "locator": {
+        "paper": "1609.06791"
+      },
+      "document_sha256": "045714f8916aee8f5693a8f34b7640d6c43edcff3aaa05bbec29d44213d42be2",
+      "question": "In the Twitter-Network topic model, what stochastic model is assigned specifically to the social network?",
+      "answerable": true,
+      "family": "component",
+      "target": "A Gaussian process random function model.",
+      "facets": [
+        {
+          "aliases": [
+            "Gaussian process"
+          ],
+          "support": [
+            [
+              628,
+              696
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R069",
+      "doc_id": "D58314f64d117",
+      "source_kind": "musique",
+      "locator": {
+        "line": 6365,
+        "record": "2hop__175116_119986",
+        "paragraph": 19
+      },
+      "document_sha256": "a1186f28a3c2674c7de7cb9a35643e2584fe86e2667508c9fa6ec4b9db9fb523",
+      "question": "What is the first name of Hindley Earnshaw's mother in the character sketch?",
+      "answerable": false,
+      "family": "missing_relative",
+      "target": "The sketch names his sister, son and wife, but not his mother.",
+      "facets": []
+    },
+    {
+      "id": "R070",
+      "doc_id": "D17f39019f212",
+      "source_kind": "qasper",
+      "locator": {
+        "paper": "1810.02100"
+      },
+      "document_sha256": "ad19f0ca37d1974124000a0609dda1a8657dcf77dd812ba88676e8d8921b7a77",
+      "question": "How did self-training compare to co-training for out-of-domain dependency parsing in the reported comparison?",
+      "answerable": true,
+      "family": "comparison",
+      "target": "They worked about equally well.",
+      "facets": [
+        {
+          "aliases": [
+            "equally",
+            "as well as",
+            "comparable",
+            "similarly",
+            "similar performance",
+            "on par",
+            "no difference",
+            "same performance"
+          ],
+          "support": [
+            [
+              1372,
+              1444
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R071",
+      "doc_id": "Dee0a20dbcb37",
+      "source_kind": "musique",
+      "locator": {
+        "line": 4158,
+        "record": "2hop__342354_126055",
+        "paragraph": 3
+      },
+      "document_sha256": "fc9711466f6719caab3b58934773cc76c64decd608f973602e91b23465ecc213",
+      "question": "After Maglione died, how did Pius XII cover the Secretary of State's duties?",
+      "answerable": true,
+      "family": "succession",
+      "target": "He took them on himself.",
+      "facets": [
+        {
+          "aliases": [
+            "himself",
+            "personally",
+            "assumed the responsibilities",
+            "took on the responsibilities",
+            "took over"
+          ],
+          "support": [
+            [
+              252,
+              345
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R072",
+      "doc_id": "D13e936c771b1",
+      "source_kind": "musique",
+      "locator": {
+        "line": 7631,
+        "record": "2hop__415725_62671",
+        "paragraph": 13
+      },
+      "document_sha256": "a4d0747c49d973c7e4c6dde9f0b02fb40c32a6347b9485d9fde201ac315b69a2",
+      "question": "At what FM frequency does the North Carolina station called The Penguin broadcast?",
+      "answerable": true,
+      "family": "quantity",
+      "target": "98.3 MHz.",
+      "facets": [
+        {
+          "aliases": [
+            "98.3"
+          ],
+          "support": [
+            [
+              11,
+              40
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R073",
+      "doc_id": "Df43020f480bb",
+      "source_kind": "musique",
+      "locator": {
+        "line": 1010,
+        "record": "2hop__18025_34455",
+        "paragraph": 15
+      },
+      "document_sha256": "22be6344d56ee0b0c3343980be07cce5a76529ee85b2ba8da2f8e45a6d49773f",
+      "question": "Did Barrasso play college hockey before his first NHL appearance?",
+      "answerable": true,
+      "family": "supported_negative",
+      "target": "No. He entered the NHL directly from high school.",
+      "facets": [
+        {
+          "aliases": [
+            "no",
+            "never",
+            "without",
+            "did not",
+            "didn't",
+            "directly from high school",
+            "straight from high school"
+          ],
+          "support": [
+            [
+              355,
+              441
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R074",
+      "doc_id": "D60ba9c025d7f",
+      "source_kind": "musique",
+      "locator": {
+        "line": 10914,
+        "record": "2hop__431123_15014",
+        "paragraph": 19
+      },
+      "document_sha256": "74a420c483cb5abfd1e95451d5e7ec6155fc354ada3cf3c5216406bef9e1c532",
+      "question": "What kind of vehicle is the namesake of Polaris Glacier?",
+      "answerable": true,
+      "family": "namesake",
+      "target": "A motor sledge.",
+      "facets": [
+        {
+          "aliases": [
+            "motor sledge",
+            "motorized sledge",
+            "motorised sledge",
+            "motor sled",
+            "snowmobile",
+            "motorized sled"
+          ],
+          "support": [
+            [
+              368,
+              400
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R075",
+      "doc_id": "D14cb73a698d2",
+      "source_kind": "qasper",
+      "locator": {
+        "paper": "1910.11491"
+      },
+      "document_sha256": "4ade5b15e4c520fab3678dea393b6f183ebb381cc54147dd2aba325c463e2d07",
+      "question": "On which dataset were the local and global attention variance losses for summarization evaluated?",
+      "answerable": true,
+      "family": "dataset",
+      "target": "CNN/Daily Mail.",
+      "facets": [
+        {
+          "aliases": [
+            "CNN Daily Mail",
+            "CNN DailyMail"
+          ],
+          "support": [
+            [
+              618,
+              685
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R076",
+      "doc_id": "De9c424c524d3",
+      "source_kind": "musique",
+      "locator": {
+        "line": 3343,
+        "record": "2hop__55054_63979",
+        "paragraph": 13
+      },
+      "document_sha256": "3e0eb4f7b8d33eebd31629f39fd19e874d61dca19f74ba6f148005a3377161b8",
+      "question": "Who arranged the songs Lynn Martin sang for Ann Sheridan in Shine on Harvest Moon?",
+      "answerable": false,
+      "family": "missing_credit",
+      "target": "The passage credits a dubbing singer but gives no arranger for her songs.",
+      "facets": []
+    },
+    {
+      "id": "R077",
+      "doc_id": "Db7491f413c4c",
+      "source_kind": "musique",
+      "locator": {
+        "line": 9077,
+        "record": "2hop__767347_36090",
+        "paragraph": 9
+      },
+      "document_sha256": "4c402c2ca9742c56f3296cd910ce93d13f9ff1e129ad95b1b02999e6769132f1",
+      "question": "How many Nukufetau residents moved from Fale to Savave in the relocation described?",
+      "answerable": false,
+      "family": "missing_measure",
+      "target": "The direction and period of the move are given but no population count.",
+      "facets": []
+    },
+    {
+      "id": "R078",
+      "doc_id": "D8de85bf960e0",
+      "source_kind": "qasper",
+      "locator": {
+        "paper": "1810.06743"
+      },
+      "document_sha256": "459d1b3f3509314f64c07f303f0f71f24abb3bc209ed7f3139fcb6a74d05ba6b",
+      "question": "What macro-average recall did lookup in the UniMorph corpora give for the UD feature mapping?",
+      "answerable": true,
+      "family": "quantity",
+      "target": "64.13 percent.",
+      "facets": [
+        {
+          "aliases": [
+            "64.13"
+          ],
+          "support": [
+            [
+              887,
+              924
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R079",
+      "doc_id": "Dce48cae91efc",
+      "source_kind": "musique",
+      "locator": {
+        "line": 11057,
+        "record": "2hop__129910_578368",
+        "paragraph": 5
+      },
+      "document_sha256": "be466e2d8b24ca333e579e93537505462d84a6d038c65f9728f5078e2a8799f7",
+      "question": "Who designed the wing added in 1971 to the Stockton church building?",
+      "answerable": false,
+      "family": "missing_credit",
+      "target": "The enlargement and year are known, but the architect is unnamed.",
+      "facets": []
+    },
+    {
+      "id": "R080",
+      "doc_id": "Db30eee03e10d",
+      "source_kind": "musique",
+      "locator": {
+        "line": 1018,
+        "record": "2hop__2222_442521",
+        "paragraph": 0
+      },
+      "document_sha256": "421ab1768869599046855438f8104dea6ebe1776380c5234fe1bddb7c3815ed4",
+      "question": "How long in minutes was the second 2007 Star Awards telecast?",
+      "answerable": false,
+      "family": "missing_duration",
+      "target": "Its date and kind are supplied but no running time.",
+      "facets": []
+    },
+    {
+      "id": "R081",
+      "doc_id": "D355d9e37175a",
+      "source_kind": "qasper",
+      "locator": {
+        "paper": "1909.03464"
+      },
+      "document_sha256": "0ea0f141848e4a3692f63f9481c4e2e999567398617b4b4a31660552a4e0c7e9",
+      "question": "Which specific conference is named as the source of yearly paper-acceptance decisions in the alignment study's example?",
+      "answerable": false,
+      "family": "missing_venue",
+      "target": "Yearly conferences are given as a type of setting. No conference is named.",
+      "facets": []
+    },
+    {
+      "id": "R082",
+      "doc_id": "D0c3b29b6762a",
+      "source_kind": "qasper",
+      "locator": {
+        "paper": "2003.10816"
+      },
+      "document_sha256": "09f2e837d13ea8c424356fc1d95c38bdb7af59e95ecb30b29a8fd16dfbddce2d",
+      "question": "Of French, Farsi and Arabic, which had the highest classification accuracy in the Universal Dependencies transfer study?",
+      "answerable": false,
+      "family": "missing_comparison",
+      "target": "They are examples of transfer languages. No per-language scores or order are given.",
+      "facets": []
+    },
+    {
+      "id": "R083",
+      "doc_id": "D86666bff0cde",
+      "source_kind": "qasper",
+      "locator": {
+        "paper": "1808.02022"
+      },
+      "document_sha256": "3233bff7d6d42fe728f74d38840fce70c106d3613f4066b588c73ae505e48e7e",
+      "question": "Which named ontology was used to represent the Twitter headline events?",
+      "answerable": false,
+      "family": "missing_component",
+      "target": "The abstract describes selecting a background data model but does not identify a particular ontology.",
+      "facets": []
+    },
+    {
+      "id": "R084",
+      "doc_id": "D113b3460aaff",
+      "source_kind": "musique",
+      "locator": {
+        "line": 2955,
+        "record": "2hop__325458_24352",
+        "paragraph": 3
+      },
+      "document_sha256": "8cd162fba0ebd1a24dcd16f8b5e0bd438a25c5a6342625f18a73181e0a43ab9b",
+      "question": "Who won the ISAF World Sailor of the Year award for which Offringa was nominated in the account?",
+      "answerable": false,
+      "family": "missing_outcome",
+      "target": "The nomination is documented but the eventual award recipient is not.",
+      "facets": []
+    },
+    {
+      "id": "R085",
+      "doc_id": "D3c53b846b358",
+      "source_kind": "musique",
+      "locator": {
+        "line": 682,
+        "record": "2hop__474997_83539",
+        "paragraph": 5
+      },
+      "document_sha256": "aac5db3c3206cf6b7a963482f5bdd22415232c9cb08a451960a80db01da8a8cc",
+      "question": "Whom did the Dallas Cowboys beat to win the championship in the playoff streak described here?",
+      "answerable": false,
+      "family": "missing_opponent",
+      "target": "The record gives a title count for the Dallas streak. No opponent is identified.",
+      "facets": []
+    },
+    {
+      "id": "R086",
+      "doc_id": "D71cf0b2b5390",
+      "source_kind": "qasper",
+      "locator": {
+        "paper": "1911.13087"
+      },
+      "document_sha256": "54e2833903b0ca5c482e77b20ab672f0c91c34b9afd6a9110fe1270a1b2eb619",
+      "question": "Which software environment did the Sorani Kurdish speech-recognition authors use for their experiment?",
+      "answerable": true,
+      "family": "method",
+      "target": "CMUSphinx.",
+      "facets": [
+        {
+          "aliases": [
+            "CMUSphinx",
+            "CMU Sphinx"
+          ],
+          "support": [
+            [
+              504,
+              553
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R087",
+      "doc_id": "D61c233158e08",
+      "source_kind": "musique",
+      "locator": {
+        "line": 3980,
+        "record": "2hop__22215_22235",
+        "paragraph": 9
+      },
+      "document_sha256": "7ef9116449a0363daf2b08a464e7f07017840725f7eb2ea76b92497e4999a2e3",
+      "question": "In which city was Saint Alphonsa canonised?",
+      "answerable": false,
+      "family": "missing_place",
+      "target": "The profile identifies canonisation milestones but gives no city for the event.",
+      "facets": []
+    },
+    {
+      "id": "R088",
+      "doc_id": "Daba7ccd19f71",
+      "source_kind": "musique",
+      "locator": {
+        "line": 3979,
+        "record": "2hop__131125_333219",
+        "paragraph": 12
+      },
+      "document_sha256": "ab0bd6ae7e55e0d7061f5c1aca42f4f9da1becac1ed67f347074a5a3a4cbce8c",
+      "question": "How many spectators can Houlihan Park on Fordham's Rose Hill campus accommodate?",
+      "answerable": false,
+      "family": "missing_measure",
+      "target": "The venue's identity and location are known, but there is no seating capacity.",
+      "facets": []
+    },
+    {
+      "id": "R089",
+      "doc_id": "Db23f3bd49546",
+      "source_kind": "musique",
+      "locator": {
+        "line": 4277,
+        "record": "2hop__59095_77346",
+        "paragraph": 0
+      },
+      "document_sha256": "0bf344a609c569d139885e62e81e01d500a1d11c5bf9272b3ebf2c17ffe1fc7d",
+      "question": "By how many points did Hueytown win the state championship during Winston's junior year?",
+      "answerable": false,
+      "family": "missing_measure",
+      "target": "The account reports the championship without a score or margin.",
+      "facets": []
+    },
+    {
+      "id": "R090",
+      "doc_id": "De042a7a7bf4f",
+      "source_kind": "musique",
+      "locator": {
+        "line": 1990,
+        "record": "2hop__20112_20093",
+        "paragraph": 13
+      },
+      "document_sha256": "8b8424d7d6748eb6f8da5b09e49a856f50e658b945512445b410346995dcb719",
+      "question": "What record label released the Swedish hockey team's single Nu tar vi dom?",
+      "answerable": false,
+      "family": "missing_publisher",
+      "target": "The passage gives writers, performers and chart history. It does not identify a record label.",
+      "facets": []
+    },
+    {
+      "id": "R091",
+      "doc_id": "D29b86d4d5f0f",
+      "source_kind": "musique",
+      "locator": {
+        "line": 3574,
+        "record": "2hop__407273_58935",
+        "paragraph": 1
+      },
+      "document_sha256": "cd3587a9dc1d401349a3ae15e02344ae661c6ef12a43a7bdf0aaad1b1ab8aed2",
+      "question": "Who illustrated A Visit to William Blake's Inn?",
+      "answerable": true,
+      "family": "paired_entities",
+      "target": "Alice and Martin Provensen.",
+      "facets": [
+        {
+          "aliases": [
+            "Alice"
+          ],
+          "support": [
+            [
+              167,
+              208
+            ]
+          ]
+        },
+        {
+          "aliases": [
+            "Martin"
+          ],
+          "support": [
+            [
+              167,
+              208
+            ]
+          ]
+        },
+        {
+          "aliases": [
+            "Provensen",
+            "Provensens"
+          ],
+          "support": [
+            [
+              167,
+              208
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R092",
+      "doc_id": "D259368004907",
+      "source_kind": "qasper",
+      "locator": {
+        "paper": "1911.03243"
+      },
+      "document_sha256": "7adf3c1f9536212e07b0f683648eb8d314a5c057fd708257b98aae77a0168700",
+      "question": "In the revised QA-SRL annotation protocol, what stage follows the selection and training of crowd workers?",
+      "answerable": true,
+      "family": "sequence",
+      "target": "Data consolidation.",
+      "facets": [
+        {
+          "aliases": [
+            "data consolidation",
+            "consolidation",
+            "consolidating"
+          ],
+          "support": [
+            [
+              654,
+              721
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R093",
+      "doc_id": "D1a55a56cc687",
+      "source_kind": "musique",
+      "locator": {
+        "line": 448,
+        "record": "2hop__707089_8796",
+        "paragraph": 9
+      },
+      "document_sha256": "d7aa5b7bac3ccd0eef4f1a60db88fd0e0213baa5235e5f5528bac3e9659641ad",
+      "question": "Why did Don and Ryan Clark leave Asterik Studios?",
+      "answerable": true,
+      "family": "causation",
+      "target": "They wanted to concentrate on work for the music industry.",
+      "facets": [
+        {
+          "aliases": [
+            "music industry",
+            "music business",
+            "work for musicians"
+          ],
+          "support": [
+            [
+              304,
+              376
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R094",
+      "doc_id": "Daf62ae99380a",
+      "source_kind": "musique",
+      "locator": {
+        "line": 64,
+        "record": "2hop__368142_35465",
+        "paragraph": 8
+      },
+      "document_sha256": "5d8e76e7afa63b48ed1eb5321afe65ba652273e3c95c0238234fcd0a09dbfad5",
+      "question": "What name did the Romans use for the Strait of Gibraltar, according to the passage?",
+      "answerable": true,
+      "family": "historical_name",
+      "target": "Fretum Gatitanum, or Strait of Cadiz.",
+      "facets": [
+        {
+          "aliases": [
+            "Fretum Gatitanum",
+            "Strait of Cadiz"
+          ],
+          "support": [
+            [
+              719,
+              774
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R095",
+      "doc_id": "D97a9cebd77f0",
+      "source_kind": "qasper",
+      "locator": {
+        "paper": "1710.01507"
+      },
+      "document_sha256": "ec448928c01fe4d7c339b1b76590b037537b9e025388c1aefb58b2ca73e97ab6",
+      "question": "In the clickbait detector, which network measures similarity between source and target information?",
+      "answerable": true,
+      "family": "component",
+      "target": "A Siamese network.",
+      "facets": [
+        {
+          "aliases": [
+            "Siamese"
+          ],
+          "support": [
+            [
+              813,
+              897
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R096",
+      "doc_id": "Dca8546682410",
+      "source_kind": "musique",
+      "locator": {
+        "line": 510,
+        "record": "2hop__298974_30581",
+        "paragraph": 10
+      },
+      "document_sha256": "c7014c21cc15b639e686cce21c23577b0596860778bae8c84f30666cba8af5cc",
+      "question": "Which specific composition by Arnold Schoenberg did Beardslee perform, according to the profile?",
+      "answerable": false,
+      "family": "missing_work",
+      "target": "The profile identifies the composer but gives no title for any of his works that she performed.",
+      "facets": []
+    },
+    {
+      "id": "R097",
+      "doc_id": "Dcbffcefc7a85",
+      "source_kind": "musique",
+      "locator": {
+        "line": 9580,
+        "record": "2hop__6458_14183",
+        "paragraph": 11
+      },
+      "document_sha256": "3c979eb947ee75d753243e26f7a8a3d542fc7a3a5a733da54cc30ecbd7cba11c",
+      "question": "What net profit does the Get Out account give, after distinguishing it from worldwide gross?",
+      "answerable": true,
+      "family": "quantity",
+      "target": "124 million dollars.",
+      "facets": [
+        {
+          "aliases": [
+            "124 million",
+            "124m",
+            "124000000"
+          ],
+          "support": [
+            [
+              506,
+              532
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R098",
+      "doc_id": "D22c9682ae73a",
+      "source_kind": "qasper",
+      "locator": {
+        "paper": "1811.01299"
+      },
+      "document_sha256": "3fe518202f336c2530985d958a70fc611e7792eb8240df1fe4f716ae0ff4f737",
+      "question": "How many participants supplied the user ratings for SimplerVoice's grocery instructions?",
+      "answerable": false,
+      "family": "missing_sample",
+      "target": "The abstract describes the user study and its score but gives no sample size.",
+      "facets": []
+    },
+    {
+      "id": "R099",
+      "doc_id": "D1b1f64efe91c",
+      "source_kind": "musique",
+      "locator": {
+        "line": 4030,
+        "record": "2hop__234884_125776",
+        "paragraph": 5
+      },
+      "document_sha256": "a695629aa13c2aacdbfab44416957bf033644db6830ed4aac8b75e4f0e150da0",
+      "question": "With whom did Elena Gilels study at the Leningrad Conservatory?",
+      "answerable": true,
+      "family": "attribution",
+      "target": "Pavel Serebryakov.",
+      "facets": [
+        {
+          "aliases": [
+            "Pavel Serebryakov",
+            "Serebryakov"
+          ],
+          "support": [
+            [
+              145,
+              197
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R100",
+      "doc_id": "D8a8cbeec9b5c",
+      "source_kind": "qasper",
+      "locator": {
+        "paper": "1912.03457"
+      },
+      "document_sha256": "59cce096b4a205b8ba2556f3065352a271487bcb0ad5183b888097eca11d9a7e",
+      "question": "Which named organization introduced a language technology to the Gondi community in the example?",
+      "answerable": false,
+      "family": "missing_affiliation",
+      "target": "The discussion identifies Gondi as an example but attributes no deployment to a named organization.",
+      "facets": []
+    }
+  ]
+}
