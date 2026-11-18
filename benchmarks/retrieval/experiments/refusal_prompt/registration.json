@@ -1,0 +1,59 @@
+{
+  "cases": {
+    "development": "f26630a8954f6f716d5b615f67b508e288a595d76e2d020968fb56dc2e3c98cf",
+    "protection": "510258868024988d61df74c195032404c853aa9984f556a198f05f516a944c6d"
+  },
+  "physical_upper_bounds": {
+    "development": 206,
+    "protection": 766
+  },
+  "previous_account": "ebd64ad97e393cf6be9d7a1505970af588b81093489a79a1b1b383dd27b23a36",
+  "source": {
+    "commit": "02b0c738aba543641c737dc68420c7d292afaa20",
+    "main": "deb28ec77fa85a9cf2c888dd46d59a8360efa189",
+    "tree": "28578f87b107a9e6683d2972ff7f9779b671fadb03f88ac776b8e60c25a9a2e6"
+  },
+  "freeze_sha256": "7b15bcab2752689c1609905d7d5ceeaecdc3ba66ec65e320ea5c95ff4d687370",
+  "preparation": {
+    "complete_visible_source_sets": 48,
+    "distinct_historical_passages_checked": 930,
+    "distinct_historical_questions_checked": 403,
+    "distinct_snapshots": 48,
+    "exact_passage_overlaps": 0,
+    "exact_question_overlaps": 0,
+    "frozen_cases_sha256": "3d9b3e4b7dc9c08ff7ff7a8e69c3928b3b97142187ce3c908eb1bde1c3341783",
+    "messages_canonical_sha256": "5d1b840df0d9827a489e1b5d934bc937b5015ca4a60b22bc914bd35d54ed4e59",
+    "per_language_answerability_counts": {
+      "en_answerable": 12,
+      "en_refusal": 12,
+      "zh_answerable": 12,
+      "zh_refusal": 12
+    },
+    "questions": 48,
+    "records_relative_path": ".scratch/refusal-prompt-20261119/independent/fresh-records.json",
+    "records_sha256": "2cdb8b766b56f4af1e8162fa2c5c304de2cea5ea7d53e004b1c0ce45b528dee2",
+    "source_counts_per_outcome_by_language": {
+      "en": {
+        "1": 6,
+        "2": 5,
+        "3": 1
+      },
+      "zh": {
+        "1": 7,
+        "2": 4,
+        "3": 1
+      }
+    },
+    "source_sha256": "31794f4c4f6558697a7f188b42943319655d008fe38bd5f31318819e1db0a230",
+    "uploaded_documents": 74
+  },
+  "opening_cny": "3.12094384",
+  "ceiling_cny": "30.00000000",
+  "historical_unknown_reserved_cny": "0.04906200",
+  "named_distinct_inputs": 7,
+  "protection_distinct_inputs": 390,
+  "model": "deepseek-v4.1-flash-1017",
+  "region": "Beijing",
+  "temperature": 0,
+  "output_limit": 2048
+}
