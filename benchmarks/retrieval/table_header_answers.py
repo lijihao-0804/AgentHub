@@ -3,18 +3,20 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from pathlib import Path
 
 import httpx
 
-from benchmarks.retrieval.table_headers import PROTOCOL
 from packages.core.canonical.json_parse import load_unique_json
+from scripts.aliyun_api_smoke import aliyun_route
 
-MODEL = "qwen-plus-2025-07-28"
-URL = "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions"
+PROTOCOL = Path(__file__).with_name("table_header_protocol.json")
+CONTEXTS_SHA256 = "41a257164089a3fd958186ba6a06ae9aa84e4cd098f6ca967aee428e1764d6c3"
 SYSTEM = (
     "Answer the question using only the provided numbered table rows. Return JSON with "
     "value (exact cell text), source (1-based evidence number), and column (1-based position "
@@ -23,7 +25,32 @@ SYSTEM = (
 )
 MAX_INPUT = 4096
 MAX_OUTPUT = 96
-RESERVE = Decimal("0.03")
+RESERVE = Decimal("0.009")
+
+
+def receipt_cost(body, model):
+    """Calculate Beijing DeepSeek Flash tariff from reported usage, including cache hits."""
+    usage = body.get("usage") or {}
+    prompt, completion = usage.get("prompt_tokens"), usage.get("completion_tokens")
+    details = usage.get("prompt_tokens_details") or {}
+    cached = details.get("cached_tokens", usage.get("prompt_cache_hit_tokens"))
+    if (
+        body.get("model") != model
+        or not body.get("id")
+        or type(body.get("created")) is not int
+        or type(prompt) is not int
+        or type(completion) is not int
+        or type(cached) is not int
+        or not 0 <= cached <= prompt <= MAX_INPUT
+        or prompt == 0
+        or not 0 <= completion <= MAX_OUTPUT
+        or usage.get("total_tokens") != prompt + completion
+    ):
+        raise ValueError("Incomplete usage, tariff timestamp or model identity.")
+    hour = datetime.fromtimestamp(body["created"], timezone(timedelta(hours=8))).hour
+    multiplier = 2 if 8 <= hour < 22 else 1
+    yuan = (prompt - cached + cached * Decimal("0.1") + completion * 4) * multiplier / 10**6
+    return prompt, completion, cached, yuan
 
 
 def write_entry(file, data):
@@ -33,16 +60,17 @@ def write_entry(file, data):
 
 
 def run(args):
-    api_key = os.environ["DASHSCOPE_API_KEY"]
+    route = aliyun_route()
     protocol = json.loads(PROTOCOL.read_text(encoding="utf8"))
     contexts = json.loads(args.contexts.read_text(encoding="utf8"))
     cases = protocol["cases"]
-    if len(cases) != 14 or set(contexts) != {"baseline", "candidate"}:
+    evidence_hash = hashlib.sha256(
+        json.dumps(contexts, sort_keys=True, separators=(",", ":")).encode()
+    ).hexdigest()
+    if len(cases) != 14 or evidence_hash != CONTEXTS_SHA256:
         raise ValueError("Unexpected protocol.")
-    # Even at the highest published long-context rates (4.8 in, 64 out / million)
-    # each dispatch fits its reserve, without relying on cache or trial credits.
-    assert (MAX_INPUT * Decimal("4.8") + MAX_OUTPUT * 64) / 10**6 < RESERVE
-    assert RESERVE * len(cases) * 2 < Decimal("30")
+    if (MAX_INPUT * 2 + MAX_OUTPUT * 8) / Decimal(10**6) > RESERVE:
+        raise ValueError("Peak Beijing tariff exceeds the dispatch reservation.")
     requests = []
     for i, (question, _, _, gold, citation) in enumerate(cases):
         arms = ("baseline", "candidate") if i % 2 == 0 else ("candidate", "baseline")
@@ -57,19 +85,20 @@ def run(args):
                 raise ValueError("Frozen request input bound exceeded.")
             requests.append((i, arm, rows, messages, gold, citation))
     summary = []
+    receipt_ids = set()
     # Exclusive creation prevents replay of completed or uncertain requests in this experiment.
     with (
         args.ledger.open("x", encoding="utf8") as log,
-        httpx.Client(timeout=90, follow_redirects=False) as client,
+        httpx.Client(timeout=float(route.timeout_seconds), trust_env=False) as client,
     ):
         for i, arm, rows, messages, gold, citation in requests:
             key = f"{arm}/{i + 1}"
             write_entry(log, {"key": key, "state": "reserved", "yuan": str(RESERVE)})
             response = client.post(
-                URL,
-                headers={"Authorization": "Bearer " + api_key},
+                route.base_url.rstrip("/") + "/chat/completions",
+                headers={"Authorization": "Bearer " + route.api_key},
                 json={
-                    "model": MODEL,
+                    "model": route.model,
                     "messages": messages,
                     "temperature": 0,
                     "enable_thinking": False,
@@ -81,25 +110,22 @@ def run(args):
                 write_entry(log, {"key": key, "state": "unconfirmed", "http": response.status_code})
                 raise RuntimeError("Provider did not return a successful receipt. Stop.")
             body = response.json()
-            usage = body.get("usage", {})
-            prompt, completion = usage.get("prompt_tokens"), usage.get("completion_tokens")
-            if (
-                body.get("model") != MODEL
-                or type(prompt) is not int
-                or type(completion) is not int
-                or not 0 < prompt <= MAX_INPUT
-                or not 0 <= completion <= MAX_OUTPUT
-                or usage.get("total_tokens") != prompt + completion
-            ):
-                raise RuntimeError("Incomplete or inconsistent usage or model identity. Stop.")
-            cost = (prompt * Decimal("0.8") + completion * 2) / 10**6
+            try:
+                prompt, completion, cached, cost = receipt_cost(body, route.model)
+                if body["id"] in receipt_ids:
+                    raise ValueError("Duplicate provider receipt.")
+            except ValueError:
+                write_entry(log, {"key": key, "state": "unconfirmed", "http": response.status_code})
+                raise
+            receipt_ids.add(body["id"])
             write_entry(
                 log,
                 {
                     "key": key,
                     "state": "confirmed",
                     "id": body["id"],
-                    "usage": usage,
+                    "usage": body["usage"],
+                    "created": body["created"],
                     "yuan": str(cost),
                 },
             )
@@ -134,11 +160,15 @@ def run(args):
                     "refused": valid and value is None,
                     "input_tokens": prompt,
                     "output_tokens": completion,
+                    "cached_input_tokens": cached,
                     "estimated_yuan": str(cost),
                 }
             )
     args.output.write_text(
-        json.dumps({"model": MODEL, "cases": summary}, indent=2) + "\n", encoding="utf8"
+        json.dumps(
+            {"model": route.model, "contexts_sha256": evidence_hash, "cases": summary}, indent=2
+        ) + "\n",
+        encoding="utf8",
     )
 
 

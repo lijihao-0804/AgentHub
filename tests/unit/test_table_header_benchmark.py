@@ -1,7 +1,26 @@
+from decimal import Decimal
+
 import httpx
 import pytest
 
+from benchmarks.retrieval.table_header_answers import receipt_cost
 from benchmarks.retrieval.table_header_local_qa import check_grammar_log, score
+
+
+def test_configured_provider_receipt_prices_cache_and_requires_complete_usage():
+    body = {
+        "id": "receipt", "model": "test", "created": 0,  # 08:00 Beijing
+        "usage": {
+            "prompt_tokens": 200, "completion_tokens": 10, "total_tokens": 210,
+            "prompt_tokens_details": {"cached_tokens": 100},
+        },
+    }
+    assert receipt_cost(body, "test") == (200, 10, 100, Decimal("0.000300"))
+    body["created"] += 14 * 3600
+    assert receipt_cost(body, "test")[-1] == Decimal("0.000150")
+    del body["usage"]["prompt_tokens_details"]
+    with pytest.raises(ValueError, match="Incomplete"):
+        receipt_cost(body, "test")
 
 
 def test_generation_cannot_pass_with_competing_numbers_or_wrong_cell() -> None:
