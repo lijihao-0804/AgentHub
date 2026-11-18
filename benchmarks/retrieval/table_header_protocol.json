@@ -1,0 +1,21 @@
+{
+  "source": "https://www.w3.org/WAI/tutorials/tables/irregular/",
+  "table_sha256": ["3ed26b0425b164965c2df45ef6a9f37465eb304d743763991595cd8d1c90760d", "3a814dde4888488643a2a722f0ab26d989ebe092006256612f45dcbc038790a4"],
+  "baseline": "f2822c3ae0ff9d6f0c6a24547c58472142fde3af",
+  "cases": [
+    ["How many Teddy Bears were produced on Mars?", ["Teddy Bears"], "Mars / Produced", "50,000", [0,3,2]],
+    ["How many Teddy Bears were sold on Mars?", ["Teddy Bears"], "Mars / Sold", "30,000", [0,3,3]],
+    ["How many Teddy Bears were produced on Venus?", ["Teddy Bears"], "Venus / Produced", "100,000", [0,3,4]],
+    ["How many Teddy Bears were sold on Venus?", ["Teddy Bears"], "Venus / Sold", "80,000", [0,3,5]],
+    ["How many Board Games were produced on Mars?", ["Board Games"], "Mars / Produced", "10,000", [0,4,2]],
+    ["How many Board Games were sold on Mars?", ["Board Games"], "Mars / Sold", "5,000", [0,4,3]],
+    ["How many Board Games were produced on Venus?", ["Board Games"], "Venus / Produced", "12,000", [0,4,4]],
+    ["How many Board Games were sold on Venus?", ["Board Games"], "Venus / Sold", "9,000", [0,4,5]],
+    ["Which poster is available in full color?", ["Full color"], "Poster name", "Zodiac", [1,2,1]],
+    ["Which color is available for the Angels poster in A5?", ["Angels","A5"], "Color", "Sepia", [1,6,2]],
+    ["How many Board Games were produced on Jupiter?", ["Board Games"], "Jupiter / Produced", null, null],
+    ["How many bicycles were sold on Mars?", ["Bicycles"], "Mars / Sold", null, null],
+    ["How many Teddy Bears were returned on Venus?", ["Teddy Bears"], "Venus / Returned", null, null],
+    ["Which poster is available in neon green?", ["Neon green"], "Poster name", null, null]
+  ]
+}

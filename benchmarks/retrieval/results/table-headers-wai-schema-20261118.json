@@ -1,0 +1,856 @@
+{
+  "baseline": "f2822c3ae0ff9d6f0c6a24547c58472142fde3af",
+  "table_sha256": [
+    "3ed26b0425b164965c2df45ef6a9f37465eb304d743763991595cd8d1c90760d",
+    "3a814dde4888488643a2a722f0ab26d989ebe092006256612f45dcbc038790a4"
+  ],
+  "protocol_sha256": "2f5511b92d48e380e723073d243c7d49c8de5f401fa265e42bb60de625cc4454",
+  "embedding": "5617a9f61b028005a4858fdac845db406aefb181",
+  "reranker": "953dc6f6f85a1b2dbfca4c34a2796e7dde08d41e",
+  "device": "cuda",
+  "arms": {
+    "baseline": [
+      {
+        "query": "How many Teddy Bears were produced on Mars?",
+        "positive": true,
+        "value": null,
+        "citation": null,
+        "correct": false,
+        "stage_row_rank": {
+          "dense": 1,
+          "sparse": 1,
+          "fused": 1,
+          "rerank": 1,
+          "selection": 1
+        },
+        "final_row_rank": 1,
+        "generated": {
+          "http": 502,
+          "error": "CITATION_QA_INVALID_MODEL_OUTPUT",
+          "reason": "The model returned an invalid citation answer. Answer markers and listed citation IDs must exist and agree.",
+          "refused": false,
+          "value_correct": false,
+          "cited_cell": false,
+          "joint": false,
+          "calls": 1,
+          "output_shapes": [
+            "dict"
+          ]
+        }
+      },
+      {
+        "query": "How many Teddy Bears were sold on Mars?",
+        "positive": true,
+        "value": null,
+        "citation": null,
+        "correct": false,
+        "stage_row_rank": {
+          "dense": 1,
+          "sparse": 1,
+          "fused": 1,
+          "rerank": 1,
+          "selection": 1
+        },
+        "final_row_rank": 1,
+        "generated": {
+          "http": 502,
+          "error": "CITATION_QA_INVALID_MODEL_OUTPUT",
+          "reason": "The model returned an invalid citation answer. An insufficient-evidence answer includes citations.",
+          "refused": false,
+          "value_correct": false,
+          "cited_cell": false,
+          "joint": false,
+          "calls": 1,
+          "output_shapes": [
+            "dict"
+          ]
+        }
+      },
+      {
+        "query": "How many Teddy Bears were produced on Venus?",
+        "positive": true,
+        "value": null,
+        "citation": null,
+        "correct": false,
+        "stage_row_rank": {
+          "dense": 1,
+          "sparse": 1,
+          "fused": 1,
+          "rerank": 1,
+          "selection": 1
+        },
+        "final_row_rank": 1,
+        "generated": {
+          "http": 502,
+          "error": "CITATION_QA_INVALID_MODEL_OUTPUT",
+          "reason": "The model returned an invalid citation answer. An insufficient-evidence answer includes citations.",
+          "refused": false,
+          "value_correct": false,
+          "cited_cell": false,
+          "joint": false,
+          "calls": 1,
+          "output_shapes": [
+            "dict"
+          ]
+        }
+      },
+      {
+        "query": "How many Teddy Bears were sold on Venus?",
+        "positive": true,
+        "value": null,
+        "citation": null,
+        "correct": false,
+        "stage_row_rank": {
+          "dense": 1,
+          "sparse": 1,
+          "fused": 1,
+          "rerank": 1,
+          "selection": 1
+        },
+        "final_row_rank": 1,
+        "generated": {
+          "http": 502,
+          "error": "CITATION_QA_INVALID_MODEL_OUTPUT",
+          "reason": "The model returned an invalid citation answer. An insufficient-evidence answer includes citations.",
+          "refused": false,
+          "value_correct": false,
+          "cited_cell": false,
+          "joint": false,
+          "calls": 1,
+          "output_shapes": [
+            "dict"
+          ]
+        }
+      },
+      {
+        "query": "How many Board Games were produced on Mars?",
+        "positive": true,
+        "value": null,
+        "citation": null,
+        "correct": false,
+        "stage_row_rank": {
+          "dense": 1,
+          "sparse": 1,
+          "fused": 1,
+          "rerank": 1,
+          "selection": 1
+        },
+        "final_row_rank": 1,
+        "generated": {
+          "http": 502,
+          "error": "CITATION_QA_INVALID_MODEL_OUTPUT",
+          "reason": "The model returned an invalid citation answer. An insufficient-evidence answer includes citations.",
+          "refused": false,
+          "value_correct": false,
+          "cited_cell": false,
+          "joint": false,
+          "calls": 1,
+          "output_shapes": [
+            "dict"
+          ]
+        }
+      },
+      {
+        "query": "How many Board Games were sold on Mars?",
+        "positive": true,
+        "value": null,
+        "citation": null,
+        "correct": false,
+        "stage_row_rank": {
+          "dense": 1,
+          "sparse": 1,
+          "fused": 1,
+          "rerank": 1,
+          "selection": 1
+        },
+        "final_row_rank": 1,
+        "generated": {
+          "http": 502,
+          "error": "CITATION_QA_INVALID_MODEL_OUTPUT",
+          "reason": "The model returned an invalid citation answer. An insufficient-evidence answer includes citations.",
+          "refused": false,
+          "value_correct": false,
+          "cited_cell": false,
+          "joint": false,
+          "calls": 1,
+          "output_shapes": [
+            "dict"
+          ]
+        }
+      },
+      {
+        "query": "How many Board Games were produced on Venus?",
+        "positive": true,
+        "value": null,
+        "citation": null,
+        "correct": false,
+        "stage_row_rank": {
+          "dense": 2,
+          "sparse": 1,
+          "fused": 1,
+          "rerank": 1,
+          "selection": 1
+        },
+        "final_row_rank": 1,
+        "generated": {
+          "http": 502,
+          "error": "CITATION_QA_INVALID_MODEL_OUTPUT",
+          "reason": "The model returned an invalid citation answer. Answer markers and listed citation IDs must exist and agree.",
+          "refused": false,
+          "value_correct": false,
+          "cited_cell": false,
+          "joint": false,
+          "calls": 1,
+          "output_shapes": [
+            "dict"
+          ]
+        }
+      },
+      {
+        "query": "How many Board Games were sold on Venus?",
+        "positive": true,
+        "value": null,
+        "citation": null,
+        "correct": false,
+        "stage_row_rank": {
+          "dense": 1,
+          "sparse": 1,
+          "fused": 1,
+          "rerank": 1,
+          "selection": 1
+        },
+        "final_row_rank": 1,
+        "generated": {
+          "http": 502,
+          "error": "CITATION_QA_INVALID_MODEL_OUTPUT",
+          "reason": "The model returned an invalid citation answer. An insufficient-evidence answer includes citations.",
+          "refused": false,
+          "value_correct": false,
+          "cited_cell": false,
+          "joint": false,
+          "calls": 1,
+          "output_shapes": [
+            "dict"
+          ]
+        }
+      },
+      {
+        "query": "Which poster is available in full color?",
+        "positive": true,
+        "value": "Zodiac",
+        "citation": [
+          1,
+          2,
+          1
+        ],
+        "correct": true,
+        "stage_row_rank": {
+          "dense": 2,
+          "sparse": 1,
+          "fused": 1,
+          "rerank": 1,
+          "selection": 1
+        },
+        "final_row_rank": 1,
+        "generated": {
+          "http": 502,
+          "error": "CITATION_QA_INVALID_MODEL_OUTPUT",
+          "reason": "The model returned an invalid citation answer. Answer markers and listed citation IDs must exist and agree.",
+          "refused": false,
+          "value_correct": false,
+          "cited_cell": false,
+          "joint": false,
+          "calls": 1,
+          "output_shapes": [
+            "dict"
+          ]
+        }
+      },
+      {
+        "query": "Which color is available for the Angels poster in A5?",
+        "positive": true,
+        "value": "Sepia",
+        "citation": [
+          1,
+          6,
+          2
+        ],
+        "correct": true,
+        "stage_row_rank": {
+          "dense": 2,
+          "sparse": 1,
+          "fused": 1,
+          "rerank": 1,
+          "selection": 1
+        },
+        "final_row_rank": 1,
+        "generated": {
+          "http": 502,
+          "error": "CITATION_QA_INVALID_MODEL_OUTPUT",
+          "reason": "The model returned an invalid citation answer. Answer markers and listed citation IDs must exist and agree.",
+          "refused": false,
+          "value_correct": false,
+          "cited_cell": false,
+          "joint": false,
+          "calls": 1,
+          "output_shapes": [
+            "dict"
+          ]
+        }
+      },
+      {
+        "query": "How many Board Games were produced on Jupiter?",
+        "positive": false,
+        "value": null,
+        "citation": null,
+        "correct": true,
+        "stage_row_rank": {
+          "dense": null,
+          "sparse": null,
+          "fused": null,
+          "rerank": null,
+          "selection": null
+        },
+        "final_row_rank": null,
+        "generated": {
+          "http": 502,
+          "error": "CITATION_QA_INVALID_MODEL_OUTPUT",
+          "reason": "The model returned an invalid citation answer. Answer markers and listed citation IDs must exist and agree.",
+          "refused": false,
+          "value_correct": false,
+          "cited_cell": false,
+          "joint": false,
+          "calls": 1,
+          "output_shapes": [
+            "dict"
+          ]
+        }
+      },
+      {
+        "query": "How many bicycles were sold on Mars?",
+        "positive": false,
+        "value": null,
+        "citation": null,
+        "correct": true,
+        "stage_row_rank": {
+          "dense": null,
+          "sparse": null,
+          "fused": null,
+          "rerank": null,
+          "selection": null
+        },
+        "final_row_rank": null,
+        "generated": {
+          "http": 502,
+          "error": "CITATION_QA_INVALID_MODEL_OUTPUT",
+          "reason": "The model returned an invalid citation answer. An insufficient-evidence answer includes citations.",
+          "refused": false,
+          "value_correct": false,
+          "cited_cell": false,
+          "joint": false,
+          "calls": 1,
+          "output_shapes": [
+            "dict"
+          ]
+        }
+      },
+      {
+        "query": "How many Teddy Bears were returned on Venus?",
+        "positive": false,
+        "value": null,
+        "citation": null,
+        "correct": true,
+        "stage_row_rank": {
+          "dense": null,
+          "sparse": null,
+          "fused": null,
+          "rerank": null,
+          "selection": null
+        },
+        "final_row_rank": null,
+        "generated": {
+          "http": 502,
+          "error": "CITATION_QA_INVALID_MODEL_OUTPUT",
+          "reason": "The model returned an invalid citation answer. An insufficient-evidence answer includes citations.",
+          "refused": false,
+          "value_correct": false,
+          "cited_cell": false,
+          "joint": false,
+          "calls": 1,
+          "output_shapes": [
+            "dict"
+          ]
+        }
+      },
+      {
+        "query": "Which poster is available in neon green?",
+        "positive": false,
+        "value": null,
+        "citation": null,
+        "correct": true,
+        "stage_row_rank": {
+          "dense": null,
+          "sparse": null,
+          "fused": null,
+          "rerank": null,
+          "selection": null
+        },
+        "final_row_rank": null,
+        "generated": {
+          "http": 502,
+          "error": "CITATION_QA_INVALID_MODEL_OUTPUT",
+          "reason": "The model returned an invalid citation answer. Answer markers and listed citation IDs must exist and agree.",
+          "refused": false,
+          "value_correct": false,
+          "cited_cell": false,
+          "joint": false,
+          "calls": 1,
+          "output_shapes": [
+            "dict"
+          ]
+        }
+      }
+    ],
+    "candidate": [
+      {
+        "query": "How many Teddy Bears were produced on Mars?",
+        "positive": true,
+        "value": "50,000",
+        "citation": [
+          0,
+          3,
+          2
+        ],
+        "correct": true,
+        "stage_row_rank": {
+          "dense": 1,
+          "sparse": 1,
+          "fused": 1,
+          "rerank": 1,
+          "selection": 1
+        },
+        "final_row_rank": 1,
+        "generated": {
+          "http": 502,
+          "error": "CITATION_QA_INVALID_MODEL_OUTPUT",
+          "reason": "The model returned an invalid citation answer. Answer markers and listed citation IDs must exist and agree.",
+          "refused": false,
+          "value_correct": false,
+          "cited_cell": false,
+          "joint": false,
+          "calls": 1,
+          "output_shapes": [
+            "dict"
+          ]
+        }
+      },
+      {
+        "query": "How many Teddy Bears were sold on Mars?",
+        "positive": true,
+        "value": "30,000",
+        "citation": [
+          0,
+          3,
+          3
+        ],
+        "correct": true,
+        "stage_row_rank": {
+          "dense": 1,
+          "sparse": 1,
+          "fused": 1,
+          "rerank": 1,
+          "selection": 1
+        },
+        "final_row_rank": 1,
+        "generated": {
+          "http": 502,
+          "error": "CITATION_QA_INVALID_MODEL_OUTPUT",
+          "reason": "The model returned an invalid citation answer. Answer markers and listed citation IDs must exist and agree.",
+          "refused": false,
+          "value_correct": false,
+          "cited_cell": false,
+          "joint": false,
+          "calls": 1,
+          "output_shapes": [
+            "dict"
+          ]
+        }
+      },
+      {
+        "query": "How many Teddy Bears were produced on Venus?",
+        "positive": true,
+        "value": "100,000",
+        "citation": [
+          0,
+          3,
+          4
+        ],
+        "correct": true,
+        "stage_row_rank": {
+          "dense": 1,
+          "sparse": 1,
+          "fused": 1,
+          "rerank": 1,
+          "selection": 1
+        },
+        "final_row_rank": 1,
+        "generated": {
+          "http": 502,
+          "error": "CITATION_QA_INVALID_MODEL_OUTPUT",
+          "reason": "The model returned an invalid citation answer. An insufficient-evidence answer includes citations.",
+          "refused": false,
+          "value_correct": false,
+          "cited_cell": false,
+          "joint": false,
+          "calls": 1,
+          "output_shapes": [
+            "dict"
+          ]
+        }
+      },
+      {
+        "query": "How many Teddy Bears were sold on Venus?",
+        "positive": true,
+        "value": "80,000",
+        "citation": [
+          0,
+          3,
+          5
+        ],
+        "correct": true,
+        "stage_row_rank": {
+          "dense": 1,
+          "sparse": 1,
+          "fused": 1,
+          "rerank": 1,
+          "selection": 1
+        },
+        "final_row_rank": 1,
+        "generated": {
+          "http": 502,
+          "error": "CITATION_QA_INVALID_MODEL_OUTPUT",
+          "reason": "The model returned an invalid citation answer. Answer markers and listed citation IDs must exist and agree.",
+          "refused": false,
+          "value_correct": false,
+          "cited_cell": false,
+          "joint": false,
+          "calls": 1,
+          "output_shapes": [
+            "dict"
+          ]
+        }
+      },
+      {
+        "query": "How many Board Games were produced on Mars?",
+        "positive": true,
+        "value": "10,000",
+        "citation": [
+          0,
+          4,
+          2
+        ],
+        "correct": true,
+        "stage_row_rank": {
+          "dense": 1,
+          "sparse": 1,
+          "fused": 1,
+          "rerank": 1,
+          "selection": 1
+        },
+        "final_row_rank": 1,
+        "generated": {
+          "http": 502,
+          "error": "CITATION_QA_INVALID_MODEL_OUTPUT",
+          "reason": "The model returned an invalid citation answer. An insufficient-evidence answer includes citations.",
+          "refused": false,
+          "value_correct": false,
+          "cited_cell": false,
+          "joint": false,
+          "calls": 1,
+          "output_shapes": [
+            "dict"
+          ]
+        }
+      },
+      {
+        "query": "How many Board Games were sold on Mars?",
+        "positive": true,
+        "value": "5,000",
+        "citation": [
+          0,
+          4,
+          3
+        ],
+        "correct": true,
+        "stage_row_rank": {
+          "dense": 1,
+          "sparse": 1,
+          "fused": 1,
+          "rerank": 1,
+          "selection": 1
+        },
+        "final_row_rank": 1,
+        "generated": {
+          "http": 502,
+          "error": "CITATION_QA_INVALID_MODEL_OUTPUT",
+          "reason": "The model returned an invalid citation answer. Answer markers and listed citation IDs must exist and agree.",
+          "refused": false,
+          "value_correct": false,
+          "cited_cell": false,
+          "joint": false,
+          "calls": 1,
+          "output_shapes": [
+            "dict"
+          ]
+        }
+      },
+      {
+        "query": "How many Board Games were produced on Venus?",
+        "positive": true,
+        "value": "12,000",
+        "citation": [
+          0,
+          4,
+          4
+        ],
+        "correct": true,
+        "stage_row_rank": {
+          "dense": 1,
+          "sparse": 1,
+          "fused": 1,
+          "rerank": 1,
+          "selection": 1
+        },
+        "final_row_rank": 1,
+        "generated": {
+          "http": 502,
+          "error": "CITATION_QA_INVALID_MODEL_OUTPUT",
+          "reason": "The model returned an invalid citation answer. An insufficient-evidence answer includes citations.",
+          "refused": false,
+          "value_correct": false,
+          "cited_cell": false,
+          "joint": false,
+          "calls": 1,
+          "output_shapes": [
+            "dict"
+          ]
+        }
+      },
+      {
+        "query": "How many Board Games were sold on Venus?",
+        "positive": true,
+        "value": "9,000",
+        "citation": [
+          0,
+          4,
+          5
+        ],
+        "correct": true,
+        "stage_row_rank": {
+          "dense": 1,
+          "sparse": 1,
+          "fused": 1,
+          "rerank": 1,
+          "selection": 1
+        },
+        "final_row_rank": 1,
+        "generated": {
+          "http": 502,
+          "error": "CITATION_QA_INVALID_MODEL_OUTPUT",
+          "reason": "The model returned an invalid citation answer. Answer markers and listed citation IDs must exist and agree.",
+          "refused": false,
+          "value_correct": false,
+          "cited_cell": false,
+          "joint": false,
+          "calls": 1,
+          "output_shapes": [
+            "dict"
+          ]
+        }
+      },
+      {
+        "query": "Which poster is available in full color?",
+        "positive": true,
+        "value": "Zodiac",
+        "citation": [
+          1,
+          2,
+          1
+        ],
+        "correct": true,
+        "stage_row_rank": {
+          "dense": 2,
+          "sparse": 1,
+          "fused": 1,
+          "rerank": 1,
+          "selection": 1
+        },
+        "final_row_rank": 1,
+        "generated": {
+          "http": 502,
+          "error": "CITATION_QA_INVALID_MODEL_OUTPUT",
+          "reason": "The model returned an invalid citation answer. An insufficient-evidence answer includes citations.",
+          "refused": false,
+          "value_correct": false,
+          "cited_cell": false,
+          "joint": false,
+          "calls": 1,
+          "output_shapes": [
+            "dict"
+          ]
+        }
+      },
+      {
+        "query": "Which color is available for the Angels poster in A5?",
+        "positive": true,
+        "value": "Sepia",
+        "citation": [
+          1,
+          6,
+          2
+        ],
+        "correct": true,
+        "stage_row_rank": {
+          "dense": 2,
+          "sparse": 1,
+          "fused": 1,
+          "rerank": 1,
+          "selection": 1
+        },
+        "final_row_rank": 1,
+        "generated": {
+          "http": 502,
+          "error": "CITATION_QA_INVALID_MODEL_OUTPUT",
+          "reason": "The model returned an invalid citation answer. Answer markers and listed citation IDs must exist and agree.",
+          "refused": false,
+          "value_correct": false,
+          "cited_cell": false,
+          "joint": false,
+          "calls": 1,
+          "output_shapes": [
+            "dict"
+          ]
+        }
+      },
+      {
+        "query": "How many Board Games were produced on Jupiter?",
+        "positive": false,
+        "value": null,
+        "citation": null,
+        "correct": true,
+        "stage_row_rank": {
+          "dense": null,
+          "sparse": null,
+          "fused": null,
+          "rerank": null,
+          "selection": null
+        },
+        "final_row_rank": null,
+        "generated": {
+          "http": 502,
+          "error": "CITATION_QA_INVALID_MODEL_OUTPUT",
+          "reason": "The model returned an invalid citation answer. An insufficient-evidence answer includes citations.",
+          "refused": false,
+          "value_correct": false,
+          "cited_cell": false,
+          "joint": false,
+          "calls": 1,
+          "output_shapes": [
+            "dict"
+          ]
+        }
+      },
+      {
+        "query": "How many bicycles were sold on Mars?",
+        "positive": false,
+        "value": null,
+        "citation": null,
+        "correct": true,
+        "stage_row_rank": {
+          "dense": null,
+          "sparse": null,
+          "fused": null,
+          "rerank": null,
+          "selection": null
+        },
+        "final_row_rank": null,
+        "generated": {
+          "http": 502,
+          "error": "CITATION_QA_INVALID_MODEL_OUTPUT",
+          "reason": "The model returned an invalid citation answer. Answer markers and listed citation IDs must exist and agree.",
+          "refused": false,
+          "value_correct": false,
+          "cited_cell": false,
+          "joint": false,
+          "calls": 1,
+          "output_shapes": [
+            "dict"
+          ]
+        }
+      },
+      {
+        "query": "How many Teddy Bears were returned on Venus?",
+        "positive": false,
+        "value": null,
+        "citation": null,
+        "correct": true,
+        "stage_row_rank": {
+          "dense": null,
+          "sparse": null,
+          "fused": null,
+          "rerank": null,
+          "selection": null
+        },
+        "final_row_rank": null,
+        "generated": {
+          "http": 502,
+          "error": "CITATION_QA_INVALID_MODEL_OUTPUT",
+          "reason": "The model returned an invalid citation answer. Answer markers and listed citation IDs must exist and agree.",
+          "refused": false,
+          "value_correct": false,
+          "cited_cell": false,
+          "joint": false,
+          "calls": 1,
+          "output_shapes": [
+            "dict"
+          ]
+        }
+      },
+      {
+        "query": "Which poster is available in neon green?",
+        "positive": false,
+        "value": null,
+        "citation": null,
+        "correct": true,
+        "stage_row_rank": {
+          "dense": null,
+          "sparse": null,
+          "fused": null,
+          "rerank": null,
+          "selection": null
+        },
+        "final_row_rank": null,
+        "generated": {
+          "http": 502,
+          "error": "CITATION_QA_INVALID_MODEL_OUTPUT",
+          "reason": "The model returned an invalid citation answer. Answer markers and listed citation IDs must exist and agree.",
+          "refused": false,
+          "value_correct": false,
+          "cited_cell": false,
+          "joint": false,
+          "calls": 1,
+          "output_shapes": [
+            "dict"
+          ]
+        }
+      }
+    ]
+  },
+  "answer_model": {
+    "model": "Qwen/Qwen2.5-0.5B-Instruct",
+    "revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+    "mode": "JSON_SCHEMA",
+    "max_new_tokens": 256,
+    "include_citation_examples": false
+  }
+}

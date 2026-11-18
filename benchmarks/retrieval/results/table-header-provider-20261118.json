@@ -1,0 +1,13 @@
+{
+  "model": "qwen-plus-2025-07-28",
+  "region": "Beijing",
+  "planned": 28,
+  "sent": 1,
+  "complete_usage_receipts": 0,
+  "estimated_settled_yuan": null,
+  "reserved_unknown_yuan": "0.03",
+  "all_planned_reserved_yuan": "0.84",
+  "first_http_status": 401,
+  "additional_dispatches": 0,
+  "state": "STOPPED_NO_USAGE"
+}
