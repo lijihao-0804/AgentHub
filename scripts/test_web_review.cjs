@@ -266,6 +266,48 @@ function testLabeledSelect() {
 }
 
 async function main() {
+  {
+    const calls = { list: 0, detail: 0 };
+    const doc = { id: 'd', current_revision_id: 'r', current_revision_status: 'READY' };
+    const rev = { revision: { id: 'r', ingestion_status: 'PROCESSING' }, ingestion_job: { stage: 'INDEXING' } };
+    let tick, onVisibility;
+    const oldWindow = global.window, oldDocument = global.document;
+    global.window = { setInterval(fn) { tick = fn; return 1; }, clearInterval() { tick = null; } };
+    global.document = { hidden: false,
+      addEventListener(_, fn) { onVisibility = fn; }, removeEventListener() { onVisibility = null; } };
+    try {
+      const h = harness({ '@/hooks/use-workspace-data': {
+        useWorkspaceData(_, key) {
+          const list = key.startsWith('kb-documents:'), detail = key.startsWith('kb-revisions:');
+          return { data: list ? [doc] : detail ? [rev] : [], loaded: true, loading: false,
+            reload() { if (list) calls.list++; if (detail) calls.detail++; } };
+        },
+        useWorkspaceMutation: () => ({}),
+      } });
+      const component = load('app/knowledge/[knowledgeBaseId]/knowledge-detail-client.tsx', h.mocks).default;
+      const setup = () => { h.render(component, { knowledgeBaseId: 'kb' }); return h.effects.at(-1)(); };
+      h.states[1] = 'd';
+      const stop = setup();
+      global.document.hidden = true;
+      tick();
+      assert.deepEqual(calls, { list: 0, detail: 0 });
+      global.document.hidden = false;
+      onVisibility();
+      assert.deepEqual(calls, { list: 0, detail: 1 });
+      stop();
+      assert.equal(onVisibility, null);
+      rev.revision.ingestion_status = 'READY';
+      assert.equal(setup(), undefined);
+      assert.equal(tick, null);
+      h.states[1] = null;
+      rev.revision.ingestion_status = 'PROCESSING';
+      assert.equal(setup(), undefined);
+      console.log('PASS expanded revision refreshes after the list is terminal, pauses while hidden and stops on close or completion');
+    } finally {
+      global.window = oldWindow;
+      global.document = oldDocument;
+    }
+  }
   testAppearance();
   await testRunHistoryFilters();
   testLabeledSelect();

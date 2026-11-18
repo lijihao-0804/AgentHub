@@ -136,13 +136,28 @@ export default function KnowledgeBaseDetailClient({ knowledgeBaseId }: { knowled
     item.current_revision_status ? INGESTION_ACTIVE_STATUSES.has(item.current_revision_status) : false,
   );
   const reloadDocuments = documents.reload;
+  const reloadRevisions = revisions.reload;
+  const followDetails = tab === "documents" && selectedDocumentId !== null && (
+    revisionList.some(({ revision }) => INGESTION_ACTIVE_STATUSES.has(revision.ingestion_status)) ||
+    INGESTION_ACTIVE_STATUSES.has(selectedDocument?.current_revision_status ?? "") ||
+    (revisions.loaded && Boolean(selectedDocument?.current_revision_id) &&
+      !revisionList.some(({ revision }) => revision.id === selectedDocument?.current_revision_id))
+  );
   useEffect(() => {
-    if (!connected || !ingestionInFlight) return;
-    const interval = window.setInterval(() => {
-      if (!document.hidden) reloadDocuments();
-    }, INGESTION_POLL_MS);
-    return () => window.clearInterval(interval);
-  }, [connected, ingestionInFlight, reloadDocuments]);
+    if (!connected || (!ingestionInFlight && !followDetails)) return;
+    const refresh = () => {
+      if (document.hidden) return;
+      if (ingestionInFlight && !documents.loading) reloadDocuments();
+      if (followDetails && !revisions.loading) reloadRevisions();
+    };
+    const interval = window.setInterval(refresh, INGESTION_POLL_MS);
+    document.addEventListener("visibilitychange", refresh);
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", refresh);
+    };
+  }, [connected, ingestionInFlight, followDetails, documents.loading, revisions.loading,
+    reloadDocuments, reloadRevisions]);
 
   if (!connected) {
     return (
