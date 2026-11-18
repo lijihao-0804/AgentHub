@@ -41,6 +41,7 @@ from packages.knowledge.refusal_consistency import (
     refuses_requested_comparison,
 )
 from packages.knowledge.retrieval import HybridKnowledgeRetriever
+from packages.knowledge.source_merge import CitationComponent, propose_source_refill
 from packages.model_gateway.contracts import (
     PROVIDER_EGRESS_POLICY_VERSION,
     CapabilityRequirements,
@@ -177,6 +178,7 @@ class CitationQaCitation:
     excerpt: str
     retrieval_score: float
     rerank_score: float | None
+    components: tuple[CitationComponent, ...] = ()
 
 
 @dataclass(frozen=True, slots=True)
@@ -582,6 +584,61 @@ def resolve_citation_answer(
     )
 
 
+def _render_evidence(query, selected, projection, knowledge_base_id, knowledge_snapshot_id):
+    evidence_prompt = None
+    if selected and projection == "compact_v1":
+        records, references = [], []
+        for item in selected:
+            record = {
+                "chunk_id": item.evidence.chunk_id,
+                "document_revision_id": item.evidence.document_revision_id,
+                "snapshot_id": str(knowledge_snapshot_id),
+                "snippet": item.text,
+                "document_name": item.evidence.metadata.get("document_name"),
+                "effective_date": item.evidence.metadata.get("effective_date"),
+                "superseded": bool(item.evidence.metadata.get("superseded", False)),
+                "locator": dict(item.evidence.locator),
+            }
+            records.append(record)
+            references.append(
+                {
+                    "snapshot_id": str(knowledge_snapshot_id),
+                    "knowledge_base_id": str(knowledge_base_id),
+                    "document_revision_id": item.evidence.document_revision_id,
+                    "chunk_id": item.evidence.chunk_id,
+                }
+            )
+        # Keep the existing body-character contract; this bound includes
+        # serialization overhead rather than silently reducing its text.
+        source_bytes = len(
+            json.dumps(
+                {"records": records, "references": references},
+                ensure_ascii=False,
+                separators=(",", ":"),
+                allow_nan=False,
+            ).encode("utf-8")
+        )
+        evidence_plan = assemble_evidence_plan(
+            records,
+            references,
+            budget=source_bytes + 1_024,
+            estimator=lambda text: len(text.encode("utf-8")),
+            citation_prefix="",
+        )
+        if evidence_plan is None:
+            selected = ()
+        else:
+            visible = {int(item["id"]) for item in evidence_plan.payload["results"]}
+            selected = tuple(item for item in selected if item.id in visible)
+            evidence_prompt = f"Question:\n{query}\n\nUntrusted reference data:\n" + json.dumps(
+                evidence_plan.payload,
+                ensure_ascii=False,
+                sort_keys=True,
+                separators=(",", ":"),
+            )
+    return selected, evidence_prompt or _evidence_prompt(query, selected)
+
+
 class CitationQaService:
     def __init__(
         self,
@@ -598,6 +655,7 @@ class CitationQaService:
         output_mode: CitationOutputMode = "JSON_SCHEMA",
         verify_refusal_consistency: bool = False,
         answer_contract_v1: bool = False,
+        source_merge_refill_v1: bool = False,
         retrieval_profile: Mapping[str, int] | None = None,
         model_plan_resolver: Callable[
             [AsyncSession, WorkspaceExecutionContext, UUID],
@@ -626,6 +684,7 @@ class CitationQaService:
         self.min_rerank_score = min_rerank_score
         self.superseded_rank_penalty = superseded_rank_penalty
         self.evidence_projection = evidence_projection
+        self.source_merge_refill_v1 = source_merge_refill_v1
         if output_mode not in {"JSON_SCHEMA", "PROMPT_JSON"}:
             raise ValueError("invalid citation output mode")
         self.output_mode = output_mode
@@ -678,6 +737,8 @@ class CitationQaService:
             self.session_factory() if self.session_factory else nullcontext(self.session) as session
         ):
             plan = await self.model_plan_resolver(session, context, model_profile_id)
+        final_k = self.retrieval_profile["final_top_k"]
+        merge_enabled = self.source_merge_refill_v1 and final_k == 6
         retrieval = await HybridKnowledgeRetriever(
             session=self.session,
             session_factory=self.session_factory,
@@ -697,61 +758,49 @@ class CitationQaService:
                 dense_top_k=self.retrieval_profile["dense_top_k"],
                 sparse_top_k=self.retrieval_profile["sparse_top_k"],
                 candidate_top_k=self.retrieval_profile["candidate_top_k"],
-                final_top_k=self.retrieval_profile["final_top_k"],
+                final_top_k=min(20, self.retrieval_profile["candidate_top_k"])
+                if merge_enabled
+                else final_k,
             ),
         )
-        selected = _select_evidence(retrieval.evidence, max_chars=self.max_evidence_chars)
-        evidence_prompt = None
-        if selected and self.evidence_projection == "compact_v1":
-            records, references = [], []
-            for item in selected:
-                record = {
-                    "chunk_id": item.evidence.chunk_id,
-                    "document_revision_id": item.evidence.document_revision_id,
-                    "snapshot_id": str(knowledge_snapshot_id),
-                    "snippet": item.text,
-                    "document_name": item.evidence.metadata.get("document_name"),
-                    "effective_date": item.evidence.metadata.get("effective_date"),
-                    "superseded": bool(item.evidence.metadata.get("superseded", False)),
-                    "locator": dict(item.evidence.locator),
-                }
-                records.append(record)
-                references.append(
-                    {
-                        "snapshot_id": str(knowledge_snapshot_id),
-                        "knowledge_base_id": str(knowledge_base_id),
-                        "document_revision_id": item.evidence.document_revision_id,
-                        "chunk_id": item.evidence.chunk_id,
-                    }
-                )
-            # Keep the existing body-character contract; this bound includes
-            # serialization overhead rather than silently reducing its text.
-            source_bytes = len(
-                json.dumps(
-                    {"records": records, "references": references},
-                    ensure_ascii=False,
-                    separators=(",", ":"),
-                    allow_nan=False,
-                ).encode("utf-8")
+
+        def render(records):
+            selected = _select_evidence(records, max_chars=self.max_evidence_chars)
+            return _render_evidence(
+                query, selected, self.evidence_projection, knowledge_base_id, knowledge_snapshot_id
             )
-            evidence_plan = assemble_evidence_plan(
-                records,
-                references,
-                budget=source_bytes + 1_024,
-                estimator=lambda text: len(text.encode("utf-8")),
-                citation_prefix="",
-            )
-            if evidence_plan is None:
-                selected = ()
-            else:
-                visible = {int(item["id"]) for item in evidence_plan.payload["results"]}
-                selected = tuple(item for item in selected if item.id in visible)
-                evidence_prompt = f"Question:\n{query}\n\nUntrusted reference data:\n" + json.dumps(
-                    evidence_plan.payload,
-                    ensure_ascii=False,
-                    sort_keys=True,
-                    separators=(",", ":"),
-                )
+
+        selected, evidence_prompt = render(retrieval.evidence[:final_k])
+        components_by_id = {}
+        proposal = propose_source_refill(retrieval.evidence) if merge_enabled else None
+        system_message = ModelMessage(
+            role="system",
+            content=citation_system_prompt(
+                self.output_mode, answer_contract_v1=self.answer_contract_v1
+            ),
+        )
+        request_categories = (ContextCategory.SYSTEM_PROMPT, ContextCategory.RAG_EVIDENCE)
+        if proposal:
+            records, union_id, components = proposal
+            candidate, candidate_prompt = render(records)
+            delivered = {item.evidence.chunk_id for item in candidate}
+            if union_id in delivered and records[-1].chunk_id in delivered:
+                delivered.update(part.chunk_id for part in components)
+                if all(item.evidence.chunk_id in delivered for item in selected):
+                    trial = (system_message, ModelMessage(role="user", content=candidate_prompt))
+                    try:
+                        _deny_oversized(
+                            plan,
+                            trial,
+                            request_categories,
+                            response_schema=_request(trial, self.output_mode).response_schema,
+                        )
+                    except AgentHubError as exc:
+                        if exc.code != "CITATION_QA_CONTEXT_BUDGET_EXCEEDED":
+                            raise
+                    else:
+                        selected, evidence_prompt = candidate, candidate_prompt
+                        components_by_id[union_id] = components
         if not selected:
             return CitationQaResult(
                 answer=_INSUFFICIENT_EVIDENCE,
@@ -760,19 +809,7 @@ class CitationQaService:
                 retrieval_trace=retrieval.trace,
             )
 
-        request_messages = (
-            ModelMessage(
-                role="system",
-                content=citation_system_prompt(
-                    self.output_mode, answer_contract_v1=self.answer_contract_v1
-                ),
-            ),
-            ModelMessage(role="user", content=evidence_prompt or _evidence_prompt(query, selected)),
-        )
-        request_categories = (
-            ContextCategory.SYSTEM_PROMPT,
-            ContextCategory.RAG_EVIDENCE,
-        )
+        request_messages = (system_message, ModelMessage(role="user", content=evidence_prompt))
         allowed_ids = frozenset(item.id for item in selected)
         for attempt in range(2):
             model_request = _request(request_messages, self.output_mode)
@@ -860,7 +897,12 @@ class CitationQaService:
                 chunk_id=by_id[identifier].evidence.chunk_id,
                 source=by_id[identifier].evidence.source,
                 locator=dict(by_id[identifier].evidence.locator),
-                excerpt=by_id[identifier].text[:MAX_EVIDENCE_EXCERPT_CHARS],
+                excerpt=(
+                    by_id[identifier].text
+                    if self.source_merge_refill_v1
+                    else by_id[identifier].text[:MAX_EVIDENCE_EXCERPT_CHARS]
+                ),
+                components=components_by_id.get(by_id[identifier].evidence.chunk_id, ()),
                 retrieval_score=by_id[identifier].evidence.retrieval_score,
                 rerank_score=by_id[identifier].evidence.rerank_score,
             )

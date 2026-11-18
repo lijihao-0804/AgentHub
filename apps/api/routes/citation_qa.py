@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from dataclasses import asdict
+
 from fastapi import APIRouter, Depends, Request
 
 from apps.api.dependencies import get_db_session_factory
@@ -29,7 +31,9 @@ model_gateway_dependency = Depends(get_citation_qa_generator)
 model_plan_resolver_dependency = Depends(get_citation_qa_model_plan_resolver)
 
 
-@router.post("/api/v1/knowledge/query", response_model=CitationQaResponse)
+@router.post(
+    "/api/v1/knowledge/query", response_model=CitationQaResponse, response_model_exclude_unset=True
+)
 async def citation_qa(
     payload: CitationQaRequest,
     request: Request,
@@ -44,6 +48,9 @@ async def citation_qa(
         model_gateway=model_gateway,
         output_mode=payload.output_mode,
         verify_refusal_consistency=request.app.state.settings.knowledge_qa_contextual_abstention,
+        source_merge_refill_v1=getattr(
+            request.app.state.settings, "knowledge_qa_source_merge_refill_v1", False
+        ),
         answer_contract_v1=request.app.state.settings.knowledge_qa_answer_contract_v1,
         max_evidence_chars=request.app.state.settings.knowledge_qa_max_evidence_chars,
         min_rerank_score=request.app.state.settings.knowledge_min_rerank_score,
@@ -73,6 +80,11 @@ def _response(result: CitationQaResult) -> CitationQaResponse:
                 source=item.source,
                 locator=item.locator,
                 excerpt=item.excerpt,
+                **(
+                    {"components": [asdict(part) for part in item.components]}
+                    if item.components
+                    else {}
+                ),
                 retrieval_score=item.retrieval_score,
                 rerank_score=item.rerank_score,
             )

@@ -6,7 +6,6 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from apps.api.schemas.knowledge import RetrievalPlaygroundStages
 from packages.knowledge.contracts import CitationOutputMode
-from packages.knowledge.evidence_records import MAX_EVIDENCE_EXCERPT_CHARS
 
 
 class CitationQaRequest(BaseModel):
@@ -20,6 +19,13 @@ class CitationQaRequest(BaseModel):
     output_mode: CitationOutputMode = "JSON_SCHEMA"
 
 
+class CitationQaComponentResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    chunk_id: str = Field(min_length=1)
+    locator: dict[str, object]
+    excerpt: str = Field(min_length=1)
+
+
 class CitationQaCitationResponse(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -29,7 +35,8 @@ class CitationQaCitationResponse(BaseModel):
     chunk_id: str = Field(min_length=1)
     source: str = Field(min_length=1)
     locator: dict[str, object]
-    excerpt: str = Field(max_length=MAX_EVIDENCE_EXCERPT_CHARS)
+    excerpt: str = Field(min_length=1)
+    components: list[CitationQaComponentResponse] = Field(default_factory=list, max_length=2)
     retrieval_score: float
     rerank_score: float | None
 

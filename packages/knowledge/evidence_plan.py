@@ -63,7 +63,18 @@ def model_evidence_locator(value: Mapping) -> dict:
                 raise ValueError("invalid evidence position")
             result[key] = value[key]
     if "type" in value:
-        if value["type"] not in {"page", "text_range", "table_row"}:
+        if value["type"] == "source_union":
+            parts = value.get("components")
+            if not isinstance(parts, list) or len(parts) != 2:
+                raise ValueError("invalid source union")
+            projected = []
+            for part in parts:
+                loc = part.get("locator") if isinstance(part, Mapping) else None
+                if not isinstance(loc, Mapping) or loc.get("type") not in {"page", "text_range"}:
+                    raise ValueError("invalid source component")
+                projected.append({"locator": model_evidence_locator(loc)})
+            result["components"] = projected
+        elif value["type"] not in {"page", "text_range", "table_row"}:
             raise ValueError("unsupported positional locator type")
         result["type"] = value["type"]
     return result
