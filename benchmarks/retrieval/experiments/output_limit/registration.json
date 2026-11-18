@@ -1,0 +1,494 @@
+{
+  "code": "0fe68871440726f7531929e1e97ce1700529a335",
+  "freeze_sha256": "e9edd73ebea75144837bb718e80eac23baa018afc1c2400a29a9a036fc5a8ed5",
+  "private_cases_sha256": "f116868a36665af6719cae8bee5d99fb9163379780a9627f622fa88d088d2ed0",
+  "physical_preflight_sha256": "9c3504f7384dca00e00fe99636cbb55cef8930cd0517ed8d28c21e35824a841e",
+  "logical": 511,
+  "cohorts": {
+    "fresh": 40,
+    "fresh_long": 21,
+    "historical": 57,
+    "protection": 267,
+    "target": 4
+  },
+  "planned_by_cap": {
+    "256": 122,
+    "2048": 389
+  },
+  "source_fingerprints": {
+    "campaign.py": "a0dd40e3686ab794c50d1ad72adca0074472aacd7f1d036699f2f82d56e7c199",
+    "cases.py": "6d2e4de72dff3f0a39b8b77d984643ddf2576e25300824ae8ed13a508afc8aa3",
+    "endpoint.py": "bf65d81ab0e042d3bbc75234ae97cb4ce2043e9a1bb746674d0d13f27c9be467",
+    "fixtures/freeze_long.py": "d9556857a0d87dc30acd66cf171f23a34a9ac409d6c281ba5446e378f43821f8",
+    "fixtures/fresh.jsonl": "a3718352ff573e64129c856bf3ea95be67b7d0e22107dc8fcbcf34e9b8d07403",
+    "fixtures/long-manifest.json": "e4828a4b0a6f2fcdbf7df6b1b150f981581d2a9add2638b9aa8beb6e256ea534",
+    "fresh_retrieval.py": "d04cf4086503625ae481a135d88c7bb11aab3ed970c3f0956e1b6624faa029f6",
+    "grading.py": "6fb3236b5b6d01bf52b229c35a25e78c6941d6b6abda16db4e889f33e91294a4",
+    "meter.py": "59f9df1755b5000dfb4f951dd69d9454ef1c8a9270d586d5e6882fd8f61e92c4",
+    "protocol.md": "9da957e1e10dee5d0859b5aeabe6e1ce4ae7492770fed91624defdd9feac96f0"
+  },
+  "old_archive": "5513ca0e5e5b32b6e297fc56cd4fd75c227a08ab",
+  "opening_confirmed_cny": "2.04767472",
+  "opening_unresolved_upper_cny": "0.049062",
+  "cap_cny": "30",
+  "route": "configured aliyun-rag, Beijing",
+  "model": "deepseek-v4.1-flash-1017",
+  "history_502": [
+    {
+      "id": "2hop__40626_475429",
+      "arm": "baseline",
+      "failure": "truncated",
+      "reasoning": 245,
+      "visible_tokens": 10,
+      "messages_sha256": "ad4d022eeb266f037773867b906d4c293554932838dc3121d6053b8969ff451d"
+    },
+    {
+      "id": "2hop__40626_475429",
+      "arm": "candidate",
+      "failure": "empty",
+      "reasoning": 256,
+      "visible_tokens": 0,
+      "messages_sha256": "dfa04151e992f2747454baef9e998c038247a34ddd9aea4a01ae09ab0fee3a96"
+    },
+    {
+      "id": "2hop__71909_729660",
+      "arm": "candidate",
+      "failure": "empty",
+      "reasoning": 256,
+      "visible_tokens": 0,
+      "messages_sha256": "b39301b27f607da41e78e0280be2beb09991fc18938043f7bc041acb7435be5c"
+    },
+    {
+      "id": "2hop__613265_495107",
+      "arm": "candidate",
+      "failure": "empty",
+      "reasoning": 256,
+      "visible_tokens": 0,
+      "messages_sha256": "0ef002dea31004cb88ecce1c2f000c63459a0dd895ce7e81651a4adbb7513811"
+    },
+    {
+      "id": "2hop__613265_495107",
+      "arm": "baseline",
+      "failure": "empty",
+      "reasoning": 256,
+      "visible_tokens": 0,
+      "messages_sha256": "cd8677c503433d7a5884f4ccaadd05683307e078614428376bcd898fd19ac62a"
+    },
+    {
+      "id": "2hop__181212_701819",
+      "arm": "candidate",
+      "failure": "empty",
+      "reasoning": 256,
+      "visible_tokens": 0,
+      "messages_sha256": "2243c4c01027224b0a56d6905293b5abe8c6e194dcae5d3ec44b997418d91239"
+    },
+    {
+      "id": "2hop__145110_861627",
+      "arm": "baseline",
+      "failure": "empty",
+      "reasoning": 256,
+      "visible_tokens": 0,
+      "messages_sha256": "8d5095db787282a61e1964c6362b2dfc3f810088c133814b82b7f1b6e795c272"
+    },
+    {
+      "id": "2hop__145110_861627",
+      "arm": "candidate",
+      "failure": "truncated",
+      "reasoning": 227,
+      "visible_tokens": 28,
+      "messages_sha256": "8d5095db787282a61e1964c6362b2dfc3f810088c133814b82b7f1b6e795c272"
+    },
+    {
+      "id": "2hop__446183_21489",
+      "arm": "candidate",
+      "failure": "truncated",
+      "reasoning": 210,
+      "visible_tokens": 45,
+      "messages_sha256": "ab70654324b07efcf26ac068482fce5e6e447cb86ee3cc20fac74cae07dfe07b"
+    },
+    {
+      "id": "2hop__108596_863816",
+      "arm": "candidate",
+      "failure": "empty",
+      "reasoning": 256,
+      "visible_tokens": 0,
+      "messages_sha256": "a162df666b23c2a94a014e51b9b7d71678845a976a1c69547c63a051a99b9f77"
+    },
+    {
+      "id": "2hop__108596_863816",
+      "arm": "baseline",
+      "failure": "empty",
+      "reasoning": 256,
+      "visible_tokens": 0,
+      "messages_sha256": "a162df666b23c2a94a014e51b9b7d71678845a976a1c69547c63a051a99b9f77"
+    },
+    {
+      "id": "2hop__645827_52448",
+      "arm": "baseline",
+      "failure": "empty",
+      "reasoning": 256,
+      "visible_tokens": 0,
+      "messages_sha256": "03302a4c5d8e35c02058acfad1c42e097bf26c40b48706d57cd160cd6ffe4d2c"
+    },
+    {
+      "id": "2hop__645827_52448",
+      "arm": "candidate",
+      "failure": "truncated",
+      "reasoning": 245,
+      "visible_tokens": 10,
+      "messages_sha256": "722f32933c67e21ccf68c0dcde8bd028a2cb4e4f286c229042b9a99ee79d0953"
+    },
+    {
+      "id": "2hop__745795_79562",
+      "arm": "baseline",
+      "failure": "truncated",
+      "reasoning": 235,
+      "visible_tokens": 20,
+      "messages_sha256": "c63416fc1f3198ebbc6d51f0e133b9b1f74c8af4cd328fcaae653f16c95ec04d"
+    },
+    {
+      "id": "2hop__806218_14904",
+      "arm": "candidate",
+      "failure": "truncated",
+      "reasoning": 167,
+      "visible_tokens": 88,
+      "messages_sha256": "1b9136cd5970d10986ff7c34c07ba24d0b8da647bfc890b8a4e8f896844b592f"
+    },
+    {
+      "id": "2hop__36206_63835",
+      "arm": "baseline",
+      "failure": "empty",
+      "reasoning": 256,
+      "visible_tokens": 0,
+      "messages_sha256": "79dfa82900851e1d7c93cd6a4ea9c4c210f6c63209248b0002fb3525ac6368e7"
+    },
+    {
+      "id": "2hop__138166_34844",
+      "arm": "candidate",
+      "failure": "empty",
+      "reasoning": 256,
+      "visible_tokens": 0,
+      "messages_sha256": "81099c2296b964f5865476b24a2f4a98d6272e5c3bca6b3572e00367e0ef8935"
+    },
+    {
+      "id": "2hop__279137_85512",
+      "arm": "baseline",
+      "failure": "truncated",
+      "reasoning": 207,
+      "visible_tokens": 48,
+      "messages_sha256": "1ad9f5d7c12750c1c87c72734280d1eea3e8d1dd077addbb2b07e29deb41644a"
+    },
+    {
+      "id": "2hop__638520_90677",
+      "arm": "candidate",
+      "failure": "empty",
+      "reasoning": 256,
+      "visible_tokens": 0,
+      "messages_sha256": "a113dc396dbee11d6f7307b22884d8890c00aba5d99fea72a5281c38c24f61bc"
+    },
+    {
+      "id": "2hop__659807_63963",
+      "arm": "candidate",
+      "failure": "empty",
+      "reasoning": 256,
+      "visible_tokens": 0,
+      "messages_sha256": "fca377b1b989fc671c788cff8f01e993c77221b935b49eadfd1fa39c5d3dadda"
+    },
+    {
+      "id": "2hop__659807_63963",
+      "arm": "baseline",
+      "failure": "empty",
+      "reasoning": 256,
+      "visible_tokens": 0,
+      "messages_sha256": "83f396c6e3b7fcaa7a7f22327458291b1f9550c19e2656ea7ef40cbfaae6da6f"
+    },
+    {
+      "id": "2hop__511537_815069",
+      "arm": "baseline",
+      "failure": "empty",
+      "reasoning": 256,
+      "visible_tokens": 0,
+      "messages_sha256": "679ba9cdff79dddf508082913de029adc015f8b0e745c5c806dc5c5cd76ec81a"
+    },
+    {
+      "id": "2hop__511537_815069",
+      "arm": "candidate",
+      "failure": "empty",
+      "reasoning": 256,
+      "visible_tokens": 0,
+      "messages_sha256": "679ba9cdff79dddf508082913de029adc015f8b0e745c5c806dc5c5cd76ec81a"
+    },
+    {
+      "id": "2hop__528151_829081",
+      "arm": "baseline",
+      "failure": "empty",
+      "reasoning": 256,
+      "visible_tokens": 0,
+      "messages_sha256": "1d22f6ad0cd9d9c0617794ba3c5c61ffe5469cd6c28178078a33179df89738ec"
+    },
+    {
+      "id": "2hop__528151_829081",
+      "arm": "candidate",
+      "failure": "empty",
+      "reasoning": 256,
+      "visible_tokens": 0,
+      "messages_sha256": "0a6ad4d269a1c6767b84e1437a431e7c1643fe9d5252cf4ff20d351946ebb2f4"
+    },
+    {
+      "id": "2hop__68650_54580",
+      "arm": "candidate",
+      "failure": "empty",
+      "reasoning": 256,
+      "visible_tokens": 0,
+      "messages_sha256": "70eb449ebea507839d18531c7583594b9881266c2ac7170591a3210b306fc50b"
+    },
+    {
+      "id": "2hop__136744_70019",
+      "arm": "candidate",
+      "failure": "empty",
+      "reasoning": 256,
+      "visible_tokens": 0,
+      "messages_sha256": "967df5d06f62ee420ce12d2e751b9b8b8839684be46bab555e74cd0c3fcf45da"
+    },
+    {
+      "id": "2hop__650310_526735",
+      "arm": "baseline",
+      "failure": "empty",
+      "reasoning": 256,
+      "visible_tokens": 0,
+      "messages_sha256": "9e50e1dd641ded00560a26a20cc198bd3bee1cd6cfbc1997541449d92c4c5f95"
+    },
+    {
+      "id": "2hop__650310_526735",
+      "arm": "candidate",
+      "failure": "empty",
+      "reasoning": 256,
+      "visible_tokens": 0,
+      "messages_sha256": "de425132a3dc07c6fb15e363c50f4dae1bd656fac865b8ad914521518fd11d4e"
+    },
+    {
+      "id": "2hop__108840_46285",
+      "arm": "baseline",
+      "failure": "truncated",
+      "reasoning": 247,
+      "visible_tokens": 8,
+      "messages_sha256": "bb345f65cad6661ea89b5e2b35c589e66601c8bf113015e668577f4bde94cd5d"
+    },
+    {
+      "id": "2hop__245784_66879",
+      "arm": "baseline",
+      "failure": "empty",
+      "reasoning": 256,
+      "visible_tokens": 0,
+      "messages_sha256": "ab42be0e75af9ff6fa16bc1c914a85e7d097036ffbb3845c6011cea2b31f3ec8"
+    },
+    {
+      "id": "2hop__822362_18120",
+      "arm": "candidate",
+      "failure": "truncated",
+      "reasoning": 248,
+      "visible_tokens": 7,
+      "messages_sha256": "609e845fe89a41ed9162128404f8d296f161e9bb7b50a26e5aed28bb10316c4c"
+    },
+    {
+      "id": "2hop__478833_47348",
+      "arm": "baseline",
+      "failure": "truncated",
+      "reasoning": 246,
+      "visible_tokens": 9,
+      "messages_sha256": "605478cec404538eb325f183ee324c81e3b215aa46217fdb3627c28cdb6684de"
+    },
+    {
+      "id": "2hop__478833_47348",
+      "arm": "candidate",
+      "failure": "empty",
+      "reasoning": 256,
+      "visible_tokens": 0,
+      "messages_sha256": "605478cec404538eb325f183ee324c81e3b215aa46217fdb3627c28cdb6684de"
+    },
+    {
+      "id": "2hop__365241_754472",
+      "arm": "candidate",
+      "failure": "empty",
+      "reasoning": 256,
+      "visible_tokens": 0,
+      "messages_sha256": "6cad71ab51c512ad11c3f587f7fdc4a36e61a04eeb475da4a4d2fc8c92426253"
+    },
+    {
+      "id": "2hop__365241_754472",
+      "arm": "baseline",
+      "failure": "empty",
+      "reasoning": 256,
+      "visible_tokens": 0,
+      "messages_sha256": "e6c48f4a4df028e2189b2463d2a7fa48cbd659acb53d0b6e33f4ebd64ca49790"
+    },
+    {
+      "id": "2hop__575733_500443",
+      "arm": "baseline",
+      "failure": "truncated",
+      "reasoning": 234,
+      "visible_tokens": 21,
+      "messages_sha256": "544578ad7c9ea3854acf669a272bb1949cb244bededa94c6478a9df94490d1c8"
+    },
+    {
+      "id": "2hop__575733_500443",
+      "arm": "candidate",
+      "failure": "empty",
+      "reasoning": 256,
+      "visible_tokens": 0,
+      "messages_sha256": "544578ad7c9ea3854acf669a272bb1949cb244bededa94c6478a9df94490d1c8"
+    },
+    {
+      "id": "2hop__91230_66008",
+      "arm": "candidate",
+      "failure": "empty",
+      "reasoning": 256,
+      "visible_tokens": 0,
+      "messages_sha256": "49b5d0c0dd0deb92ed7dc2ba9a5479849702a829a7d7a122a6f45de0878f43c1"
+    },
+    {
+      "id": "2hop__91230_66008",
+      "arm": "baseline",
+      "failure": "empty",
+      "reasoning": 256,
+      "visible_tokens": 0,
+      "messages_sha256": "fa3e94913b9e5fca51374bea3adad4c799e6c6005edbdfef43c876b441e276c1"
+    },
+    {
+      "id": "2hop__430752_55607",
+      "arm": "candidate",
+      "failure": "truncated",
+      "reasoning": 197,
+      "visible_tokens": 58,
+      "messages_sha256": "7523dfb5def75e2ff78b2200b7ea9d0d1daec061bbc3026c32524dfac3359af5"
+    },
+    {
+      "id": "2hop__839424_160978",
+      "arm": "candidate",
+      "failure": "empty",
+      "reasoning": 256,
+      "visible_tokens": 0,
+      "messages_sha256": "13e38774c3d4c1571f02c220ede407f6e3862baa1abc644ce21e6696df5265e8"
+    },
+    {
+      "id": "2hop__839424_160978",
+      "arm": "baseline",
+      "failure": "truncated",
+      "reasoning": 229,
+      "visible_tokens": 26,
+      "messages_sha256": "9dbe8a5544c4e010df62d723dd02fe56a48d3753454c18c87653b2a059906dc0"
+    },
+    {
+      "id": "2hop__734554_32631",
+      "arm": "baseline",
+      "failure": "empty",
+      "reasoning": 256,
+      "visible_tokens": 0,
+      "messages_sha256": "ee5c6ab4b61d06f73f6233a178c5f5d9bd436245c064dc91407d890281ea4be9"
+    },
+    {
+      "id": "2hop__746150_728372",
+      "arm": "candidate",
+      "failure": "truncated",
+      "reasoning": 247,
+      "visible_tokens": 8,
+      "messages_sha256": "7b8656e7ee8e0087d7bc324e7687263797a32633cd3c2df268902711975b4488"
+    },
+    {
+      "id": "2hop__120705_4688",
+      "arm": "baseline",
+      "failure": "empty",
+      "reasoning": 256,
+      "visible_tokens": 0,
+      "messages_sha256": "48d19cdcaf76a482b4abfaaedf5b8f944ebd1677d4904530da3b351de220d2ab"
+    },
+    {
+      "id": "2hop__120705_4688",
+      "arm": "candidate",
+      "failure": "truncated",
+      "reasoning": 250,
+      "visible_tokens": 5,
+      "messages_sha256": "c31fba35d526e4931aeff715e3ebd8ec40731b155e6597afca3a41646e82bee2"
+    },
+    {
+      "id": "2hop__11874_25017",
+      "arm": "candidate",
+      "failure": "empty",
+      "reasoning": 256,
+      "visible_tokens": 0,
+      "messages_sha256": "50d4d298b009e3ec518546d1096fdf6ae49c21a85a22c723842c27c84ef2f70b"
+    },
+    {
+      "id": "2hop__11874_25017",
+      "arm": "baseline",
+      "failure": "empty",
+      "reasoning": 256,
+      "visible_tokens": 0,
+      "messages_sha256": "c066969e1f6e2238346ef5ed73ac1f0707f8d091ffce581622f68f0120b37cd3"
+    },
+    {
+      "id": "2hop__57390_44352",
+      "arm": "baseline",
+      "failure": "empty",
+      "reasoning": 256,
+      "visible_tokens": 0,
+      "messages_sha256": "f8badd682e5f31c278200ba36c822735157395db7ba256928d0896b8a18df6f7"
+    },
+    {
+      "id": "2hop__57390_44352",
+      "arm": "candidate",
+      "failure": "empty",
+      "reasoning": 256,
+      "visible_tokens": 0,
+      "messages_sha256": "f8badd682e5f31c278200ba36c822735157395db7ba256928d0896b8a18df6f7"
+    },
+    {
+      "id": "2hop__304266_3953",
+      "arm": "candidate",
+      "failure": "empty",
+      "reasoning": 256,
+      "visible_tokens": 0,
+      "messages_sha256": "f59a57427d693c00c50e25cc15a5043f7559c388338f042f6007651c1c37ea85"
+    },
+    {
+      "id": "2hop__304266_3953",
+      "arm": "baseline",
+      "failure": "empty",
+      "reasoning": 256,
+      "visible_tokens": 0,
+      "messages_sha256": "f59a57427d693c00c50e25cc15a5043f7559c388338f042f6007651c1c37ea85"
+    },
+    {
+      "id": "2hop__145631_92216",
+      "arm": "candidate",
+      "failure": "truncated",
+      "reasoning": 215,
+      "visible_tokens": 40,
+      "messages_sha256": "8e97fa0793147c002b9ab2893a1884dbcff63d9355d843a5a588f14e5d96e443"
+    },
+    {
+      "id": "2hop__159801_59031",
+      "arm": "baseline",
+      "failure": "truncated",
+      "reasoning": 206,
+      "visible_tokens": 49,
+      "messages_sha256": "c7318f0ee9e99ac846d36249b3dfb83ab51b6d7e705e7343435c193b36cfff47"
+    },
+    {
+      "id": "2hop__159801_59031",
+      "arm": "candidate",
+      "failure": "empty",
+      "reasoning": 256,
+      "visible_tokens": 0,
+      "messages_sha256": "c7318f0ee9e99ac846d36249b3dfb83ab51b6d7e705e7343435c193b36cfff47"
+    },
+    {
+      "id": "2hop__296387_5111",
+      "arm": "candidate",
+      "failure": "truncated",
+      "reasoning": 218,
+      "visible_tokens": 37,
+      "messages_sha256": "191b377ab77725b4378a74273e280d374bb71f20dca2e47e94cfadf8965761a5"
+    }
+  ]
+}

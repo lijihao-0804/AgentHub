@@ -2,14 +2,27 @@ from types import SimpleNamespace
 from uuid import UUID
 
 import pytest
+import pytest_asyncio
 
 from benchmarks.retrieval.experiments.output_limit.endpoint import BASE_URL, MODEL, ReplayEndpoint
 from packages.knowledge import citation_qa as qa
 from packages.knowledge.contracts import RetrievedEvidence
 
 
+@pytest_asyncio.fixture
+async def closed_model_worker():
+    # LiteLLM schedules logging on the running test loop. Drain it before
+    # pytest closes that loop and other gateway tests start their own.
+    yield
+    from litellm.litellm_core_utils.logging_worker import GLOBAL_LOGGING_WORKER
+
+    await GLOBAL_LOGGING_WORKER.stop()
+
+
 @pytest.mark.asyncio
-async def test_raw_messages_stay_fixed_and_payload_drift_is_stopped(monkeypatch):
+async def test_raw_messages_stay_fixed_and_payload_drift_is_stopped(
+    monkeypatch, closed_model_worker
+):
     monkeypatch.setenv("LITELLM_LOCAL_MODEL_COST_MAP", "True")
     doc, revision = str(UUID(int=11)), str(UUID(int=12))
     source = f"document:{doc}/revision:{revision}"
