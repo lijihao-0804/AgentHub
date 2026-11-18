@@ -2,6 +2,7 @@
 
 import asyncio
 import json
+from decimal import Decimal
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, patch
 from uuid import uuid4
@@ -13,7 +14,7 @@ from packages.knowledge import citation_qa
 from packages.model_gateway.adapters.litellm.provider_http import GuardedProviderTransport
 from packages.model_gateway.egress import parse_provider_endpoint
 
-from .wire import MODEL, Wire, digest, reservation
+from .wire import MODEL, Wire, digest, receipt_cost, reservation
 
 FAILURES = ("status", "timeout", "missing_usage", "inconsistent_usage", "duplicate_id")
 
@@ -131,6 +132,21 @@ async def scenario(failure, directory):
 
 
 async def check(directory):
+    # 1,000 input including 100 cached, 3 output. Epoch UTC is 08:00 Beijing.
+    state = dict(
+        id="price-fixture",
+        model=MODEL,
+        created=0,
+        usage={
+            "prompt_tokens": 1000,
+            "completion_tokens": 3,
+            "total_tokens": 1003,
+            "prompt_tokens_details": {"cached_tokens": 100},
+        },
+    )
+    assert receipt_cost(state, MODEL, max_input=1000, max_output=256)[3] == Decimal("0.001828")
+    state["created"] = 14 * 3600  # 22:00 Beijing.
+    assert receipt_cost(state, MODEL, max_input=1000, max_output=256)[3] == Decimal("0.000914")
     for mode in FAILURES:
         await scenario(mode, directory)
     print("Five raw transport fail-stop scenarios passed, with zero network dispatch.")

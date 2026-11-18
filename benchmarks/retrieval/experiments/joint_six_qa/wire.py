@@ -3,12 +3,14 @@
 import hashlib
 import json
 from contextlib import contextmanager
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from unittest.mock import patch
 
 import httpx
 
-from benchmarks.retrieval.table_header_answers import receipt_cost, write_entry
+from benchmarks.retrieval.table_header_answers import receipt_cost as validate_receipt
+from benchmarks.retrieval.table_header_answers import write_entry
 from packages.knowledge import citation_qa as qa
 from packages.model_gateway.adapters.litellm.provider_http import GuardedProviderTransport
 
@@ -17,6 +19,27 @@ CAP_CNY = Decimal("30")
 PRIOR_CONFIRMED = Decimal("1.2133176")
 PRIOR_UNKNOWN = Decimal("0.03") + Decimal("0.019062")
 CAMPAIGN_CNY = CAP_CNY - PRIOR_CONFIRMED - PRIOR_UNKNOWN
+TARIFF = {
+    "region": "cn-beijing",
+    "timezone": "Asia/Shanghai",
+    "peak_hours": "[08:00,22:00)",
+    "peak_cny_per_million": {"miss": "2", "hit": "0.04", "output": "8"},
+    "offpeak_cny_per_million": {"miss": "1", "hit": "0.02", "output": "4"},
+    "verified_date": "2026-11-18",
+    "sources": ["https://help.aliyun.com/zh/model-studio/deepseek-v4-1-flash"],
+}
+
+
+def receipt_cost(body, model, *, max_input, max_output, tariff=TARIFF):
+    inp, out, cached, _ = validate_receipt(body, model, max_input=max_input, max_output=max_output)
+    hour = datetime.fromtimestamp(body["created"], timezone(timedelta(hours=8))).hour
+    rates = tariff["peak_cny_per_million" if 8 <= hour < 22 else "offpeak_cny_per_million"]
+    cny = (
+        (inp - cached) * Decimal(rates["miss"])
+        + cached * Decimal(rates["hit"])
+        + out * Decimal(rates["output"])
+    ) / 1_000_000
+    return inp, out, cached, cny
 
 
 def reservation(input_bound):

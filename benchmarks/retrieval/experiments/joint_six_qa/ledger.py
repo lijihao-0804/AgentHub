@@ -7,7 +7,6 @@ from collections import Counter, defaultdict
 from decimal import Decimal
 from pathlib import Path
 
-from benchmarks.retrieval.table_header_answers import receipt_cost
 from scripts.aliyun_api_smoke import aliyun_route
 
 from .inputs import (
@@ -29,7 +28,17 @@ from .inputs import (
     save,
     sha,
 )
-from .wire import CAMPAIGN_CNY, CAP_CNY, MODEL, PRIOR_CONFIRMED, PRIOR_UNKNOWN, digest, reservation
+from .wire import (
+    CAMPAIGN_CNY,
+    CAP_CNY,
+    MODEL,
+    PRIOR_CONFIRMED,
+    PRIOR_UNKNOWN,
+    TARIFF,
+    digest,
+    receipt_cost,
+    reservation,
+)
 
 MAIN = "4a0daa2ed29540ed0a0b46500c9a7e78671b55a6"
 RUNTIME = ("inputs.py", "runner.py", "wire.py", "wire_check.py", "ledger.py")
@@ -211,7 +220,7 @@ def registration(stage, commit):
         model=MODEL,
         endpoint_sha256=digest(aliyun_route().base_url.rstrip("/")),
         weights=weights(),
-        tariff=load(OLD_FREEZE)["tariff"],
+        tariff=TARIFF,
         set_sha256=sha(FRESH),
         old_closed_ledger_sha256=sha(OLD_LEDGER),
         artifacts=artifacts,
@@ -307,7 +316,7 @@ def settle(stage, *, require_complete):
             usage=confirmed["usage"],
         )
         inp, out, cached, cost = receipt_cost(
-            raw, MODEL, max_input=r["input_bound"], max_output=256
+            raw, MODEL, max_input=r["input_bound"], max_output=256, tariff=freeze["tariff"]
         )
         if (inp, out, cached, cost) != (
             confirmed["input"],
