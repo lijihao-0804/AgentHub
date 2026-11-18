@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 
+import PairedSuccess from "@/components/evaluation/paired-success";
 import StatusBadge from "@/components/ui/status-badge";
 import { EmptyState, ErrorState, InlineError, LoadingState, Panel } from "@/components/ui/states";
 import TechnicalDetails from "@/components/ui/technical-details";
@@ -490,6 +491,10 @@ export default function RunWorkflow({
             {comparisons && comparisons.length === 0 && <EmptyState title={t("evaluation.comparison.empty")} />}
 
             {selectedComparison && <ComparisonView comparison={selectedComparison} variantLabel={variantLabel} />}
+            {selectedComparison && (
+              <PairedSuccess key={`${input.sessionId}:${run.id}:${selectedComparison.id}`}
+                input={input} runId={run.id} comparisonId={selectedComparison.id} />
+            )}
           </>
         )}
       </Panel>
@@ -862,6 +867,7 @@ function AblationView({
 
 function gateReasonExplanation(reason: string | null | undefined, locale: string): string | null {
   const explanations: Record<string, [string, string]> = {
+    incomplete_paired_repetitions: ["部分重复执行缺少可配对的任务评分，门禁无法判定。", "Some repetitions lack matched task scores, so the gate is inconclusive."],
     insufficient_pairs: ["可配对样本数不足，无法作出可靠门禁判断。", "Too few paired cases to support a reliable gate decision."],
     insufficient_complete_cases: ["完整重复覆盖的 case 不足，缺失样本不能按失败或成功补齐。", "Too few cases have complete repetition coverage; missing trials cannot be filled as successes or failures."],
     degenerate_interval: ["统计区间上下界重合，不能据此宣称稳定或门禁通过。", "The interval bounds coincide; this does not establish stability or a passing gate."],

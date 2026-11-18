@@ -23,10 +23,13 @@ const RULE_TYPES = [
   "MIN_VALUE",
   "MAX_VALUE",
   "TRADEOFF",
+  "MIN_CI_LOWER_BOUND",
+  "NON_INFERIORITY",
 ] as const;
 
 const TOLERANCE_RULES = new Set(["MAX_ABSOLUTE_REGRESSION", "MAX_RELATIVE_REGRESSION", "TRADEOFF"]);
-const THRESHOLD_RULES = new Set(["MIN_VALUE", "MAX_VALUE"]);
+const PAIRED_RULES = new Set(["MIN_CI_LOWER_BOUND", "NON_INFERIORITY"]);
+const THRESHOLD_RULES = new Set(["MIN_VALUE", "MAX_VALUE", ...PAIRED_RULES]);
 
 type DraftRule = {
   metric: string;
@@ -78,7 +81,8 @@ function buildPolicyJson(
     }
     if (THRESHOLD_RULES.has(rule.rule)) {
       const threshold = Number(rule.threshold);
-      if (rule.threshold.trim() === "" || !Number.isFinite(threshold)) {
+      if (rule.threshold.trim() === "" || !Number.isFinite(threshold) ||
+          (rule.rule === "NON_INFERIORITY" && threshold < 0)) {
         return { error: translate("evaluation.gates.builder.thresholdError") };
       }
       gate.threshold = threshold;
@@ -101,7 +105,7 @@ function buildPolicyJson(
 }
 
 export default function ReleaseGatePoliciesPage() {
-  const { t, formatDateTime } = useI18n();
+  const { t, formatDateTime, locale } = useI18n();
   const { workspaceId, accessToken, connected, sessionId, permissions } =
     useFrontendSession();
   const canManage = permissions?.includes("evaluation_manage") === true;
@@ -263,6 +267,7 @@ export default function ReleaseGatePoliciesPage() {
                     <input
                       required
                       value={rule.metric}
+                      readOnly={PAIRED_RULES.has(rule.rule)}
                       onChange={(e) => updateRule(index, { metric: e.target.value })}
                       spellCheck={false}
                     />
@@ -272,10 +277,17 @@ export default function ReleaseGatePoliciesPage() {
                     {t("evaluation.gates.builder.ruleType")}
                     <Select
                       value={rule.rule}
-                      onChange={(next) => updateRule(index, { rule: next as DraftRule["rule"] })}
+                      onChange={(next) => updateRule(index, {
+                        rule: next as DraftRule["rule"],
+                        metric: PAIRED_RULES.has(next) ? "success_rate_delta" : PAIRED_RULES.has(rule.rule) ? "" : rule.metric,
+                      })}
                       options={RULE_TYPES.map((type) => ({ value: type, label: type }))}
                     />
-                    <span className="state-hint">{t(`evaluation.gates.builder.ruleDescriptions.${rule.rule}` as never)}</span>
+                    <span className="state-hint">{rule.rule === "NON_INFERIORITY"
+                      ? (locale === "zh-CN" ? "输入可接受的成功率损失，例如 0.02 表示 2 个百分点。配对区间下界须达到负的容许值。" : "Enter the permitted success-rate loss, e.g. 0.02 for two percentage points. The paired lower bound must reach the negative of this margin.")
+                      : rule.rule === "MIN_CI_LOWER_BOUND"
+                        ? (locale === "zh-CN" ? "配对成功率变化的 95% 置信区间下界须达到阈值，例如 0.02 表示提高 2 个百分点。" : "The lower 95% confidence bound on the paired success-rate change must reach the threshold, e.g. 0.02 for a two-point gain.")
+                        : t(`evaluation.gates.builder.ruleDescriptions.${rule.rule}` as never)}</span>
                   </label>
                   {TOLERANCE_RULES.has(rule.rule) && (
                     <label>

@@ -640,6 +640,22 @@ export type EvaluationComparison = {
   created_at: string;
 };
 
+export type PairedSuccessReport = {
+  pair_count: number;
+  planned_repetitions: number;
+  missing_repetitions: number;
+  delta: number | null;
+  interval: {lower: number; upper: number} | null;
+  cases: Array<{
+    case_key: string; delta: number | null; matched_repetitions: number;
+    planned_repetitions: number; baseline_missing: number; candidate_missing: number;
+  }>;
+};
+
+export function getPairedSuccess(input: AuthInput, runId: string, comparisonId: string): Promise<PairedSuccessReport> {
+  return get(input, `/experiment-runs/${encodeURIComponent(runId)}/comparisons/${encodeURIComponent(comparisonId)}/paired-success`);
+}
+
 export function listExperimentComparisons(input: AuthInput, runId: string): Promise<EvaluationComparison[]> {
   return get(input, `/experiment-runs/${encodeURIComponent(runId)}/comparisons`);
 }

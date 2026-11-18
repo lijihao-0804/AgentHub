@@ -37,6 +37,7 @@ from apps.api.schemas.evaluation import (
     EvaluationReleaseGateDecisionResponse,
     EvaluationReleaseGatePolicyCreateRequest,
     EvaluationReleaseGatePolicyResponse,
+    PairedSuccessResponse,
     PricingSnapshotCreateRequest,
     PricingSnapshotResponse,
 )
@@ -873,6 +874,28 @@ async def get_experiment_comparison(
         comparison_id=comparison_id,
     )
     return EvaluationComparisonResponse.model_validate(comparison, from_attributes=True)
+
+
+@router.get(
+    "/experiment-runs/{run_id}/comparisons/{comparison_id}/paired-success",
+    response_model=PairedSuccessResponse,
+)
+async def get_comparison_paired_success(
+    workspace_id: UUID,
+    run_id: UUID,
+    comparison_id: UUID,
+    context: WorkspaceExecutionContext = context_dependency,
+    session: AsyncSession = db_session_dependency,
+) -> dict[str, Any]:
+    del workspace_id
+    comparison = await EvaluationMetricsService().get_comparison(
+        session, context=context, run_id=run_id, comparison_id=comparison_id
+    )
+    return await EvaluationStatisticsService().paired_comparison(
+        session, context=context, run_id=run_id,
+        baseline_variant_id=comparison.baseline_variant_id,
+        candidate_variant_id=comparison.candidate_variant_id,
+    )
 
 
 @router.post(

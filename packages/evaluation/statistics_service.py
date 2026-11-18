@@ -196,52 +196,39 @@ class EvaluationStatisticsService:
         experiment = await metrics_service._load_experiment(
             session, workspace_id, run.experiment_id
         )
-        registry = self.registry.for_manifest(experiment.evaluator_manifest)
+        try:
+            registry = self.registry.for_manifest(experiment.evaluator_manifest)
+        except ValueError:
+            raise AgentHubError(
+                "EXPERIMENT_EVALUATOR_VERSION_MISMATCH",
+                "The persisted evaluator manifest is not compatible.",
+                409,
+            ) from None
         rows = await metrics_service._load_and_validate_case_set(
             session, workspace_id, run, experiment
         )
 
-        per_variant: dict[UUID, dict[str, list[float]]] = {}
+        trials: dict[str, dict[int, dict[UUID, float | None]]] = {}
         for case, item, variant in rows:
-            evaluated = registry.evaluate(item.category, item.expected, case.observation)
-            task = evaluated.get("task_success")
-            value: float | None = None
-            if (
-                task is not None
-                and task.status == MetricStatus.AVAILABLE
-                and task.value is not None
-            ):
-                value = float(task.value)
-            per_variant.setdefault(variant.id, {}).setdefault(item.case_key, []).append(
-                value  # type: ignore[arg-type]
+            if variant.id not in {baseline_variant_id, candidate_variant_id}:
+                continue
+            task = registry.evaluate(item.category, item.expected, case.observation).get(
+                "task_success"
             )
+            value = (
+                float(task.value)
+                if task and task.status == MetricStatus.AVAILABLE and task.value is not None
+                else None
+            )
+            trials.setdefault(item.case_key, {}).setdefault(case.repetition_index, {})[
+                variant.id
+            ] = value
 
-        baseline = per_variant.get(baseline_variant_id, {})
-        candidate = per_variant.get(candidate_variant_id, {})
-        pairs: list[tuple[float, float]] = []
-        for case_key in set(baseline).intersection(candidate):
-            baseline_values = [value for value in baseline[case_key] if value is not None]
-            candidate_values = [value for value in candidate[case_key] if value is not None]
-            if baseline_values and candidate_values:
-                pairs.append((mean(baseline_values), mean(candidate_values)))
-        delta = mean([after - before for before, after in pairs]) if pairs else None
-        interval = paired_bootstrap_interval(pairs)
         return {
             "run_id": str(run_id),
             "baseline_variant_id": str(baseline_variant_id),
             "candidate_variant_id": str(candidate_variant_id),
-            "pair_count": len(pairs),
-            "delta": delta,
-            "interval": (
-                {
-                    "method": "paired_bootstrap",
-                    "lower": interval[0],
-                    "upper": interval[1],
-                    "bootstrap_count": 2000,
-                }
-                if interval
-                else None
-            ),
+            **_matched_success(trials, baseline_variant_id, candidate_variant_id),
         }
 
     def _require_read(self, context: WorkspaceExecutionContext) -> None:
@@ -253,6 +240,62 @@ class EvaluationStatisticsService:
             return UUID(context.workspace_id)
         except (TypeError, ValueError):
             raise AgentHubError("FORBIDDEN", "Invalid workspace context.", 403) from None
+
+
+def _matched_success(
+    trials: dict[str, dict[int, dict[UUID, float | None]]],
+    baseline: UUID,
+    candidate: UUID,
+) -> dict[str, Any]:
+    cases = []
+    pairs = []
+    missing = 0
+    planned = 0
+    for key in sorted(trials):
+        repetitions = trials[key]
+        matched = []
+        baseline_missing = candidate_missing = 0
+        for scores in repetitions.values():
+            before, after = scores.get(baseline), scores.get(candidate)
+            baseline_missing += before is None
+            candidate_missing += after is None
+            if before is not None and after is not None:
+                matched.append((before, after))
+        planned += len(repetitions)
+        missing += len(repetitions) - len(matched)
+        delta = None
+        if matched:
+            before_mean = mean(before for before, _ in matched)
+            after_mean = mean(after for _, after in matched)
+            pairs.append((before_mean, after_mean))
+            delta = after_mean - before_mean
+        cases.append(
+            {
+                "case_key": key,
+                "delta": delta,
+                "matched_repetitions": len(matched),
+                "planned_repetitions": len(repetitions),
+                "baseline_missing": baseline_missing,
+                "candidate_missing": candidate_missing,
+            }
+        )
+    interval = paired_bootstrap_interval(pairs)
+    return {
+        "method_version": "matched_repetitions_v1",
+        "pair_count": len(pairs),
+        "planned_repetitions": planned,
+        "missing_repetitions": missing,
+        "delta": mean(after - before for before, after in pairs) if pairs else None,
+        "interval": {
+            "method": "paired_bootstrap",
+            "lower": interval[0],
+            "upper": interval[1],
+            "bootstrap_count": 2000,
+        }
+        if interval
+        else None,
+        "cases": cases,
+    }
 
 
 def _interval(values: list[float]) -> dict[str, Any] | None:

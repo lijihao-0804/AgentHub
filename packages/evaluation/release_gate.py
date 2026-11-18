@@ -189,7 +189,6 @@ class EvaluationReleaseGateService:
             return existing
 
         statistics: Mapping[str, Any] | None = None
-        statistics: Mapping[str, Any] | None = None
         rule_names = {rule["rule"] for rule in policy.policy_json["rules"]}
         needs_statistics = bool(
             rule_names & {"MIN_PASS_HAT_K", "MIN_CI_LOWER_BOUND", "NON_INFERIORITY"}
@@ -460,6 +459,10 @@ class EvaluationReleaseGateService:
                 continue
             if rule["rule"] in {"MIN_CI_LOWER_BOUND", "NON_INFERIORITY"}:
                 result = self._evaluate_paired_interval(rule, statistics)
+                if statistics and isinstance(statistics.get("paired"), Mapping):
+                    paired = statistics["paired"]
+                    if paired.get("method_version"):
+                        result["method_version"] = paired["method_version"]
                 rule_results.append(result)
                 if result["status"] == "FAIL" and rule.get("required", True):
                     hard_fail = True
@@ -509,6 +512,16 @@ class EvaluationReleaseGateService:
                 "reason": "statistics_unavailable",
             }
         paired = statistics.get("paired")
+        if isinstance(paired, Mapping) and paired.get("missing_repetitions"):
+            return {
+                "metric": rule["metric"],
+                "rule": rule["rule"],
+                "status": "INCONCLUSIVE",
+                "reason": "incomplete_paired_repetitions",
+                "pair_count": paired["pair_count"],
+                "missing_repetitions": paired["missing_repetitions"],
+                "planned_repetitions": paired["planned_repetitions"],
+            }
         if not isinstance(paired, Mapping) or not isinstance(paired.get("interval"), Mapping):
             return {
                 "metric": rule["metric"],

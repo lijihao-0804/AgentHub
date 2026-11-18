@@ -381,6 +381,35 @@ class EvaluationComparisonCreateRequest(BaseModel):
     candidate_variant_id: UUID
 
 
+class PairedSuccessCase(BaseModel):
+    case_key: str
+    delta: float | None
+    matched_repetitions: int
+    planned_repetitions: int
+    baseline_missing: int
+    candidate_missing: int
+
+
+class PairedSuccessInterval(BaseModel):
+    method: Literal["paired_bootstrap"]
+    lower: float
+    upper: float
+    bootstrap_count: int
+
+
+class PairedSuccessResponse(BaseModel):
+    run_id: UUID
+    baseline_variant_id: UUID
+    candidate_variant_id: UUID
+    method_version: Literal["matched_repetitions_v1"]
+    pair_count: int
+    planned_repetitions: int
+    missing_repetitions: int
+    delta: float | None
+    interval: PairedSuccessInterval | None
+    cases: list[PairedSuccessCase]
+
+
 class EvaluationComparisonResponse(BaseModel):
     model_config = ConfigDict(extra="forbid", from_attributes=True)
 

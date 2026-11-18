@@ -10,6 +10,7 @@ from alembic import command
 from alembic.config import Config
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
+from apps.api.app import create_app
 from packages.agent_runtime.models import AgentVersion
 from packages.core.canonical.json_hash import canonical_json_hash
 from packages.core.config.settings import Settings, get_settings
@@ -23,6 +24,7 @@ from packages.evaluation.models import EvaluationExperimentRun
 from packages.evaluation.release_gate import EvaluationReleaseGateService
 from packages.evaluation.runner import CaseExecutionObservation, ExperimentRunner
 from packages.evaluation.service import EvaluationDatasetService
+from tests.integration.test_ae10_evidence_view import _client
 from tests.integration.test_m4c_agent_runtime import _seed
 from tests.integration.test_m7b_experiments import (
     _item,
@@ -95,7 +97,7 @@ class _CountingDriver:
         )
 
 
-async def _release_run(session: AsyncSession, base: dict[str, object]):
+async def _release_run(session: AsyncSession, base: dict[str, object], case_keys=("holdout",)):
     context = _manager_context(base)
     dataset = await EvaluationDatasetService().create_dataset(
         session, context=context, name=f"m7ef-{uuid4().hex}"
@@ -104,7 +106,7 @@ async def _release_run(session: AsyncSession, base: dict[str, object]):
         session,
         context=context,
         dataset_id=dataset.id,
-        items=[_item("holdout", split="HOLDOUT", ordinal=0)],
+        items=[_item(key, split="HOLDOUT", ordinal=i) for i, key in enumerate(case_keys)],
     )
     await EvaluationDatasetService().publish_version(
         session, context=context, dataset_id=dataset.id, version_id=dataset_version.id
@@ -185,6 +187,32 @@ async def test_m7ef_persisted_ablation_to_release_gate_chain_and_scope(db_factor
             baseline_variant_id=baseline.id,
             candidate_variant_id=candidate.id,
         )
+        settings = Settings(testing=True)
+        app = create_app(settings)
+        app.state.db_session_factory = db_factory
+        path = (
+            f"/api/v1/workspaces/{base['workspace_id']}/evaluation/experiment-runs/{run.id}"
+            f"/comparisons/{comparison.id}/paired-success"
+        )
+        async with _client(app, base["user"].id, settings) as client:
+            response = await client.get(path)
+            assert response.status_code == 200, response.text
+            report = response.json()
+            assert report["pair_count"] == 1
+            assert report["delta"] == 0
+            assert report["cases"] == [
+                {
+                    "case_key": "holdout",
+                    "delta": 0,
+                    "matched_repetitions": 1,
+                    "planned_repetitions": 1,
+                    "baseline_missing": 0,
+                    "candidate_missing": 0,
+                }
+            ]
+            assert (await client.get(path)).json() == report
+            wrong_scope = path.replace(str(base["workspace_id"]), str(uuid4()))
+            assert (await client.get(wrong_scope)).status_code in {403, 404}
         ablation_service = EvaluationAblationService()
         ablation = await ablation_service.create_ablation(
             session, context=context, run_id=run.id, comparison_id=comparison.id
@@ -281,3 +309,78 @@ async def test_m7ef_persisted_ablation_to_release_gate_chain_and_scope(db_factor
                 policy_id=policy.id,
             )
         assert read_integrity.value.code == "EVALUATION_COMPARISON_INTEGRITY_ERROR"
+
+
+class _MixedEvidenceDriver(_CountingDriver):
+    async def execute(self, session, *, run, variant, item):
+        result = await super().execute(session, run=run, variant=variant, item=item)
+        if (variant.label, item.case_key) in {("baseline", "gain"), ("candidate", "loss")}:
+            result.observation["final_chunk_ids"] = []
+        if variant.label == "candidate" and item.case_key == "unknown":
+            del result.observation["final_chunk_ids"]
+        return result
+
+
+@pytest.mark.asyncio
+async def test_paired_success_real_api_reports_regressions_and_blocks_partial_gate(db_factory):
+    settings = Settings(testing=True)
+    async with db_factory() as session:
+        base = await _seed(session, label=f"paired-{uuid4().hex}")
+        run, baseline, candidate, _ = await _release_run(
+            session, base, ("gain", "loss", "unknown", "tie")
+        )
+    await ExperimentRunner(db_factory, driver=_MixedEvidenceDriver()).execute(
+        run_id=run.id, owner="paired-worker", settings=settings
+    )
+    app = create_app(settings)
+    app.state.db_session_factory = db_factory
+    root = f"/api/v1/workspaces/{base['workspace_id']}/evaluation"
+    run_path = f"{root}/experiment-runs/{run.id}"
+    async with _client(app, base["user"].id, settings) as client:
+        assert (await client.post(run_path + "/metrics")).is_success
+        comparison = await client.post(
+            run_path + "/comparisons",
+            json={
+                "baseline_variant_id": str(baseline.id),
+                "candidate_variant_id": str(candidate.id),
+            },
+        )
+        assert comparison.is_success, comparison.text
+        path = run_path + "/comparisons/" + comparison.json()["id"]
+        response = await client.get(path + "/paired-success")
+        assert response.is_success, response.text
+        report = response.json()
+        assert [(r["case_key"], r["delta"]) for r in report["cases"]] == [
+            ("gain", 1),
+            ("loss", -1),
+            ("tie", 0),
+            ("unknown", None),
+        ]
+        assert report["pair_count"] == 3
+        assert report["missing_repetitions"] == 1 and report["planned_repetitions"] == 4
+        policy = await client.post(
+            root + "/release-gate-policies",
+            json={
+                "name": "paired-coverage",
+                "policy_json": {
+                    "rules": [
+                        {
+                            "metric": "success_rate_delta",
+                            "rule": "NON_INFERIORITY",
+                            "threshold": 0.02,
+                        }
+                    ]
+                },
+            },
+        )
+        assert policy.is_success, policy.text
+        decision = await client.post(
+            path + "/release-gates", json={"policy_id": policy.json()["id"]}
+        )
+        assert decision.is_success, decision.text
+        artifact = decision.json()
+        assert artifact["status"] == "INCONCLUSIVE"
+        assert artifact["rule_results"][0]["reason"] == "incomplete_paired_repetitions"
+        assert artifact["rule_results"][0]["method_version"] == report["method_version"]
+        reread = await client.get(path + "/release-gates/" + policy.json()["id"])
+        assert reread.json() == artifact
