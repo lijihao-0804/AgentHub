@@ -7,6 +7,7 @@ from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from pathlib import Path
 
+from benchmarks.retrieval.experiments.output_limit.cases import digest
 from benchmarks.retrieval.experiments.output_limit.report import money, rate
 
 from .scoring import ARMS, DIRECTORY, ROOT, STAGES, lines, load, save
@@ -214,7 +215,19 @@ def main():
     d = args.directory
     results = lines(d / "outcomes.jsonl")
     rows = rows_from(results, load(d / "grades.json"))
-    save(d / "aggregate.json", build(rows, results))
+    report = build(rows, results)
+    account = load(d / "account.json")
+    if (
+        account["outcomes_sha"] != digest(results)
+        or account["freeze_sha"] != digest(load(d / "freeze.json"))
+        or account["new_unknown"] != 0
+        or account["new_physical"] != report["actual_live_receipts"]
+        or account["new_cost_cny"] != report["actual_live_cost_cny"]
+        or account["remaining_cny"] != report["remaining_cny"]
+    ):
+        raise ValueError("Independent receipt reconciliation differs from the closed account")
+    report["account"] = account
+    save(d / "aggregate.json", report)
     (d / "row-status.jsonl").write_text(
         "".join(json.dumps(r, ensure_ascii=False, separators=(",", ":")) + "\n" for r in rows),
         encoding="utf8",
