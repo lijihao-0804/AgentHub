@@ -203,13 +203,18 @@ def check_grammar_log(path, offset, expected_calls=1):
         raise RuntimeError("Local server log does not reconcile the measured request count.")
 
 
-async def model_profile(factory, workspace_id, generator):
+async def model_profile(factory, workspace_id, generator, *, route=None, cipher=None):
     async with factory() as session:
         credential = ProviderCredential(
-            workspace_id=workspace_id, provider="offline", name="local-table-qa"
+            workspace_id=workspace_id,
+            provider=route.provider if route else "offline",
+            base_url=route.base_url if route else None,
+            name="table-qa",
         )
         encrypt_provider_credential_secret(
-            credential, "unused-offline-fixture", cipher=ProviderCredentialCipher.from_settings()
+            credential,
+            route.api_key if route else "unused-offline-fixture",
+            cipher=cipher or ProviderCredentialCipher.from_settings(),
         )
         session.add(credential)
         await session.flush()

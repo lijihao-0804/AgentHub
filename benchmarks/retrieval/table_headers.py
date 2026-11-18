@@ -7,6 +7,7 @@ import asyncio
 import json
 import os
 import re
+import secrets
 import tempfile
 from contextlib import nullcontext
 from pathlib import Path
@@ -27,6 +28,7 @@ from apps.api.knowledge_dependencies import (
 )
 from apps.worker.tasks.knowledge import _process_knowledge_ingestion
 from benchmarks.retrieval.revision_reuse import InlineQueue, arm_context, digest, git, post
+from benchmarks.retrieval.table_header_cloud_qa import CloudTableMeter
 from benchmarks.retrieval.table_header_local_qa import (
     GGUFGenerator,
     LocalGenerator,
@@ -42,6 +44,7 @@ from packages.knowledge.adapters.qdrant import QdrantVectorIndex
 from packages.knowledge.adapters.reranker import BgeReranker
 from packages.knowledge.adapters.sparse import BgeM3SparseEncoder
 from packages.knowledge.composition import RetrievalComponents
+from packages.model_gateway.credentials import ProviderCredentialCipher
 
 PROTOCOL = Path(__file__).with_name("table_header_protocol.json")
 
@@ -86,8 +89,17 @@ async def arm(settings, factory, models, payload, cases, contexts, generator):
     base = f"/api/v1/workspaces/{context.workspace_id}/knowledge-bases"
     if generator is not None:
         app.dependency_overrides[get_query_workspace_context] = lambda: context
-        app.dependency_overrides[get_citation_qa_generator] = lambda: generator
-        profile = await model_profile(factory, context.workspace_id, generator)
+        if isinstance(generator, CloudTableMeter):
+            profile = await model_profile(
+                factory,
+                context.workspace_id,
+                generator,
+                route=generator.route,
+                cipher=ProviderCredentialCipher.from_settings(settings),
+            )
+        else:
+            app.dependency_overrides[get_citation_qa_generator] = lambda: generator
+            profile = await model_profile(factory, context.workspace_id, generator)
     results = []
     try:
         async with httpx.AsyncClient(
@@ -176,11 +188,17 @@ async def arm(settings, factory, models, payload, cases, contexts, generator):
                             c["document_revision_id"] == uploaded["revision"]["id"]
                             for c in generated.json()["citations"]
                         )
+                    if isinstance(generator, CloudTableMeter) and (
+                        generator.halted or generator.calls == before
+                    ):
+                        raise RuntimeError("Cloud QA stopped before a confirmed provider result.")
                     results[-1]["generated"] = {
                         **score(generated, gold, citation),
                         "calls": generator.calls - before,
                         "output_shapes": generator.output_shapes[before:],
                     }
+                    if isinstance(generator, CloudTableMeter):
+                        results[-1]["generated"]["receipts"] = generator.receipts[before:]
     finally:
         index.close()
     return results
@@ -222,6 +240,10 @@ async def run(args):
     )
     if args.gguf:
         generator = GGUFGenerator(args.gguf, args.short_decoder_schema)
+    if args.aliyun_ledger:
+        if args.include_citation_examples or args.diagnostics or args.output_mode != "PROMPT_JSON":
+            raise ValueError("Cloud QA uses the production prompt and publishes scores only.")
+        generator = CloudTableMeter(args.aliyun_ledger)
     log_offset = None
     if args.short_decoder_schema:
         if not args.gguf or not args.server_log:
@@ -250,7 +272,8 @@ async def run(args):
             if args.include_citation_examples
             else nullcontext()
         )
-        with tempfile.TemporaryDirectory() as temp, prompt_override:
+        meter = generator.measure() if isinstance(generator, CloudTableMeter) else nullcontext()
+        with tempfile.TemporaryDirectory() as temp, prompt_override, meter:
             old = Path(temp) / "baseline-parser"
             # Only the baseline parser package is materialized. The real worker executes both
             # parser implementations in its normal killable subprocess on the identical upload.
@@ -282,6 +305,9 @@ async def run(args):
                 knowledge_chunk_overlap_chars=200,
                 knowledge_superseded_rank_penalty=0.0,
             )
+            if args.aliyun_ledger:
+                # The lab's persisted credential can only be opened during this run.
+                settings.credential_master_key = secrets.token_urlsafe(32)
             with patch("packages.knowledge.parser._PROJECT_ROOT", str(old)):
                 result["arms"]["baseline"] = await arm(
                     settings,
@@ -325,6 +351,11 @@ if __name__ == "__main__":
     parser.add_argument("--diagnostics", type=Path)
     model = parser.add_mutually_exclusive_group()
     model.add_argument("--answer-model", type=Path)
+    model.add_argument(
+        "--aliyun-ledger",
+        type=Path,
+        help="Dispatch paid requests on the configured Beijing route using a fresh ledger.",
+    )
     model.add_argument(
         "--gguf", type=Path, help="Pinned 3B GGUF served by local llama.cpp b7550 on port 56423."
     )

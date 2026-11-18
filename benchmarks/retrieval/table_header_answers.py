@@ -28,7 +28,7 @@ MAX_OUTPUT = 96
 RESERVE = Decimal("0.009")
 
 
-def receipt_cost(body, model):
+def receipt_cost(body, model, *, max_input=MAX_INPUT, max_output=MAX_OUTPUT):
     """Calculate Beijing DeepSeek Flash tariff from reported usage, including cache hits."""
     usage = body.get("usage") or {}
     prompt, completion = usage.get("prompt_tokens"), usage.get("completion_tokens")
@@ -41,9 +41,9 @@ def receipt_cost(body, model):
         or type(prompt) is not int
         or type(completion) is not int
         or type(cached) is not int
-        or not 0 <= cached <= prompt <= MAX_INPUT
+        or not 0 <= cached <= prompt <= max_input
         or prompt == 0
-        or not 0 <= completion <= MAX_OUTPUT
+        or not 0 <= completion <= max_output
         or usage.get("total_tokens") != prompt + completion
     ):
         raise ValueError("Incomplete usage, tariff timestamp or model identity.")
@@ -167,7 +167,8 @@ def run(args):
     args.output.write_text(
         json.dumps(
             {"model": route.model, "contexts_sha256": evidence_hash, "cases": summary}, indent=2
-        ) + "\n",
+        )
+        + "\n",
         encoding="utf8",
     )
 
