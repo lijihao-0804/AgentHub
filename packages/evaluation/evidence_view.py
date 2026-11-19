@@ -28,7 +28,7 @@ from packages.evaluation.models import (
     InteractiveEpisode,
     InteractiveEpisodeTurn,
 )
-from packages.evaluation.taxonomy import classify_failure
+from packages.evaluation.taxonomy import case_failure_labels
 
 EVIDENCE_VIEW_SCHEMA_VERSION = 1
 _UNSET = object()
@@ -354,6 +354,7 @@ def build_evidence_view(
         ),
         "steps": projected_steps,
         "failure_labels": _project_failure_labels(
+            category=category,
             observation=observation,
             expected=expected,
             task_success=task_success_value,
@@ -924,14 +925,13 @@ def _proposal_hash(
 
 def _project_failure_labels(
     *,
+    category: str | None,
     observation: Mapping[str, Any],
     expected: Mapping[str, Any],
     task_success: bool | None,
     steps: Sequence[Mapping[str, Any]],
 ) -> list[dict[str, Any]]:
-    labels = observation.get("failure_taxonomy")
-    if not isinstance(labels, list):
-        labels = classify_failure(expected, observation, task_success=task_success)
+    labels = case_failure_labels(category, expected, observation, task_success=task_success)
 
     index_to_order = _trajectory_index_to_step_order(observation)
     step_order_counts: dict[int, int] = {}

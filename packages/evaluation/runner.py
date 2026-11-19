@@ -424,7 +424,11 @@ class AgentRuntimeEvaluationDriver:
                 "observed_agent_failure_code": result.failure_code,
                 "model_step_count": result.model_step_count,
                 "tool_call_count": result.tool_call_count,
-                "output_hash": canonical_json_hash(result.final_output or ""),
+                "output_hash": (
+                    canonical_json_hash(result.final_output)
+                    if result.final_output is not None
+                    else None
+                ),
                 "variant_hash": variant.variant_hash,
             }
             trajectory_steps = [

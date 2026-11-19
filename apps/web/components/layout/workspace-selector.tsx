@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 
 import { useI18n } from "@/i18n/provider";
 import { useMenuKeyboardNav } from "@/components/layout/menu-keyboard";
@@ -22,6 +22,7 @@ export default function WorkspaceSelector() {
     organizationId,
     tenancyLoading,
     tenancyError,
+    reloadTenancy,
     setActiveWorkspace,
     panelOpen,
     openPanel,
@@ -101,9 +102,14 @@ export default function WorkspaceSelector() {
         <div className="ws-menu" role="menu" aria-label={t("workspace.selectWorkspace")}>
           {tenancyLoading && <p className="ws-menu-empty">{t("common.loading")}</p>}
           {tenancyError && (
-            <p className="ws-menu-empty" role="alert">
-              {errorText(tenancyError.code, tenancyError.message || t("errors.loadWorkspaces"))}
-            </p>
+            <>
+              <p className="ws-menu-empty" role="alert">
+                {errorText(tenancyError.code, tenancyError.message || t("errors.loadWorkspaces"))}
+              </p>
+              <button type="button" role="menuitem" className="ws-menu-item" onClick={() => void reloadTenancy()}>
+                {t("common.retry")}
+              </button>
+            </>
           )}
           {!tenancyLoading && !tenancyError && workspaces.length === 0 && (
             <p className="ws-menu-empty">{t("workspace.noWorkspaces")}</p>

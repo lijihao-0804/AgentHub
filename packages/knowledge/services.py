@@ -136,6 +136,14 @@ class KnowledgeService:
                 )
                 session.add(document)
                 await session.flush()
+            else:
+                # Take the per-document allocation lock after streaming the blob.
+                # The next SELECT then sees the previous uploader's committed number.
+                await session.execute(
+                    select(Document.id)
+                    .where(Document.id == document.id)
+                    .with_for_update(key_share=True)
+                )
 
             latest_revision = await session.scalar(
                 select(DocumentRevision.revision_number)
@@ -357,6 +365,8 @@ class KnowledgeService:
         job.lease_token = None
         job.lease_expires_at = None
         job.next_attempt_at = None
+        job.last_error_code = None
+        job.safe_error_message = None
         revision.ingestion_status = RevisionIngestionStatus.PENDING
         await session.commit()
         try:

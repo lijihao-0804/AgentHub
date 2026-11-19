@@ -19,18 +19,29 @@ from packages.core.errors.exceptions import AgentHubError
 from packages.core.execution_context.models import WorkspaceExecutionContext
 from packages.evaluation.metrics import EvaluatorRegistry, MetricStatus
 from packages.evaluation.metrics_service import EvaluationMetricsService
+from packages.evaluation.models import EvaluationExperiment
 from packages.evaluation.statistics import (
     TrialOutcome,
     cluster_bootstrap_interval,
     paired_bootstrap_interval,
     statistical_summary,
 )
-from packages.evaluation.taxonomy import TAXONOMY_VERSION, classify_failure, summarize_labels
+from packages.evaluation.taxonomy import TAXONOMY_VERSION, case_failure_labels, summarize_labels
 
 
 class EvaluationStatisticsService:
     def __init__(self, registry: EvaluatorRegistry | None = None) -> None:
         self.registry = registry or EvaluatorRegistry()
+
+    def _registry_for_experiment(self, experiment: EvaluationExperiment) -> EvaluatorRegistry:
+        try:
+            return self.registry.for_manifest(experiment.evaluator_manifest)
+        except ValueError:
+            raise AgentHubError(
+                "EXPERIMENT_EVALUATOR_VERSION_MISMATCH",
+                "The persisted evaluator manifest is not compatible.",
+                409,
+            ) from None
 
     async def compute(
         self,
@@ -46,14 +57,7 @@ class EvaluationStatisticsService:
         experiment = await metrics_service._load_experiment(
             session, workspace_id, run.experiment_id
         )
-        try:
-            registry = self.registry.for_manifest(experiment.evaluator_manifest)
-        except ValueError:
-            raise AgentHubError(
-                "EXPERIMENT_EVALUATOR_VERSION_MISMATCH",
-                "The persisted evaluator manifest is not compatible.",
-                409,
-            ) from None
+        registry = self._registry_for_experiment(experiment)
         rows = await metrics_service._load_and_validate_case_set(
             session, workspace_id, run, experiment
         )
@@ -128,7 +132,7 @@ class EvaluationStatisticsService:
         experiment = await metrics_service._load_experiment(
             session, workspace_id, run.experiment_id
         )
-        registry = self.registry.for_manifest(experiment.evaluator_manifest)
+        registry = self._registry_for_experiment(experiment)
         rows = await metrics_service._load_and_validate_case_set(
             session, workspace_id, run, experiment
         )
@@ -144,11 +148,9 @@ class EvaluationStatisticsService:
                 and task.value is not None
             ):
                 task_success = float(task.value) >= 1.0
-            labels = case.observation.get("failure_taxonomy")
-            if not isinstance(labels, list):
-                labels = classify_failure(
-                    item.expected, case.observation, task_success=task_success
-                )
+            labels = case_failure_labels(
+                item.category, item.expected, case.observation, task_success=task_success
+            )
             bucket = per_variant.setdefault(
                 variant.id,
                 {
@@ -196,14 +198,7 @@ class EvaluationStatisticsService:
         experiment = await metrics_service._load_experiment(
             session, workspace_id, run.experiment_id
         )
-        try:
-            registry = self.registry.for_manifest(experiment.evaluator_manifest)
-        except ValueError:
-            raise AgentHubError(
-                "EXPERIMENT_EVALUATOR_VERSION_MISMATCH",
-                "The persisted evaluator manifest is not compatible.",
-                409,
-            ) from None
+        registry = self._registry_for_experiment(experiment)
         rows = await metrics_service._load_and_validate_case_set(
             session, workspace_id, run, experiment
         )

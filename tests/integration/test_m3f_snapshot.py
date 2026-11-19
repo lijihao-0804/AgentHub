@@ -14,7 +14,7 @@ import pytest_asyncio
 from alembic import command
 from alembic.config import Config
 from qdrant_client import QdrantClient
-from sqlalchemy import select, update
+from sqlalchemy import select, text, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
@@ -326,6 +326,63 @@ async def test_layout_upload_to_frozen_preview_and_retrieval(
             assert evidence["locator"] == row["locator"]
     finally:
         index.close()
+
+
+@pytest.mark.asyncio
+async def test_overlapping_revision_uploads_both_publish_distinct_numbers(db_factory, tmp_path):
+    bundle = await _seed_bundle(db_factory)
+    settings = Settings(
+        testing=True, database_url=async_database_url(TEST_DATABASE_URL), blob_root=str(tmp_path)
+    )
+    app = create_app(settings)
+    app.state.db_session_factory = db_factory
+    queued: list[UUID] = []
+
+    class Queue:
+        async def enqueue(self, job_id: UUID) -> None:
+            queued.append(job_id)
+
+    app.dependency_overrides[get_ingestion_queue] = Queue
+    path = (
+        f"/api/v1/workspaces/{bundle.workspace_id}/knowledge-bases/{bundle.knowledge_base_id}"
+        f"/documents/{bundle.document_id}/revisions"
+    )
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app=app),
+        base_url="http://test",
+        headers={"Authorization": f"Bearer {issue_access_token(bundle.user_id, settings)}"},
+    ) as client:
+        async with db_factory() as gate:
+            # Pause inserts while allowing reads, so both requests overlap even on fast hosts.
+            await gate.execute(text("LOCK TABLE document_revisions IN SHARE MODE"))
+            writes = asyncio.gather(
+                *(
+                    client.post(path, files={"file": (name, name.encode(), "text/plain")})
+                    for name in ("second.txt", "third.txt")
+                )
+            )
+            blocked_requests = text("""
+                WITH RECURSIVE blocked(pid) AS (
+                    SELECT pg_backend_pid()
+                    UNION
+                    SELECT waiter.pid FROM pg_locks waiter JOIN blocked
+                    ON blocked.pid = ANY(pg_blocking_pids(waiter.pid))
+                    WHERE NOT waiter.granted
+                ) SELECT count(*) - 1 FROM blocked
+            """)
+            try:
+                async with asyncio.timeout(10):
+                    while await gate.scalar(blocked_requests) < 2:
+                        await asyncio.sleep(0.02)
+            finally:
+                await gate.rollback()
+                responses = await writes
+        assert [reply.status_code for reply in responses] == [202, 202], [
+            reply.text for reply in responses
+        ]
+        assert {reply.json()["revision"]["revision_number"] for reply in responses} == {2, 3}
+        assert len(set(queued)) == len(queued) == 2
+        assert set(queued) == {UUID(reply.json()["ingestion_job"]["id"]) for reply in responses}
 
 
 @pytest.mark.asyncio

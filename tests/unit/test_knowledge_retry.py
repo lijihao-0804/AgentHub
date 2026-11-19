@@ -62,6 +62,8 @@ async def test_retry_resets_max_attempt_failed_job_and_clears_lease() -> None:
         lease_token="expired-lease",
         lease_expires_at=datetime.now(UTC),
         next_attempt_at=datetime.now(UTC),
+        last_error_code="MAX_ATTEMPTS_EXCEEDED",
+        safe_error_message="The ingestion job exceeded its retry limit.",
     )
     session = _Session(document, revision, job)
     queue = _Queue()
@@ -81,6 +83,8 @@ async def test_retry_resets_max_attempt_failed_job_and_clears_lease() -> None:
     assert job.lease_token is None
     assert job.lease_expires_at is None
     assert job.next_attempt_at is None
+    assert job.last_error_code is None
+    assert job.safe_error_message is None
     assert session.committed
     assert queue.enqueued == [job_id]
 

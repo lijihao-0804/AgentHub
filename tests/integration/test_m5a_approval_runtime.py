@@ -21,6 +21,7 @@ from packages.approvals import (
     ApprovalReconciliationService,
     ApprovalService,
 )
+from packages.approvals.service import cancel_pending_in_session
 from packages.control_plane.models import AuditLog
 from packages.core.config.settings import get_settings
 from packages.core.database import create_database
@@ -437,7 +438,9 @@ async def test_unknown_outcome_needs_attention_and_resume_does_not_retry(db_fact
 
 
 @pytest.mark.asyncio
-async def test_cancel_waiting_approval_is_terminal_and_not_executable(db_factory) -> None:
+async def test_cancel_waiting_approval_is_terminal_and_not_executable(
+    db_factory, monkeypatch
+) -> None:
     tool_spec = {
         "kind": "builtin",
         "identity": "create_ticket",
@@ -480,12 +483,53 @@ async def test_cancel_waiting_approval_is_terminal_and_not_executable(db_factory
     approval = (await ApprovalService(db_factory).list(context.model_copy(
         update={"permissions": frozenset({"workspace_read"})}
     )))[0]
+    async def fail_before_commit(session, context, run_id):
+        await cancel_pending_in_session(session, context, run_id)
+        raise RuntimeError("interrupted before cancel commit")
+
+    with monkeypatch.context() as patch:
+        patch.setattr(
+            "packages.agent_runtime.runtime_service.cancel_pending_in_session", fail_before_commit
+        )
+        with pytest.raises(RuntimeError, match="interrupted before cancel commit"):
+            await service.cancel(context, run_id=first.run_id)
+    async with db_factory() as session:
+        assert (await session.get(AgentRun, first.run_id)).status == "WAITING_APPROVAL"
+        assert (await session.get(type(approval), approval.id)).decision_status == "PENDING"
+
     cancelled = await service.cancel(context, run_id=first.run_id)
     assert cancelled.status == "CANCELLED"
     async with db_factory() as session:
         persisted = await session.get(type(approval), approval.id)
     assert persisted is not None
     assert persisted.decision_status == ApprovalDecisionStatus.CANCELLED
+
+    # Recreate a historical split commit, then run the periodic worker twice.
+    age = timedelta(days=3650)
+    async with db_factory() as session:
+        historical_run = await session.get(AgentRun, first.run_id)
+        historical_run.started_at = datetime.now(UTC) - age
+        row = await session.get(type(approval), approval.id)
+        row.decision_status = "PENDING"
+        row.decided_at = None
+        row.decided_by = None
+        await session.commit()
+
+    class ExistingCheckpoint:
+        async def has_checkpoint(self, workspace_id, run_id):
+            return True
+
+    worker = ApprovalReconciliationService(db_factory, checkpoint_probe=ExistingCheckpoint())
+    stats = await worker.reconcile_candidates(stale_after_seconds=int(age.total_seconds()))
+    assert stats["errors"] == 0
+    async with db_factory() as session:
+        row = await session.get(type(approval), approval.id)
+        assert row.decision_status == ApprovalDecisionStatus.CANCELLED
+        first_decided_at = row.decided_at
+    await worker.reconcile_candidates(stale_after_seconds=int(age.total_seconds()))
+    async with db_factory() as session:
+        row = await session.get(type(approval), approval.id)
+        assert row.decided_at == first_decided_at
 
 
 class FailIfCalledExecutor:
