@@ -47,6 +47,7 @@ async def citation_qa(
         refusal_prompt=request.app.state.settings.knowledge_qa_refusal_prompt,
         answer_contract_v1=request.app.state.settings.knowledge_qa_answer_contract_v1,
         first_refusal_contract=request.app.state.settings.knowledge_qa_first_refusal_contract,
+        requested_fact_contract=request.app.state.settings.knowledge_qa_requested_fact_contract,
         max_evidence_chars=request.app.state.settings.knowledge_qa_max_evidence_chars,
         min_rerank_score=request.app.state.settings.knowledge_min_rerank_score,
         superseded_rank_penalty=request.app.state.settings.knowledge_superseded_rank_penalty,

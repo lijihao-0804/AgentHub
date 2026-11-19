@@ -97,6 +97,7 @@ class Settings(BaseSettings):
     knowledge_qa_refusal_prompt: bool = False
     knowledge_qa_answer_contract_v1: bool = False
     knowledge_qa_first_refusal_contract: bool = False
+    knowledge_qa_requested_fact_contract: bool = False
     knowledge_ingestion_max_attempts: int = Field(default=3, ge=1, le=100)
     knowledge_ingestion_retry_base_seconds: int = Field(default=30, ge=1, le=86_400)
     knowledge_reconciliation_batch_size: int = Field(default=100, ge=1, le=10_000)
