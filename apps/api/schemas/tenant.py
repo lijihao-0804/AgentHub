@@ -17,6 +17,7 @@ class OrganizationResponse(BaseModel):
 
     id: UUID
     name: str
+    org_role: str
 
 
 class OrganizationMemberCreateRequest(BaseModel):

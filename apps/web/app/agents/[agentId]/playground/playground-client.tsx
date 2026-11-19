@@ -79,7 +79,7 @@ function latestPublished(versions: AgentVersion[]): AgentVersion | null {
 
 export default function AgentPlaygroundClient({ agentId }: { agentId: string }) {
   const { t, formatDurationMs } = useI18n();
-  const { connected, workspaceId, accessToken, sessionId } = useFrontendSession();
+  const { connected, workspaceId, accessToken, sessionId, permissions } = useFrontendSession();
 
   const loadVersions = useCallback((auth: AuthInput) => listAgentVersions(auth, agentId), [agentId]);
   const versions = useWorkspaceData<AgentVersion[]>(
@@ -191,6 +191,9 @@ export default function AgentPlaygroundClient({ agentId }: { agentId: string }) 
   const applyRun = useCallback((run: AgentRun) => {
     setRunId(run.id);
     setRunStatus(run.status);
+    if (run.status !== "WAITING_APPROVAL") {
+      setApproval((current) => current?.decision_status === "PENDING" ? null : current);
+    }
     setFailureCode(run.failure_code);
     setFinalOutput(run.final_output);
     setUsage({
@@ -211,7 +214,7 @@ export default function AgentPlaygroundClient({ agentId }: { agentId: string }) 
       const list = await listRunApprovals(workspaceId, currentRunId, accessToken);
       if (generationRef.current !== generation) return;
       const pending = [...list].reverse().find((item) => item.decision_status === "PENDING") ?? null;
-      if (pending) setApproval(pending);
+      setApproval(pending);
     },
     [workspaceId, accessToken],
   );
@@ -420,7 +423,7 @@ export default function AgentPlaygroundClient({ agentId }: { agentId: string }) 
 
   async function startRun() {
     const text = inputText.trim();
-    if (!text || !selectedVersionId || streaming) return;
+    if (!text || !selectedVersionId || streaming || busy || !permissions?.includes("agent_run")) return;
     abortStream();
     const controller = new AbortController();
     streamRef.current = controller;
@@ -498,7 +501,7 @@ export default function AgentPlaygroundClient({ agentId }: { agentId: string }) 
   }
 
   async function cancelRun() {
-    if (!runId) return;
+    if (!runId || busy || deciding || !permissions?.includes("agent_run")) return;
     const generation = generationRef.current;
     setBusy(true);
     setError(null);
@@ -530,7 +533,7 @@ export default function AgentPlaygroundClient({ agentId }: { agentId: string }) 
   }
 
   async function decide(decision: "approve" | "deny") {
-    if (!approval) return;
+    if (!approval || !permissions?.includes("approve_action") || busy) return;
     const generation = generationRef.current;
     setDeciding(decision);
     setError(null);
@@ -654,8 +657,9 @@ export default function AgentPlaygroundClient({ agentId }: { agentId: string }) 
 
   const selectedVersion = versionList.find((version) => version.id === selectedVersionId) ?? null;
   const displayedOutput = finalOutput ?? assistantOutput;
-  const canRun = Boolean(selectedVersionId) && inputText.trim().length > 0 && !streaming && !busy;
-  const cancellable = runId !== null && (runStatus === "RUNNING" || streaming);
+  const canRun = permissions?.includes("agent_run") && Boolean(selectedVersionId) && inputText.trim().length > 0 && !streaming && !busy;
+  const cancellable = permissions?.includes("agent_run") && runId !== null &&
+    (runStatus === "RUNNING" || runStatus === "WAITING_APPROVAL" || streaming);
   const hintKey = error ? errorHintKey(error) : null;
   // A malformed stream frame is surfaced, never swallowed.
   const errorHint = hintKey
@@ -786,7 +790,7 @@ export default function AgentPlaygroundClient({ agentId }: { agentId: string }) 
                   type="button"
                   className="button button-ghost"
                   onClick={() => void cancelRun()}
-                  disabled={busy}
+                  disabled={busy || deciding !== null}
                 >
                   {t("agents.playground.cancel")}
                 </button>
@@ -876,7 +880,7 @@ export default function AgentPlaygroundClient({ agentId }: { agentId: string }) 
                   type="button"
                   className="button button-ghost"
                   onClick={() => void decide("deny")}
-                  disabled={deciding !== null}
+                  disabled={deciding !== null || busy || !permissions?.includes("approve_action")}
                 >
                   {deciding === "deny" ? t("approvals.card.denying") : t("approvals.card.deny")}
                 </button>
@@ -884,7 +888,7 @@ export default function AgentPlaygroundClient({ agentId }: { agentId: string }) 
                   type="button"
                   className="button button-primary"
                   onClick={() => void decide("approve")}
-                  disabled={deciding !== null}
+                  disabled={deciding !== null || busy || !permissions?.includes("approve_action")}
                 >
                   {deciding === "approve" ? t("approvals.card.approving") : t("approvals.card.approve")}
                 </button>

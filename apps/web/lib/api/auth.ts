@@ -11,6 +11,8 @@ import { publicApiRequest } from "@/lib/api/client";
  */
 
 const AUTH_BASE = "/api/v1/auth";
+const REFRESH_LOCK = "agenthub.auth.refresh";
+let refreshInFlight: Promise<AuthSessionResponse> | null = null;
 
 export type AuthSessionResponse = {
   user_id: string;
@@ -48,7 +50,18 @@ export function login(input: LoginInput): Promise<AuthSessionResponse> {
  * callers present it as UNAUTHENTICATED rather than an error state.
  */
 export function refresh(): Promise<AuthSessionResponse> {
-  return publicApiRequest<AuthSessionResponse>(`${AUTH_BASE}/refresh`, { method: "POST", body: {} });
+  if (refreshInFlight) return refreshInFlight;
+
+  const exchange = () => publicApiRequest<AuthSessionResponse>(`${AUTH_BASE}/refresh`, {
+    method: "POST", body: {},
+  });
+  // Same-origin tabs share one rotating cookie. Start the network request only
+  // after the previous tab's response (including Set-Cookie) has completed.
+  // Each tab obtains its own access token without putting it in shared storage.
+  const locks = typeof navigator === "undefined" ? undefined : navigator.locks;
+  const exchangeResult = locks ? locks.request(REFRESH_LOCK, exchange) : exchange();
+  refreshInFlight = exchangeResult.finally(() => { refreshInFlight = null; });
+  return refreshInFlight;
 }
 
 export function logout(): Promise<unknown> {

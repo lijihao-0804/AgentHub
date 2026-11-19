@@ -1,5 +1,6 @@
 "use client";
 
+import { canCreateWorkspaceIn } from "@/lib/api/tenancy";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
@@ -120,13 +121,14 @@ export function SessionRequired({ contextKey }: { contextKey?: MessageKey }) {
   }
 
   if (workspaces.length === 0) {
+    const hasManageableOrganization = organizations.some(canCreateWorkspaceIn);
     return (
       <div className="state-block state-session">
         <p className="state-title">{t("workspace.noWorkspaces")}</p>
         <Link className="button button-primary" href={
-          organizations.length ? "/settings#create-workspace" : "/settings#create-organization"
+          hasManageableOrganization ? "/settings#create-workspace" : "/settings#create-organization"
         }>
-          {t(organizations.length ? "workspace.createWorkspace" : "settings.createOrganization")}
+          {t(hasManageableOrganization ? "workspace.createWorkspace" : "settings.createOrganization")}
         </Link>
       </div>
     );

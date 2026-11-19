@@ -6,7 +6,7 @@ from uuid import uuid4
 import pytest
 from pydantic import ValidationError
 
-from apps.api.schemas.agents import RetrievalConfigRequest
+from apps.api.schemas.agents import AgentPatchRequest, RetrievalConfigRequest
 from apps.api.schemas.knowledge import RetrievalPlaygroundRequest
 from packages.agent_runtime.publish import _resolved_spec, _validate_retrieval_config
 from packages.core.errors.exceptions import AgentHubError
@@ -23,6 +23,13 @@ from packages.tools.contracts import (
     ToolExecutionContext,
     ToolRisk,
 )
+
+
+@pytest.mark.parametrize("strategy", ["DENSE", "HYBRID", "HYBRID_RERANK"])
+def test_published_retrieval_config_can_be_applied_to_a_draft(strategy: str) -> None:
+    published = _validate_retrieval_config({"retrieval_strategy": strategy})
+    patch = AgentPatchRequest.model_validate({"retrieval_config": published})
+    assert patch.model_dump(mode="json", exclude_unset=True)["retrieval_config"] == published
 
 
 def test_playground_schema_accepts_budget_boundaries_and_rejects_invalid_values() -> None:

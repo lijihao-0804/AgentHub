@@ -265,8 +265,72 @@ function testLabeledSelect() {
   console.log('PASS labeled select closes after a pointer selection and returns focus to its trigger');
 }
 
-// Run against a running local web app with --shell-browser URL.
-// PLAYWRIGHT_MODULE_PATH can point to a separately installed Playwright.
+// --auth-tabs URL ACCOUNT_FILE uses the real local API and shared browser cookies.
+async function testConcurrentAuthTabs(baseUrl, accountFile) {
+  const { chromium } = require(process.env.PLAYWRIGHT_MODULE_PATH || 'playwright');
+  const { email, password, workspace_id: workspaceId } = JSON.parse(fs.readFileSync(accountFile, 'utf8'));
+  const browser = await chromium.launch({ channel: process.env.PLAYWRIGHT_CHANNEL || 'msedge' });
+  try {
+    const context = await browser.newContext({ locale: 'en-US' });
+    const start = await context.newPage();
+    await start.goto(new URL('/login', baseUrl).href);
+    await start.locator('[name=email]').fill(email);
+    await start.locator('[name=password]').fill(password);
+    await start.locator('button[type=submit]').click();
+    await start.locator('.ws-selector-trigger').waitFor();
+    await context.addInitScript(id => {
+      localStorage.setItem('agenthub.workspaceId', id);
+      localStorage.setItem('agenthub.locale', 'en-US');
+    }, workspaceId);
+    const paths = ['/support/records', '/runs', '/approvals'];
+    const pages = await Promise.all(paths.map(() => context.newPage()));
+    const responses = [];
+    let active = 0, maxActive = 0;
+    for (const page of pages) {
+      page.on('request', req => {
+        if (new URL(req.url()).pathname === '/api/v1/auth/refresh') {
+          active++;
+          maxActive = Math.max(maxActive, active);
+        }
+      });
+      page.on('response', res => {
+        if (new URL(res.url()).pathname === '/api/v1/auth/refresh') {
+          responses.push(res.status());
+          active--;
+        }
+      });
+    }
+    // Stretch the contention window without inspecting or replacing the real
+    // authenticated request or response. All three pages share one cookie jar.
+    await context.route('**/api/v1/auth/refresh', async route => {
+      await new Promise(resolve => setTimeout(resolve, 150));
+      await route.continue();
+    });
+    const buttons = ['main form[role=search] button[type=submit]', '.runs-toolbar [role=combobox]', 'main details.panel > summary'];
+    for (let round = 0; round < 2; round++) {
+      await Promise.all(pages.map(async (page, index) => {
+        const workspace = page.waitForResponse(r => new URL(r.url()).pathname === '/api/v1/workspaces/' + workspaceId && r.ok());
+        await page.goto(new URL(paths[index], baseUrl).href, { waitUntil: 'domcontentloaded', timeout: 90_000 });
+        await page.locator('.ws-selector-trigger').waitFor();
+        await workspace;
+        const button = page.locator(buttons[index]).first();
+        await button.focus();
+        await page.keyboard.press('Enter');
+        if (index === 1) await page.getByRole('listbox').waitFor();
+        if (index === 2) await page.locator('main details.panel select').waitFor();
+        assert.equal(new URL(page.url()).pathname, paths[index]);
+      }));
+    }
+    assert.equal(responses.length, 6);
+    assert.deepEqual([...new Set(responses)], [200]);
+    assert.equal(maxActive, 1);
+    console.log('PASS six real cookie rotations across two concurrent three-tab navigations, all pages load workspace data and accept keyboard input');
+  } finally {
+    await browser.close();
+  }
+}
+
+// --shell-browser URL exercises UI states using browser-local fixtures.
 async function testShellBrowser(baseUrl) {
   const { chromium } = require(process.env.PLAYWRIGHT_MODULE_PATH || 'playwright');
   const browser = await chromium.launch({ channel: process.env.PLAYWRIGHT_CHANNEL || 'msedge' });
@@ -282,8 +346,12 @@ async function testShellBrowser(baseUrl) {
       agent_id: 'shell-agent', kind: 'support', title: 'Phone conversation',
       created_by: 'shell-user', created_at: '2026-01-01T00:00:00Z', updated_at: '2026-01-01T00:00:00Z' };
     const workspacePath = '/api/v1/workspaces/' + workspace.id;
+    let workspaceAccessUnavailable = false;
     await page.route('**/api/v1/**', async route => {
       const pathname = new URL(route.request().url()).pathname;
+      if (workspaceAccessUnavailable && pathname === workspacePath) {
+        return route.fulfill({ status: 503, json: { error: { code: 'UNAVAILABLE', message: 'Workspace access unavailable' } } });
+      }
       const endpoints = {
         '/api/v1/auth/refresh': { user_id: 'shell-user', access_token: 'test', expires_in: 3600 },
         '/api/v1/organizations': { items: [{ id: 'shell-org', name: 'Shell organization' }] },
@@ -397,6 +465,11 @@ async function testShellBrowser(baseUrl) {
     await page.keyboard.press('Escape');
     assert.ok(await history.evaluate(node => node === document.activeElement));
     assert.equal(await composer.inputValue(), 'Preserve my unsent draft');
+    workspaceAccessUnavailable = true;
+    await page.reload();
+    await composer.waitFor();
+    assert.ok(await composer.isDisabled(), 'an unavailable workspace permission lookup must keep sending disabled');
+    workspaceAccessUnavailable = false;
     authenticated = false;
     await page.reload();
     await page.waitForURL('**/login');
@@ -407,8 +480,43 @@ async function testShellBrowser(baseUrl) {
   }
 }
 
+async function testWorkspaceCreationUsesTargetOrganization() {
+  const writes = [];
+  const tenant = load('lib/api/tenancy.ts');
+  const h = harness({ '@/lib/api/tenancy': {
+    ...tenant, createWorkspace: async (_token, body) => { writes.push(body); return { id: 'first-workspace' }; },
+  } });
+  Object.assign(h.session, {
+    connected: false, organizationId: '', workspaceId: '', workspaces: [], reloadTenancy: async () => {},
+    setActiveWorkspace() {}, organizations: [
+      { id: 'read-only', name: 'Existing org', org_role: 'MEMBER' },
+      { id: 'owned', name: 'New org', org_role: 'OWNER' },
+    ],
+  });
+  const Settings = load('app/settings/page.tsx', h.mocks).default;
+  const workspaceForm = () => elements(h.render(Settings), el => el.props.id === 'create-workspace')[0];
+  workspaceForm();
+  for (const effect of h.effects) effect();
+  let form = workspaceForm();
+  const select = () => elements(form, el => typeof el.props.onChange === 'function' && el.props.options)[0];
+  assert.equal(select().props.value, 'owned');
+  elements(form, el => el.type === 'input')[0].props.onChange({ target: { value: 'First' } });
+  select().props.onChange('read-only');
+  form = workspaceForm();
+  const submit = () => elements(form, el => el.props.type === 'submit')[0];
+  assert.equal(submit().props.disabled, true);
+  await form.props.onSubmit({ preventDefault() {} });
+  assert.deepEqual(writes, []);
+  select().props.onChange('owned');
+  form = workspaceForm();
+  assert.equal(submit().props.disabled, false);
+  await form.props.onSubmit({ preventDefault() {} });
+  assert.deepEqual(writes, [{ organization_id: 'owned', name: 'First' }]);
+  console.log('PASS organization-only onboarding and per-target workspace creation roles');
+}
+
 function testWorkspaceRecoveryEntry() {
-  const view = harness();
+  const view = harness({ '@/lib/api/tenancy': load('lib/api/tenancy.ts') });
   const { SessionRequired, ErrorState } = load('components/ui/states.tsx', view.mocks);
   let retries = 0;
   Object.assign(view.session, {
@@ -422,11 +530,68 @@ function testWorkspaceRecoveryEntry() {
   view.session.tenancyError = null;
   const destination = () => elements(view.render(SessionRequired, {}), item => item.type === 'a')[0].props.href;
   assert.equal(destination(), '/settings#create-organization');
-  view.session.organizations = [{ id: 'org' }];
+  view.session.organizations = [{ id: 'org', org_role: 'MEMBER' }];
+  assert.equal(destination(), '/settings#create-organization');
+  view.session.organizations = [{ id: 'org', org_role: 'OWNER' }];
   assert.equal(destination(), '/settings#create-workspace');
 }
 
+function testModelSettingsRoles() {
+  const resources = {
+    credentials: [{ id: 'credential', provider: 'openai-compatible', name: 'Test provider', enabled: true }],
+    profiles: [{ id: 'profile', provider_credential_id: 'credential', model: 'test-model', enabled: true }],
+  };
+  const view = harness({
+    '@/hooks/use-workspace-data': {
+      useWorkspaceData: (_, key) => ({ loaded: true, data: resources[key.split(':')[0]], reload() {} }),
+      useWorkspaceMutation: () => ({}),
+    },
+  });
+  const Page = load('app/settings/models/page.tsx', view.mocks).default;
+  for (const [permissions, credentials, profiles] of [
+    [null, false, false], [['workspace_read'], false, false],
+    [['workspace_read', 'agent_edit'], false, true],
+    [['workspace_read', 'agent_edit', 'workspace_administration'], true, true],
+  ]) {
+    view.session.permissions = permissions;
+    const panels = elements(view.render(Page), node => node.props.ariaLabel?.startsWith('settings.models.'));
+    assert.equal(panels.length, 2);
+    for (const [panel, allowed] of [[panels[0], credentials], [panels[1], profiles]]) {
+      assert.equal(Boolean(panel.props.actions), allowed);
+      assert.equal(elements(panel, node => node.type === 'button').length, allowed ? 3 : 0);
+      assert.ok(elements(panel, node => node.type === 'tbody').length, 'readers keep the populated table');
+    }
+  }
+}
+
+async function testRefreshCoalescing() {
+  let attempts = 0;
+  let finish, fail;
+  const client = load('lib/api/auth.ts', {
+    '@/lib/api/client': { publicApiRequest: () => {
+      attempts++;
+      return new Promise((resolve, reject) => { finish = resolve; fail = reject; });
+    } },
+  });
+  const first = client.refresh();
+  const duplicate = client.refresh();
+  assert.equal(first, duplicate);
+  await tick();
+  assert.equal(attempts, 1);
+  fail(new Error('test refresh failed'));
+  await assert.rejects(first, /test refresh failed/);
+  const later = client.refresh();
+  await tick();
+  assert.equal(attempts, 2);
+  finish({ user_id: 'test-user' });
+  assert.deepEqual(await later, { user_id: 'test-user' });
+  console.log('PASS same-tab refresh coalesces requests and releases failed requests for later use');
+}
+
 async function main() {
+    await testWorkspaceCreationUsesTargetOrganization();
+    await testRefreshCoalescing();
+  testModelSettingsRoles();
   testWorkspaceRecoveryEntry();
   const directory = harness({
     '@/components/layout/menu-keyboard': { useMenuKeyboardNav: () => ({ current: null }) },
@@ -504,7 +669,34 @@ async function main() {
     { label: 'nav.evaluations', href: '/evaluations' }, { label: 'common.detail', href: undefined },
   ]);
   assert.equal(autoBreadcrumbs(`/runs/${trialRun}`, String)[0].href, '/runs');
-  console.log('PASS evaluation run loading trail links only to an existing index');
+  for (const parent of [`/agents/${trialRun}`, `/evaluations/datasets/${trialRun}`]) {
+    const crumbs = autoBreadcrumbs(`${parent}/versions/${trialRun}`, String);
+    assert.equal(crumbs.at(-2).href, parent);
+    assert.equal(crumbs.at(-1).href, undefined);
+    assert.ok(!crumbs.some(({ href }) => href === `${parent}/versions`));
+  }
+  // Check every app-router page, including both routes of an optional catch-all.
+  const appDirectory = path.join(web, 'app');
+  const pages = new Set();
+  function visitPages(directory) {
+    for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+      if (entry.isDirectory()) visitPages(path.join(directory, entry.name));
+      else if (entry.name === 'page.tsx') {
+        const route = '/' + path.relative(appDirectory, directory).split(path.sep).join('/');
+        const catchAll = /\/\[\[\.\.\.[^/]+\]\]$/;
+        const base = route.replace(catchAll, '').replace(/\[[^/]+\]/g, trialRun);
+        pages.add(base);
+        if (catchAll.test(route)) pages.add(`${base}/${trialRun}`);
+      }
+    }
+  }
+  visitPages(appDirectory);
+  for (const route of pages) {
+    for (const crumb of autoBreadcrumbs(route, String) ?? []) {
+      if (crumb.href) assert.ok(pages.has(crumb.href), `${route} links to missing page ${crumb.href}`);
+    }
+  }
+  console.log('PASS generated breadcrumb ancestors resolve to app-router pages');
   const { Markdown } = load('components/ui/markdown.tsx');
   const html = renderToStaticMarkup(React.createElement(Markdown, {
     text: '<script>alert(1)</script> & "ok"\n\n[search](https://example.com/?a=1&b=2)\n\n- bullet\n1. numbered\n- last\n\n[bad](javascript:alert(1))',
@@ -655,6 +847,13 @@ async function main() {
   assert.equal(h.states[1].length, 1);
   assert.equal(h.states[2], null);
   console.log('PASS org-only 403 during permission loading preserves workspace roster');
+  h.session.permissions = null;
+  h.states[1] = [{ user_id: 'other', email: 'other@example.test', role: 'VIEWER' }];
+  h.states[4] = true;
+  assert.equal(elements(h.render(Members), el => el.type === 'button' && el.props.children === 'settings.members.remove').length, 0);
+  h.session.permissions = ['workspace_administration'];
+  assert.equal(elements(h.render(Members), el => el.type === 'button' && el.props.children === 'settings.members.remove').length, 1);
+  console.log('PASS unknown workspace access hides other-member removal, confirmed workspace administration allows it');
 
   const threadCalls = [];
   const threadApi = {
@@ -887,4 +1086,8 @@ async function main() {
   console.log('PASS handoff client strict response and workspace/artifact identity');
 }
 const browserFlag = process.argv.indexOf('--shell-browser');
-(browserFlag >= 0 ? testShellBrowser(process.argv[browserFlag + 1]) : main()).catch((error) => { console.error(error); process.exitCode = 1; });
+const authFlag = process.argv.indexOf('--auth-tabs');
+const execution = authFlag >= 0
+  ? testConcurrentAuthTabs(process.argv[authFlag + 1], process.argv[authFlag + 2])
+  : browserFlag >= 0 ? testShellBrowser(process.argv[browserFlag + 1]) : main();
+execution.catch((error) => { console.error(error); process.exitCode = 1; });

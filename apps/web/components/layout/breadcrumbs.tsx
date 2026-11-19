@@ -101,12 +101,15 @@ export function autoBreadcrumbs(pathname: string, t: (key: MessageKey) => string
   }
   const items: Crumb[] = [];
   let href = "";
-  for (const segment of segments) {
+  for (const [index, segment] of segments.entries()) {
     href += `/${segment}`;
-    // Run details live under the owning experiment; there is no /evaluations/runs index.
-    if (href === "/evaluations/runs") continue;
+    // These folders organize detail routes but have no index page.
+    if (
+      href === "/evaluations/runs" ||
+      /^\/(?:agents\/[^/]+|evaluations\/datasets\/[^/]+)\/versions$/.test(href)
+    ) continue;
     const labelKey = SEGMENT_LABELS[segment];
-    const isLast = segment === segments[segments.length - 1];
+    const isLast = index === segments.length - 1;
     if (labelKey) {
       items.push({ label: t(labelKey), href: isLast ? undefined : href });
     } else {

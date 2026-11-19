@@ -36,7 +36,8 @@ export default function ToolDetailClient({ toolId }: { toolId: string }) {
     const key = EXECUTION_KIND_KEYS[kind.toLowerCase()];
     return key ? t(key) : kind;
   };
-  const { connected, sessionId, workspaceId } = useFrontendSession();
+  const { connected, sessionId, workspaceId, permissions } = useFrontendSession();
+  const canEdit = permissions?.includes("tool_edit") === true;
 
   const scope = `${workspaceId}:${toolId}`;
   const loadTool = useCallback((auth: AuthInput) => getTool(auth, toolId), [toolId]);
@@ -112,7 +113,7 @@ export default function ToolDetailClient({ toolId }: { toolId: string }) {
         ariaLabel={t("tools.overview")}
         title={t("tools.overview")}
         actions={
-          current ? (
+          current && canEdit ? (
             <>
               <button
                 type="button"
@@ -216,7 +217,7 @@ export default function ToolDetailClient({ toolId }: { toolId: string }) {
 
             <InlineError error={mutation.error} fallback={t("errors.requestFailed")} />
 
-            {editing && (
+            {editing && canEdit && (
               <form className="eval-form" onSubmit={submitEdit} noValidate>
                 <p className="eval-form-title">{t("tools.editTool")}</p>
                 <div className="form-grid">

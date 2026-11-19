@@ -55,7 +55,10 @@ function defaultDraft(remoteName: string, title: string | null): ImportDraft {
 
 export default function McpImportPage() {
   const { t, statusLabel } = useI18n();
-  const { workspaceId, accessToken, connected, sessionId } = useFrontendSession();
+  const { workspaceId, accessToken, connected, sessionId, permissions } = useFrontendSession();
+  const canManage = permissions?.includes("workspace_administration") === true;
+  const canDiscover = permissions?.includes("tool_edit") === true;
+  const canImport = permissions?.includes("tool_create") === true;
 
   const loadConnections = useCallback(
     (auth: AuthInput) => listMcpConnections(auth),
@@ -146,9 +149,8 @@ export default function McpImportPage() {
     }
   }
 
-  async function submitImport(remoteToolName: string) {
-    const draft = importDrafts[remoteToolName];
-    if (!draft || !selectedConnectionId) return;
+  async function submitImport(remoteToolName: string, draft: ImportDraft) {
+    if (!selectedConnectionId) return;
     const result = await importMutation.run((auth) =>
       importMcpTool(auth, selectedConnectionId, {
         remote_tool_name: remoteToolName,
@@ -184,11 +186,11 @@ export default function McpImportPage() {
 
       <Panel
         title={t("tools.mcp.connections.title")}
-        actions={
+        actions={canManage && (
           <button type="button" className="button button-ghost" onClick={() => setShowCreateForm((v) => !v)}>
             {t("tools.mcp.connections.add")}
           </button>
-        }
+        )}
       >
         {connections.error ? (
           <ErrorState
@@ -227,17 +229,19 @@ export default function McpImportPage() {
                       <StatusBadge status={connection.enabled ? "AVAILABLE" : "NOT_AVAILABLE"} />
                     </td>
                     <td data-label={t("settings.models.actions")}>
-                      <button
-                        type="button"
-                        className="button button-ghost"
-                        onClick={() => {
-                          setSelectedConnectionId((current) => (current === connection.id ? null : connection.id));
-                          setTestResult(null);
-                          setDiscovery(null);
-                        }}
-                      >
-                        {t("tools.mcp.select")}
-                      </button>
+                      {canDiscover && (
+                        <button
+                          type="button"
+                          className="button button-ghost"
+                          onClick={() => {
+                            setSelectedConnectionId((current) => (current === connection.id ? null : connection.id));
+                            setTestResult(null);
+                            setDiscovery(null);
+                          }}
+                        >
+                          {t("tools.mcp.select")}
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -247,7 +251,7 @@ export default function McpImportPage() {
         )}
         <InlineError error={connections.error} fallback={t("errors.loadTools")} />
 
-        {showCreateForm && (
+        {canManage && showCreateForm && (
           <form className="eval-form" onSubmit={submitConnection} noValidate>
             <p className="eval-form-title">{t("tools.mcp.connections.formTitle")}</p>
             <div className="form-grid">
@@ -298,7 +302,7 @@ export default function McpImportPage() {
         )}
       </Panel>
 
-      {selectedConnection && (
+      {canDiscover && selectedConnection && (
         <Panel title={t("tools.mcp.wizard.title")} eyebrow={selectedConnection.name}>
           <div className="form-actions">
             <button type="button" className="button button-ghost" onClick={() => void runTest(selectedConnection.id)} disabled={testing}>
@@ -365,14 +369,14 @@ export default function McpImportPage() {
                           <Link className="button button-primary" href={`/tools/${encodeURIComponent(importedId)}`}>
                             {t("tools.mcp.wizard.openTool")}
                           </Link>
-                        ) : (
+                        ) : canImport && (
                           <details>
                             <summary className="button button-ghost">{t("tools.mcp.wizard.configure")}</summary>
                             <form
                               className="eval-form"
                               onSubmit={(event) => {
                                 event.preventDefault();
-                                void submitImport(tool.name);
+                                void submitImport(tool.name, draft);
                               }}
                               noValidate
                             >

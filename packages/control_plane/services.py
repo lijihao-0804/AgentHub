@@ -78,7 +78,7 @@ class TenantService:
 
     async def list_organizations(
         self, session: AsyncSession, *, principal: PrincipalContext
-    ) -> list[Organization]:
+    ) -> list[tuple[Organization, str]]:
         tenant: TenantRepository = SqlAlchemyTenantRepository(session)
         return await tenant.list_organizations(self._user_id(principal))
 

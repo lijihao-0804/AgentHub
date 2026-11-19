@@ -41,7 +41,7 @@ async def create_organization(
     organization = await TenantService().create_organization(
         session, principal=principal, name=payload.name
     )
-    return OrganizationResponse(id=organization.id, name=organization.name)
+    return OrganizationResponse(id=organization.id, name=organization.name, org_role="OWNER")
 
 
 @router.get("/api/v1/organizations", response_model=list[OrganizationResponse])
@@ -50,7 +50,10 @@ async def list_organizations(
     session: AsyncSession = db_session_dependency,
 ) -> list[OrganizationResponse]:
     organizations = await TenantService().list_organizations(session, principal=principal)
-    return [OrganizationResponse(id=item.id, name=item.name) for item in organizations]
+    return [
+        OrganizationResponse(id=organization.id, name=organization.name, org_role=role)
+        for organization, role in organizations
+    ]
 
 
 @router.get(
