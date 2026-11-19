@@ -1,5 +1,7 @@
 # AgentHub 当前状态
 
+2026-11-19，已复验并修复知识库并发建版、运行取消后的审批、评测失败归因和工作区目录重试。逐项故障现象、数据库测试和真实浏览器结果见[产品链路故障复验](reviews/project-closure-20261119.md)。
+
 2026-11-16，开发历程收录客服工单闭环、RAG 首答对照和 RunStep 计量修复。可从[近期进展](development-history/index.html#view=recent)或[设计面试的情景题](development-history/index.html#view=learn&chapter=design-cases&depth=intro)开始阅读。
 
 2026-11-15 原目录RAG整合：RunStep两类持久化约束修复已纳入本地开发分支（`5b1858c`、`b03cc73`），代码迁移头0056，业务库未迁移。12题正式结果未支持切换互补默认。成果、WIP保全和后续开发约定见[进度入口](reviews/AGENTHUB_RAG_PROGRESS.md)及[本地验收](reviews/agenthub-local-rag-integration-20261115.md)。以下保留历史时点，不将历史运行状态当当前部署证明。
