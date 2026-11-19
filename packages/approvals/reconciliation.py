@@ -74,26 +74,11 @@ class ApprovalReconciliationService:
                     )
                 )
             )
-            pending = [
-                approval
-                for approval in approvals
-                if approval.decision_status == ApprovalDecisionStatus.PENDING
-            ]
             before_status = run.status
             before_failure_code = run.failure_code
             before_completed_at = run.completed_at
             now = datetime.now(UTC)
-            expired_count = 0
-            for approval in pending:
-                if approval.expires_at is not None and approval.expires_at <= now:
-                    approval.decision_status = ApprovalDecisionStatus.EXPIRED
-                    approval.decided_at = now
-                    expired_count += 1
-            pending = [
-                approval
-                for approval in pending
-                if approval.decision_status == ApprovalDecisionStatus.PENDING
-            ]
+            pending, expired_count = _pending_after_expiration(run, approvals, now)
             _apply_reconciliation_transition(
                 run,
                 pending,
@@ -107,6 +92,7 @@ class ApprovalReconciliationService:
                 (before_status, before_failure_code) != (run.status, run.failure_code)
                 or before_completed_at != run.completed_at
                 or expired_count
+                or (run.status == "CANCELLED" and bool(pending))
             ):
                 await _append_reconciliation_step(
                     session,
@@ -140,6 +126,13 @@ class ApprovalReconciliationService:
                     .where(
                         AgentRun.status.in_(
                             {"RUNNING", "WAITING_APPROVAL", "CANCEL_REQUESTED", "NEEDS_ATTENTION"}
+                        ) | (
+                            (AgentRun.status == "CANCELLED")
+                            & select(Approval.id).where(
+                                Approval.run_id == AgentRun.id,
+                                Approval.workspace_id == AgentRun.workspace_id,
+                                Approval.decision_status == "PENDING",
+                            ).exists()
                         ),
                         AgentRun.started_at <= cutoff,
                     )
@@ -181,26 +174,11 @@ class ApprovalReconciliationService:
                             )
                         )
                     )
-                    pending = [
-                        approval
-                        for approval in approvals
-                        if approval.decision_status == ApprovalDecisionStatus.PENDING
-                    ]
                     before_status = run.status
                     before_completed_at = run.completed_at
                     now = datetime.now(UTC)
                     run.reconciled_at = now
-                    expired_count = 0
-                    for approval in pending:
-                        if approval.expires_at is not None and approval.expires_at <= now:
-                            approval.decision_status = ApprovalDecisionStatus.EXPIRED
-                            approval.decided_at = now
-                            expired_count += 1
-                    pending = [
-                        approval
-                        for approval in pending
-                        if approval.decision_status == ApprovalDecisionStatus.PENDING
-                    ]
+                    pending, expired_count = _pending_after_expiration(run, approvals, now)
                     _apply_reconciliation_transition(
                         run,
                         pending,
@@ -213,6 +191,7 @@ class ApprovalReconciliationService:
                     changed = (
                         before != (run.status, run.failure_code)
                         or before_completed_at != run.completed_at
+                        or (run.status == "CANCELLED" and bool(pending))
                         or expired_count
                     )
                     if changed:
@@ -246,6 +225,24 @@ class ApprovalReconciliationService:
                     "approval_reconciliation_failed", extra={"run_id": str(candidate.id)}
                 )
         return result
+
+
+def _pending_after_expiration(
+    run: AgentRun, approvals: list[Approval], now: datetime
+) -> tuple[list[Approval], int]:
+    pending = []
+    expired = 0
+    cancelling = run.status in {"CANCELLED", "CANCEL_REQUESTED"}
+    for approval in approvals:
+        if approval.decision_status != ApprovalDecisionStatus.PENDING:
+            continue
+        if not cancelling and approval.expires_at is not None and approval.expires_at <= now:
+            approval.decision_status = ApprovalDecisionStatus.EXPIRED
+            approval.decided_at = now
+            expired += 1
+        else:
+            pending.append(approval)
+    return pending, expired
 
 
 def _apply_reconciliation_transition(
@@ -314,6 +311,12 @@ def _apply_reconciliation_transition(
             for a in all_approvals
         ):
             run.resume_pending = True
+    if run.status == "CANCELLED":
+        run.resume_pending = False
+        run.waiting_approval_id = None
+        for approval in pending:
+            approval.decision_status = ApprovalDecisionStatus.CANCELLED
+            approval.decided_at = now
     if run.status != before_status:
         run.event_log_complete = False
 

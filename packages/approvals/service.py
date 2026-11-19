@@ -94,6 +94,8 @@ class ApprovalService:
             )
             if existing is not None:
                 return existing
+            if run.status in {"CANCEL_REQUESTED", "CANCELLED"}:
+                raise AgentHubError("RUN_CANCELLED", "The run was cancelled.", 409)
             approval = Approval(
                 id=uuid4(),
                 workspace_id=workspace_id,
@@ -430,23 +432,30 @@ class ApprovalService:
     async def cancel_pending_for_run(self, context: WorkspaceExecutionContext, run_id: UUID) -> int:
         """Cancel pending approvals without touching an already-approved execution."""
 
-        user_id = _user_uuid(context)
         async with self.session_factory() as session:
-            result = await session.execute(
-                update(Approval)
-                .where(
-                    Approval.workspace_id == _workspace_uuid(context),
-                    Approval.run_id == run_id,
-                    Approval.decision_status == ApprovalDecisionStatus.PENDING,
-                )
-                .values(
-                    decision_status=ApprovalDecisionStatus.CANCELLED,
-                    decided_by=user_id,
-                    decided_at=datetime.now(UTC),
-                )
-            )
+            count = await cancel_pending_in_session(session, context, run_id)
             await session.commit()
-            return result.rowcount
+            return count
+
+
+async def cancel_pending_in_session(
+    session: AsyncSession, context: WorkspaceExecutionContext, run_id: UUID
+) -> int:
+    user_id = _user_uuid(context)
+    result = await session.execute(
+        update(Approval)
+        .where(
+            Approval.workspace_id == _workspace_uuid(context),
+            Approval.run_id == run_id,
+            Approval.decision_status == ApprovalDecisionStatus.PENDING,
+        )
+        .values(
+            decision_status=ApprovalDecisionStatus.CANCELLED,
+            decided_by=user_id,
+            decided_at=datetime.now(UTC),
+        )
+    )
+    return result.rowcount
 
 
 def _workspace_uuid(context: WorkspaceExecutionContext) -> UUID:

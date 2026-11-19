@@ -62,6 +62,7 @@ from packages.agent_runtime.work_layer import (
 )
 from packages.approvals import ApprovalExecutionStatus, ApprovalService
 from packages.approvals.models import Approval, ApprovalPreference, PersonalApprovalRun
+from packages.approvals.service import cancel_pending_in_session
 from packages.control_plane.models import User
 from packages.control_plane.services import TenantService
 from packages.core.canonical.json_hash import canonical_json_hash
@@ -946,12 +947,15 @@ class AgentRunService:
                 run.completed_at = datetime.now(UTC)
             elif run.status in {"RUNNING", "WAITING_APPROVAL"}:
                 run.status = "CANCEL_REQUESTED"
+            if run.status in {"CANCEL_REQUESTED", "CANCELLED"}:
+                await cancel_pending_in_session(session, context, run.id)
+                if run.status == "CANCELLED":
+                    run.resume_pending = False
+                    run.waiting_approval_id = None
             if previous_status != run.status:
                 run.event_log_complete = False
             await session.commit()
             result = _run_result(run)
-        if result.status == "CANCELLED" and self.approval_service is not None:
-            await self.approval_service.cancel_pending_for_run(context, run_id)
         return result
 
     async def _mark_waiting(self, context: WorkspaceExecutionContext, run_id: UUID) -> None:

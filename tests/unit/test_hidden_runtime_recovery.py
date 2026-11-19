@@ -80,6 +80,11 @@ def test_stale_claim_cannot_be_reexecuted_and_cancel_converges():
     queued = SimpleNamespace(status="CANCEL_REQUESTED", failure_code=None)
     _apply_reconciliation_transition(queued, [], False, approvals=[], stale=True)
     assert queued.status == "CANCELLED"
+    pending = SimpleNamespace(decision_status="PENDING", execution_status="NOT_STARTED")
+    queued.status = "CANCEL_REQUESTED"
+    _apply_reconciliation_transition(queued, [pending], True)
+    assert pending.decision_status == "CANCELLED"
+    assert pending.decided_at is not None
 
 
 def test_live_owner_is_not_reconciled_as_stale_action():
