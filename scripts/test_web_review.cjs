@@ -266,6 +266,30 @@ function testLabeledSelect() {
 }
 
 async function main() {
+  const directory = harness({
+    '@/components/layout/menu-keyboard': { useMenuKeyboardNav: () => ({ current: null }) },
+    '@/i18n/provider': { useI18n: () => ({ t: key => key, errorText: (_, message) => message }) },
+  });
+  let selectedWorkspace, retries = 0;
+  Object.assign(directory.session, {
+    panelOpen: true, organizations: [], workspaces: [],
+    tenancyError: { code: 'TEMP_UNAVAILABLE', message: 'Directory unavailable' },
+    reloadTenancy() {
+      retries++;
+      directory.session.tenancyError = null;
+      directory.session.workspaces = [{ id: 'b', name: 'Beta', organization_id: 'org-b' }];
+    },
+    setActiveWorkspace(id) { selectedWorkspace = id; },
+  });
+  const Selector = load('components/layout/workspace-selector.tsx', directory.mocks).default;
+  const menuItems = () => elements(directory.render(Selector), node => node.props.role === 'menuitem');
+  assert.deepEqual(menuItems().map(item => item.props.children), ['common.retry']);
+  menuItems()[0].props.onClick();
+  assert.equal(retries, 1);
+  assert.deepEqual(menuItems().map(item => item.props.children), ['Beta']);
+  menuItems()[0].props.onClick();
+  assert.equal(selectedWorkspace, 'b');
+  console.log('PASS workspace directory error can be retried and recovered workspace selected');
   {
     const calls = { list: 0, detail: 0 };
     const doc = { id: 'd', current_revision_id: 'r', current_revision_status: 'READY' };
