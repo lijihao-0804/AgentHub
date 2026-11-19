@@ -15,6 +15,70 @@ from packages.artifacts.schemas import (
 from packages.core.errors.exceptions import AgentHubError
 
 
+def test_paying_user_metric_round_trips_in_a_finding(tmp_path):
+    warehouse = Warehouse(tmp_path / "finance.sqlite3")
+    warehouse.build()
+    call = RecordedToolCall(
+        "warehouse.get_paying_user_counts",
+        "finance",
+        4,
+        arguments={},
+        data={"structured_content": warehouse.paying_user_counts()},
+    )
+    artifact = project_analysis_query(call, uuid4())
+    assert artifact is not None
+    finding = validate_artifact_content(
+        ANALYSIS_FINDING,
+        {"question": "Which users qualify?", "conclusion": "368", "queries": [artifact.content]},
+    )
+    saved = finding["queries"][0]
+    assert saved["metric_arguments"] == {}
+    assert dict(saved["rows"]) == {
+        "strict_first_qualified_users": 368,
+        "any_qualified_users": 405,
+        "any_only_first_failed": 31,
+        "any_only_first_refunded": 6,
+        "any_only_first_other": 0,
+    }
+    with pytest.raises(AgentHubError):
+        validate_artifact_content(artifact.type, {**saved, "metric_arguments": {"window": "all"}})
+
+
+def test_order_activity_finding_keeps_the_observed_cohorts_and_window(tmp_path):
+    warehouse = Warehouse(tmp_path / "orders.sqlite3")
+    warehouse.build()
+    window = {"start_date": "2026-03-14", "end_date": "2026-03-16"}
+    result = warehouse.order_activity(window)
+    call = RecordedToolCall(
+        "warehouse.get_order_activity",
+        "call-orders",
+        2,
+        arguments=window,
+        data={"structured_content": result},
+    )
+    artifact = project_analysis_query(call, uuid4())
+    assert artifact is not None
+    content = validate_artifact_content(artifact.type, artifact.content)
+    assert content["metric_arguments"] == window
+    assert content["rows"] == [
+        ["with_paid_order", 42, 47, 46, 1, 1, 0, 0],
+        ["without_paid_order", 5, 5, 0, 5, 3, 2, 0],
+    ]
+    finding = validate_artifact_content(
+        ANALYSIS_FINDING,
+        {"question": "Who ordered?", "conclusion": "47 users", "queries": [content]},
+    )
+    assert finding["queries"] == [content]
+    assert content["provenance"]["tool_call_id"] == "call-orders"
+    bad_window = {"start_date": "2026-03-15", "end_date": "2026-03-14"}
+    with pytest.raises(AgentHubError):
+        validate_artifact_content(artifact.type, {**content, "metric_arguments": bad_window})
+    result["with_paid_order"]["users"] = None
+    assert project_analysis_query(call, uuid4()) is None
+    result["window"] = bad_window
+    assert project_analysis_query(call, uuid4()) is None
+
+
 def test_metric_tool_result_and_finding_preserve_actual_arguments_and_rows(tmp_path):
     warehouse = Warehouse(tmp_path / "metric.sqlite3")
     warehouse.build()

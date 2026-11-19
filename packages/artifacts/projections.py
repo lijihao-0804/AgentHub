@@ -307,6 +307,24 @@ def project_incident_timeline(call: RecordedToolCall, run_id: UUID) -> BuiltArti
 # analysis
 
 
+def _metric_table(
+    call: RecordedToolCall, run_id: UUID, title: str, columns: list[str], rows: list[list]
+) -> BuiltArtifact:
+    return BuiltArtifact(
+        schemas.ANALYSIS_QUERY_RESULT,
+        title,
+        {
+            "question": None,
+            "metric_arguments": call.arguments,
+            "columns": columns,
+            "rows": rows[: schemas.MAX_ROWS],
+            "row_count": len(rows),
+            "truncated": len(rows) > schemas.MAX_ROWS,
+            "provenance": _provenance(call, run_id),
+        },
+    )
+
+
 def _registration_conversion(call: RecordedToolCall, run_id: UUID) -> BuiltArtifact | None:
     result = _structured(call)
     if not result:
@@ -364,35 +382,73 @@ def _registration_conversion(call: RecordedToolCall, run_id: UUID) -> BuiltArtif
                         group["change_pp"] if index == 1 else None,
                     ]
                 )
-    return BuiltArtifact(
-        schemas.ANALYSIS_QUERY_RESULT,
-        "Registration conversion",
-        {
-            "question": None,
-            "metric_arguments": call.arguments,
-            "columns": [
-                "scope",
-                "platform",
-                "app_version",
-                "start_date",
-                "end_date",
-                "signups",
-                "views",
-                "rate_pct",
-                "change_pp",
-            ],
-            "rows": rows[: schemas.MAX_ROWS],
-            "row_count": len(rows),
-            "truncated": len(rows) > schemas.MAX_ROWS,
-            "provenance": _provenance(call, run_id),
-        },
+    columns = [
+        "scope",
+        "platform",
+        "app_version",
+        "start_date",
+        "end_date",
+        "signups",
+        "views",
+        "rate_pct",
+        "change_pp",
+    ]
+    return _metric_table(call, run_id, "Registration conversion", columns, rows)
+
+
+def _order_activity(call: RecordedToolCall, run_id: UUID) -> BuiltArtifact | None:
+    result = _structured(call)
+    if not result or result.get("window") != call.arguments:
+        return None
+    fields = [
+        "users",
+        "order_rows",
+        "paid_rows",
+        "non_paid_rows",
+        "refunded_rows",
+        "cancelled_rows",
+        "other_status_rows",
+    ]
+    rows = []
+    for cohort in ("with_paid_order", "without_paid_order"):
+        counts = result.get(cohort)
+        if not isinstance(counts, dict) or any(
+            type(counts.get(key)) is not int or counts[key] < 0 for key in fields
+        ):
+            return None
+        rows.append([cohort, *(counts[key] for key in fields)])
+    return _metric_table(call, run_id, "Order activity by user", ["cohort", *fields], rows)
+
+
+def _paying_users(call: RecordedToolCall, run_id: UUID) -> BuiltArtifact | None:
+    result = _structured(call)
+    if not result or call.arguments:
+        return None
+    groups = result.get("any_only_by_first_payment_status")
+    if not isinstance(groups, dict):
+        return None
+    rows = [
+        ["strict_first_qualified_users", result.get("strict_first_qualified_users")],
+        ["any_qualified_users", result.get("any_qualified_users")],
+    ]
+    for status in ("failed", "refunded", "other"):
+        rows.append([f"any_only_first_{status}", groups.get(status)])
+    if any(type(value) is not int or value < 0 for _, value in rows):
+        return None
+    return _metric_table(
+        call, run_id, "Paying users by payment history", ["measure", "users"], rows
     )
 
 
 def project_analysis_query(call: RecordedToolCall, run_id: UUID) -> BuiltArtifact | None:
-    if tool_tail(call.tool_identity) == "get_registration_conversion":
+    name = tool_tail(call.tool_identity)
+    if name == "get_paying_user_counts":
+        return _paying_users(call, run_id)
+    if name == "get_order_activity":
+        return _order_activity(call, run_id)
+    if name == "get_registration_conversion":
         return _registration_conversion(call, run_id)
-    if tool_tail(call.tool_identity) != "query_sql":
+    if name != "query_sql":
         return None
     structured = _structured(call)
     if structured is None:

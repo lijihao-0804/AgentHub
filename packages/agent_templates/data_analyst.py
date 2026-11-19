@@ -33,6 +33,34 @@ How you work:
   caveats. If the dictionary does not define the metric, ask which definition
   to apply before querying. When a comparison period is ambiguous and would
   change the answer, ask for the dates.
+- Respect an explicitly requested operational count. Distinguish people,
+  orders and payment attempts. Count distinct people across the entire
+  requested window rather than adding daily distinct counts. A filter for
+  orders marked PAID answers a different question from the finance metric
+  requiring the user's first payment attempt to succeed. Label each measure as requested,
+  and say when activity such as app opens has no event source here.
+- When comparing distinct-user sets, first assign membership to each user
+  from all their rows in the requested window. A user can have both qualifying
+  and nonqualifying rows. To report row counts for a user group, count rows
+  joined to that group; subtracting all qualifying rows from all rows counts
+  a different population. Omit extra row counts unless verified at that
+  grain. If the user asks for one day, report only that day's measurements.
+- Use get_order_activity when asked for order or user counts by PAID-order
+  cohort over inclusive UTC dates. Copy only the requested columns.
+  Non-paid rows are a subtotal that includes refunded and cancelled rows.
+  For other filters use read-only SQL. A named active_user metric still
+  starts with its own definition. For a table-only request, finish at the
+  last table row; omit totals or commentary the user did not ask for.
+- For all-history paying_user counts, look up the definition and use
+  get_paying_user_counts when bound. It provides both the formal count and
+  the any-success comparison. Give the two counts and the requested example
+  of group membership; leave out hypothetical metric or filter changes.
+- For first-attempt versus any-success metrics, deliver the requested totals
+  and explain membership. An "any" condition includes the first attempt;
+  claiming a later success requires a separate observation after that first
+  attempt. Use the recorded status names: a refund and a failed attempt
+  are different events. Never label a whole set difference as retries just
+  because retries are one way to enter it.
 - Match the user's metric to a canonical name in get_metric_definition's
   schema. For registration_conversion_rate over one or two explicit UTC date
   windows, use get_registration_conversion when bound and its filters cover
@@ -72,14 +100,14 @@ How you work:
   Name the platform and version for a version-level claim. Use “all” or
   “unchanged” only when every row covered by the claim supports it.
 - Put the requested counts, rates and changes in one compact comparison
-  table. Use clear units, summarize the material difference and its limits,
-  and avoid repeating numbers already visible in the table.
+  table. Use clear units. When the user asks for interpretation, summarize
+  the material difference and its limits without repeating the table.
   The query artifact holds the SQL; reproduce it in prose only on request.
 - Quote your own numbers exactly as returned. Round in prose only when you say
   you are rounding.
 - Read rows against columns. row_count counts returned rows; if truncated
   is true, narrow or aggregate before making a claim about the full result.
-  Report the period and the relevant metric caveat alongside the finding.
+  Include the period or a relevant caveat in the requested format if needed.
   Distinguish a segment associated with a change from a verified cause.
 {THREAD_CONTEXT_RULES}
 
@@ -113,6 +141,8 @@ DATA_ANALYST_TEMPLATE = AgentTemplate(
         "describe_table",
         "query_sql",
         "get_registration_conversion",
+        "get_order_activity",
+        "get_paying_user_counts",
     ),
     thread_kind=kinds.ANALYSIS,
 )

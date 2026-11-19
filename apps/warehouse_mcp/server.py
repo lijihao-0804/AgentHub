@@ -44,6 +44,8 @@ LIST_TABLES = "list_tables"
 DESCRIBE_TABLE = "describe_table"
 QUERY_SQL = "query_sql"
 GET_REGISTRATION_CONVERSION = "get_registration_conversion"
+GET_ORDER_ACTIVITY = "get_order_activity"
+GET_PAYING_USER_COUNTS = "get_paying_user_counts"
 
 
 def _record(properties: dict[str, Any]) -> dict[str, Any]:
@@ -56,6 +58,28 @@ def _record(properties: dict[str, Any]) -> dict[str, Any]:
 
 
 _DATE_WINDOW = _record({"start_date": {"type": "string"}, "end_date": {"type": "string"}})
+_ORDER_GROUP = _record(
+    {
+        key: {"type": "integer", "minimum": 0}
+        for key in (
+            "users",
+            "order_rows",
+            "paid_rows",
+            "non_paid_rows",
+            "refunded_rows",
+            "cancelled_rows",
+            "other_status_rows",
+        )
+    }
+)
+ORDER_ACTIVITY_OUTPUT = _record(
+    {
+        "window": _DATE_WINDOW,
+        "ordered_users": {"type": "integer", "minimum": 0},
+        "with_paid_order": _ORDER_GROUP,
+        "without_paid_order": _ORDER_GROUP,
+    }
+)
 _WINDOWS = {"type": "array", "minItems": 1, "maxItems": 2, "items": _DATE_WINDOW}
 CONVERSION_INPUT = {
     "type": "object",
@@ -298,6 +322,37 @@ TOOLS: tuple[mcp_types.Tool, ...] = (
         outputSchema=CONVERSION_OUTPUT,
         annotations=READ_ONLY,
     ),
+    mcp_types.Tool(
+        name=GET_ORDER_ACTIVITY,
+        title="Get order activity",
+        description="Count distinct users who ordered between inclusive UTC dates "
+        "(YYYY-MM-DD). Group users by whether they had any PAID order in that window. "
+        "Each group's row counts include all orders belonging to those users, including "
+        "their REFUNDED or CANCELLED rows. This describes order activity, not the "
+        "paying_user metric or payment attempts.",
+        inputSchema=_DATE_WINDOW,
+        outputSchema=ORDER_ACTIVITY_OUTPUT,
+        annotations=READ_ONLY,
+    ),
+    mcp_types.Tool(
+        name=GET_PAYING_USER_COUNTS,
+        title="Get paying user counts",
+        description="Count registered users over all payment history. An attempt qualifies "
+        "when its payment is SUCCEEDED and its order is PAID. Strict counts a qualifying first "
+        "attempt; any includes the first attempt. Only users in any minus strict are grouped "
+        "by first payment status: FAILED, REFUNDED, or all other states.",
+        inputSchema=LIST_TABLES_INPUT_SCHEMA,
+        outputSchema=_record(
+            {
+                "strict_first_qualified_users": {"type": "integer"},
+                "any_qualified_users": {"type": "integer"},
+                "any_only_by_first_payment_status": _record(
+                    {key: {"type": "integer"} for key in ("failed", "refunded", "other")}
+                ),
+            }
+        ),
+        annotations=READ_ONLY,
+    ),
 )
 
 
@@ -326,6 +381,12 @@ def build_server(warehouse: Warehouse) -> Server[Any]:
             elif params.name == QUERY_SQL:
                 _reject_unknown(arguments, QUERY_INPUT_SCHEMA)
                 payload = _query_sql(warehouse, arguments)
+            elif params.name == GET_ORDER_ACTIVITY:
+                _reject_unknown(arguments, _DATE_WINDOW)
+                payload = warehouse.order_activity(arguments)
+            elif params.name == GET_PAYING_USER_COUNTS:
+                _reject_unknown(arguments, LIST_TABLES_INPUT_SCHEMA)
+                payload = warehouse.paying_user_counts()
             elif params.name == GET_REGISTRATION_CONVERSION:
                 _reject_unknown(arguments, CONVERSION_INPUT)
                 if "platform" in arguments and arguments["platform"] is None:
@@ -433,6 +494,10 @@ def _summary(tool_name: str, payload: dict[str, Any]) -> str:
         return f"{len(payload['tables'])} table(s) in the warehouse."
     if tool_name == GET_REGISTRATION_CONVERSION:
         return f"Registration conversion returned for {len(payload['windows'])} UTC window(s)."
+    if tool_name == GET_PAYING_USER_COUNTS:
+        return "All-history first-attempt and any-attempt counts returned for registered users."
+    if tool_name == GET_ORDER_ACTIVITY:
+        return f"{payload['ordered_users']} distinct ordering users in the UTC window."
     if tool_name == DESCRIBE_TABLE:
         return (
             f"Table {payload['table']} has {len(payload['columns'])} column(s) "
@@ -517,6 +582,8 @@ __all__ = [
     "DESCRIBE_TABLE_INPUT_SCHEMA",
     "DESCRIBE_TABLE_OUTPUT_SCHEMA",
     "GET_METRIC_DEFINITION",
+    "GET_ORDER_ACTIVITY",
+    "GET_PAYING_USER_COUNTS",
     "GET_REGISTRATION_CONVERSION",
     "LIST_TABLES",
     "LIST_TABLES_INPUT_SCHEMA",

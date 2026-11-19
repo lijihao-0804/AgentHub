@@ -299,6 +299,21 @@ def _validate_rows(value: Any) -> list[list[Any]]:
     return rows
 
 
+def _validate_metric_window(window: Any) -> tuple[str, str]:
+    if not isinstance(window, dict) or set(window) != {"start_date", "end_date"}:
+        _invalid("A metric window requires start_date and end_date.")
+    start, end = window["start_date"], window["end_date"]
+    try:
+        canonical = all(date.fromisoformat(value).isoformat() == value for value in (start, end))
+    except (ValueError, TypeError):
+        canonical = False
+    if not canonical:
+        _invalid("Metric window dates must be YYYY-MM-DD strings.")
+    if start > end:
+        _invalid("Metric windows must be chronological.")
+    return start, end
+
+
 def _validate_analysis_query_result(content: dict[str, Any]) -> dict[str, Any]:
     columns = _text_list(content.get("columns"), "columns")
     rows = _validate_rows(content.get("rows"))
@@ -306,7 +321,17 @@ def _validate_analysis_query_result(content: dict[str, Any]) -> dict[str, Any]:
         if len(row) != len(columns):
             _invalid("every row must have one cell per column.")
     provenance = validate_provenance(content.get("provenance"))
-    if "metric_arguments" in content:
+    tool = provenance["tool_identity"].rsplit(".", 1)[-1]
+    if "metric_arguments" in content and tool == "get_paying_user_counts":
+        if content["metric_arguments"] != {} or "sql" in content:
+            _invalid("A full-history paying user lookup takes no arguments.")
+        source = {"metric_arguments": {}}
+    elif "metric_arguments" in content and tool == "get_order_activity":
+        if "sql" in content:
+            _invalid("A metric lookup cannot also declare SQL.")
+        _validate_metric_window(content["metric_arguments"])
+        source = {"metric_arguments": content["metric_arguments"]}
+    elif "metric_arguments" in content:
         args = content["metric_arguments"]
         if (
             provenance["tool_identity"].rsplit(".", 1)[-1] != "get_registration_conversion"
@@ -320,18 +345,8 @@ def _validate_analysis_query_result(content: dict[str, Any]) -> dict[str, Any]:
             _invalid("One or two windows are required.")
         previous_end = None
         for window in windows:
-            if not isinstance(window, dict) or set(window) != {"start_date", "end_date"}:
-                _invalid("A metric window requires start_date and end_date.")
-            start, end = window["start_date"], window["end_date"]
-            try:
-                canonical = all(
-                    date.fromisoformat(value).isoformat() == value for value in (start, end)
-                )
-            except (ValueError, TypeError):
-                canonical = False
-            if not canonical:
-                _invalid("Metric window dates must be YYYY-MM-DD strings.")
-            if start > end or (previous_end is not None and start <= previous_end):
+            start, end = _validate_metric_window(window)
+            if previous_end is not None and start <= previous_end:
                 _invalid("Metric windows must be chronological and non-overlapping.")
             previous_end = end
         if ("platform" in args and args["platform"] not in ("ios", "android")) or args.get(

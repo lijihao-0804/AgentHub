@@ -188,8 +188,10 @@ METRICS: dict[str, dict[str, Any]] = {
             "were later refunded do not count, and neither do cancelled orders."
         ),
         "formula": (
-            "users with EXISTS (payments.status = 'SUCCEEDED' JOIN orders "
-            "ON payments.order_id = orders.order_id WHERE orders.status = 'PAID')"
+            "Rank payment attempts per orders.user_id by payments.paid_at, payments.payment_id "
+            "across their order history. Count distinct registered users whose first attempt "
+            "has payments.status = 'SUCCEEDED' and whose corresponding orders.status = 'PAID'. "
+            "Apply status filters after selecting the first attempt."
         ),
         "numerator": "Distinct signups.user_id meeting the condition.",
         "denominator": None,
@@ -249,6 +251,20 @@ class WarehouseError(Exception):
     The message is written to be read by an agent: it says what was wrong and,
     where a closed set exists, what the valid options are.
     """
+
+
+def _utc_date_window(window: Any) -> tuple[str, str]:
+    if not isinstance(window, dict) or set(window) != {"start_date", "end_date"}:
+        raise WarehouseError("Each window needs start_date and end_date.")
+    start, end = window["start_date"], window["end_date"]
+    try:
+        if any(date.fromisoformat(v).isoformat() != v for v in (start, end)):
+            raise ValueError
+    except (TypeError, ValueError):
+        raise WarehouseError("Use valid UTC dates in YYYY-MM-DD form.") from None
+    if start > end:
+        raise WarehouseError("Date windows must be chronological and non-overlapping.")
+    return start, end
 
 
 class Warehouse:
@@ -334,15 +350,8 @@ class Warehouse:
             raise WarehouseError("Supply one or two chronological UTC date windows.")
         bounds: list[tuple[str, str]] = []
         for window in windows:
-            if not isinstance(window, dict) or set(window) != {"start_date", "end_date"}:
-                raise WarehouseError("Each window needs start_date and end_date.")
-            start, end = window["start_date"], window["end_date"]
-            try:
-                if any(date.fromisoformat(v).isoformat() != v for v in (start, end)):
-                    raise ValueError
-            except (TypeError, ValueError):
-                raise WarehouseError("Use valid UTC dates in YYYY-MM-DD form.") from None
-            if start > end or (bounds and bounds[-1][1] >= start):
+            start, end = _utc_date_window(window)
+            if bounds and bounds[-1][1] >= start:
                 raise WarehouseError("Date windows must be chronological and non-overlapping.")
             bounds.append((start, end))
         if platform not in (None, "android", "ios") or breakdown not in (
@@ -424,6 +433,97 @@ class Warehouse:
                 {"platform": p, "app_version": v, **summary(cnt)}
                 for (p, v), cnt in versions.items()
             ],
+        }
+
+    def order_activity(self, window: dict[str, Any]) -> dict[str, Any]:
+        """Group people by whether any of their orders in this UTC window was PAID."""
+        start, end = _utc_date_window(window)
+        sql = """
+            WITH per_user AS (
+                SELECT user_id, count(*) AS n, sum(status = 'PAID') AS paid,
+                       sum(status = 'REFUNDED') AS refunded, sum(status = 'CANCELLED') AS cancelled
+                FROM orders WHERE date(ordered_at) BETWEEN ? AND ?
+                GROUP BY user_id
+            )
+            SELECT paid > 0 AS has_paid, count(*), sum(n), sum(paid), sum(refunded), sum(cancelled)
+            FROM per_user GROUP BY has_paid
+        """
+        fields = (
+            "users",
+            "order_rows",
+            "paid_rows",
+            "non_paid_rows",
+            "refunded_rows",
+            "cancelled_rows",
+            "other_status_rows",
+        )
+        groups = {
+            key: dict.fromkeys(fields, 0) for key in ("with_paid_order", "without_paid_order")
+        }
+        connection = connect_read_only(self._path)
+        try:
+            with statement_timeout(connection):
+                for has_paid, users, n, paid, refunded, cancelled in connection.execute(
+                    sql, (start, end)
+                ):
+                    groups["with_paid_order" if has_paid else "without_paid_order"] = dict(
+                        users=users,
+                        order_rows=n,
+                        paid_rows=paid,
+                        non_paid_rows=n - paid,
+                        refunded_rows=refunded,
+                        cancelled_rows=cancelled,
+                        other_status_rows=n - paid - refunded - cancelled,
+                    )
+        except sqlite3.DatabaseError as exc:
+            raise WarehouseError(
+                f"The warehouse rejected the order activity query: {exc}"
+            ) from None
+        finally:
+            connection.close()
+        return {
+            "window": window,
+            "ordered_users": sum(g["users"] for g in groups.values()),
+            **groups,
+        }
+
+    def paying_user_counts(self) -> dict[str, Any]:
+        """Compare registered users' first attempt with any attempt across all history."""
+        # Rank the complete history before applying either status condition.
+        # Once reduced to the first row, each user can enter only one difference bucket.
+        sql = """
+            WITH history AS (
+                SELECT o.user_id, p.paid_at, p.payment_id, p.status AS first_status,
+                       (p.status = 'SUCCEEDED' AND o.status = 'PAID') AS qualified
+                FROM signups s
+                JOIN orders o ON o.user_id = s.user_id
+                JOIN payments p ON p.order_id = o.order_id
+            ), ranked AS (
+                SELECT first_status, qualified,
+                       row_number() OVER (
+                           PARTITION BY user_id ORDER BY paid_at, payment_id
+                       ) AS attempt_number,
+                       max(qualified) OVER (PARTITION BY user_id) AS any_qualified
+                FROM history
+            )
+            SELECT count(*) FILTER (WHERE qualified),
+                   count(*),
+                   count(*) FILTER (WHERE NOT qualified AND first_status = 'FAILED'),
+                   count(*) FILTER (WHERE NOT qualified AND first_status = 'REFUNDED'),
+                   count(*) FILTER (
+                       WHERE NOT qualified AND first_status NOT IN ('FAILED', 'REFUNDED')
+                   )
+            FROM ranked WHERE attempt_number = 1 AND any_qualified
+        """
+        first, any_attempt, failed, refunded, other = self.query(sql, 1)["rows"][0]
+        return {
+            "strict_first_qualified_users": first,
+            "any_qualified_users": any_attempt,
+            "any_only_by_first_payment_status": {
+                "failed": failed,
+                "refunded": refunded,
+                "other": other,
+            },
         }
 
     def query(self, sql: str, limit: int) -> dict[str, Any]:

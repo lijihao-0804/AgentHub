@@ -32,3 +32,23 @@ def test_known_commit_has_a_read_path_independent_of_incident_triage() -> None:
     assert "Omit repository unless the user or a tool supplied the repository identifier" in text
     assert "A commit-only question needs no metrics, logs, deployment lookup or rollback" in text
     assert "affected paths and observed changes" in text
+
+
+def test_status_note_does_not_trigger_policy_research_or_duplicate_delivery() -> None:
+    text = prompt("support")
+    assert "request to relay recorded facts requires no policy lookup" in text
+    assert "return just the text the user can forward" in text
+    assert "say that dispatch or settlement is unconfirmed" in text
+
+
+def test_scoped_telemetry_question_stops_at_the_requested_measurement() -> None:
+    text = prompt("incident")
+    assert "read only that signal in that window, once" in text
+    assert "recommend the next verification without fetching other periods" in text
+
+
+def test_order_row_and_user_set_membership_are_distinguished() -> None:
+    text = prompt("data_analyst")
+    assert "first assign membership to each user" in text
+    assert "count rows joined to that group" in text
+    assert "Omit extra row counts unless verified at that grain" in text
