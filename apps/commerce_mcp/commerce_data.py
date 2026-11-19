@@ -256,6 +256,17 @@ def find_customer_orders(customer_ref: str) -> list[dict[str, Any]]:
     return [_order_record(order) for order in orders]
 
 
+def find_customer_order(customer_ref: str, order_ref: str) -> list[dict[str, Any]]:
+    """Resolve both references without disclosing whether another account owns the order."""
+    customer = _require_ref(customer_ref, "customer_ref")
+    reference = _require_ref(order_ref, "order_ref")
+    return [
+        _order_record(order)
+        for order in ORDERS
+        if order["customer_ref"] == customer and order["order_ref"] == reference
+    ]
+
+
 def find_refunds(order_ref: str) -> list[dict[str, Any]]:
     """Return every refund on an order, seeded and issued, oldest first.
 
@@ -382,6 +393,7 @@ __all__ = [
     "SOURCE",
     "CommerceError",
     "find_customer_orders",
+    "find_customer_order",
     "find_order",
     "find_refunds",
     "outstanding_amount",

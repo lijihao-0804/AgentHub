@@ -365,7 +365,9 @@ def query_logs(
     return {"service": SERVICE, "query": needle, "total": total, "entries": entries}
 
 
-def get_deployments(*, service: str, from_time: str, to_time: str) -> dict[str, Any]:
+def get_deployments(
+    *, service: str, from_time: str, to_time: str, include_repository: bool = False
+) -> dict[str, Any]:
     """Return deployments of a service inside a window, newest first."""
 
     _require_service(service)
@@ -383,6 +385,10 @@ def get_deployments(*, service: str, from_time: str, to_time: str) -> dict[str, 
         for record in _DEPLOYMENTS
         if start <= record["deployed_at"] <= end
     ]
+    if include_repository:
+        for deployment in deployments:
+            commit = _COMMITS.get(deployment["commit_sha"])
+            deployment["repository"] = commit.get("repository") if commit else None
     return {"service": SERVICE, "total": len(deployments), "deployments": deployments}
 
 

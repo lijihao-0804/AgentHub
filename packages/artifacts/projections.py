@@ -83,6 +83,27 @@ def _number(value: Any) -> float | int | None:
 
 
 def project_paper_search(call: RecordedToolCall, run_id: UUID) -> BuiltArtifact | None:
+    if tool_tail(call.tool_identity) == "get_paper":
+        structured = _structured(call)
+        if structured is None:
+            return None
+        paper = structured.get("paper")
+        requested_id = _text(call.arguments.get("paper_id"))
+        if not requested_id or not isinstance(paper, dict) or paper.get("paper_id") != requested_id:
+            return None
+        # The research pane and shortlist accept this existing paper-list shape.
+        # The lookup supplies one record and makes no claim about a search corpus.
+        return BuiltArtifact(
+            schemas.PAPER_SEARCH,
+            f"Paper: {requested_id}"[:MAX_TITLE_LENGTH],
+            {
+                "query": requested_id,
+                "source": structured.get("source") or "unknown",
+                "filters": {},
+                "total": 1,
+                "papers": [{**paper, "provenance": _provenance(call, run_id)}],
+            },
+        )
     if not is_search_tool(call.tool_identity):
         return None
     built = build_search_content(call, run_id=run_id)

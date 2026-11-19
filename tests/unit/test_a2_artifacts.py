@@ -9,11 +9,15 @@ of the storage rather than a request made of the model.
 
 from __future__ import annotations
 
+from types import SimpleNamespace
+from unittest.mock import AsyncMock
 from uuid import uuid4
 
 import pytest
 
+from packages.agent_runtime.runtime_graph import _AgentRunGraph
 from packages.agent_runtime.work_layer import RecordedToolCall
+from packages.artifacts.projections import project_paper_search
 from packages.artifacts.research import build_search_content, is_search_tool
 from packages.artifacts.schemas import (
     PAPER_SEARCH,
@@ -21,6 +25,7 @@ from packages.artifacts.schemas import (
     validate_artifact_content,
 )
 from packages.core.errors.exceptions import AgentHubError
+from packages.tools.contracts import ToolResult, ToolResultStatus
 
 RUN_ID = uuid4()
 
@@ -154,7 +159,7 @@ def test_a_search_without_a_query_is_refused() -> None:
         ("search_knowledge", False),
     ],
 )
-def test_only_the_search_tool_produces_artifacts(identity: str, expected: bool) -> None:
+def test_search_tool_identity_match(identity: str, expected: bool) -> None:
     assert is_search_tool(identity) is expected
 
 
@@ -226,3 +231,57 @@ def test_the_filters_record_what_was_actually_asked_for() -> None:
     assert built is not None
     _, content = built
     assert content["filters"] == {"year_from": 2019, "limit": 20}
+
+
+@pytest.mark.parametrize("identity", ["get_paper", "literature.get_paper"])
+def test_exact_lookup_projects_one_selectable_paper_with_local_provenance(identity: str) -> None:
+    record = paper(provenance={"tool_call_id": "remote-claim"})
+    lookup = call(
+        {"structured_content": {"source": "openalex", "paper": record}},
+        tool_identity=identity,
+        arguments={"paper_id": record["paper_id"]},
+    )
+    artifact = project_paper_search(lookup, RUN_ID)
+    assert artifact is not None and artifact.type == PAPER_SEARCH
+    content = validate_artifact_content(artifact.type, artifact.content)
+    assert content["query"] == record["paper_id"]
+    assert (content["total"], content["source"]) == (1, "openalex")
+    (selected,) = content["papers"]
+    assert selected["title"] == record["title"]
+    assert selected["paper_id"] == record["paper_id"]
+    assert selected["provenance"] == {**PROVENANCE, "tool_identity": identity}
+    shortlist = validate_artifact_content(PAPER_SHORTLIST, {"papers": [selected]})
+    assert shortlist["papers"] == [selected]
+
+
+@pytest.mark.parametrize(
+    ("arguments", "response"),
+    [
+        ({"paper_id": "openalex:W2"}, {"paper": paper()}),
+        ({}, {"paper": paper()}),
+        ({"paper_id": "openalex:W1"}, {"paper": {"title": "Missing ID"}}),
+        ({"paper_id": "openalex:W1"}, {"papers": [paper()]}),
+        ({"paper_id": "openalex:W1"}, {"error": "No such record"}),
+    ],
+)
+def test_exact_lookup_requires_a_matching_returned_paper(arguments: dict, response: dict) -> None:
+    lookup = call({"structured_content": response}, tool_identity="get_paper", arguments=arguments)
+    assert project_paper_search(lookup, RUN_ID) is None
+
+
+@pytest.mark.asyncio
+async def test_failed_exact_lookup_with_paper_shaped_data_never_reaches_recorder() -> None:
+    recorder = AsyncMock()
+    graph = SimpleNamespace(
+        run=SimpleNamespace(thread_id=uuid4()), service=SimpleNamespace(artifact_recorder=recorder)
+    )
+    result = ToolResult(
+        status=ToolResultStatus.ERROR, data={"structured_content": {"paper": paper()}}
+    )
+    proposal = {
+        "name": "get_paper",
+        "tool_call_id": "lookup",
+        "arguments": {"paper_id": "openalex:W1"},
+    }
+    await _AgentRunGraph._record_artifacts(graph, [proposal], {"lookup": result})  # type: ignore[arg-type]
+    recorder.record.assert_not_awaited()

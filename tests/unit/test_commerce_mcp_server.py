@@ -153,6 +153,25 @@ async def test_get_order_accepts_a_customer_reference_and_returns_recent_orders_
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("customer", "reference"),
+    [("CUS-10291", "ORD-77412"), ("CUS-10291", "ORD-unlisted"), ("CUS-unlisted", "ORD-77310")],
+)
+async def test_scoped_order_misses_do_not_disclose_existence(customer: str, reference: str) -> None:
+    result = await server.call_tool("get_order", {"customer_ref": customer, "order_ref": reference})
+    assert _structured(result) == {"orders": [], "total": 0}
+    assert result.content[0].text == "0 order(s) returned."
+
+
+@pytest.mark.asyncio
+async def test_scoped_lookup_returns_only_the_requested_order() -> None:
+    result = await server.call_tool(
+        "get_order", {"customer_ref": " CUS-10291 ", "order_ref": " ORD-77310 "}
+    )
+    assert _structured(result) == {"orders": [find_order("ORD-77310")], "total": 1}
+
+
+@pytest.mark.asyncio
 async def test_get_order_refuses_when_neither_reference_is_given() -> None:
     result = await server.call_tool("get_order", {})
     assert "order_ref or customer_ref" in _message(result)

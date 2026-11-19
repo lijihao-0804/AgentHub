@@ -102,6 +102,10 @@ GET_DEPLOYMENTS_INPUT_SCHEMA: dict[str, Any] = {
     "type": "object",
     "properties": {
         "service": {"type": "string", "minLength": 1},
+        "include_repository": {
+            "type": "boolean",
+            "description": "Return the source repository when known for the deployed commit.",
+        },
         "from_time": dict(_TIMESTAMP),
         "to_time": dict(_TIMESTAMP),
     },
@@ -113,7 +117,12 @@ GET_COMMIT_INPUT_SCHEMA: dict[str, Any] = {
     "type": "object",
     "properties": {
         "commit_sha": {"type": "string", "minLength": 1},
-        "repository": {"type": "string"},
+        "repository": {
+            "type": "string",
+            "description": "Optional repository identifier from deployment or commit evidence. "
+            "Omit it when only the commit SHA is known. "
+            "A service name is not a repository identifier.",
+        },
     },
     "required": ["commit_sha"],
     "additionalProperties": False,
@@ -134,8 +143,8 @@ ROLLBACK_INPUT_SCHEMA: dict[str, Any] = {
     "additionalProperties": False,
 }
 
-# Every field is required and nullable where the source may have nothing, so a
-# consumer never has to tell "absent" from "unknown".
+# Source fields are nullable when unknown. The deployment repository projection
+# is omitted unless requested so older frozen output contracts remain valid.
 METRIC_POINT_SCHEMA: dict[str, Any] = {
     "type": "object",
     "properties": {
@@ -211,6 +220,7 @@ DEPLOYMENT_SCHEMA: dict[str, Any] = {
         "deployment_id": {"type": "string"},
         "version": {"type": "string"},
         "commit_sha": {"type": "string"},
+        "repository": {"type": ["string", "null"]},
         "deployed_at": {"type": "string"},
         "deployed_by": {"type": "string"},
         "status": {"type": "string"},
@@ -476,7 +486,11 @@ def _logs(arguments: dict[str, Any]) -> dict[str, Any]:
 
 
 def _deployments(arguments: dict[str, Any]) -> dict[str, Any]:
+    include_repository = arguments.get("include_repository", False)
+    if not isinstance(include_repository, bool):
+        raise IncidentDataError("include_repository must be a boolean.")
     return get_deployments(
+        include_repository=include_repository,
         service=_require_string(arguments.get("service"), "service"),
         from_time=_require_string(arguments.get("from_time"), "from_time"),
         to_time=_require_string(arguments.get("to_time"), "to_time"),
