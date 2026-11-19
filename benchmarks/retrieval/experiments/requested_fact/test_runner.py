@@ -107,3 +107,85 @@ def test_all_success_and_failure_origins_receive_live_candidate():
     assert campaign.forecast(histories, obs)["early_joint_six"] == dict(
         registered_arms=556, strict_arms=259, distinct_correct_inputs=250
     )
+
+
+@pytest.mark.parametrize(
+    "fault", [None, "development_overlap", "missing_source", "changed_product", "surplus"]
+)
+def test_confirmation_registration_checks_holdout_ancestry_and_exact_strata(monkeypatch, fault):
+    # Private confirmatory questions never enter these tests.
+    rows = []
+    for i in range(49 if fault == "surplus" else 48):
+        ident = str(i)
+        rows.append(
+            dict(
+                id=ident,
+                language="en" if i < 24 else "zh",
+                gold={"answerable": i % 2 == 0},
+                documents=[{"text": f"Synthetic source {i}"}],
+                question=f"Synthetic query {i}?",
+                messages=[
+                    {"role": "system", "content": "test"},
+                    {"role": "user", "content": ident},
+                ],
+                kb="kb-" + ident,
+                snapshot="snap-" + ident,
+            )
+        )
+    prep = campaign.OUT / "independent"
+    fixture = campaign.FOLDER / "fixtures/confirmatory.jsonl"
+    sources = campaign.preconfirmation_sources()
+    source_shas = {
+        p.relative_to(campaign.primary.ROOT).as_posix(): "synthetic-sha" for p in sources
+    }
+    dev_path = campaign.FOLDER / "fixtures/fresh.jsonl"
+    if fault == "missing_source":
+        source_shas.pop(dev_path.relative_to(campaign.primary.ROOT).as_posix())
+    manifest = dict(
+        product_commit="other" if fault == "changed_product" else campaign.PRODUCT_COMMIT,
+        product_system_content_sha256=campaign.hashlib.sha256(
+            qa.citation_system_prompt("PROMPT_JSON").encode()
+        ).hexdigest(),
+        records_relative_path=(prep / "fresh-records.json")
+        .relative_to(campaign.primary.ROOT)
+        .as_posix(),
+        source_sha256="synthetic-sha",
+        frozen_cases_sha256="synthetic-sha",
+        records_sha256="synthetic-sha",
+        history_sources_sha256=source_shas,
+        questions=48,
+        distinct_snapshots=48,
+        complete_visible_source_sets=48,
+        messages_canonical_sha256=campaign.digest(
+            {r["id"]: campaign.digest(r["messages"]) for r in rows}
+        ),
+        exact_question_overlaps=0,
+        exact_passage_overlaps=0,
+        per_language_answerability_counts={
+            "en_answerable": 12,
+            "en_refusal": 12,
+            "zh_answerable": 12,
+            "zh_refusal": 12,
+        },
+    )
+
+    def get(path):
+        if path == fixture or path == prep / "fresh-cases.json":
+            return rows
+        if path == prep / "verification.json":
+            return manifest
+        if path == prep / "fresh-records.json":
+            return {r["id"]: {"messages": r["messages"]} for r in rows}
+        if path == dev_path and fault == "development_overlap":
+            return [{"question": "Different example?", "documents": rows[0]["documents"]}]
+        assert path in sources
+        return []
+
+    monkeypatch.setattr(campaign, "load", get)
+    monkeypatch.setattr(campaign, "lines", get)
+    monkeypatch.setattr(campaign, "file_hash", lambda p: "synthetic-sha")
+    if fault:
+        with pytest.raises(ValueError):
+            campaign.independent([])
+    else:
+        assert len(campaign.independent([])) == 48

@@ -18,7 +18,7 @@ from packages.core.canonical.json_parse import load_unique_json
 from packages.knowledge import citation_qa
 
 ARMS, STAGES = first.ARMS, first.STAGES
-BASE = first.ROOT / ".scratch/requested-fact-20261119"
+BASE = first.ROOT / ".scratch/requested-fact-confirm-20261119"
 PRIOR_LABELS = "c3694c1a30fd06eebb2ccd811bdabe4440644ef5575f8b3462459836976fff64"
 REFUSALS = {
     "Insufficient evidence to answer from the selected knowledge snapshot.": "en",

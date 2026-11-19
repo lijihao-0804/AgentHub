@@ -2,6 +2,7 @@
 
 import argparse
 import asyncio
+import hashlib
 import json
 import os
 import subprocess
@@ -24,7 +25,8 @@ from ..refusal_prompt import campaign as prev
 from .billing import ACCOUNT, OPENING, FactMeter, close, opening
 from .endpoint import DryTransport, FactEndpoint, arm_case, original
 
-OUT = primary.ROOT / ".scratch/requested-fact-20261119"
+OUT = primary.ROOT / ".scratch/requested-fact-confirm-20261119"
+PRODUCT_COMMIT = "b2992baa5f33f25940473044ff824fc27db25601"
 FOLDER = Path(__file__).resolve().parent
 STAGES = ("first", "final")
 EARLY_DIR = primary.PREVIOUS
@@ -32,18 +34,37 @@ EARLY_DIR = primary.PREVIOUS
 
 def source_control():
     ctrl = prev.source_control()
+    subprocess.run(
+        ["git", "diff", "--quiet", PRODUCT_COMMIT, "--", "packages", "apps/api"],
+        cwd=primary.ROOT,
+        check=True,
+    )
     folder = FOLDER.relative_to(primary.ROOT).as_posix()
+    confirmation = f"{folder}/fixtures/confirmatory.jsonl"
+    if primary.git("ls-tree", "--name-only", PRODUCT_COMMIT, "--", confirmation):
+        raise ValueError("The confirmatory fixture existed before the product freeze")
+    subprocess.run(
+        ["git", "merge-base", "--is-ancestor", PRODUCT_COMMIT, ctrl["commit"]],
+        cwd=primary.ROOT,
+        check=True,
+    )
     paths = [
         p
         for p in primary.git("ls-files", "--", folder).splitlines()
-        if p.endswith((".py", "protocol.md", "fixtures/fresh.jsonl"))
+        if p.endswith((".py", "protocol.md", "fixtures/fresh.jsonl", "fixtures/confirmatory.jsonl"))
     ]
-    if any(
-        p.endswith((".py", "protocol.md", "fixtures/fresh.jsonl"))
-        for p in primary.git(
-            "ls-files", "--others", "--exclude-standard", "--", folder
-        ).splitlines()
-    ) or set(primary.git("diff", "--name-only", "HEAD", "--", folder).splitlines()) & set(paths):
+    if (
+        confirmation not in paths
+        or any(
+            p.endswith(
+                (".py", "protocol.md", "fixtures/fresh.jsonl", "fixtures/confirmatory.jsonl")
+            )
+            for p in primary.git(
+                "ls-files", "--others", "--exclude-standard", "--", folder
+            ).splitlines()
+        )
+        or set(primary.git("diff", "--name-only", "HEAD", "--", folder).splitlines()) & set(paths)
+    ):
         raise ValueError("Requested-fact executable, fixture or protocol is uncommitted")
     ctrl["requested_fact_tree"] = digest(
         [
@@ -333,30 +354,110 @@ def historical(first, second):
     return cases, history
 
 
+def file_hash(path):
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def preconfirmation_sources():
+    review = primary.ROOT / ".scratch/joint-six-review-packets-v1"
+    return [
+        *(review / f"blind-{i}.json" for i in range(3)),
+        EARLY_DIR / "cases.json",
+        *(
+            FOLDER.parent / name / "fixtures/fresh.jsonl"
+            for name in (
+                "first_refusal_contract",
+                "refusal_prompt",
+                "requested_fact",
+            )
+        ),
+    ]
+
+
+def validate_confirmation_manifest(manifest, expected):
+    if any(manifest.get(key) != value for key, value in expected.items()):
+        raise ValueError("Confirmation preparation manifest or pinned artifact differs")
+
+
 def independent(history_cases):
-    rows = load(OUT / "independent/fresh-cases.json")
-    fixture = {r["id"]: r for r in lines(FOLDER / "fixtures/fresh.jsonl")}
+    directory = OUT / "independent"
+    case_path = directory / "fresh-cases.json"
+    wire_path = directory / "fresh-records.json"
+    fixture_path = FOLDER / "fixtures/confirmatory.jsonl"
+    rows = load(case_path)
+    source = lines(fixture_path)
+    fixture = {r["id"]: r for r in source}
+    strata = {(lang, answerable): 12 for lang in ("en", "zh") for answerable in (False, True)}
+    actual = Counter((r["language"], r["gold"]["answerable"]) for r in rows)
     if (
-        len(rows) < 48
+        len(rows) != 48
+        or len(source) != 48
+        or len(fixture) != 48
         or set(fixture) != {r["id"] for r in rows}
-        or len(fixture) != len(rows)
-        or min(
-            Counter((r["language"], r["gold"]["answerable"]) for r in rows)[lang, a]
-            for lang in ("en", "zh")
-            for a in (False, True)
-        )
-        < 12
+        or actual != strata
     ):
-        raise ValueError("Independent registration incomplete")
-    questions = [normalized(c["question"]) for c in rows]
-    if len(set(questions)) != len(rows) or set(questions) & {
-        normalized(c["question"]) for c in history_cases
-    }:
-        raise ValueError("Independent question overlap")
+        raise ValueError("Confirmation registration must have exactly 48 unique, balanced cases")
+    records = load(wire_path)
+    if set(records) != set(fixture):
+        raise ValueError("Confirmation records differ from the registered identifiers")
+    predecessors = preconfirmation_sources()
+    snapshot_hashes = {p.relative_to(primary.ROOT).as_posix(): file_hash(p) for p in predecessors}
+    manifest = load(directory / "verification.json")
+    validate_confirmation_manifest(
+        manifest,
+        {
+            "product_commit": PRODUCT_COMMIT,
+            "product_system_content_sha256": hashlib.sha256(
+                original.qa.citation_system_prompt("PROMPT_JSON").encode()
+            ).hexdigest(),
+            "source_sha256": file_hash(fixture_path),
+            "records_relative_path": wire_path.relative_to(primary.ROOT).as_posix(),
+            "records_sha256": file_hash(wire_path),
+            "frozen_cases_sha256": file_hash(case_path),
+            "messages_canonical_sha256": digest({r["id"]: digest(r["messages"]) for r in rows}),
+            "questions": 48,
+            "distinct_snapshots": 48,
+            "complete_visible_source_sets": 48,
+            "exact_question_overlaps": 0,
+            "exact_passage_overlaps": 0,
+            "per_language_answerability_counts": {
+                "en_answerable": 12,
+                "en_refusal": 12,
+                "zh_answerable": 12,
+                "zh_refusal": 12,
+            },
+        },
+    )
+    if any(
+        manifest.get("history_sources_sha256", {}).get(k) != v for k, v in snapshot_hashes.items()
+    ):
+        raise ValueError("Confirmation preparation omitted or changed a predecessor")
+    # Compare locally without exposing material from the confirmatory cohort.
+    old = list(history_cases)
+    for path in predecessors:
+        old.extend(lines(path) if path.suffix == ".jsonl" else load(path))
+    questions = [normalized(r["question"]) for r in rows]
+    passages = [normalized(doc["text"]) for r in rows for doc in r["documents"]]
+    old_q = {normalized(r["question"]) for r in old}
+    old_text = {
+        normalized(d["text"])
+        for r in old
+        for field in ("documents", "selected", "cited")
+        for d in r.get(field, ())
+        if isinstance(d.get("text"), str)
+    }
+    if (
+        len(set(questions)) != 48
+        or len(set(passages)) != len(passages)
+        or set(questions).intersection(old_q)
+        or set(passages).intersection(old_text)
+    ):
+        raise ValueError("Confirmation overlaps a previous question or passage")
     output = []
     for c in rows:
         if (
             any(c[k] != v for k, v in fixture[c["id"]].items())
+            or any(c[k] != v for k, v in records[c["id"]].items())
             or not c.get("kb")
             or not c.get("snapshot")
         ):
@@ -545,6 +646,7 @@ def registered(directory):
     if (
         reg["previous_account"] != ACCOUNT
         or reg["inputs"] != digest(cases)
+        or reg["confirmation_manifest"] != digest(load(directory / "independent/verification.json"))
         or stripped != expected
         or reg["plan"] != forecast(cases, hist)
     ):
@@ -584,7 +686,13 @@ async def run(args):
         if (OUT / "freeze.json").exists():
             raise ValueError("Registration already present")
         await preflight(cases, history, ledger)
-        reg = dict(previous_account=ACCOUNT, source=control, inputs=digest(cases), plan=plan)
+        reg = dict(
+            previous_account=ACCOUNT,
+            source=control,
+            inputs=digest(cases),
+            plan=plan,
+            confirmation_manifest=digest(load(OUT / "independent/verification.json")),
+        )
         persist(OUT / "cases.json", cases)
         persist(OUT / "freeze.json", reg)
         print(json.dumps(dict(freeze_sha=digest(reg), external_calls=0, **plan)))
