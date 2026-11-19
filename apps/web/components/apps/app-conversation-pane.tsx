@@ -65,7 +65,7 @@ export default function AppConversationPane({
 }) {
   const { t, locale, formatDateTime } = useI18n();
   const { workspaceId, accessToken, permissions, takeTaskDraft } = useFrontendSession();
-  const cannotRun = permissions !== null && !permissions.includes("agent_run");
+  const cannotRun = !permissions?.includes("agent_run");
   const mutation = useWorkspaceMutation(`app-turns:${threadId}`);
   const submissionRef = useRef<TurnSubmissionState>(createSubmissionState());
   const [recoverySubmission, setRecoverySubmission] = useState<TurnSubmission | null>(null);

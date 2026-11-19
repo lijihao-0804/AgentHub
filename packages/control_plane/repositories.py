@@ -92,9 +92,9 @@ class SqlAlchemyTenantRepository:
         result = await self.session.execute(statement)
         return result.scalar_one_or_none()
 
-    async def list_organizations(self, user_id: UUID) -> list[Organization]:
+    async def list_organizations(self, user_id: UUID) -> list[tuple[Organization, str]]:
         result = await self.session.execute(
-            select(Organization)
+            select(Organization, OrganizationMembership.role)
             .join(
                 OrganizationMembership,
                 OrganizationMembership.organization_id == Organization.id,
@@ -102,7 +102,7 @@ class SqlAlchemyTenantRepository:
             .where(OrganizationMembership.user_id == user_id)
             .order_by(Organization.created_at, Organization.id)
         )
-        return list(result.scalars().all())
+        return [(organization, role) for organization, role in result]
 
     async def list_workspaces(self, user_id: UUID) -> list[Workspace]:
         workspace_membership = select(WorkspaceMembership.workspace_id).where(

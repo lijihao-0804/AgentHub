@@ -53,7 +53,7 @@ function argumentEntries(approval: Approval): Array<[string, unknown]> {
 export default function ApprovalsPage() {
   const { t, locale, statusLabel, formatCount, formatDateTime, formatDurationMs } = useI18n();
   const { workspaceId, accessToken, connected, permissions, sessionId } = useFrontendSession();
-  const cannotDecide = permissions !== null && !permissions.includes("approve_action");
+  const cannotDecide = !permissions?.includes("approve_action");
   const [approvals, setApprovals] = useState<Approval[]>([]);
   const [error, setError] = useState<ApiError | null>(null);
   const [decisionError, setDecisionError] = useState<{ approvalId: string; error: ApiError } | null>(null);
@@ -225,6 +225,7 @@ export default function ApprovalsPage() {
   }, [connected, refresh]);
 
   async function decide(approvalId: string, decision: "approve" | "deny", reason?: string) {
+    if (cannotDecide || decisionState) return;
     setDecisionError(null);
     setLastDecisionId(null);
     setDecisionState({ approvalId, decision });

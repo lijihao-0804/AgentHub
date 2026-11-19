@@ -177,7 +177,7 @@ export const enUS = {
       "Configure a workspace session to view {context}. The session lives in memory only and is cleared on refresh.",
     configure: "Configure session",
     context: {
-      settings: "Member management needs a workspace session",
+      settings: "member management",
       home: "the workspace overview",
       dashboard: "the workspace dashboard",
       runs: "the run history",
@@ -1536,6 +1536,7 @@ export const enUS = {
     selectWorkspace: "Select workspace",
     noWorkspaces: "No workspaces",
     noWorkspacesHint: "Create an organization and a workspace in Settings to continue.",
+    createPermission: "An organization owner or administrator can create workspaces in this organization.",
     createWorkspace: "Create workspace",
     otherWorkspaces: "Other workspaces",
   },

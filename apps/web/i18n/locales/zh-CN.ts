@@ -174,7 +174,7 @@ export const zhCN: MessageSchema = {
       "请配置工作区会话以查看{context}。会话仅存于内存，刷新后即清除。",
     configure: "配置会话",
     context: {
-      settings: "成员管理需要一个工作区会话",
+      settings: "成员管理",
       home: "工作区总览",
       dashboard: "工作区仪表板",
       runs: "运行历史",
@@ -1523,6 +1523,7 @@ export const zhCN: MessageSchema = {
     selectWorkspace: "选择工作区",
     noWorkspaces: "暂无工作区",
     noWorkspacesHint: "请先在设置中创建组织与工作区。",
+    createPermission: "只有该组织的所有者或管理员可以在此创建工作区。",
     createWorkspace: "创建工作区",
     otherWorkspaces: "其他工作区",
   },

@@ -114,7 +114,9 @@ function validMaxContextTokens(value: string): boolean {
 
 export default function ModelSettingsPage() {
   const { t, formatDateTime, locale } = useI18n();
-  const { connected, sessionId, workspaceId } = useFrontendSession();
+  const { connected, sessionId, workspaceId, permissions } = useFrontendSession();
+  const manageCredentials = permissions?.includes("workspace_administration") === true;
+  const manageProfiles = permissions?.includes("agent_edit") === true;
 
   const listFormat = new Intl.ListFormat(locale, { style: "long", type: "conjunction" });
   function missingFieldsHint(fields: string[]): string | null {
@@ -221,6 +223,7 @@ export default function ModelSettingsPage() {
    * presented as an "unavailable" health verdict.
    */
   async function runProfileTest(profileId: string) {
+    if (!manageProfiles) return;
     setNotice(null);
     forgetProfileTest(profileId);
     setTestingProfileId(profileId);
@@ -398,7 +401,7 @@ export default function ModelSettingsPage() {
       <Panel
         ariaLabel={t("settings.models.providers")}
         title={t("settings.models.providers")}
-        actions={
+        actions={manageCredentials && (
           <button
             type="button"
             className="button button-primary"
@@ -409,11 +412,11 @@ export default function ModelSettingsPage() {
           >
             {t("settings.models.addProvider")}
           </button>
-        }
+        )}
       >
         <p className="state-hint">{t("settings.models.secretNote")}</p>
 
-        {showCredentialForm && (
+        {manageCredentials && showCredentialForm && (
           <form className="eval-form" onSubmit={submitCredential} noValidate>
             <p className="eval-form-title">{t("settings.models.addProvider")}</p>
             <div className="form-grid">
@@ -505,7 +508,7 @@ export default function ModelSettingsPage() {
         )}
         {credentials.loading && !credentials.error && <LoadingState />}
         {credentials.loaded && !credentials.error && credentialList.length === 0 && (
-          <EmptyState title={t("settings.models.noProviders")} hint={t("settings.models.noProvidersHint")} />
+          <EmptyState title={t("settings.models.noProviders")} hint={manageCredentials ? t("settings.models.noProvidersHint") : undefined} />
         )}
 
         {credentialList.length > 0 && (
@@ -517,7 +520,7 @@ export default function ModelSettingsPage() {
                   <th scope="col">{t("settings.models.provider")}</th>
                   <th scope="col">{t("settings.models.baseUrl")}</th>
                   <th scope="col">{t("settings.models.status")}</th>
-                  <th scope="col">{t("settings.models.actions")}</th>
+                  {manageCredentials && <th scope="col">{t("settings.models.actions")}</th>}
                 </tr>
               </thead>
               <tbody>
@@ -537,7 +540,7 @@ export default function ModelSettingsPage() {
                         label={credential.enabled ? t("common.enabled") : t("common.disabled")}
                       />
                     </td>
-                    <td data-label={t("settings.models.actions")}>
+                    {manageCredentials && <td data-label={t("settings.models.actions")}>
                       <div className="approval-actions">
                         <button
                           type="button"
@@ -571,7 +574,7 @@ export default function ModelSettingsPage() {
                           {t("settings.models.rotate")}
                         </button>
                       </div>
-                    </td>
+                    </td>}
                   </tr>
                 ))}
               </tbody>
@@ -579,7 +582,7 @@ export default function ModelSettingsPage() {
           </div>
         )}
 
-        {editingCredentialId && (
+        {manageCredentials && editingCredentialId && (
           <form className="eval-form" onSubmit={submitCredentialEdit} noValidate>
             <p className="eval-form-title">
               {t("settings.models.editProvider")} · {credentialName(editingCredentialId)}
@@ -620,7 +623,7 @@ export default function ModelSettingsPage() {
           </form>
         )}
 
-        {rotatingCredentialId && (
+        {manageCredentials && rotatingCredentialId && (
           <form className="eval-form" onSubmit={submitRotate} noValidate>
             <p className="eval-form-title">
               {t("settings.models.rotate")} · {credentialName(rotatingCredentialId)}
@@ -661,7 +664,7 @@ export default function ModelSettingsPage() {
       <Panel
         ariaLabel={t("settings.models.profiles")}
         title={t("settings.models.profiles")}
-        actions={
+        actions={manageProfiles && (
           <button
             type="button"
             className="button button-primary"
@@ -674,13 +677,13 @@ export default function ModelSettingsPage() {
           >
             {t("settings.models.addProfile")}
           </button>
-        }
+        )}
       >
-        {credentialList.length === 0 && !credentials.loading && (
+        {manageProfiles && credentialList.length === 0 && !credentials.loading && (
           <p className="state-hint">{t("settings.models.profileNeedsProvider")}</p>
         )}
 
-        {showProfileForm && (
+        {manageProfiles && showProfileForm && (
           <form className="eval-form" onSubmit={submitProfile} noValidate>
             <p className="eval-form-title">
               {editingProfileId ? t("settings.models.editProfile") : t("settings.models.addProfile")}
@@ -829,10 +832,10 @@ export default function ModelSettingsPage() {
         )}
         {profiles.loading && !profiles.error && <LoadingState />}
         {profiles.loaded && !profiles.error && profileList.length === 0 && (
-          <EmptyState title={t("settings.models.noProfiles")} hint={t("settings.models.noProfilesHint")} />
+          <EmptyState title={t("settings.models.noProfiles")} hint={manageProfiles ? t("settings.models.noProfilesHint") : undefined} />
         )}
 
-        {profileList.length > 0 && <p className="state-hint">{t("settings.models.testHint")}</p>}
+        {manageProfiles && profileList.length > 0 && <p className="state-hint">{t("settings.models.testHint")}</p>}
         {/* A failed request stays a request failure; it is never rendered
             as a health verdict, which only the backend may produce. */}
         <InlineError error={testMutation.error} fallback={t("errors.requestFailed")} />
@@ -847,7 +850,7 @@ export default function ModelSettingsPage() {
                   <th scope="col">{t("settings.models.capabilities")}</th>
                   <th scope="col">{t("settings.models.status")}</th>
                   <th scope="col">{t("settings.models.testResult")}</th>
-                  <th scope="col">{t("settings.models.actions")}</th>
+                  {manageProfiles && <th scope="col">{t("settings.models.actions")}</th>}
                 </tr>
               </thead>
               <tbody>
@@ -876,7 +879,7 @@ export default function ModelSettingsPage() {
                         <TestResultCell result={testResults[profile.id]} />
                       )}
                     </td>
-                    <td data-label={t("settings.models.actions")}>
+                    {manageProfiles && <td data-label={t("settings.models.actions")}>
                       <div className="approval-actions">
                         <button
                           type="button"
@@ -904,7 +907,7 @@ export default function ModelSettingsPage() {
                             : t("settings.models.test")}
                         </button>
                       </div>
-                    </td>
+                    </td>}
                   </tr>
                 ))}
               </tbody>

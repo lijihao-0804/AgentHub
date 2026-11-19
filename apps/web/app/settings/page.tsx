@@ -8,7 +8,7 @@ import { CatalogPageHeader } from "@/components/catalog/catalog-layout";
 import { useFrontendSession } from "@/components/providers/session-provider";
 import AppearanceSettings from "@/components/layout/appearance-settings";
 import { ApiError, toApiError } from "@/lib/api/client";
-import { createOrganization, createWorkspace } from "@/lib/api/tenancy";
+import { canCreateWorkspaceIn, createOrganization, createWorkspace } from "@/lib/api/tenancy";
 import Select from "@/components/ui/select";
 import { useI18n } from "@/i18n/provider";
 
@@ -51,9 +51,14 @@ export default function SettingsPage() {
     setNotice(null);
   }, [sessionId]);
 
+  const targetOrganization = organizations.find((org) => org.id === targetOrganizationId);
+  const canCreateWorkspace = canCreateWorkspaceIn(targetOrganization);
+
   useEffect(() => {
     if (!targetOrganizationId && organizations.length > 0) {
-      setTargetOrganizationId(organizationId || organizations[0].id);
+      const eligible = organizations.filter(canCreateWorkspaceIn);
+      const initial = eligible.find((org) => org.id === organizationId) ?? eligible[0] ?? organizations[0];
+      setTargetOrganizationId(initial.id);
     }
   }, [organizations, organizationId, targetOrganizationId]);
 
@@ -82,7 +87,7 @@ export default function SettingsPage() {
 
   async function submitWorkspace(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!workspaceName.trim() || !targetOrganizationId) return;
+    if (!canCreateWorkspace || !workspaceName.trim()) return;
     const requestSessionId = sessionId;
     setBusy(true);
     setError(null);
@@ -173,11 +178,14 @@ export default function SettingsPage() {
               maxLength={200}
             />
           </label>
+          {targetOrganization && !canCreateWorkspace && (
+            <p className="state-hint">{t("workspace.createPermission")}</p>
+          )}
           <div className="form-actions">
             <button
               type="submit"
               className="button button-primary"
-              disabled={busy || !workspaceName.trim() || !targetOrganizationId}
+              disabled={busy || !workspaceName.trim() || !canCreateWorkspace}
             >
               {t("settings.createWorkspace")}
             </button>

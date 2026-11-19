@@ -28,8 +28,8 @@ export default function SettingsMembersPage() {
   const { t } = useI18n();
   const { connected, sessionId, workspaceId, organizationId, accessToken, userId, permissions } =
     useFrontendSession();
-  const canManageOrg = permissions === null || permissions.includes("organization_management");
-  const canManageWorkspace = permissions === null || permissions.includes("workspace_administration");
+  const canManageOrg = permissions?.includes("organization_management") ?? false;
+  const canManageWorkspace = permissions?.includes("workspace_administration") ?? false;
 
   const [orgMembers, setOrgMembers] = useState<Member[]>([]);
   const [wsMembers, setWsMembers] = useState<Member[]>([]);
@@ -88,7 +88,7 @@ export default function SettingsMembersPage() {
   }, [connected, refresh]);
 
   async function removeMember(scope: "org" | "workspace", targetUserId: string) {
-    if (removing || targetUserId === userId) return;
+    if (removing || targetUserId === userId || !(scope === "org" ? canManageOrg : canManageWorkspace)) return;
     const requestSessionId = sessionId;
     setRemoving(true);
     setRowError(null);
@@ -159,7 +159,7 @@ export default function SettingsMembersPage() {
         <header className="page-header">
           <h1>{t("settings.members.title")}</h1>
         </header>
-        <SessionRequired contextKey="session.context.approvals" />
+        <SessionRequired contextKey="session.context.settings" />
       </div>
     );
   }

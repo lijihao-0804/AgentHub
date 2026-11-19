@@ -10,7 +10,12 @@ import { apiRequest, isRecord } from "@/lib/api/client";
 export type Organization = {
   id: string;
   name: string;
+  org_role: string;
 };
+
+export function canCreateWorkspaceIn(organization: Organization | undefined): boolean {
+  return organization?.org_role === "OWNER" || organization?.org_role === "ADMIN";
+}
 
 export type Workspace = {
   id: string;
