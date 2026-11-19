@@ -2,6 +2,18 @@
 
 from __future__ import annotations
 
+from types import SimpleNamespace
+from unittest.mock import AsyncMock
+from uuid import uuid4
+
+import httpx
+import pytest
+
+from apps.api.app import create_app
+from apps.api.dependencies import get_db_session
+from apps.api.knowledge_dependencies import get_workspace_context
+from packages.control_plane.rbac import EVALUATION_READ
+from packages.core.config.settings import Settings
 from packages.evaluation.taxonomy import classify_failure, summarize_labels
 from packages.evaluation.trajectory import build_trajectory_observation
 
@@ -66,6 +78,43 @@ def test_order_violation_is_labeled() -> None:
     )
 
     assert "TOOL_ORDER_VIOLATION" in {label["code"] for label in labels}
+
+
+@pytest.mark.parametrize("later_lookup", [False, True])
+def test_order_violation_at_step_zero_survives_later_error(later_lookup: bool) -> None:
+    steps = [_tool("create_ticket")]
+    if later_lookup:
+        steps.append({**_tool("query_customer"), "index": 1})
+    steps.append({"index": 7, "kind": "GUARD", "status": "FAILED"})
+    labels = classify_failure(
+        {"precedence": [["query_customer", "create_ticket"]]}, _observation(steps=steps)
+    )
+    violation = next(label for label in labels if label["code"] == "TOOL_ORDER_VIOLATION")
+    assert violation["step_index"] == 0
+
+
+@pytest.mark.asyncio
+async def test_taxonomy_route_reports_incompatible_historical_evaluator() -> None:
+    workspace_id, run_id = uuid4(), uuid4()
+    session = AsyncMock()
+    session.scalar.side_effect = [
+        SimpleNamespace(status="SUCCEEDED", experiment_id=uuid4()),
+        SimpleNamespace(spec_json={"frozen": True}, evaluator_manifest={"evaluator_versions": {}}),
+    ]
+    app = create_app(Settings(testing=True))
+    app.dependency_overrides[get_db_session] = lambda: session
+    app.dependency_overrides[get_workspace_context] = lambda: SimpleNamespace(
+        workspace_id=str(workspace_id), permissions={EVALUATION_READ}
+    )
+    async with httpx.AsyncClient(
+        transport=httpx.ASGITransport(app=app, raise_app_exceptions=False),
+        base_url="http://test",
+    ) as client:
+        response = await client.get(
+            f"/api/v1/workspaces/{workspace_id}/evaluation/experiment-runs/{run_id}/failure-taxonomy"
+        )
+    assert response.status_code == 409
+    assert response.json()["error"]["code"] == "EXPERIMENT_EVALUATOR_VERSION_MISMATCH"
 
 
 def test_approval_bypass_is_labeled() -> None:

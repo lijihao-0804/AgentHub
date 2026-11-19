@@ -75,10 +75,17 @@ def classify_failure(
         )
     violation = _first_order_violation(precedence, identities)
     if violation is not None:
+        before, after = violation
+        steps_by_tool: dict[str, Any] = {}
+        for call in calls:
+            steps_by_tool.setdefault(str(call.get("identity")), call.get("step_index"))
+        offending_step = steps_by_tool.get(after)
+        if offending_step is None:
+            offending_step = steps_by_tool.get(before)
         labels.append(
             _label(
                 "TOOL_ORDER_VIOLATION",
-                _order_violation_step(precedence, calls) or step_index,
+                step_index if offending_step is None else offending_step,
                 {"pair": list(violation)},
             )
         )
@@ -122,28 +129,6 @@ def summarize_labels(labels: Sequence[Mapping[str, Any]]) -> dict[str, int]:
         code = str(label.get("code"))
         counts[code] = counts.get(code, 0) + 1
     return dict(sorted(counts.items()))
-
-
-def _order_violation_step(
-    precedence: Any, calls: Sequence[Mapping[str, Any]]
-) -> int | None:
-    if not isinstance(precedence, Sequence) or isinstance(precedence, (str, bytes)):
-        return None
-    positions: dict[str, int] = {}
-    steps: dict[str, Any] = {}
-    for index, call in enumerate(calls):
-        identity = str(call.get("identity"))
-        positions.setdefault(identity, index)
-        steps.setdefault(identity, call.get("step_index"))
-    for pair in precedence:
-        if not isinstance(pair, Sequence) or isinstance(pair, (str, bytes)) or len(pair) != 2:
-            continue
-        before, after = str(pair[0]), str(pair[1])
-        if before not in positions or after not in positions:
-            return steps.get(after) or steps.get(before)
-        if positions[before] > positions[after]:
-            return steps.get(after)
-    return None
 
 
 def _label(
