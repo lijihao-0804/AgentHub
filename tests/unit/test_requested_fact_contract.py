@@ -1,4 +1,5 @@
 import json
+import re
 from dataclasses import replace
 
 import pytest
@@ -119,6 +120,56 @@ async def test_claims_receive_their_own_locatable_sources_and_keep_an_explicit_m
         assert item["locator"] == chunk.locator and item["excerpt"] == chunk.text
 
 
+@pytest.mark.asyncio
+async def test_a_missing_receipt_has_its_own_citation_separate_from_the_confirmed_title():
+    session = _FakeSession(chunks=2)
+    catalog, shipment = session.chunks
+    catalog.text = "The catalogued title was River Atlas."
+    shipment.text = "The receiving sheet was lost; the delivered copy count cannot be verified."
+    question = "Which title was sent, how many copies were delivered, and when was it signed?"
+
+    class PartialGateway(_FakeModelGateway):
+        async def generate_resolved(self, context, plan, request):
+            sections = re.split(r"\n\[(\d+)\]\n", request.messages[1].content)[1:]
+            by_text = {
+                section.split("\ntext:\n")[1].strip(): int(n)
+                for n, section in zip(sections[::2], sections[1::2], strict=True)
+            }
+            self.content = json.dumps(
+                supported(
+                    ("River Atlas.", [by_text[catalog.text]]),
+                    unanswered_parts=[
+                        {
+                            "part": "how many copies were delivered",
+                            "citation_ids": [by_text[shipment.text]],
+                        },
+                        {"part": "when was it signed", "citation_ids": []},
+                    ],
+                )
+            )
+            return await super().generate_resolved(context, plan, request)
+
+    gateway = PartialGateway()
+    app = _app(session, gateway)
+    app.state.settings.knowledge_qa_requested_fact_contract = True
+    response = await _post(
+        app, _payload(session) | {"query": question, "output_mode": "PROMPT_JSON"}
+    )
+    assert response.status_code == 200 and len(gateway.requests) == 1
+    body = response.json()
+    assert not body["insufficient_evidence"] and len(body["citations"]) == 2
+    by_chunk = {c["chunk_id"]: c for c in body["citations"]}
+    title_ref = by_chunk[catalog.chunk_id]
+    gap_ref = by_chunk[shipment.chunk_id]
+    assert (title_ref["locator"], title_ref["excerpt"]) == (catalog.locator, catalog.text)
+    assert (gap_ref["locator"], gap_ref["excerpt"]) == (shipment.locator, shipment.text)
+    assert body["answer"] == (
+        f"River Atlas [{title_ref['id']}]. "
+        f"The evidence does not answer “how many copies were delivered” [{gap_ref['id']}]. "
+        "The evidence does not answer “when was it signed”."
+    )
+
+
 @pytest.mark.parametrize(
     ("text", "source"),
     [
@@ -152,6 +203,7 @@ def test_supported_branch_preserves_negatives_bounds_and_literal_values(text, so
     ("raw", "calls"),
     [
         ('{"kind":"insufficient","claims":[]}', 1),
+        ('{"kind":"insufficient","unanswered_parts":[{"part":"amount","citation_ids":[1]}]}', 1),
         ('{"kind":"insufficient","kind":"supported"}', 1),
         (json.dumps(supported()), 1),
         (json.dumps(supported(("Fact.", []))), 1),
@@ -164,6 +216,30 @@ def test_supported_branch_preserves_negatives_bounds_and_literal_values(text, so
         (json.dumps(supported(("Fact [9", [1]))), 2),
         (json.dumps(supported(("The code is [777].", [1]))), 2),
         (json.dumps(supported(("Fact.", [1]), unanswered_parts=["an invented unknown fact"])), 2),
+        (
+            json.dumps(
+                supported(
+                    ("Fact.", [1]), unanswered_parts=[{"part": "handbook", "citation_ids": [2]}]
+                )
+            ),
+            2,
+        ),
+        (
+            json.dumps(
+                supported(
+                    ("Fact.", [1]), unanswered_parts=[{"part": "handbook", "citation_ids": [1, 1]}]
+                )
+            ),
+            2,
+        ),
+        (
+            json.dumps(
+                supported(
+                    ("Fact.", [1]), unanswered_parts=[{"part": "handbook", "citation_ids": [True]}]
+                )
+            ),
+            1,
+        ),
         ('{"answer":"Yes [1].","citation_ids":[1],"insufficient_evidence":false}', 1),
     ],
 )

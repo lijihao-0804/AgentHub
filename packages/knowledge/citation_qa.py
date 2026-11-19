@@ -131,7 +131,8 @@ _REQUESTED_FACT_CORRECTION = (
     "Return the requested-fact JSON again. If the evidence establishes no requested fact, "
     'return exactly {"kind":"insufficient"}. Otherwise use kind="supported" and put each '
     "claim's visible source numbers in its citation_ids array. Use no inline source markers. "
-    "Each unanswered_parts entry must be copied from the question."
+    "Copy each unanswered part from the question. If visible evidence explicitly documents "
+    "the gap, cite its IDs on that part only. Use no IDs for silence alone."
 )
 
 _SYSTEM_PROMPT = """You are AgentHub's evidence-grounded question answering component.
@@ -209,8 +210,13 @@ For example, a manual's silence does not prohibit an action; an explicit prohibi
 A stated maximum answers a question about the maximum, not the exact quantity used.
 Naming the person who operated a device does not identify the person who approved its use.
 For an explicitly multi-part request, give every supported part. If some requested parts
-remain unresolved, include each of them in "unanswered_parts" using an exact excerpt of
-the original question. Omit this array when all requested parts are supported.
+remain unresolved, include each in "unanswered_parts".
+Use {"part":"exact question excerpt","citation_ids":[]} for each such part.
+When a visible record explicitly documents
+why the requested value is unknown, put its actual ID(s) on that unanswered part, not on
+the supported claim. If the sources are simply silent, leave its IDs empty or use just
+the exact question excerpt as a string. Never guess an ID. Omit unanswered_parts when all
+requested parts are supported.
 Never include background claims just to justify choosing the insufficient branch."""
 
 
@@ -268,11 +274,17 @@ class _FactClaim(BaseModel):
     citation_ids: list[int] = Field(min_length=1)
 
 
+class _UnansweredPart(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    part: str = Field(min_length=1)
+    citation_ids: list[int]
+
+
 class _SupportedFacts(BaseModel):
     model_config = ConfigDict(extra="forbid")
     kind: Literal["supported"]
     claims: list[_FactClaim] = Field(min_length=1)
-    unanswered_parts: list[str] = Field(default_factory=list)
+    unanswered_parts: list[str | _UnansweredPart] = Field(default_factory=list)
 
 
 class _MissingFacts(BaseModel):
@@ -638,6 +650,16 @@ class CitationAnswerReceipt:
     rule: str | None
 
 
+def _attributed_text(text: str, ids: set[int]) -> str:
+    if not ids:
+        return text
+    markers = "".join(f"[{n}]" for n in sorted(ids))
+    statement = text.rstrip(".!?。！？")
+    if statement:
+        return f"{statement} {markers}{text[len(statement) :]}"
+    return f"{text} {markers}"
+
+
 def _fact_claim_text(
     claim: _FactClaim, allowed: frozenset[int], evidence_texts: Mapping[int, str] | None
 ) -> str:
@@ -680,11 +702,7 @@ def _fact_claim_text(
         answer=f"{checked} {markers}", citation_ids=list(ids), insufficient_evidence=False
     )
     _validate_model_output(verified, evidence_count=len(allowed), visible_ids=allowed)
-    # Place the source alongside its own claim, before any terminal punctuation.
-    statement = text.rstrip(".!?。！？")
-    if statement:
-        return f"{statement} {markers}{text[len(statement) :]}"
-    return f"{text} {markers}"
+    return _attributed_text(text, ids)
 
 
 def _resolve_requested_facts(
@@ -706,34 +724,49 @@ def _resolve_requested_facts(
     ids: tuple[int, ...] = ()
     if isinstance(output, _SupportedFacts):
         pieces = [_fact_claim_text(claim, allowed, evidence_texts) for claim in output.claims]
-        ids = tuple(sorted({n for claim in output.claims for n in claim.citation_ids}))
-        parts = [part.strip() for part in output.unanswered_parts]
-        if len(parts) != len(set(parts)) or any(
-            not part or part not in query or part.rstrip("?.。？") == query.strip().rstrip("?.。？")
-            for part in parts
-        ):
-            raise _InvalidCitationAnswer(
-                _QaFailure.STATE_BODY_CONFLICT,
-                "An unanswered part must be quoted from the question.",
-            )
-        if parts:
+        all_ids = {n for claim in output.claims for n in claim.citation_ids}
+        seen_parts = set()
+        chinese = answer != _INSUFFICIENT_EVIDENCE
+        for item in output.unanswered_parts:
+            part = (item if isinstance(item, str) else item.part).strip()
+            if (
+                not part
+                or part not in query
+                or part in seen_parts
+                or part.rstrip("?.。？") == query.strip().rstrip("?.。？")
+            ):
+                raise _InvalidCitationAnswer(
+                    _QaFailure.STATE_BODY_CONFLICT,
+                    "An unanswered part must be a distinct excerpt of the question.",
+                )
+            seen_parts.add(part)
+            references = [] if isinstance(item, str) else item.citation_ids
+            part_ids = set(references)
+            if not part_ids <= allowed:
+                raise _InvalidCitationAnswer(
+                    _QaFailure.CITATION_OUT_OF_RANGE, "Unseen unanswered-part citation ID."
+                )
+            if len(part_ids) != len(references):
+                raise _InvalidCitationAnswer(
+                    _QaFailure.CITATION_MISMATCH, "Duplicate unanswered-part citation ID."
+                )
             # A user's question may itself contain bracketed numerals. In that
             # case avoid reproducing ambiguous references in the qualification.
-            chinese = answer != _INSUFFICIENT_EVIDENCE
-            if any(_NUMERIC_GROUP.search(part) for part in parts):
-                pieces.append(
+            if _NUMERIC_GROUP.search(part):
+                note = (
                     "其余所问内容证据不足。"
                     if chinese
                     else "The remaining requested details are not established."
                 )
-            elif chinese:
-                pieces.append(
-                    "证据未能回答的问题部分为" + "、".join(f"“{part}”" for part in parts) + "。"
-                )
             else:
-                pieces.append(
-                    "The evidence does not answer " + ", ".join(f"“{part}”" for part in parts) + "."
+                note = (
+                    f"证据未能回答的问题部分为“{part}”。"
+                    if chinese
+                    else f"The evidence does not answer “{part}”."
                 )
+            pieces.append(_attributed_text(note, part_ids))
+            all_ids.update(part_ids)
+        ids = tuple(sorted(all_ids))
         answer = " ".join(pieces)
         if len(answer) > _MAX_ANSWER_CHARS:
             raise _InvalidCitationAnswer(
