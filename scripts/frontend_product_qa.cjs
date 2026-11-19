@@ -121,8 +121,9 @@ async function exerciseRegistrationUi(page, baseUrl, observations) {
   });
 }
 
-async function loginThroughUi(page, baseUrl, account, observations) {
+async function loginThroughUi(page, baseUrl, account, workspace, observations) {
   await page.goto(`${baseUrl}/login`, { waitUntil: "domcontentloaded", timeout: 45_000 });
+  await page.evaluate((id) => localStorage.setItem("agenthub.workspaceId", id), account.workspace_id);
   const emailField = page.locator('input[name="email"]');
   const passwordField = page.locator('input[name="password"]');
   const submit = page.locator('button[type="submit"]');
@@ -150,10 +151,12 @@ async function loginThroughUi(page, baseUrl, account, observations) {
   if (response.status() !== 200) throw new Error("Browser login failed");
   await page.locator(".app-shell").waitFor({ state: "visible", timeout: 45_000 });
   await page.locator(".ws-selector-trigger").waitFor({ state: "visible", timeout: 30_000 });
-  const workspaceLabel = await page.locator(".ws-selector-trigger").getAttribute("title");
+  const workspacePath = page.locator(".ws-selector-trigger .ws-path");
+  await workspacePath.filter({ hasText: workspace.name }).waitFor();
+  const workspaceLabel = await workspacePath.innerText();
   observations.push({
     name: "target-workspace-visible",
-    pass: Boolean(workspaceLabel?.includes("Research")),
+    pass: workspaceLabel === workspace.name,
     detail: workspaceLabel || "workspace selector title missing",
   });
 }
@@ -405,7 +408,11 @@ async function routeGeometry(page) {
             fieldLabel: rect(destinationLabel),
             select: rect(destinationSelect),
             selectGap: destinationSelect && destinationLabel
-              ? rect(destinationSelect).y - rect(destinationLabel).bottom
+              ? Math.max(
+                  rect(destinationSelect).x - rect(destinationLabel).right,
+                  rect(destinationLabel).x - rect(destinationSelect).right,
+                  rect(destinationSelect).y - rect(destinationLabel).bottom,
+                )
               : null,
           }
         : null,
@@ -649,8 +656,8 @@ async function exerciseWorkspaceAndWorkbench(page, baseUrl, fixtures, observatio
   await page.locator(".app-shell").waitFor({ state: "visible" });
   const workspaceButton = page.locator(".ws-selector-trigger");
   await workspaceButton.click();
-  const researchMenu = page.locator('.ws-menu-item[role="menuitem"]').filter({ hasText: "Research" });
-  const workspaceMenuVisible = await researchMenu.isVisible();
+  const activeItem = page.locator('.ws-menu-item[aria-current="true"]');
+  const workspaceMenuVisible = await activeItem.isVisible() && (await activeItem.innerText()) === fixtures.workspace.name;
   await page.keyboard.press("Escape");
   const sidebarBefore = await page.locator(".app-shell").getAttribute("data-sidebar");
   await page.locator(".sidebar-toggle").click();
@@ -659,7 +666,7 @@ async function exerciseWorkspaceAndWorkbench(page, baseUrl, fixtures, observatio
   observations.push({
     name: "workspace-selector",
     pass: workspaceMenuVisible,
-    detail: `Research menu visible=${workspaceMenuVisible}`,
+    detail: `Active workspace menu item matches=${workspaceMenuVisible}`,
   });
   observations.push({
     name: "desktop-sidebar-toggle",
@@ -812,7 +819,7 @@ async function main() {
     const context = await browser.newContext({ viewport: { width: 1440, height: 920 }, locale: "en-US" });
     const page = await context.newPage();
     page.setDefaultTimeout(60_000);
-    await loginThroughUi(page, baseUrl, account, observations);
+    await loginThroughUi(page, baseUrl, account, fixtures.workspace, observations);
     const needsAgentDetailInteractions = scenes.some((scene) => scene.name === "agent-detail");
     if (!selectedSceneNames || needsAgentDetailInteractions) {
       await setPreferences(page, "light", "en-US", observations);
@@ -867,11 +874,11 @@ async function main() {
     base_url: baseUrl,
     api_base_url: apiBaseUrl,
     matrix: { scenes: scenes.map((scene) => scene.name), widths, themes, locales },
-    workspace: "Verification Org / Research",
+    workspace: fixtures.workspace.name,
     authorization_fixture: {
-      organization_role: "MEMBER",
-      workspace_role: "VIEWER",
-      workspace_permissions: ["workspace_read", "evaluation_read"],
+      organization_role: fixtures.workspace.org_role,
+      workspace_role: fixtures.workspace.workspace_role,
+      workspace_permissions: fixtures.workspace.permissions,
     },
     fixture_summary: {
       agent_id: fixtures.agent.id,
@@ -907,7 +914,7 @@ async function main() {
     "",
     `- Completed: ${report.started_or_completed_at}`,
     `- Web: ${baseUrl}`,
-    `- Workspace: Verification Org / Research`,
+    `- Workspace: ${report.workspace}`,
     `- Cases: ${report.totals.passed}/${report.totals.cases} passed`,
     `- Interaction observations: ${observations.filter((item) => item.pass).length}/${observations.length} passed`,
     `- Report: ${reportPath}`,
