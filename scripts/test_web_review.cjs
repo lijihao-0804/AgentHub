@@ -766,6 +766,19 @@ async function testRenewalIdentity() {
 }
 
 async function main() {
+  const artifactClient = load('lib/api/artifacts.ts', {
+    '@/lib/api/client': { isRecord: value => !!value && typeof value === 'object' && !Array.isArray(value) },
+    '@/lib/api/tenancy': {},
+  });
+  const metric = {
+    question: null, metric_arguments: { windows: [{ start_date: '2026-03-15', end_date: '2026-03-15' }], platform: 'ios' },
+    columns: ['signups', 'views'], rows: [[14, 45]], row_count: 1, truncated: false,
+    provenance: { run_id: 'run', tool_identity: 'get_registration_conversion', tool_call_id: 'call', step_sequence: 2 },
+  };
+  const metricQuery = artifactClient.readAnalysisQueryResultContent(metric);
+  assert.deepEqual(artifactClient.queryResultPayload(metricQuery), metric);
+  assert.deepEqual(artifactClient.readAnalysisFindingContent({ queries: [metric] }).queries, [metricQuery]);
+  console.log('PASS metric query arguments, rows and provenance survive finding attachment without SQL');
   await testRenewalIdentity();
   {
     const h = harness();

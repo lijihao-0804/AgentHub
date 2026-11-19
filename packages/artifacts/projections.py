@@ -307,7 +307,91 @@ def project_incident_timeline(call: RecordedToolCall, run_id: UUID) -> BuiltArti
 # analysis
 
 
+def _registration_conversion(call: RecordedToolCall, run_id: UUID) -> BuiltArtifact | None:
+    result = _structured(call)
+    if not result:
+        return None
+    windows = result.get("windows")
+    if (
+        not isinstance(windows, list)
+        or not 1 <= len(windows) <= 2
+        or windows != call.arguments.get("windows")
+    ):
+        return None
+    overall, platforms, versions = (result.get(key) for key in ("overall", "platforms", "versions"))
+    if (
+        not isinstance(overall, dict)
+        or not isinstance(platforms, list)
+        or not isinstance(versions, list)
+    ):
+        return None
+    rows = []
+    for scope, groups in (("overall", [overall]), ("platform", platforms), ("version", versions)):
+        for group in groups:
+            if not isinstance(group, dict) or "change_pp" not in group:
+                return None
+            if scope != "overall" and not _text(group.get("platform")):
+                return None
+            if scope == "version" and not _text(group.get("app_version")):
+                return None
+            periods = group.get("periods")
+            if not isinstance(periods, list) or len(periods) != len(windows):
+                return None
+            for index, (window, period) in enumerate(zip(windows, periods, strict=True)):
+                if not isinstance(window, dict) or not isinstance(period, dict):
+                    return None
+                if not {"signups", "views", "rate_pct"} <= period.keys():
+                    return None
+                if any(
+                    type(period[key]) is not int or period[key] < 0 for key in ("signups", "views")
+                ):
+                    return None
+                if any(
+                    value is not None and _number(value) is None
+                    for value in (group["change_pp"], period["rate_pct"])
+                ):
+                    return None
+                rows.append(
+                    [
+                        scope,
+                        group.get("platform"),
+                        group.get("app_version"),
+                        window.get("start_date"),
+                        window.get("end_date"),
+                        period["signups"],
+                        period["views"],
+                        period["rate_pct"],
+                        group["change_pp"] if index == 1 else None,
+                    ]
+                )
+    return BuiltArtifact(
+        schemas.ANALYSIS_QUERY_RESULT,
+        "Registration conversion",
+        {
+            "question": None,
+            "metric_arguments": call.arguments,
+            "columns": [
+                "scope",
+                "platform",
+                "app_version",
+                "start_date",
+                "end_date",
+                "signups",
+                "views",
+                "rate_pct",
+                "change_pp",
+            ],
+            "rows": rows[: schemas.MAX_ROWS],
+            "row_count": len(rows),
+            "truncated": len(rows) > schemas.MAX_ROWS,
+            "provenance": _provenance(call, run_id),
+        },
+    )
+
+
 def project_analysis_query(call: RecordedToolCall, run_id: UUID) -> BuiltArtifact | None:
+    if tool_tail(call.tool_identity) == "get_registration_conversion":
+        return _registration_conversion(call, run_id)
     if tool_tail(call.tool_identity) != "query_sql":
         return None
     structured = _structured(call)
