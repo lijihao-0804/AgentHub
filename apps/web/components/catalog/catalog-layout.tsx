@@ -13,24 +13,18 @@ export type CatalogStat = {
 };
 
 export function CatalogPageHeader({
-  eyebrow,
   title,
-  description,
   actions,
   context,
 }: {
-  eyebrow?: string;
   title: string;
-  description: string;
   actions?: ReactNode;
   context?: ReactNode;
 }) {
   return (
     <header className="catalog-page-header">
       <div className="catalog-page-heading">
-        {eyebrow && <p className="catalog-eyebrow">{eyebrow}</p>}
         <h1>{title}</h1>
-        <p className="catalog-page-description">{description}</p>
         {context && <div className="catalog-page-context">{context}</div>}
       </div>
       {actions && <div className="catalog-page-actions">{actions}</div>}
@@ -126,7 +120,6 @@ export function CatalogEmptyNotice({
 }) {
   return (
     <div className="catalog-empty-notice">
-      <span className="catalog-empty-mark" aria-hidden="true"><Icon name="search" size={18} /></span>
       <div>
         <p className="state-title">{title}</p>
         {hint && <p className="state-hint">{hint}</p>}

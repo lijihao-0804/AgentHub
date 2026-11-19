@@ -243,7 +243,7 @@ export default function SupportRecords({ ticketId }: { ticketId?: string }) {
   const canManage = permissions?.includes("support_records_manage") === true;
   return (
     <div className="page">
-      <CatalogPageHeader title={t("support.records.title")} description={t("support.records.description")} actions={
+      <CatalogPageHeader title={t("support.records.title")} actions={
         ticketId && canRead ? <Link className="button button-ghost" href="/support/records">{t("support.records.customerList")}</Link> : undefined
       } />
       {!connected ? <SessionRequired contextKey="session.context.support" />

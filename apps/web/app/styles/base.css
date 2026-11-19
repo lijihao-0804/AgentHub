@@ -8,6 +8,7 @@ html {
   -moz-osx-font-smoothing: grayscale;
   background: var(--background);
   scrollbar-gutter: stable;
+  scroll-padding-block-start: calc(var(--topbar-height) + 1rem);
   text-rendering: optimizeLegibility;
 }
 

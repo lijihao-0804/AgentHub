@@ -194,7 +194,6 @@ export default function DatasetDetailPage({ datasetId }: { datasetId: string }) 
 
       <Panel
         title={t("evaluation.datasets.versions.title")}
-        eyebrow={t("evaluation.datasets.eyebrow")}
         actions={
           canManage ? (
             <button type="button" className="button button-primary" onClick={() => setShowForm((v) => !v)}>

@@ -315,7 +315,7 @@ export default function RunCompareClient() {
 
       {leftSide && rightSide && (
         <>
-          <Panel title={t("runCompare.statusTitle")} eyebrow={t("runCompare.eyebrow")}>
+          <Panel title={t("runCompare.statusTitle")}>
             <p className="state-hint">
               {leftSide.detail.agent_version_number === rightSide.detail.agent_version_number
                 ? t("runCompare.versionsSame", { version: leftSide.detail.agent_version_number })

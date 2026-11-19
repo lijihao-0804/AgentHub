@@ -265,7 +265,169 @@ function testLabeledSelect() {
   console.log('PASS labeled select closes after a pointer selection and returns focus to its trigger');
 }
 
+// Run against a running local web app with --shell-browser URL.
+// PLAYWRIGHT_MODULE_PATH can point to a separately installed Playwright.
+async function testShellBrowser(baseUrl) {
+  const { chromium } = require(process.env.PLAYWRIGHT_MODULE_PATH || 'playwright');
+  const browser = await chromium.launch({ channel: process.env.PLAYWRIGHT_CHANNEL || 'msedge' });
+  const destinations = ['/', '/dashboard', '/research', '/incidents', '/analytics', '/support', '/agents',
+    '/knowledge', '/tools', '/runs', '/approvals', '/evaluations', '/settings'];
+  try {
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    page.setDefaultTimeout(20_000);
+    let authenticated = true;
+    const workspace = { id: 'shell-workspace', name: 'Shell workspace', organization_id: 'shell-org',
+      workspace_role: 'VIEWER', permissions: ['workspace_read'] };
+    const conversation = { id: '00000000-0000-4000-8000-000000000103', workspace_id: workspace.id,
+      agent_id: 'shell-agent', kind: 'support', title: 'Phone conversation',
+      created_by: 'shell-user', created_at: '2026-01-01T00:00:00Z', updated_at: '2026-01-01T00:00:00Z' };
+    const workspacePath = '/api/v1/workspaces/' + workspace.id;
+    await page.route('**/api/v1/**', async route => {
+      const pathname = new URL(route.request().url()).pathname;
+      const endpoints = {
+        '/api/v1/auth/refresh': { user_id: 'shell-user', access_token: 'test', expires_in: 3600 },
+        '/api/v1/organizations': { items: [{ id: 'shell-org', name: 'Shell organization' }] },
+        '/api/v1/workspaces': { items: [workspace] },
+        [workspacePath]: workspace,
+        [workspacePath + '/threads']: { items: [conversation] },
+        [workspacePath + '/threads/' + conversation.id]: conversation,
+      };
+      await route.fulfill({ status: authenticated ? 200 : 401, json: authenticated
+        ? endpoints[pathname] ?? { items: [] }
+        : { error: { code: 'UNAUTHENTICATED', message: 'Signed out' } } });
+    });
+    await page.goto(new URL('/', baseUrl).href);
+    const nav = page.locator('#app-sidebar nav');
+    const links = nav.locator('a');
+    async function checkDestinations() {
+      await links.first().waitFor({ state: 'visible' });
+      assert.deepEqual(await links.evaluateAll(nodes => nodes.map(node => node.getAttribute('href'))), destinations);
+      for (const link of await links.all()) {
+        await link.focus();
+        assert.ok(await link.evaluate(node => node === document.activeElement && node.getBoundingClientRect().width > 0));
+        assert.ok(await link.getAttribute('aria-label'));
+      }
+    }
+    const theme = page.locator('.theme-toggle');
+    const language = page.locator('.language-toggle');
+    await theme.waitFor();
+    const initialTheme = await page.locator('html').getAttribute('data-theme');
+    const nextTheme = initialTheme === 'dark' ? 'light' : 'dark';
+    const initialLocale = await page.locator('html').getAttribute('lang');
+    const nextLocale = initialLocale === 'zh-CN' ? 'en-US' : 'zh-CN';
+    await theme.focus();
+    await page.keyboard.press('Space');
+    await language.focus();
+    await page.keyboard.press('Enter');
+    await page.waitForFunction(([theme, locale]) => document.documentElement.dataset.theme === theme &&
+      document.documentElement.lang === locale, [nextTheme, nextLocale]);
+    await page.reload();
+    await theme.waitFor();
+    assert.equal(await page.locator('html').getAttribute('data-theme'), nextTheme);
+    assert.equal(await page.locator('html').getAttribute('lang'), nextLocale);
+    if (nextLocale !== 'zh-CN') await language.click();
+    await page.goto(new URL('/agents/00000000-0000-4000-8000-000000000001/chat', baseUrl).href);
+    await page.locator('.breadcrumbs [aria-current="page"]').waitFor();
+    assert.match(await page.locator('.breadcrumbs [aria-current="page"]').innerText(), /对话|聊天/);
+    await checkDestinations();
+    await page.locator('.sidebar-toggle').click();
+    await checkDestinations();
+    const toggle = page.locator('.nav-toggle');
+    const drawer = page.locator('#app-sidebar');
+    const finder = page.locator('.page-finder');
+    await page.setViewportSize({ width: 320, height: 640 });
+    await toggle.click();
+    await checkDestinations();
+    assert.equal(await drawer.getAttribute('aria-modal'), 'true');
+    assert.ok(await page.locator('.app-frame').evaluate(node => node.inert));
+    await page.keyboard.press('Tab');
+    assert.ok(await drawer.locator('.brand-link').evaluate(node => node === document.activeElement));
+    await page.keyboard.press('Shift+Tab');
+    assert.ok(await links.last().evaluate(node => node === document.activeElement));
+    await page.keyboard.press('Control+k');
+    assert.equal(await finder.isVisible(), false);
+    await page.keyboard.press('Escape');
+    await drawer.waitFor({ state: 'hidden' });
+    assert.ok(await toggle.evaluate(node => node === document.activeElement));
+    await toggle.click();
+    await nav.locator('[href="/support"]').click();
+    await page.waitForURL('**/support');
+    await drawer.waitFor({ state: 'hidden' });
+    assert.ok(await page.locator('main select[name="agent"]').isDisabled(), 'viewer cannot create threads');
+    await page.keyboard.press('Control+k');
+    const search = finder.getByRole('searchbox');
+    await search.fill('/settings');
+    assert.equal(await finder.getByRole('link').count(), 1);
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('Enter');
+    await page.waitForURL('**/settings');
+    await finder.waitFor({ state: 'hidden' });
+    await toggle.click();
+    assert.equal(await nav.locator('[href="/settings"]').getAttribute('aria-current'), 'page');
+    await drawer.locator('.drawer-close').click();
+    await drawer.waitFor({ state: 'hidden' });
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(new URL('/support', baseUrl).href);
+    const welcome = page.locator('.thread-welcome');
+    await welcome.waitFor();
+    const frame = await page.locator('.thread-frame').boundingBox();
+    assert.ok((await welcome.boundingBox()).y - frame.y < 80, 'new conversation starts near the top');
+    workspace.permissions.push('agent_run');
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(new URL('/support/' + conversation.id, baseUrl).href);
+    const composer = page.locator('textarea[name="message"]');
+    await composer.fill('Preserve my unsent draft');
+    const detailsToggle = page.locator('.thread-side-toggle');
+    const details = page.locator('#conversation-details');
+    await detailsToggle.focus();
+    await page.keyboard.press('Enter');
+    await details.waitFor();
+    assert.equal(await composer.isVisible(), false);
+    assert.ok((await details.innerText()).trim().length > 0);
+    assert.ok(await detailsToggle.getByText('返回对话').isVisible());
+    await page.keyboard.press('Escape');
+    assert.ok(await detailsToggle.evaluate(node => node === document.activeElement));
+    assert.ok(await composer.isVisible());
+    assert.equal(await composer.inputValue(), 'Preserve my unsent draft');
+    await detailsToggle.click();
+    const history = page.locator('[aria-controls="conversation-history"]');
+    await history.click();
+    await page.locator('#conversation-history').waitFor();
+    assert.equal(await details.isVisible(), false);
+    await page.keyboard.press('Escape');
+    assert.ok(await history.evaluate(node => node === document.activeElement));
+    assert.equal(await composer.inputValue(), 'Preserve my unsent draft');
+    authenticated = false;
+    await page.reload();
+    await page.waitForURL('**/login');
+    assert.equal(await drawer.count(), 0);
+    console.log('PASS browser shell: all destinations, collapsed rail, 320px drawer, focus loop, Escape, search navigation, viewer permissions and signed-out redirect');
+  } finally {
+    await browser.close();
+  }
+}
+
+function testWorkspaceRecoveryEntry() {
+  const view = harness();
+  const { SessionRequired, ErrorState } = load('components/ui/states.tsx', view.mocks);
+  let retries = 0;
+  Object.assign(view.session, {
+    organizations: [], workspaces: [], tenancyError: { code: 'DIRECTORY_UNAVAILABLE' },
+    reloadTenancy: () => { retries++; },
+  });
+  const error = view.render(SessionRequired, {});
+  assert.equal(error.type, ErrorState);
+  error.props.onRetry();
+  assert.equal(retries, 1);
+  view.session.tenancyError = null;
+  const destination = () => elements(view.render(SessionRequired, {}), item => item.type === 'a')[0].props.href;
+  assert.equal(destination(), '/settings#create-organization');
+  view.session.organizations = [{ id: 'org' }];
+  assert.equal(destination(), '/settings#create-workspace');
+}
+
 async function main() {
+  testWorkspaceRecoveryEntry();
   const directory = harness({
     '@/components/layout/menu-keyboard': { useMenuKeyboardNav: () => ({ current: null }) },
     '@/i18n/provider': { useI18n: () => ({ t: key => key, errorText: (_, message) => message }) },
@@ -724,4 +886,5 @@ async function main() {
   await assert.rejects(clientApi.getArtifactHandoff(auth, 'artifact-a'));
   console.log('PASS handoff client strict response and workspace/artifact identity');
 }
-main().catch((error) => { console.error(error); process.exitCode = 1; });
+const browserFlag = process.argv.indexOf('--shell-browser');
+(browserFlag >= 0 ? testShellBrowser(process.argv[browserFlag + 1]) : main()).catch((error) => { console.error(error); process.exitCode = 1; });

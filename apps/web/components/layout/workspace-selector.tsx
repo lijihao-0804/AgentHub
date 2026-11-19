@@ -33,7 +33,10 @@ export default function WorkspaceSelector() {
   useEffect(() => {
     if (!panelOpen) return;
     function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") closePanel();
+      if (event.key === "Escape") {
+        containerRef.current?.querySelector<HTMLButtonElement>("button[aria-haspopup]")?.focus();
+        closePanel();
+      }
     }
     function onPointerDown(event: MouseEvent) {
       if (!containerRef.current?.contains(event.target as Node)) closePanel();
@@ -70,7 +73,8 @@ export default function WorkspaceSelector() {
     : workspaceLabel;
 
   return (
-    <div className="ws-selector" ref={containerRef}>
+    <div className="ws-selector" ref={containerRef}
+      onBlur={(event) => { if (panelOpen && event.relatedTarget && !event.currentTarget.contains(event.relatedTarget)) closePanel(); }}>
       <button
         type="button"
         className="ws-selector-trigger"
@@ -80,9 +84,7 @@ export default function WorkspaceSelector() {
         onClick={() => (panelOpen ? closePanel() : openPanel())}
         title={fullLabel}
       >
-        <span className="session-dot" aria-hidden="true" />
         <span className="ws-context">
-          <span className="ws-context-label">{t("shell.currentWorkspace")}</span>
           <span className="ws-path-line">
             {orgPrefix && <span className="ws-org-prefix">{orgPrefix} /</span>}
             <span className="ws-path">{workspaceLabel}</span>

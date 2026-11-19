@@ -262,7 +262,7 @@ function NavLink({
         href={item.href}
         className={`nav-link${active ? " nav-link-active" : ""}`}
         aria-current={active ? "page" : undefined}
-        aria-label={label}
+        aria-label={badgeTitle ? `${label}, ${badgeTitle}` : label}
         title={label}
         onClick={onNavigate}
       >
@@ -294,22 +294,23 @@ function SidebarContent({ onNavigate }: { onNavigate: () => void }) {
         <Link
           href="/"
           className="brand-link"
-          aria-label={`AgentHub, ${t("brand.subtitle")}`}
-          title={t("brand.subtitle")}
+          aria-label={`AgentHub, ${t("nav.home")}`}
           onClick={onNavigate}
         >
           <span className="brand-mark"><BrandMark className="brand-mark-glyph" /></span>
           <span className="brand-copy">
             <span className="brand-name">AgentHub</span>
-            <span className="brand-subtitle">{t("brand.subtitle")}</span>
           </span>
         </Link>
+        <button type="button" className="shell-control drawer-close" aria-label={t("shell.closeMenu")} onClick={onNavigate}>
+          <svg aria-hidden="true" fill="none" viewBox="0 0 24 24"><path d="m7 7 10 10M17 7 7 17" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" /></svg>
+        </button>
       </div>
 
       <nav className="sidebar-nav" aria-label={t("shell.primaryNav")}>
         {PRIMARY_GROUPS.map((group) => (
           <section className="nav-group" key={group.headingKey}>
-            <h2 className="nav-group-heading">{t(group.headingKey)}</h2>
+            <h2 className={group.headingKey === "nav.configureGroup" || group.headingKey === "nav.workspaceGroup" ? "sr-only" : "nav-group-heading"}>{t(group.headingKey)}</h2>
             <ul>
               {group.items.map((item) => {
                 const rawCount = item.badge ? counts[item.badge] : null;
@@ -336,10 +337,6 @@ function SidebarContent({ onNavigate }: { onNavigate: () => void }) {
         ))}
       </nav>
 
-      <div className="sidebar-footer">
-        <span className="sidebar-security-dot" aria-hidden="true" />
-        <p className="sidebar-footnote">{t("shell.footnote")}</p>
-      </div>
     </>
   );
 }
@@ -425,17 +422,11 @@ function ShellChrome({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!navOpen) return;
-    const previousFocus =
-      document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    const firstLink = sidebarRef.current?.querySelector<HTMLElement>(
-      ".brand-link, .nav-link, button",
-    );
-    firstLink?.focus();
+    sidebarRef.current?.querySelector<HTMLButtonElement>(".drawer-close")?.focus();
 
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
         setNavOpen(false);
-        menuButtonRef.current?.focus();
         return;
       }
       if (event.key !== "Tab" || !sidebarRef.current) return;
@@ -443,7 +434,7 @@ function ShellChrome({ children }: { children: ReactNode }) {
         ...sidebarRef.current.querySelectorAll<HTMLElement>(
           'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
         ),
-      ];
+      ].filter((element) => element.getClientRects().length > 0);
       if (focusable.length === 0) return;
       const first = focusable[0];
       const last = focusable[focusable.length - 1];
@@ -458,7 +449,7 @@ function ShellChrome({ children }: { children: ReactNode }) {
     document.addEventListener("keydown", onKeyDown);
     return () => {
       document.removeEventListener("keydown", onKeyDown);
-      if (previousFocus?.isConnected) previousFocus.focus();
+      if (menuButtonRef.current?.getClientRects().length) menuButtonRef.current.focus();
     };
   }, [navOpen]);
 
@@ -467,7 +458,7 @@ function ShellChrome({ children }: { children: ReactNode }) {
       className="app-shell"
       data-sidebar={sidebarCollapsed ? "collapsed" : "open"}
     >
-      <a className="skip-link" href="#app-content">
+      <a className="skip-link" href="#app-content" inert={navOpen}>
         {t("shell.skipToContent")}
       </a>
 
@@ -475,6 +466,9 @@ function ShellChrome({ children }: { children: ReactNode }) {
         className="sidebar"
         id="app-sidebar"
         ref={sidebarRef}
+        role={navOpen ? "dialog" : undefined}
+        aria-modal={navOpen || undefined}
+        aria-label={navOpen ? t("shell.primaryNav") : undefined}
       >
         <SidebarContent key={`${sessionId}:${workspaceId}`} onNavigate={() => setNavOpen(false)} />
       </aside>
@@ -483,12 +477,14 @@ function ShellChrome({ children }: { children: ReactNode }) {
         <button
           type="button"
           className="sidebar-scrim"
+          tabIndex={-1}
+          aria-hidden="true"
           aria-label={t("shell.closeMenu")}
           onClick={() => setNavOpen(false)}
         />
       )}
 
-      <div className="app-frame">
+      <div className="app-frame" inert={navOpen}>
         <header className="topbar">
           <button
             type="button"
@@ -529,7 +525,7 @@ function ShellChrome({ children }: { children: ReactNode }) {
           </div>
         </header>
 
-        <main className="app-content" id="app-content">
+        <main className="app-content" id="app-content" tabIndex={-1}>
           <AutoBreadcrumbs />
           <Fragment key={`${sessionId}:${workspaceId}`}>{children}</Fragment>
         </main>

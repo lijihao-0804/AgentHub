@@ -93,8 +93,6 @@ export default function ToolsPage() {
 
   const copy = locale === "zh-CN"
     ? {
-        eyebrow: "工具治理",
-        description: "看看智能体能够做什么，并决定哪些工具可以投入使用。每项工具都会说明读取或写入范围、风险以及是否需要审批。",
         searchLabel: "搜索工具",
         searchPlaceholder: "按名称、标识、效果或风险搜索",
         clearSearch: "清空搜索",
@@ -108,8 +106,6 @@ export default function ToolsPage() {
         unavailableValue: "不可用",
       }
     : {
-        eyebrow: "Tool governance",
-        description: "See what your agents can do and choose which tools they may use. Each tool shows whether it reads or changes data, its risk, and whether someone must approve it.",
         searchLabel: "Search tools",
         searchPlaceholder: "Search by name, identity, effect, or risk",
         clearSearch: "Clear search",
@@ -188,9 +184,7 @@ export default function ToolsPage() {
   return (
     <div className="page">
       <CatalogPageHeader
-        eyebrow={copy.eyebrow}
         title={t("tools.title")}
-        description={copy.description}
         actions={
           <Link className="button button-ghost" href="/tools/mcp">
             {t("tools.mcp.entry")}
@@ -321,7 +315,6 @@ export default function ToolsPage() {
       <Panel
         ariaLabel={t("tools.catalog")}
         title={t("tools.catalog")}
-        eyebrow={t("tools.catalogEyebrow")}
       >
         <p className="state-hint">{t("tools.catalogNote")}</p>
 

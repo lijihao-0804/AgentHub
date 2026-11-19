@@ -150,8 +150,6 @@ function RunHistory() {
   const hasActiveRows = runs.some((run) => ACTIVE_RUN_STATUSES.has(run.status));
   const copy = locale === "zh-CN"
     ? {
-        eyebrow: "运行记录",
-        description: "查看最近和正在进行的运行，快速发现成功、失败以及等待处理的下一步。活动运行会自动更新。",
         searchLabel: "搜索当前列表中的运行",
         searchPlaceholder: "按运行 ID、状态、版本或失败代码搜索",
         clearSearch: "清空搜索",
@@ -166,8 +164,6 @@ function RunHistory() {
         unavailable: "不可用",
       }
     : {
-        eyebrow: "Run history",
-        description: "Follow recent and active runs, spot what succeeded or failed, and find the next item that needs attention. Active runs update automatically.",
         searchLabel: "Search runs in this view",
         searchPlaceholder: "Search run ID, status, version, or failure code",
         clearSearch: "Clear search",
@@ -241,9 +237,7 @@ function RunHistory() {
   return (
     <div className="page">
       <CatalogPageHeader
-        eyebrow={copy.eyebrow}
         title={t("runs.title")}
-        description={copy.description}
         actions={
           <>
             <Link className="button button-ghost" href="/runs/compare">{t("nav.runCompare")}</Link>

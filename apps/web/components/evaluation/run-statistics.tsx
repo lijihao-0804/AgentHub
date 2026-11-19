@@ -42,7 +42,6 @@ import {
 
 type Copy = {
   title: string;
-  eyebrow: string;
   refresh: string;
   refreshing: string;
   noData: string;
@@ -108,7 +107,6 @@ function copyFor(locale: Locale): Copy {
   if (locale === "zh-CN") {
     return {
       title: "运行摘要与统计",
-      eyebrow: "结果摘要",
       refresh: "刷新摘要",
       refreshing: "正在刷新…",
       noData: "暂无可展示的摘要",
@@ -172,7 +170,6 @@ function copyFor(locale: Locale): Copy {
   }
   return {
     title: "Run summary and statistics",
-    eyebrow: "Results summary",
     refresh: "Refresh summary",
     refreshing: "Refreshing…",
     noData: "No summary is available yet",
@@ -383,7 +380,6 @@ export function RunStatistics({
   return (
     <Panel
       title={text.title}
-      eyebrow={text.eyebrow}
       actions={
         <button
           type="button"

@@ -39,7 +39,6 @@ type AuthInput = { workspaceId: string; accessToken: string };
 
 const RUN_CASE_COPY = {
   "en-US": {
-    eyebrow: "Evaluation evidence",
     title: "Case results and evidence",
     refresh: "Refresh",
     filterLabel: "Execution status",
@@ -92,7 +91,6 @@ const RUN_CASE_COPY = {
     agentFailureCode: "AgentRun failure code",
   },
   "zh-CN": {
-    eyebrow: "评测证据",
     title: "逐题结果与证据",
     refresh: "刷新",
     filterLabel: "执行状态",
@@ -460,7 +458,6 @@ function RunCaseEvidenceSession({
     <div className="case-evidence">
       <Panel
         title={text.title}
-        eyebrow={text.eyebrow}
         actions={
           <>
             <button
@@ -630,7 +627,6 @@ function RunCaseEvidenceSession({
             items.find((item) => item.id === detailState.caseId)?.case_execution_key ??
             detailState.caseId
           }
-          eyebrow={text.eyebrow}
         >
           <LoadingState label={text.detailLoading} />
         </Panel>
@@ -641,7 +637,6 @@ function RunCaseEvidenceSession({
             selectedItem?.case_execution_key ??
             detailState.caseId
           }
-          eyebrow={text.eyebrow}
         >
           <ErrorState
             code={detailState.error.code}

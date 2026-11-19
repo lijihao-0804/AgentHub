@@ -85,19 +85,9 @@
 .thread-frame[data-side="closed"] .thread-side { display: none; }
 
 /* Welcome / create screen shown in the center when no thread is selected. */
-.thread-welcome { margin: auto; max-width: 32rem; padding: 2.5rem 2rem; width: 100%; }
-.thread-welcome-intro { display: grid; gap: 0.65rem; margin-bottom: 1.75rem; }
-.thread-welcome-icon { align-items: center; background: var(--accent-soft); border-radius: 16px; color: var(--accent); display: flex; height: 64px; justify-content: center; margin-bottom: 0.65rem; width: 64px; }
-.thread-welcome-intro h2 { font-size: 1.8rem; font-weight: 650; letter-spacing: -0.04em; margin: 0; }
-.thread-welcome-intro p { color: var(--text-muted); font-size: 0.85rem; line-height: 1.8; margin: 0; }
+.thread-return-label { display: none; }
+.thread-welcome { margin: 0 auto; max-width: 32rem; padding: 2.5rem 2rem; width: 100%; }
 .thread-welcome.eval-form { background: transparent; border: 0; border-radius: 0; }
-.thread-welcome-empty {
-  align-content: center;
-  display: grid;
-  gap: var(--space-3);
-  justify-items: center;
-  text-align: center;
-}
 .thread-welcome-title { font-size: 1.15rem; font-weight: 650; margin: 0; }
 
 /* Left rail: the conversation list, no box around it. */
@@ -145,6 +135,7 @@
 .thread-rename label { color: var(--text-muted); display: grid; font-size: 0.75rem; gap: 0.25rem; }
 
 /* Center: the turn stream and the pinned composer. */
+.jump-bottom-row { display: flex; justify-content: center; padding: 0.3rem 0; }
 .thread-chat { display: flex; flex-direction: column; min-height: 0; min-width: 0; padding: var(--space-4) 0; }
 .thread-turns {
   flex: 1 1 auto;
@@ -162,7 +153,7 @@
   max-width: var(--chat-content-width);
   padding: 0;
 }
-.conversation-turn { display: grid; gap: 0.4rem; }
+.conversation-turn { display: grid; gap: var(--space-4); min-width: 0; }
 .conversation-message {
   border: 0;
   display: grid;
@@ -184,14 +175,6 @@
 .conversation-message-agent { padding-right: 0.2rem; }
 .conversation-role { color: var(--text-muted); font-size: 0.72rem; font-weight: 600; margin: 0; }
 .conversation-role-line { align-items: center; display: flex; gap: var(--space-2); }
-/* A gradient dot marks the agent turn without shipping an avatar image. */
-.conversation-role-line::before {
-  background: var(--gradient-brand);
-  border-radius: 50%;
-  content: "";
-  height: 0.5rem;
-  width: 0.5rem;
-}
 .conversation-text { line-height: 1.65; margin: 0; overflow-wrap: anywhere; white-space: pre-wrap; }
 .conversation-pending { color: var(--text-muted); }
 .conversation-meta { color: var(--text-muted); font-size: 0.75rem; margin: 0; overflow-wrap: anywhere; }
@@ -206,7 +189,7 @@
   display: grid;
   gap: var(--space-1);
   margin: 0 auto var(--space-1);
-  max-width: calc(var(--chat-content-width) + 2rem);
+  max-width: var(--chat-content-width);
   padding: var(--space-3);
   transition: border-color 140ms ease, box-shadow 140ms ease;
   width: calc(100% - var(--space-6));
@@ -278,7 +261,6 @@
   .thread-topbar > .button { font-size: 0.72rem; }
   .thread-topbar-actions { margin-left: auto; }
   .thread-welcome { padding: 2rem 1.25rem; }
-  .thread-welcome-intro h2 { font-size: 1.5rem; }
   .conversation-composer { width: calc(100% - 1.5rem); }
   .thread-turns { padding: 0.5rem 1rem 1.25rem; }
   .composer-hint { max-width: 10rem; }

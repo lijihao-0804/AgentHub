@@ -7,7 +7,6 @@ import { useI18n } from "@/i18n/provider";
 import type { MessageKey } from "@/i18n/messages";
 import type { ApiError } from "@/lib/api/client";
 import { useFrontendSession } from "@/components/providers/session-provider";
-import Icon from "@/components/ui/icon";
 
 /** Quiet, structural placeholder for "nothing here yet". */
 export function EmptyState({
@@ -21,7 +20,6 @@ export function EmptyState({
 }) {
   return (
     <div className="state-block state-empty">
-      <span className="state-illustration" aria-hidden="true"><Icon name="workspace" size={25} /></span>
       <p className="state-title">{title}</p>
       {hint && <p className="state-hint">{hint}</p>}
       {actions && <div className="form-actions">{actions}</div>}
@@ -106,18 +104,29 @@ export function LoadingState({ label }: { label?: string }) {
  */
 export function SessionRequired({ contextKey }: { contextKey?: MessageKey }) {
   const { t } = useI18n();
-  const { openPanel, workspaces, tenancyLoading } = useFrontendSession();
+  const { openPanel, workspaces, organizations, tenancyLoading, tenancyError, reloadTenancy } =
+    useFrontendSession();
   const context = contextKey ? t(contextKey) : undefined;
 
   if (tenancyLoading) return <LoadingState />;
+  if (tenancyError) {
+    return (
+      <ErrorState
+        code={tenancyError.code}
+        message={tenancyError.message || t("errors.loadWorkspaces")}
+        onRetry={reloadTenancy}
+      />
+    );
+  }
 
   if (workspaces.length === 0) {
     return (
       <div className="state-block state-session">
         <p className="state-title">{t("workspace.noWorkspaces")}</p>
-        <p className="state-hint">{t("workspace.noWorkspacesHint")}</p>
-        <Link className="button button-primary" href="/settings">
-          {t("workspace.createWorkspace")}
+        <Link className="button button-primary" href={
+          organizations.length ? "/settings#create-workspace" : "/settings#create-organization"
+        }>
+          {t(organizations.length ? "workspace.createWorkspace" : "settings.createOrganization")}
         </Link>
       </div>
     );

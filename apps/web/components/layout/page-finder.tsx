@@ -30,6 +30,7 @@ export default function PageFinder({ groups }: { groups: Group[] }) {
     function shortcut(event: KeyboardEvent) {
       if ((event.metaKey || event.ctrlKey) && !event.altKey && !event.shiftKey &&
           !event.isComposing && event.key.toLowerCase() === "k") {
+        if (document.body.classList.contains("nav-open")) return;
         if (document.querySelector("dialog[open]") && !dialog.current?.open) return;
         event.preventDefault();
         open();
@@ -50,8 +51,8 @@ export default function PageFinder({ groups }: { groups: Group[] }) {
   return (
     <>
       <button className="finder-trigger shell-control" type="button" onClick={open}
-        aria-label={label} aria-haspopup="dialog" aria-keyshortcuts="Control+K Meta+K">
-        <Icon name="search" size={16} /><span>{label}</span><kbd>Ctrl / ⌘ K</kbd>
+        title={`${label} (Ctrl / ⌘ K)`} aria-label={label} aria-haspopup="dialog" aria-keyshortcuts="Control+K Meta+K">
+        <Icon name="search" size={16} /><span>{label}</span><kbd aria-hidden="true">Ctrl / ⌘ K</kbd>
       </button>
       <dialog ref={dialog} className="page-finder" aria-label={label}
         onClick={(event) => { if (event.target === dialog.current) dialog.current.close(); }}>

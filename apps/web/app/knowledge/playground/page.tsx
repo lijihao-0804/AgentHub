@@ -36,7 +36,6 @@ function StageCard({ label, stage }: { label: string; stage: PlaygroundStage }) 
     <section className="playground-stage" aria-labelledby={`${label}-stage`}>
       <div className="playground-stage-header">
         <div>
-          <p className="eyebrow">{t("playground.stage.eyebrow")}</p>
           <h3 id={`${label}-stage`}>{label}</h3>
         </div>
         {/* Stage latency and scores stay in a neutral dot-decimal format for
@@ -189,7 +188,6 @@ export default function RetrievalPlaygroundPage() {
       <form className="panel query-panel" onSubmit={handleSubmit} noValidate>
         <div className="panel-heading">
           <div>
-            <p className="eyebrow">{t("playground.queryEyebrow")}</p>
             <h2>{t("playground.queryTitle")}</h2>
           </div>
         </div>
@@ -320,7 +318,6 @@ export default function RetrievalPlaygroundPage() {
           </section>
           <Panel
             title={t("playground.evidence.title")}
-            eyebrow={t("playground.evidence.eyebrow")}
             actions={<span className="state-hint">{t("playground.evidence.chunks", { count: formatNumber(result.evidence.length) })}</span>}
           >
             <div className="evidence-list">

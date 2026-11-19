@@ -281,7 +281,6 @@ export default function VersionCompareClient({ agentId }: { agentId: string }) {
         <>
           <Panel
             ariaLabel={t("agents.versionDiff.changedFields")}
-            eyebrow={t("agents.versionDiff.title")}
             title={t("agents.versionDiff.heading", {
               left: leftVersion.version_number,
               right: rightVersion.version_number,

@@ -91,8 +91,6 @@ function AgentCatalog() {
 
   const copy = locale === "zh-CN"
     ? {
-        eyebrow: "智能体目录",
-        description: "创建并管理工作区里的智能体。可以从模板或空白草稿开始，再为它配置模型、知识和工具。",
         searchLabel: "搜索智能体",
         searchPlaceholder: "按名称、说明或模型搜索",
         clearSearch: "清空搜索",
@@ -106,8 +104,6 @@ function AgentCatalog() {
         unavailable: "不可用",
       }
     : {
-        eyebrow: "Agent catalog",
-        description: "Create and manage the agents your team works with. Start from a template or a blank draft, then connect the model, knowledge, and tools each agent needs.",
         searchLabel: "Search agents",
         searchPlaceholder: "Search by name, description, or model",
         clearSearch: "Clear search",
@@ -182,9 +178,7 @@ function AgentCatalog() {
   return (
     <div className="page">
       <CatalogPageHeader
-        eyebrow={copy.eyebrow}
         title={t("agents.title")}
-        description={copy.description}
         actions={
           <button
             type="button"

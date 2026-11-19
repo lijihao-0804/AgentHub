@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 import MetricCard from "@/components/ui/metric-card";
-import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
+import { ErrorState, LoadingState, SessionRequired } from "@/components/ui/states";
 import { CatalogPageHeader } from "@/components/catalog/catalog-layout";
 import { ApiError, toApiError } from "@/lib/api/client";
 import {
@@ -32,14 +32,10 @@ export default function EvaluationOverviewPage() {
   activeSessionRef.current = sessionId;
   const copy = locale === "zh-CN"
     ? {
-        eyebrow: "评测与发布",
-        description: "创建数据集、比较智能体版本，并判断新版本是否已经达到发布标准。",
         openDatasets: "数据集",
         openExperiments: "正式实验",
       }
     : {
-        eyebrow: "Evaluation and release",
-        description: "Create datasets, compare agent versions, and decide when a version is ready to release.",
         openDatasets: "Datasets",
         openExperiments: "Formal experiments",
       };
@@ -97,9 +93,7 @@ export default function EvaluationOverviewPage() {
   return (
     <div className="page">
       <CatalogPageHeader
-        eyebrow={copy.eyebrow}
         title={t("evaluation.overview.title")}
-        description={copy.description}
         actions={
           <>
             <Link className="button button-ghost" href="/evaluations/datasets">{copy.openDatasets}</Link>
@@ -118,67 +112,29 @@ export default function EvaluationOverviewPage() {
       {loading && !error && <LoadingState />}
 
       {!loading && !error && (
-        <>
-          <section className="kpi-grid" aria-label={t("evaluation.overview.title")}>
-            <MetricCard
-              label={t("evaluation.overview.datasets")}
-              value={formatNumber(datasetTotal ?? 0)}
-              hint={t("evaluation.overview.countsHint")}
-              href="/evaluations/datasets"
-            />
-            <MetricCard
-              label={t("evaluation.overview.experiments")}
-              value={formatNumber(experimentTotal ?? 0)}
-              href="/evaluations/experiments"
-            />
-            <MetricCard
-              label={t("evaluation.overview.pricing")}
-              value={pricing?.length ?? 0}
-              href="/evaluations/pricing"
-            />
-            <MetricCard
-              label={t("evaluation.overview.policies")}
-              value={policies?.length ?? 0}
-              href="/evaluations/release-gates"
-            />
-          </section>
-
-          <Panel title={t("evaluation.overview.quick")} eyebrow={t("evaluation.eyebrow")}>
-            {datasetTotal !== null && experimentTotal !== null && pricing !== null && policies !== null && (
-              <div className="overview-grid">
-                <Link className="overview-card" href="/evaluations/datasets">
-                  <span className="overview-card-title">{t("evaluation.overview.newDataset")}</span>
-                  <span className="overview-card-description">{t("evaluation.datasets.lede")}</span>
-                  <span className="overview-card-cta" aria-hidden="true">{t("evaluation.overview.open")} →</span>
-                </Link>
-                <Link className="overview-card" href="/evaluations/experiments">
-                  <span className="overview-card-title">{t("evaluation.overview.newExperiment")}</span>
-                  <span className="overview-card-description">{t("evaluation.experiments.lede")}</span>
-                  <span className="overview-card-cta" aria-hidden="true">{t("evaluation.overview.open")} →</span>
-                </Link>
-                <Link className="overview-card" href="/evaluations/release-gates">
-                  <span className="overview-card-title">{t("evaluation.overview.managePolicies")}</span>
-                  <span className="overview-card-description">{t("evaluation.gates.lede")}</span>
-                  <span className="overview-card-cta" aria-hidden="true">{t("evaluation.overview.open")} →</span>
-                </Link>
-                <Link className="overview-card" href="/evaluations/pricing">
-                  <span className="overview-card-title">{t("nav.pricing")}</span>
-                  <span className="overview-card-description">{t("evaluation.pricing.lede")}</span>
-                  <span className="overview-card-cta" aria-hidden="true">{t("evaluation.overview.open")} →</span>
-                </Link>
-              </div>
-            )}
-            {datasetTotal === 0 &&
-              experimentTotal === 0 &&
-              pricing?.length === 0 &&
-              policies?.length === 0 && (
-                <EmptyState
-                  title={t("evaluation.datasets.empty")}
-                  hint={t("evaluation.datasets.emptyHint")}
-                />
-              )}
-          </Panel>
-        </>
+        <section className="kpi-grid" aria-label={t("evaluation.overview.title")}>
+          <MetricCard
+            label={t("evaluation.overview.datasets")}
+            value={formatNumber(datasetTotal ?? 0)}
+            hint={t("evaluation.overview.countsHint")}
+            href="/evaluations/datasets"
+          />
+          <MetricCard
+            label={t("evaluation.overview.experiments")}
+            value={formatNumber(experimentTotal ?? 0)}
+            href="/evaluations/experiments"
+          />
+          <MetricCard
+            label={t("evaluation.overview.pricing")}
+            value={pricing?.length ?? 0}
+            href="/evaluations/pricing"
+          />
+          <MetricCard
+            label={t("evaluation.overview.policies")}
+            value={policies?.length ?? 0}
+            href="/evaluations/release-gates"
+          />
+        </section>
       )}
     </div>
   );

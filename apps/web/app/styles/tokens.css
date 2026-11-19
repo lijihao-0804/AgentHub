@@ -13,23 +13,23 @@
   --z-floating: 60;
   --z-skip-link: 100;
 
-  --background: #f4f6fa;
+  --background: #ffffff;
   --surface: #ffffff;
   --surface-raised: #ffffff;
-  --surface-inset: #eaf0f7;
-  --surface-nav: #1d2948;
+  --surface-inset: #f4f4f5;
+  --surface-nav: #f7f7f8;
   --surface-topbar: rgba(255, 255, 255, 0.92);
   --surface-popover: #ffffff;
-  --row-hover: rgba(52, 88, 170, 0.075);
+  --row-hover: rgba(32, 32, 38, 0.055);
   --row-subtle: rgba(23, 46, 53, 0.035);
-  --border: #dae1eb;
-  --border-strong: #b9c7d9;
+  --border: #dedee2;
+  --border-strong: #bebec5;
   --border-focus: #3458aa;
   --focus-ring: #3458aa;
 
-  --text: #1c2942;
-  --text-muted: #55657b;
-  --text-placeholder: #63777c;
+  --text: #232328;
+  --text-muted: #62626c;
+  --text-placeholder: #686872;
   --text-on-accent: #ffffff;
 
   --accent: #3458aa;
@@ -40,15 +40,9 @@
   --accent-3: #91a9d6;
   --gradient-brand: linear-gradient(135deg, #3458aa 0%, #5572ad 100%);
 
-  --btn-primary-bg: #3458aa;
+  --btn-primary-bg: var(--text);
   --btn-primary-ink: #ffffff;
-  --btn-primary-hover: #25458d;
-  --composer-surface: #29477f;
-  --composer-ink: #fff;
-  --composer-muted: #dce6ff;
-  --composer-highlight: #ffcf91;
-  --composer-highlight-hover: #ffe2bb;
-  --composer-highlight-ink: #382b19;
+  --btn-primary-hover: #414147;
 
   --success: #18794e;
   --success-soft: #e7f5ed;
@@ -62,20 +56,20 @@
   --info: #2d6faa;
   --info-soft: #e9f2fa;
 
-  --sidebar-text: #f4fbfa;
-  --sidebar-muted: #b5c1da;
-  --sidebar-faint: #a0afcb;
-  --sidebar-border: rgba(255, 255, 255, 0.11);
-  --sidebar-hover: rgba(255, 255, 255, 0.07);
-  --sidebar-active: rgba(138, 163, 222, 0.19);
-  --sidebar-active-border: #ffcb85;
-  --sidebar-badge: rgba(255, 255, 255, 0.13);
+  --sidebar-text: var(--text);
+  --sidebar-muted: var(--text-muted);
+  --sidebar-faint: var(--text-placeholder);
+  --sidebar-border: var(--border);
+  --sidebar-hover: var(--row-hover);
+  --sidebar-active: color-mix(in srgb, var(--text) 8%, var(--surface-nav));
+  --sidebar-active-border: var(--accent);
+  --sidebar-badge: var(--surface-inset);
 
-  --radius-xs: 5px;
-  --radius-sm: 8px;
-  --radius: 11px;
-  --radius-lg: 15px;
-  --radius-xl: 20px;
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
   --radius-pill: 999px;
   --shadow-sm: 0 1px 2px rgba(23, 46, 53, 0.06);
   --shadow: 0 18px 44px rgba(23, 46, 53, 0.12);
@@ -120,23 +114,23 @@
 :root[data-theme="dark"] {
   color-scheme: dark;
 
-  --background: #101827;
-  --surface: #192338;
-  --surface-raised: #202d44;
-  --surface-inset: #141e31;
-  --surface-nav: #1d2948;
-  --surface-topbar: rgba(25, 35, 56, 0.96);
-  --surface-popover: #202d44;
-  --row-hover: rgba(122, 216, 202, 0.075);
+  --background: #171719;
+  --surface: #1b1b1e;
+  --surface-raised: #252529;
+  --surface-inset: #212124;
+  --surface-nav: #141416;
+  --surface-topbar: rgba(27, 27, 30, 0.96);
+  --surface-popover: #252529;
+  --row-hover: rgba(250, 250, 255, 0.065);
   --row-subtle: rgba(255, 255, 255, 0.028);
-  --border: #314058;
-  --border-strong: #465977;
+  --border: #35353a;
+  --border-strong: #54545c;
   --border-focus: #a0baff;
   --focus-ring: #a0baff;
 
-  --text: #e8f1f1;
-  --text-muted: #9eb1b3;
-  --text-placeholder: #7c9296;
+  --text: #eeeeef;
+  --text-muted: #b1b1b9;
+  --text-placeholder: #a0a0ab;
   --text-on-accent: #142346;
 
   --accent: #a0baff;
@@ -147,10 +141,9 @@
   --accent-3: #9fbbed;
   --gradient-brand: linear-gradient(135deg, #7095d8 0%, #a4bffa 100%);
 
-  --btn-primary-bg: #a0baff;
-  --btn-primary-ink: #142346;
-  --btn-primary-hover: #b9caff;
-  --composer-surface: #293e69;
+  --btn-primary-bg: var(--text);
+  --btn-primary-ink: var(--background);
+  --btn-primary-hover: #d3d3d9;
 
   --success: #61d39a;
   --success-soft: rgba(97, 211, 154, 0.12);
@@ -185,20 +178,13 @@
   --border-focus: var(--accent);
   --focus-ring: var(--accent);
   --row-hover: color-mix(in srgb, var(--accent) 8%, transparent);
-  --surface-nav: color-mix(in srgb, var(--user-accent) 14%, #172031);
-  --sidebar-active: rgb(255 255 255 / 12%);
-  --sidebar-active-border: color-mix(in srgb, var(--user-accent) 32%, white);
-  --composer-surface: color-mix(in srgb, var(--user-accent) 28%, #162135);
-  --composer-muted: color-mix(in srgb, var(--user-accent) 13%, white);
-  --composer-highlight: var(--sidebar-active-border);
-  --composer-highlight-hover: color-mix(in srgb, var(--composer-highlight) 75%, white);
-  --composer-highlight-ink: #172031;
+  --sidebar-active: var(--accent-soft);
 }
 
 :root[data-theme="dark"][data-accent]:not([data-accent="#3458aa"]) {
   --accent: color-mix(in srgb, var(--user-accent) 27%, white);
   --accent-hover: color-mix(in srgb, var(--accent) 85%, white);
-  --accent-ink: #101827;
+  --accent-ink: #171719;
 }
 
 /* In XYZ D65, Y is sRGB relative luminance. Keep an already readable seed;

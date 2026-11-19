@@ -106,7 +106,6 @@ export default function DatasetVersionDetailClient({
     return (
       <div className="page">
         <header className="page-header">
-          <p className="eyebrow">{t("evaluation.datasets.version.eyebrow")}</p>
         </header>
         <SessionRequired contextKey="session.context.evaluations" />
       </div>
@@ -175,7 +174,7 @@ export default function DatasetVersionDetailClient({
             {publishedNotice && <p className="inline-notice">{t("evaluation.datasets.version.publishedNotice")}</p>}
           </Panel>
 
-          <Panel title={t("evaluation.datasets.version.itemsTitle")} eyebrow={t("evaluation.datasets.eyebrow")}>
+          <Panel title={t("evaluation.datasets.version.itemsTitle")}>
             {version.items.length === 0 ? (
               <EmptyState title={t("evaluation.datasets.versions.empty")} />
             ) : (

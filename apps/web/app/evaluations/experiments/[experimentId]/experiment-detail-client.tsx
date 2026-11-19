@@ -281,7 +281,6 @@ export default function ExperimentDetailClient({ experimentId }: { experimentId:
     return (
       <div className="page">
         <header className="page-header">
-          <p className="eyebrow">{t("evaluation.experiment.eyebrow")}</p>
         </header>
         <SessionRequired contextKey="session.context.evaluations" />
       </div>
@@ -378,7 +377,6 @@ export default function ExperimentDetailClient({ experimentId }: { experimentId:
           {!isDraft && (
             <Panel
               title={t("evaluation.experiment.runs.title")}
-              eyebrow={t("evaluation.experiment.eyebrow")}
               actions={
                 <span className="state-hint">
                   {t("evaluation.experiment.runs.count", { count: runsView.data?.length ?? 0 })}
@@ -441,7 +439,6 @@ export default function ExperimentDetailClient({ experimentId }: { experimentId:
 
           <Panel
             title={t("evaluation.experiment.variants.title")}
-            eyebrow={t("evaluation.experiment.eyebrow")}
             actions={
               canManage && isDraft && (
                 <button type="button" className="button button-ghost" onClick={() => setShowVariantForm((v) => !v)}>
