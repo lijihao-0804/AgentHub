@@ -137,7 +137,7 @@ export default function AgentVersionDetailClient({
       )}
       {applied && <p className="inline-notice" role="status">{t("agents.derive.applied")}</p>}
       {derive && (
-        <Panel ariaLabel={t("agents.derive.title")} title={t("agents.derive.title")} eyebrow={t("agents.derive.eyebrow")}>
+        <Panel ariaLabel={t("agents.derive.title")} title={t("agents.derive.title")}>
           <p className="state-hint">
             {t("agents.derive.note", {
               version: `v${derive.source_version_number}`,

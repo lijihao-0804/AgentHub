@@ -184,7 +184,6 @@ export default function McpImportPage() {
 
       <Panel
         title={t("tools.mcp.connections.title")}
-        eyebrow={t("tools.mcp.eyebrow")}
         actions={
           <button type="button" className="button button-ghost" onClick={() => setShowCreateForm((v) => !v)}>
             {t("tools.mcp.connections.add")}

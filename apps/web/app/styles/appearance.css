@@ -1,7 +1,6 @@
-.appearance-panel { scroll-margin-top: calc(var(--topbar-height) + 1rem); }
 .appearance-heading { align-items: flex-start; display: flex; flex-wrap: wrap; gap: var(--space-3); justify-content: space-between; }
 .appearance-heading p { color: var(--text-muted); margin-top: var(--space-1); }
-.appearance-layout { align-items: start; display: flex; flex-wrap: wrap; gap: var(--space-5) var(--space-7); margin-top: var(--space-5); }
+.appearance-layout { align-items: flex-start; display: flex; flex-wrap: wrap; gap: var(--space-5) var(--space-7); margin-top: var(--space-5); }
 .appearance-controls { display: grid; flex: 2 1 22rem; gap: var(--space-4); min-width: 0; }
 .appearance-controls fieldset { border: 0; margin: 0; min-width: 0; padding: 0; }
 .appearance-controls legend, .appearance-custom-label, .appearance-preview figcaption {

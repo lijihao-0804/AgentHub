@@ -522,7 +522,7 @@ export default function KnowledgeBaseDetailClient({ knowledgeBaseId }: { knowled
       )}
 
       {(usage.data ?? []).length > 0 && (
-        <Panel ariaLabel={t("knowledge.usedByTitle")} title={t("knowledge.usedByTitle")} eyebrow={t("knowledge.usedByEyebrow")}>
+        <Panel ariaLabel={t("knowledge.usedByTitle")} title={t("knowledge.usedByTitle")}>
           <ul className="research-thread-cards">
             {(usage.data ?? []).map(({ agent, mode, snapshotId }) => (
               <li key={agent.id}>

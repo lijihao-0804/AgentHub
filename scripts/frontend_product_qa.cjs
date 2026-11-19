@@ -248,11 +248,12 @@ async function exerciseAgentDetailTabs(page, baseUrl, fixtures, screenshotRoot, 
 }
 
 async function setPreferences(page, theme, locale, observations) {
-  await page.locator(".theme-option").nth(theme === "light" ? 0 : 1).click();
-  const language = page.locator(".lang-switch:not(.theme-switch) button").filter({
-    hasText: locale === "en-US" ? "EN" : "中文",
-  });
-  await language.click();
+  if (await page.locator("html").getAttribute("data-theme") !== theme) {
+    await page.locator(".theme-toggle").click();
+  }
+  if (await page.locator("html").getAttribute("lang") !== locale) {
+    await page.locator(".language-toggle").click();
+  }
   await page.waitForFunction(
     ({ expectedLocale, expectedTheme }) =>
       document.documentElement.lang === expectedLocale &&
@@ -361,7 +362,7 @@ async function routeGeometry(page) {
       const bounds = element.getBoundingClientRect();
       return style.display !== "none" && style.visibility !== "hidden" && bounds.width > 0 && bounds.height > 0;
     };
-    const controls = Array.from(document.querySelectorAll(".topbar .shell-control, .topbar .ws-selector-trigger, .topbar .theme-option, .topbar .lang-option, .topbar .user-menu-trigger"))
+    const controls = Array.from(document.querySelectorAll(".topbar .shell-control, .topbar .ws-selector-trigger, .topbar .user-menu-trigger"))
       .filter(visible)
       .map((element) => ({ className: element.className, ...rect(element) }));
     const collisions = [];

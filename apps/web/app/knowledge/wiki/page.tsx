@@ -483,7 +483,6 @@ function WikiWorkbenchContent() {
     <div className="page">
       <CatalogPageHeader
         title={copy.title}
-        description={copy.lead}
         actions={
           <Link className="button button-ghost" href="/knowledge">
             {t("nav.knowledge")}

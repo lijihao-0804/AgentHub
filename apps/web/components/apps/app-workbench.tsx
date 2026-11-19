@@ -8,7 +8,7 @@ import type { AppThreadCopy } from "@/components/apps/app-thread-copy";
 import AppConversationPane from "@/components/apps/app-conversation-pane";
 import Icon, { type IconName } from "@/components/ui/icon";
 import { InlineConfirm } from "@/components/evaluation/hash-value";
-import { EmptyState, ErrorState, InlineError, LoadingState, SessionRequired } from "@/components/ui/states";
+import { ErrorState, InlineError, LoadingState, SessionRequired } from "@/components/ui/states";
 import { useFrontendSession } from "@/components/providers/session-provider";
 import { useWorkspaceData, useWorkspaceMutation, type WorkspaceQuery } from "@/hooks/use-workspace-data";
 import { ApiError, errorHintKey, type AuthInput } from "@/lib/api/client";
@@ -141,9 +141,12 @@ export default function AppWorkbench({
 
   const [railOpen, setRailOpen] = useState(true);
   const [sideOpen, setSideOpen] = useState(false);
-  const [showCreate, setShowCreate] = useState(false);
+  const [visitedDetails, setVisitedDetails] = useState("");
+  const sideToggle = useRef<HTMLButtonElement>(null);
+  const historyToggle = useRef<HTMLButtonElement>(null);
   const [agentId, setAgentId] = useState("");
   const [title, setTitle] = useState("");
+  const titleInput = useRef<HTMLInputElement>(null);
   const initialTask = useRef("");
   const [renaming, setRenaming] = useState(false);
   const [titleDraft, setTitleDraft] = useState("");
@@ -153,7 +156,6 @@ export default function AppWorkbench({
   const appIcon: IconName = copy.kind === "research" ? "research" : copy.kind === "incident" ? "incidents" : copy.kind === "analysis" ? "analytics" : copy.kind === "support" ? "support" : "agents";
 
   useEffect(() => {
-    setShowCreate(false);
     setAgentId(copy.agentId ?? "");
     setTitle("");
     setRenaming(false);
@@ -164,13 +166,21 @@ export default function AppWorkbench({
   useEffect(() => { setThreadSearch(""); }, [sessionId, listScope]);
 
   useEffect(() => {
-    if (!railOpen) return;
+    if (!railOpen && !sideOpen) return;
     const dismiss = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && window.matchMedia("(max-width: 860px)").matches) setRailOpen(false);
+      if (event.key !== "Escape" || event.defaultPrevented || document.querySelector("dialog[open]") ||
+          document.body.classList.contains("nav-open") || !window.matchMedia("(max-width: 860px)").matches) return;
+      if (railOpen) {
+        setRailOpen(false);
+        historyToggle.current?.focus();
+      } else if (sideOpen) {
+        setSideOpen(false);
+        sideToggle.current?.focus();
+      }
     };
     document.addEventListener("keydown", dismiss);
     return () => document.removeEventListener("keydown", dismiss);
-  }, [railOpen]);
+  }, [railOpen, sideOpen]);
 
   // Older bookmarks used a query string. New tasks travel in the current session.
   useEffect(() => {
@@ -256,7 +266,6 @@ export default function AppWorkbench({
     if (created) {
       queueTaskDraft(created.id, initialTask.current);
       initialTask.current = "";
-      setShowCreate(false);
       setTitle("");
       summaryCacheRef.current.clear();
       threads.reload();
@@ -307,8 +316,6 @@ export default function AppWorkbench({
     );
   }
 
-  const showCreateForm = showCreate || !threadId;
-
   return (
     <div className="thread-page">
       <header className="thread-topbar">
@@ -318,7 +325,11 @@ export default function AppWorkbench({
           aria-pressed={railOpen}
           aria-expanded={railOpen}
           aria-controls="conversation-history"
-          onClick={() => setRailOpen((open) => !open)}
+          ref={historyToggle}
+          onClick={() => {
+            if (!railOpen && window.matchMedia("(max-width: 860px)").matches) setSideOpen(false);
+            setRailOpen((open) => !open);
+          }}
         >
           {t("appThread.railToggleList")}
         </button>
@@ -335,10 +346,20 @@ export default function AppWorkbench({
             <button
               type="button"
               className="button button-ghost thread-side-toggle"
-              aria-pressed={sideOpen}
-              onClick={() => setSideOpen((open) => !open)}
+              ref={sideToggle}
+              aria-expanded={sideOpen}
+              aria-controls="conversation-details"
+              disabled={!current}
+              onClick={() => {
+                if (!sideOpen) {
+                  setVisitedDetails(scope);
+                  if (window.matchMedia("(max-width: 860px)").matches) setRailOpen(false);
+                }
+                setSideOpen((open) => !open);
+              }}
             >
-              {t("appThread.railToggle")}
+              <span className={sideOpen ? "thread-details-open-label" : undefined}>{t("appThread.railToggle")}</span>
+              {sideOpen && <span className="thread-return-label">{isChinese ? "返回对话" : "Back to chat"}</span>}
             </button>
           )}
           {threadId && (
@@ -361,7 +382,13 @@ export default function AppWorkbench({
               className="button button-primary thread-new"
               disabled={cannotCreate}
               title={cannotCreate ? t("appThread.createPermissionHint") : undefined}
-              onClick={() => threadId ? router.push(copy.basePath) : setShowCreate(true)}
+              onClick={() => {
+                if (threadId) router.push(copy.basePath);
+                else {
+                  if (window.matchMedia("(max-width: 860px)").matches) setRailOpen(false);
+                  titleInput.current?.focus();
+                }
+              }}
             >
               <span aria-hidden="true">+</span>
               {t(copy.newThread)}
@@ -414,7 +441,7 @@ export default function AppWorkbench({
               </button>
             )}
             {threads.loaded && !threads.error && threadList.length === 0 && (
-              <p className="state-hint">{t(copy.noThreadsHint)}</p>
+              <p className="state-hint">{t(copy.noThreads)}</p>
             )}
 
             {threadId && (
@@ -507,80 +534,61 @@ export default function AppWorkbench({
               />
             )}
             {!threadId && (
-              showCreateForm ? (
-                <form className="thread-welcome eval-form" onSubmit={submitCreate} noValidate>
-                  <div className="thread-welcome-intro">
-                    <span className="thread-welcome-icon"><Icon name={appIcon} size={29} /></span>
-                    <h2>{t(copy.title)}</h2>
-                    <p>{t(copy.lede)}</p>
-                  </div>
-                  <p className="eval-form-title">{t(copy.createTitle)}</p>
-                  {!copy.agentId && (
-                    <label>
-                      {t("appThread.publishedAgent")}
-                      <select name="agent" value={agentId} disabled={!agents.loaded || !agentList.length || cannotCreate} onChange={(event) => setAgentId(event.target.value)}>
-                        <option value="">{t("appThread.selectAgent")}</option>
-                        {agentList.map((agent) => (
-                          <option value={agent.id} key={agent.id}>
-                            {agent.name}
-                          </option>
-                        ))}
-                      </select>
-                    </label>
-                  )}
-                  {agents.error && <ErrorState code={agents.error.code} message={agents.error.message} onRetry={agents.reload} />}
-                  {agents.loading && !agents.loaded && <LoadingState />}
-                  {agents.loaded && !agentList.length && <p className="state-hint">{t("appThread.noPublishedAgent")}</p>}
-                  {permissions?.includes("agent_create") && (
-                    <Link href={copy.agentId ? `/agents/${encodeURIComponent(copy.agentId)}` : `/agents?template=${encodeURIComponent(templateKey)}`}>
-                      {t(copy.agentId ? "agents.chat.openAgent" : "appThread.configureTemplate")}
-                    </Link>
-                  )}
+              <form className="thread-welcome eval-form" onSubmit={submitCreate} noValidate>
+                <h2 className="thread-welcome-title">{t(copy.createTitle)}</h2>
+                {!copy.agentId && (
                   <label>
-                    {t("appThread.threadTitle")}
-                    <input
-                      name="conversation-title"
-                      autoComplete="off"
-                      value={title}
-                      onChange={(event) => setTitle(event.target.value)}
-                      placeholder={t(copy.threadTitlePlaceholder)}
-                      maxLength={200}
-                    />
+                    {t("appThread.publishedAgent")}
+                    <select name="agent" value={agentId} disabled={!agents.loaded || !agentList.length || cannotCreate} onChange={(event) => setAgentId(event.target.value)}>
+                      <option value="">{t("appThread.selectAgent")}</option>
+                      {agentList.map((agent) => (
+                        <option value={agent.id} key={agent.id}>
+                          {agent.name}
+                        </option>
+                      ))}
+                    </select>
                   </label>
-                  <InlineError error={mutation.error} fallback={t("errors.requestFailed")} />
-                  {cannotCreate && <p className="state-hint" role="note">{t("appThread.createPermissionHint")}</p>}
-                  <div className="form-actions">
-                    <button
-                      type="submit"
-                      className="button button-primary"
-                      disabled={cannotCreate || mutation.pending || !title.trim() || !selectedAgent}
-                    >
-                      {mutation.pending ? t("common.loading") : t(copy.createTitle)}
-                    </button>
-                    {threadId && (
-                      <button type="button" className="button button-ghost" onClick={() => setShowCreate(false)}>
-                        {t("appThread.cancel")}
-                      </button>
-                    )}
-                  </div>
-                </form>
-              ) : (
-                <div className="thread-welcome thread-welcome-empty">
-                  <p className="thread-welcome-title">{t(copy.createTitle)}</p>
-                  <p className="state-hint">{t(copy.noThreadsHint)}</p>
-                  <button type="button" className="button button-primary" onClick={() => setShowCreate(true)}>
-                    {t(copy.newThread)}
+                )}
+                {agents.error && <ErrorState code={agents.error.code} message={agents.error.message} onRetry={agents.reload} />}
+                {agents.loading && !agents.loaded && <LoadingState />}
+                {agents.loaded && !agentList.length && <p className="state-hint">{t("appThread.noPublishedAgent")}</p>}
+                {permissions?.includes("agent_create") && (
+                  <Link href={copy.agentId ? `/agents/${encodeURIComponent(copy.agentId)}` : `/agents?template=${encodeURIComponent(templateKey)}`}>
+                    {t(copy.agentId ? "agents.chat.openAgent" : "appThread.configureTemplate")}
+                  </Link>
+                )}
+                <label>
+                  {t("appThread.threadTitle")}
+                  <input
+                    ref={titleInput}
+                    name="conversation-title"
+                    autoComplete="off"
+                    value={title}
+                    onChange={(event) => setTitle(event.target.value)}
+                    placeholder={t(copy.threadTitlePlaceholder)}
+                    maxLength={200}
+                  />
+                </label>
+                <InlineError error={mutation.error} fallback={t("errors.requestFailed")} />
+                {cannotCreate && <p className="state-hint" role="note">{t("appThread.createPermissionHint")}</p>}
+                <div className="form-actions">
+                  <button
+                    type="submit"
+                    className="button button-primary"
+                    disabled={cannotCreate || mutation.pending || !title.trim() || !selectedAgent}
+                  >
+                    {mutation.pending ? t("common.loading") : t(copy.createTitle)}
                   </button>
                 </div>
-              )
+              </form>
             )}
           </div>
         )}
 
         {railOpen && <button className="thread-rail-scrim" type="button" aria-label={isChinese ? "关闭对话列表" : "Close conversation list"} onClick={() => setRailOpen(false)} />}
 
-        {threadId && current && sideOpen && (
-          <aside className="thread-side" aria-label={t("appThread.railToggle")}>
+        {threadId && current && (sideOpen || visitedDetails === scope) && (
+          <aside id="conversation-details" className="thread-side" aria-label={t("appThread.railToggle")}>
             {children({ threadId, thread: current, artifacts, turns })}
           </aside>
         )}

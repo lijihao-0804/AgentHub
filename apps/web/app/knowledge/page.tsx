@@ -35,8 +35,6 @@ export default function KnowledgeBasesPage() {
 
   const copy = locale === "zh-CN"
     ? {
-        eyebrow: "知识资源",
-        description: "整理智能体可以查阅的资料。按知识库组织文档，并随时查看上传进度与可用内容。",
         searchLabel: "搜索知识库",
         searchPlaceholder: "按知识库名称或 ID 搜索",
         clearSearch: "清空搜索",
@@ -45,8 +43,6 @@ export default function KnowledgeBasesPage() {
         noMatchHint: "尝试更短的关键词，或清空搜索查看全部知识库。",
       }
     : {
-        eyebrow: "Knowledge resources",
-        description: "Keep the material your agents can draw on. Organize documents by knowledge base and follow upload progress from one place.",
         searchLabel: "Search knowledge bases",
         searchPlaceholder: "Search by knowledge base name or ID",
         clearSearch: "Clear search",
@@ -89,9 +85,7 @@ export default function KnowledgeBasesPage() {
   return (
     <div className="page">
       <CatalogPageHeader
-        eyebrow={copy.eyebrow}
         title={t("knowledge.title")}
-        description={copy.description}
         actions={
           <>
             <Link className="button button-ghost" href="/knowledge/playground">

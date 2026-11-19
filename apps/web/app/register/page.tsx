@@ -66,7 +66,7 @@ export default function RegisterPage() {
   }
 
   return (
-    <AuthLayout mode="register">
+    <AuthLayout>
       <h1 id="auth-form-title">{t("auth.registerTitle")}</h1>
       <form onSubmit={handleSubmit} noValidate aria-busy={submitting}>
         <label>

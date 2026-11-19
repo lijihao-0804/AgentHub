@@ -37,7 +37,10 @@ export default function UserMenu() {
   useEffect(() => {
     if (!open) return;
     function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") setOpen(false);
+      if (event.key === "Escape") {
+        containerRef.current?.querySelector<HTMLButtonElement>("button[aria-haspopup]")?.focus();
+        setOpen(false);
+      }
     }
     function onPointerDown(event: MouseEvent) {
       if (!containerRef.current?.contains(event.target as Node)) setOpen(false);
@@ -59,7 +62,8 @@ export default function UserMenu() {
   }
 
   return (
-    <div className="user-menu" ref={containerRef}>
+    <div className="user-menu" ref={containerRef}
+      onBlur={(event) => { if (open && event.relatedTarget && !event.currentTarget.contains(event.relatedTarget)) setOpen(false); }}>
       <button
         type="button"
         className="user-menu-trigger"

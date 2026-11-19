@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 
 import { InlineError, Panel } from "@/components/ui/states";
-import { CatalogPageHeader, CatalogStatStrip } from "@/components/catalog/catalog-layout";
+import { CatalogPageHeader } from "@/components/catalog/catalog-layout";
 import { useFrontendSession } from "@/components/providers/session-provider";
 import AppearanceSettings from "@/components/layout/appearance-settings";
 import { ApiError, toApiError } from "@/lib/api/client";
@@ -17,7 +17,7 @@ import { useI18n } from "@/i18n/provider";
  * account that has no organization or workspace yet.
  */
 export default function SettingsPage() {
-  const { t, locale, formatCount } = useI18n();
+  const { t } = useI18n();
   const {
     accessToken,
     sessionId,
@@ -59,28 +59,6 @@ export default function SettingsPage() {
 
   const activeWorkspace = workspaces.find((workspace) => workspace.id === workspaceId) ?? null;
   const activeOrganization = organizations.find((organization) => organization.id === organizationId) ?? null;
-  const copy = locale === "zh-CN"
-    ? {
-        eyebrow: "工作区设置",
-        description: "确认当前组织与工作区上下文，管理模型和成员，并为新团队完成组织与工作区初始化。",
-        organizations: "组织",
-        workspaces: "工作区",
-        activeContext: "当前上下文",
-        none: "未选择",
-        loading: "加载中",
-        unavailable: "不可用",
-      }
-    : {
-        eyebrow: "Workspace settings",
-        description: "Confirm the current organization and workspace, manage models and members, and initialize a new team when needed.",
-        organizations: "Organizations",
-        workspaces: "Workspaces",
-        activeContext: "Active context",
-        none: "Not selected",
-        loading: "Loading",
-        unavailable: "Unavailable",
-      };
-
   async function submitOrganization(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!orgName.trim()) return;
@@ -130,23 +108,13 @@ export default function SettingsPage() {
   return (
     <div className="page settings-page">
       <CatalogPageHeader
-        eyebrow={copy.eyebrow}
         title={t("settings.title")}
-        description={copy.description}
         actions={
           <>
             <Link className="button button-ghost" href="/settings/models">{t("settings.models.title")}</Link>
             <Link className="button button-ghost" href="/settings/members">{t("settings.members.title")}</Link>
           </>
         }
-      />
-
-      <CatalogStatStrip
-        items={[
-          { label: copy.organizations, value: tenancyLoading ? copy.loading : tenancyError ? copy.unavailable : formatCount(organizations.length) },
-          { label: copy.workspaces, value: tenancyLoading ? copy.loading : tenancyError ? copy.unavailable : formatCount(workspaces.length) },
-          { label: copy.activeContext, value: tenancyLoading ? copy.loading : activeWorkspace?.name ?? copy.none, href: activeWorkspace ? "/dashboard" : undefined },
-        ]}
       />
 
       <AppearanceSettings />
@@ -161,7 +129,7 @@ export default function SettingsPage() {
           </div>
           <div className="key-value-row">
             <dt>{t("settings.workspace")}</dt>
-            <dd>{activeWorkspace?.name ?? t("common.none")}</dd>
+            <dd>{activeWorkspace ? <Link href="/dashboard">{activeWorkspace.name}</Link> : t("common.none")}</dd>
           </div>
           <div className="key-value-row">
             <dt>{t("settings.workspaceId")}</dt>
@@ -170,30 +138,14 @@ export default function SettingsPage() {
         </dl>
       </Panel>
 
-      <section className="overview-grid" aria-label={t("settings.areas")}>
-        <Link className="overview-card" href="/settings/models">
-          <span className="overview-card-title">{t("settings.models.title")}</span>
-          <span className="overview-card-description">{t("settings.models.description")}</span>
-          <span className="overview-card-cta" aria-hidden="true">
-            {t("home.cardCta")} →
-          </span>
-        </Link>
-        <Link className="overview-card" href="/settings/members">
-          <span className="overview-card-title">{t("settings.members.title")}</span>
-          <span className="overview-card-description">{t("settings.members.lede")}</span>
-          <span className="overview-card-cta" aria-hidden="true">{t("evaluation.overview.open")} →</span>
-        </Link>
-      </section>
-
-      <Panel ariaLabel={t("settings.tenancy")} title={t("settings.tenancy")} eyebrow={t("settings.eyebrow")}>
-        {notice && <p className="inline-notice">{notice}</p>}
+      <Panel ariaLabel={t("settings.tenancy")} title={t("settings.tenancy")}>
+        {notice && <p className="inline-notice" role="status">{notice}</p>}
         <InlineError error={error} fallback={t("errors.requestFailed")} />
 
-        <form className="eval-form" onSubmit={submitOrganization} noValidate>
-          <p className="eval-form-title">{t("settings.createOrganization")}</p>
+        <form id="create-organization" className="eval-form" aria-label={t("settings.createOrganization")} onSubmit={submitOrganization} noValidate>
           <label>
             {t("settings.organizationName")}
-            <input value={orgName} onChange={(event) => setOrgName(event.target.value)} maxLength={200} />
+            <input name="organization" autoComplete="organization" value={orgName} onChange={(event) => setOrgName(event.target.value)} maxLength={200} />
           </label>
           <div className="form-actions">
             <button type="submit" className="button button-primary" disabled={busy || !orgName.trim()}>
@@ -202,8 +154,7 @@ export default function SettingsPage() {
           </div>
         </form>
 
-        <form className="eval-form" onSubmit={submitWorkspace} noValidate>
-          <p className="eval-form-title">{t("settings.createWorkspace")}</p>
+        <form id="create-workspace" className="eval-form" aria-label={t("settings.createWorkspace")} onSubmit={submitWorkspace} noValidate>
           <label>
             {t("settings.organization")}
             <Select
@@ -216,6 +167,7 @@ export default function SettingsPage() {
           <label>
             {t("settings.workspaceName")}
             <input
+              name="workspace"
               value={workspaceName}
               onChange={(event) => setWorkspaceName(event.target.value)}
               maxLength={200}

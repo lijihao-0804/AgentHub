@@ -334,7 +334,6 @@ export default function AddRunToDatasetPanel({
   return (
     <Panel
       title={t("evaluation.addToEvaluation.title")}
-      eyebrow={t("evaluation.eyebrow")}
       ariaLabel={t("evaluation.addToEvaluation.title")}
       actions={
         <button type="button" className="button button-ghost" onClick={onClose} disabled={mutation.pending}>

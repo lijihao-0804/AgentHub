@@ -45,7 +45,7 @@ export default function LoginPage() {
   }
 
   return (
-    <AuthLayout mode="login">
+    <AuthLayout>
       <h1 id="auth-form-title">{t("auth.loginTitle")}</h1>
       <form onSubmit={handleSubmit} noValidate aria-busy={submitting}>
         <label>

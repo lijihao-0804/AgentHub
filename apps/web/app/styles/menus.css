@@ -1,74 +1,28 @@
 /* Topbar controls, workspace context and their popovers. */
 
-.lang-switch {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  display: flex;
-  flex: 0 0 auto;
-  overflow: hidden;
+.language-toggle {
+  font: 600 var(--text-xs) var(--font-sans);
 }
-
-.lang-option {
-  align-items: center;
-  background: transparent;
-  border: 0;
-  color: var(--text-muted);
-  cursor: pointer;
-  display: inline-flex;
-  font: inherit;
-  font-size: var(--text-xs);
-  font-weight: 650;
-  height: 2.3rem;
-  justify-content: center;
-  min-width: 2.35rem;
-  padding: 0 0.55rem;
-  transition: background 120ms ease, color 120ms ease;
-  white-space: nowrap;
-}
-
-.lang-option:focus-visible {
-  outline-offset: -2px;
-}
-
-.lang-option[aria-pressed="true"] {
-  background: var(--accent-soft);
-  color: var(--text);
-  box-shadow: inset 0 0 0 1px var(--border);
-}
-
-.lang-option:hover:not([aria-pressed="true"]) {
-  background: var(--row-hover);
-  color: var(--text);
-}
-
-.theme-option {
-  min-width: 2.35rem;
-  padding: 0;
-}
-
-.theme-option svg {
-  height: 1rem;
-  width: 1rem;
-}
+.theme-toggle svg { width: 1.05rem; height: 1.05rem; }
 
 .ws-selector {
-  flex: 0 1 19rem;
+  flex: 0 1 auto;
+  max-width: min(32vw, 23rem);
   min-width: 9.5rem;
   position: relative;
 }
 
 .ws-selector-trigger {
   align-items: center;
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: transparent;
+  border: 1px solid transparent;
   border-radius: var(--radius-sm);
-  box-shadow: var(--shadow-sm);
+
   color: var(--text);
   cursor: pointer;
   display: flex;
   gap: 0.6rem;
-  height: 2.65rem;
+  height: 2.25rem;
   min-width: 0;
   padding: 0.3rem 0.65rem;
   text-align: left;
@@ -79,17 +33,7 @@
 .ws-selector-trigger:hover,
 .ws-selector-trigger[aria-expanded="true"] {
   border-color: var(--border-strong);
-  box-shadow: 0 0 0 3px var(--accent-soft);
-}
-
-.session-dot {
-  background: var(--accent);
-  border-radius: 50%;
-  box-shadow: 0 0 0 3px var(--accent-soft);
-  display: inline-block;
-  flex: 0 0 auto;
-  height: 0.42rem;
-  width: 0.42rem;
+  background: var(--row-hover);
 }
 
 .ws-context {
@@ -97,14 +41,6 @@
   flex: 1 1 auto;
   gap: 0.02rem;
   min-width: 0;
-}
-
-.ws-context-label {
-  color: var(--text-muted);
-  font-size: 0.58rem;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  line-height: 1.2;
 }
 
 .ws-path-line {
@@ -154,13 +90,20 @@
   border-radius: var(--radius);
   box-shadow: var(--shadow-popover);
   max-height: min(24rem, calc(100dvh - 5rem));
-  min-width: 17rem;
+  min-width: min(17rem, calc(100vw - 2rem));
   overflow-y: auto;
   padding: 0.4rem;
   position: absolute;
   right: 0;
   top: calc(100% + 0.45rem);
   z-index: var(--z-floating);
+}
+
+.ws-selector .ws-menu {
+  left: 0;
+  right: auto;
+  width: max-content;
+  max-width: min(24rem, calc(100vw - 4.5rem));
 }
 
 @keyframes menu-enter {
@@ -217,8 +160,8 @@
 
 .user-menu-trigger {
   align-items: center;
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: transparent;
+  border: 1px solid transparent;
   border-radius: var(--radius-sm);
   color: var(--text);
   cursor: pointer;
@@ -227,7 +170,7 @@
   font-size: var(--text-sm);
   font-weight: 600;
   gap: 0.45rem;
-  height: 2.65rem;
+  height: 2.25rem;
   padding: 0.28rem 0.6rem 0.28rem 0.32rem;
   transition: background 120ms ease, border-color 120ms ease;
 }

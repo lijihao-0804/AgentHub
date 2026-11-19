@@ -39,12 +39,10 @@
 .button-danger:hover:not(:disabled) { background: var(--danger); border-color: transparent; color: var(--accent-ink); }
 
 .panel {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  box-shadow: 0 2px 4px rgba(20, 46, 53, 0.025);
+  border-block-start: 1px solid var(--border);
+
   margin-top: var(--space-5);
-  padding: var(--space-5);
+  padding-block: var(--space-5);
 }
 .panel-heading {
   align-items: flex-start;
@@ -73,11 +71,11 @@
   border-color: var(--danger-border);
 }
 .state-block.state-loading { align-items: center; justify-items: start; }
-.state-empty { background: var(--surface); border-style: dashed; justify-items: center; padding: 2.75rem 1.5rem; text-align: center; }
+.state-empty { background: var(--surface-inset); border-color: transparent; justify-items: center; padding: 2.75rem 1.5rem; text-align: center; }
 .state-empty .state-hint { max-width: 34rem; }
 .state-empty .form-actions { justify-content: center; }
-.state-illustration { align-items: center; background: var(--surface-inset); border: 1px solid var(--border); border-radius: 16px; color: var(--accent); display: flex; height: 58px; justify-content: center; margin-bottom: 0.75rem; width: 58px; }
 .state-title { font-weight: 700; }
+.session-error { color: var(--danger); font-size: var(--text-sm); }
 .state-hint { color: var(--text-muted); font-size: var(--text-base); line-height: 1.5; }
 .state-code {
   background: var(--surface-inset);

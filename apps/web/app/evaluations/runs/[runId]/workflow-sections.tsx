@@ -56,15 +56,12 @@ function isDeprecated(metric: MetricValueView): boolean {
   return (metric.details as { deprecated?: unknown } | null)?.deprecated === true;
 }
 
-function StepHeader({ step, title, eyebrow }: { step: number; title: string; eyebrow: string }) {
+function StepHeader({ step, title }: { step: number; title: string }) {
   const { t } = useI18n();
   return (
     <div className="workflow-step-header">
       <span className="workflow-step-number" aria-hidden="true">{step}</span>
-      <div>
-        <p className="eyebrow">{t("evaluation.run.workflow.step", { number: step })} · {eyebrow}</p>
-        <h3>{title}</h3>
-      </div>
+      <h3><span className="sr-only">{t("evaluation.run.workflow.step", { number: step })} </span>{title}</h3>
     </div>
   );
 }
@@ -406,7 +403,7 @@ export default function RunWorkflow({
     <>
       {/* ---------- 1 Metrics ---------- */}
       <Panel ariaLabel={t("evaluation.metrics.stepTitle")}>
-        <StepHeader step={1} title={t("evaluation.metrics.stepTitle")} eyebrow={t("evaluation.metrics.stepTitle")} />
+        <StepHeader step={1} title={t("evaluation.metrics.stepTitle")} />
         {!terminal && <p className="state-hint">{t("evaluation.run.workflow.needsTerminal")}</p>}
         {terminal && metrics.kind === "notMaterialized" && (
           <div className="state-block state-inline">
@@ -428,7 +425,7 @@ export default function RunWorkflow({
 
       {/* ---------- 2 Comparison ---------- */}
       <Panel ariaLabel={t("evaluation.comparison.stepTitle")}>
-        <StepHeader step={2} title={t("evaluation.comparison.stepTitle")} eyebrow={t("evaluation.comparison.stepTitle")} />
+        <StepHeader step={2} title={t("evaluation.comparison.stepTitle")} />
         {!metricsReady && <p className="state-hint">{t("evaluation.comparison.needsMetrics")}</p>}
         {metricsReady && (
           <>
@@ -501,7 +498,7 @@ export default function RunWorkflow({
 
       {/* ---------- 3 Ablation ---------- */}
       <Panel ariaLabel={t("evaluation.ablation.stepTitle")}>
-        <StepHeader step={3} title={t("evaluation.ablation.stepTitle")} eyebrow={t("evaluation.ablation.stepTitle")} />
+        <StepHeader step={3} title={t("evaluation.ablation.stepTitle")} />
         {!selectedComparison && <p className="state-hint">{t("evaluation.ablation.needsComparison")}</p>}
         {selectedComparison && ablationState === "loading" && <LoadingState />}
         {selectedComparison && ablationState === "error" && ablationError && (
@@ -525,7 +522,7 @@ export default function RunWorkflow({
 
       {/* ---------- 4 Release gate ---------- */}
       <Panel ariaLabel={t("evaluation.gate.stepTitle")}>
-        <StepHeader step={4} title={t("evaluation.gate.stepTitle")} eyebrow={t("evaluation.gate.stepTitle")} />
+        <StepHeader step={4} title={t("evaluation.gate.stepTitle")} />
         <p className="state-hint">{t("evaluation.gate.disclaimer")}</p>
         <p className="state-hint">
           {locale === "zh-CN"
@@ -1080,7 +1077,6 @@ export function RunCaseResults({
   return (
     <Panel
       title={t("evaluation.run.caseResults.title")}
-      eyebrow={t("evaluation.run.caseResults.eyebrow")}
       actions={
         <>
           <button

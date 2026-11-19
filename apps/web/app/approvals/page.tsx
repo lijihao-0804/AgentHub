@@ -101,8 +101,6 @@ export default function ApprovalsPage() {
   );
   const copy = locale === "zh-CN"
     ? {
-        eyebrow: "审批队列",
-        description: "审核智能体准备执行的工具操作，处理待审批请求，并及时跟进结果不明确的操作。",
         searchLabel: "搜索当前列表中的审批",
         searchPlaceholder: "按工具、运行、动作 ID 或状态搜索",
         clearSearch: "清空搜索",
@@ -116,8 +114,6 @@ export default function ApprovalsPage() {
         unavailable: "不可用",
       }
     : {
-        eyebrow: "Approval queue",
-        description: "Review tool actions agents want to take, clear pending requests, and follow up on any action whose outcome is uncertain.",
         searchLabel: "Search approvals in this view",
         searchPlaceholder: "Search tool, run, action ID, or state",
         clearSearch: "Clear search",
@@ -286,9 +282,7 @@ export default function ApprovalsPage() {
   return (
     <div className="page">
       <CatalogPageHeader
-        eyebrow={copy.eyebrow}
         title={t("approvals.title")}
-        description={copy.description}
         actions={
           <Link className="button button-ghost" href="/runs?status=NEEDS_ATTENTION">
             {t("dashboard.ops.needsAttention")}
@@ -309,7 +303,6 @@ export default function ApprovalsPage() {
       <Panel
         ariaLabel={t("approvals.inboxTitle")}
         title={t("approvals.inboxTitle")}
-        eyebrow={t("approvals.inboxEyebrow")}
         actions={
           <>
             <span className="state-hint" aria-live="polite">

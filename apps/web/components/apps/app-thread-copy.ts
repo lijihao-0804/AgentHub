@@ -18,15 +18,12 @@ export type AppThreadCopy = {
   agentId?: string;
   /** Where the list page lives; a thread is `${basePath}/${id}`. */
   basePath: string;
-  eyebrow: MessageKey;
   title: MessageKey;
-  lede: MessageKey;
   newThread: MessageKey;
   createTitle: MessageKey;
   threadTitlePlaceholder: MessageKey;
   recent: MessageKey;
   noThreads: MessageKey;
-  noThreadsHint: MessageKey;
   /** Explains to a disconnected visitor what the session would show them. */
   sessionContext: MessageKey;
 };

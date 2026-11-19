@@ -7,7 +7,6 @@ import MetricCard, { windowDelta } from "@/components/ui/metric-card";
 import Select from "@/components/ui/select";
 import StatusBadge from "@/components/ui/status-badge";
 import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
-import { CatalogPageHeader } from "@/components/catalog/catalog-layout";
 import { ApiError, errorHintKey, toApiError } from "@/lib/api/client";
 import {
   AgentVersionBreakdown,
@@ -112,34 +111,22 @@ export default function DashboardPage() {
   const loadingRef = useRef(false);
   const copy = locale === "zh-CN"
     ? {
-        eyebrow: "运营仪表板",
-        description: "从所选时间段查看运行是否健康、哪里变慢、成本如何，以及哪些工作最需要你处理。",
         focusTitle: "需要处理",
         focusLiveTitle: "运行进行中",
         focusClearTitle: "工作区空闲",
-        focusEyebrowUrgent: "操作关注",
-        focusEyebrowLive: "实时状态",
-        focusEyebrowClear: "运行状态",
         focusAttention: (attention: string, waiting: string) => `${attention} 次运行需要关注，${waiting} 次运行正在等待审批。`,
         focusLive: (running: string) => `${running} 次运行正在执行；当前没有阻塞或未知结果。`,
-        focusClear: "当前没有活动运行或待处理异常，工作区处于空闲状态。",
         reviewRuns: "查看异常运行",
         reviewApprovals: "查看审批",
         liveRuns: "查看活动运行",
         emptyWorkspace: "设置智能体",
       }
     : {
-        eyebrow: "Operations dashboard",
-        description: "See how runs are performing across the selected period, where time or cost is rising, and which work needs you most.",
         focusTitle: "Needs attention",
         focusLiveTitle: "Runs in flight",
         focusClearTitle: "Workspace is quiet",
-        focusEyebrowUrgent: "Action required",
-        focusEyebrowLive: "Live status",
-        focusEyebrowClear: "Operations status",
         focusAttention: (attention: string, waiting: string) => `${attention} ${attention === "1" ? "run needs" : "runs need"} attention and ${waiting} ${waiting === "1" ? "approval is" : "approvals are"} waiting.`,
         focusLive: (running: string) => `${running} ${running === "1" ? "run is" : "runs are"} in flight, with no current blocker or unknown outcome.`,
-        focusClear: "No runs are active or waiting for attention. This workspace is quiet.",
         reviewRuns: "Review attention runs",
         reviewApprovals: "Review approvals",
         liveRuns: "View active runs",
@@ -249,7 +236,7 @@ export default function DashboardPage() {
 
   if (!connected) {
     return (
-      <div className="page">
+      <div className="page dashboard-page">
         <header className="page-header">
           <h1>{t("dashboard.title")}</h1>
         </header>
@@ -259,12 +246,9 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="page">
-      <CatalogPageHeader
-        eyebrow={copy.eyebrow}
-        title={t("dashboard.title")}
-        description={copy.description}
-        actions={
+    <div className="page dashboard-page">
+      <header className="catalog-page-header">
+        <h1>{t("dashboard.title")}</h1>
           <section className="dashboard-window" aria-label={t("dashboard.window")}>
             <label>
               {t("dashboard.window")}
@@ -275,8 +259,7 @@ export default function DashboardPage() {
               />
             </label>
           </section>
-        }
-      />
+      </header>
 
       {error && (
         <ErrorState
@@ -299,17 +282,12 @@ export default function DashboardPage() {
             return (
               <section className={`dashboard-focus${urgent ? " is-urgent" : active ? " is-live" : " is-clear"}`} aria-live="polite">
                 <div className="dashboard-focus-copy">
-                  <p className="catalog-eyebrow">
-                    {urgent ? copy.focusEyebrowUrgent : active ? copy.focusEyebrowLive : copy.focusEyebrowClear}
-                  </p>
                   <h2>{urgent ? copy.focusTitle : active ? copy.focusLiveTitle : copy.focusClearTitle}</h2>
-                  <p>
+                  {active && <p>
                     {urgent
                       ? copy.focusAttention(formatCount(attention), formatCount(waiting))
-                      : active
-                        ? copy.focusLive(formatCount(running))
-                        : copy.focusClear}
-                  </p>
+                      : copy.focusLive(formatCount(running))}
+                  </p>}
                 </div>
                 <div className="dashboard-focus-actions">
                   {attention > 0 && (
@@ -347,121 +325,128 @@ export default function DashboardPage() {
               </div>
             </Panel>
           )}
-          <section className="kpi-grid" aria-label={t("dashboard.title")}>
-            <MetricCard
-              label={t("dashboard.kpi.finishedRuns")}
-              value={formatCount(summary.finished_runs.denominator)}
-              href="/runs"
-              hint={
-                summary.current.running_count + summary.current.waiting_approval_count > 0
-                  ? t("dashboard.kpi.finishedRunsHint", {
-                      running: formatCount(summary.current.running_count),
-                      waitingApproval: formatCount(summary.current.waiting_approval_count),
-                    })
-                  : undefined
-              }
-              delta={windowDelta((timeseries?.items ?? []).map((item) => item.runs))}
-              deltaLabel={t("dashboard.kpi.deltaLabel")}
-              sparkline={(timeseries?.items ?? []).map((item) => item.runs)}
-            />
-            <MetricCard
-              label={t("dashboard.kpi.failedRuns")}
-              value={formatCount(summary.finished_runs.failed)}
-              href="/runs?status=FAILED"
-              emphasis={summary.finished_runs.failed > 0}
-              emphasisTone="danger"
-              delta={windowDelta((timeseries?.items ?? []).map((item) => item.failed))}
-              deltaLabel={t("dashboard.kpi.deltaLabel")}
-              deltaInverse
-              sparkline={(timeseries?.items ?? []).map((item) => item.failed)}
-              sparklineTone="danger"
-            />
-            <MetricCard
-              label={t("dashboard.kpi.successRate")}
-              value={summary.success_rate.rate === null ? "—" : formatPercent(summary.success_rate.rate)}
-              hint={t("dashboard.kpi.successHint", {
-                numerator: formatCount(summary.success_rate.numerator),
-                denominator: formatCount(summary.success_rate.denominator),
-              })}
-            />
-            <MetricCard
-              label={t("dashboard.kpi.p95Latency")}
-              value={summary.latency.p95_ms === null ? "—" : formatDurationMs(summary.latency.p95_ms)}
-              hint={t("dashboard.kpi.p95Hint", {
-                p50: summary.latency.p50_ms === null ? "—" : formatDurationMs(summary.latency.p50_ms),
-                avg: summary.latency.avg_ms === null ? "—" : formatDurationMs(summary.latency.avg_ms),
-                count: formatCount(summary.latency.sample_count),
-              })}
-            />
-            <MetricCard
-              label={t("dashboard.kpi.tokensPerRun")}
-              value={summary.usage.avg_tokens_per_run === null ? "—" : formatCount(summary.usage.avg_tokens_per_run)}
-              hint={t("dashboard.kpi.tokensBreakdown", {
-                input: summary.usage.avg_input_tokens === null ? t("common.unknown") : formatCount(summary.usage.avg_input_tokens),
-                output: summary.usage.avg_output_tokens === null ? t("common.unknown") : formatCount(summary.usage.avg_output_tokens),
-                cached: summary.usage.avg_cached_tokens === null ? t("common.unknown") : formatCount(summary.usage.avg_cached_tokens),
-              })}
-            />
-            <MetricCard
-              label={t("dashboard.kpi.costPerSuccess")}
-              value={
-                summary.cost.mixed_currency
-                  ? t("dashboard.cost.mixed")
-                  : summary.cost.cost_per_successful_run === null
-                    ? t("common.unknown")
-                    : formatCurrencyAmount(summary.cost.cost_per_successful_run, null)
-              }
-              unit={
-                summary.cost.mixed_currency || summary.cost.cost_per_successful_run === null
-                  ? null
-                  : summary.cost.currency
-              }
-              hint={
-                summary.cost.total_cost === null || summary.cost.mixed_currency
-                  ? t("dashboard.kpi.costHint", { count: formatCount(summary.cost.successful_cost_denominator) })
-                  : t("dashboard.kpi.costHintTotal", {
-                      total: formatCurrencyAmount(summary.cost.total_cost, null),
-                      average: summary.cost.avg_cost_per_run === null
+          <div className="dashboard-readings">
+            <section aria-labelledby="dashboard-period-title">
+              <h2 id="dashboard-period-title">{locale === "zh-CN" ? "时段指标" : "Period metrics"}</h2>
+              <div className="kpi-grid">
+                <MetricCard
+                  label={t("dashboard.kpi.finishedRuns")}
+                  value={formatCount(summary.finished_runs.denominator)}
+                  href="/runs"
+                  hint={
+                    summary.current.running_count + summary.current.waiting_approval_count > 0
+                      ? t("dashboard.kpi.finishedRunsHint", {
+                          running: formatCount(summary.current.running_count),
+                          waitingApproval: formatCount(summary.current.waiting_approval_count),
+                        })
+                      : undefined
+                  }
+                  delta={windowDelta((timeseries?.items ?? []).map((item) => item.runs))}
+                  deltaLabel={t("dashboard.kpi.deltaLabel")}
+                  sparkline={(timeseries?.items ?? []).map((item) => item.runs)}
+                />
+                <MetricCard
+                  label={t("dashboard.kpi.failedRuns")}
+                  value={formatCount(summary.finished_runs.failed)}
+                  href="/runs?status=FAILED"
+                  emphasis={summary.finished_runs.failed > 0}
+                  emphasisTone="danger"
+                  delta={windowDelta((timeseries?.items ?? []).map((item) => item.failed))}
+                  deltaLabel={t("dashboard.kpi.deltaLabel")}
+                  deltaInverse
+                  sparkline={(timeseries?.items ?? []).map((item) => item.failed)}
+                  sparklineTone="danger"
+                />
+                <MetricCard
+                  label={t("dashboard.kpi.successRate")}
+                  value={summary.success_rate.rate === null ? "—" : formatPercent(summary.success_rate.rate)}
+                  hint={t("dashboard.kpi.successHint", {
+                    numerator: formatCount(summary.success_rate.numerator),
+                    denominator: formatCount(summary.success_rate.denominator),
+                  })}
+                />
+                <MetricCard
+                  label={t("dashboard.kpi.p95Latency")}
+                  value={summary.latency.p95_ms === null ? "—" : formatDurationMs(summary.latency.p95_ms)}
+                  hint={t("dashboard.kpi.p95Hint", {
+                    p50: summary.latency.p50_ms === null ? "—" : formatDurationMs(summary.latency.p50_ms),
+                    avg: summary.latency.avg_ms === null ? "—" : formatDurationMs(summary.latency.avg_ms),
+                    count: formatCount(summary.latency.sample_count),
+                  })}
+                />
+                <MetricCard
+                  label={t("dashboard.kpi.tokensPerRun")}
+                  value={summary.usage.avg_tokens_per_run === null ? "—" : formatCount(summary.usage.avg_tokens_per_run)}
+                  hint={t("dashboard.kpi.tokensBreakdown", {
+                    input: summary.usage.avg_input_tokens === null ? t("common.unknown") : formatCount(summary.usage.avg_input_tokens),
+                    output: summary.usage.avg_output_tokens === null ? t("common.unknown") : formatCount(summary.usage.avg_output_tokens),
+                    cached: summary.usage.avg_cached_tokens === null ? t("common.unknown") : formatCount(summary.usage.avg_cached_tokens),
+                  })}
+                />
+                <MetricCard
+                  label={t("dashboard.kpi.costPerSuccess")}
+                  value={
+                    summary.cost.mixed_currency
+                      ? t("dashboard.cost.mixed")
+                      : summary.cost.cost_per_successful_run === null
                         ? t("common.unknown")
-                        : formatCurrencyAmount(summary.cost.avg_cost_per_run, null),
-                      count: formatCount(summary.cost.successful_cost_denominator),
-                    })
-              }
-            />
-          </section>
-
-          <section className="op-grid" aria-label={t("dashboard.title")}>
-            <MetricCard label={t("dashboard.ops.running")} value={formatCount(summary.current.running_count)} href="/runs?status=RUNNING" />
-            <MetricCard
-              label={t("dashboard.ops.waitingApproval")}
-              value={formatCount(summary.current.waiting_approval_count)}
-              href="/approvals"
-              emphasis={summary.current.waiting_approval_count > 0}
-              emphasisTone="attention"
-            />
-            <MetricCard
-              label={t("dashboard.ops.cancelRequested")}
-              value={formatCount(summary.current.cancel_requested_count)}
-              href="/runs?status=CANCEL_REQUESTED"
-              emphasis={summary.current.cancel_requested_count > 0}
-              emphasisTone="warning"
-            />
-            <MetricCard
-              label={t("dashboard.ops.needsAttention")}
-              value={formatCount(summary.current.needs_attention_count)}
-              href="/runs?status=NEEDS_ATTENTION"
-              emphasis={summary.current.needs_attention_count > 0}
-              emphasisTone="attention"
-            />
-            <MetricCard
-              label={t("dashboard.ops.unknownOutcome")}
-              value={formatCount(summary.current.unknown_outcome_action_count)}
-              hint={t("dashboard.ops.unknownOutcomeHint")}
-              href="/runs?status=NEEDS_ATTENTION"
-              emphasis={summary.current.unknown_outcome_action_count > 0}
-              emphasisTone="warning"
-            />
-          </section>
+                        : formatCurrencyAmount(summary.cost.cost_per_successful_run, null)
+                  }
+                  unit={
+                    summary.cost.mixed_currency || summary.cost.cost_per_successful_run === null
+                      ? null
+                      : summary.cost.currency
+                  }
+                  hint={
+                    summary.cost.total_cost === null || summary.cost.mixed_currency
+                      ? t("dashboard.kpi.costHint", { count: formatCount(summary.cost.successful_cost_denominator) })
+                      : t("dashboard.kpi.costHintTotal", {
+                          total: formatCurrencyAmount(summary.cost.total_cost, null),
+                          average: summary.cost.avg_cost_per_run === null
+                            ? t("common.unknown")
+                            : formatCurrencyAmount(summary.cost.avg_cost_per_run, null),
+                          count: formatCount(summary.cost.successful_cost_denominator),
+                        })
+                  }
+                />
+              </div>
+            </section>
+            <section aria-labelledby="dashboard-live-title">
+              <h2 id="dashboard-live-title">{locale === "zh-CN" ? "当前状态" : "Current status"}</h2>
+              <div className="op-grid">
+                <MetricCard label={t("dashboard.ops.running")} value={formatCount(summary.current.running_count)} href="/runs?status=RUNNING" />
+                <MetricCard
+                  label={t("dashboard.ops.waitingApproval")}
+                  value={formatCount(summary.current.waiting_approval_count)}
+                  href="/approvals"
+                  emphasis={summary.current.waiting_approval_count > 0}
+                  emphasisTone="attention"
+                />
+                <MetricCard
+                  label={t("dashboard.ops.cancelRequested")}
+                  value={formatCount(summary.current.cancel_requested_count)}
+                  href="/runs?status=CANCEL_REQUESTED"
+                  emphasis={summary.current.cancel_requested_count > 0}
+                  emphasisTone="warning"
+                />
+                <MetricCard
+                  label={t("dashboard.ops.needsAttention")}
+                  value={formatCount(summary.current.needs_attention_count)}
+                  href="/runs?status=NEEDS_ATTENTION"
+                  emphasis={summary.current.needs_attention_count > 0}
+                  emphasisTone="attention"
+                />
+                <MetricCard
+                  label={t("dashboard.ops.unknownOutcome")}
+                  value={formatCount(summary.current.unknown_outcome_action_count)}
+                  hint={t("dashboard.ops.unknownOutcomeHint")}
+                  href="/runs?status=NEEDS_ATTENTION"
+                  emphasis={summary.current.unknown_outcome_action_count > 0}
+                  emphasisTone="warning"
+                />
+              </div>
+            </section>
+          </div>
 
           <Panel title={t("dashboard.approvals.title")}>
             <div className="run-facts">

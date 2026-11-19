@@ -31,7 +31,7 @@ export default function AppearanceSettings() {
       <div className="appearance-heading">
         <div>
           <h2 id="appearance-heading">{t("appearance.title")}</h2>
-          <p role="status">{t(canPersist ? "appearance.description" : "appearance.tabOnly")}</p>
+          {!canPersist && <p role="status">{t("appearance.tabOnly")}</p>}
         </div>
         <button
           className="button button-ghost"

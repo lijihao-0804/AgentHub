@@ -628,7 +628,6 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
       {preflight && (
         <Panel
           ariaLabel={t("agents.publishPreview")}
-          eyebrow={t("agents.readinessCheck")}
           title={t("agents.publishPreview")}
         >
           <p className="inline-notice">{t("agents.readyToPublish")}</p>

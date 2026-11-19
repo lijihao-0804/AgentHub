@@ -26,7 +26,6 @@ import {
 
 const DETAIL_COPY = {
   "en-US": {
-    eyebrow: "Case evidence",
     fallbackTitle: "Case",
     identity: "Identity",
     category: "Category",
@@ -118,7 +117,6 @@ const DETAIL_COPY = {
     },
   },
   "zh-CN": {
-    eyebrow: "逐题证据",
     fallbackTitle: "题目",
     identity: "身份",
     category: "类别",
@@ -325,7 +323,7 @@ export function CaseEvidenceDetails({
   }
 
   return (
-    <Panel title={title} eyebrow={text.eyebrow}>
+    <Panel title={title}>
       <div className="case-evidence-detail">
         <CostReservationNotice item={caseResult} evidence={evidence} text={text} />
 
