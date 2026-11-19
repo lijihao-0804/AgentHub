@@ -1,0 +1,98 @@
+{
+  "archived_current_debit_units": 0,
+  "archived_unique": 553,
+  "archived_unique_prepaid_units": 66952336,
+  "by_cohort_arm_origin_attempt": {
+    "fresh/baseline/live/correction": {
+      "cached_prompt_tokens": 256,
+      "completion_tokens": 1382,
+      "new_cost_units": 2177824,
+      "new_physical": 8,
+      "prompt_tokens": 5612
+    },
+    "fresh/baseline/live/first": {
+      "cached_prompt_tokens": 256,
+      "completion_tokens": 14694,
+      "new_cost_units": 16531624,
+      "new_physical": 48,
+      "prompt_tokens": 24133
+    },
+    "fresh/candidate/live/first": {
+      "cached_prompt_tokens": 5632,
+      "completion_tokens": 13991,
+      "new_cost_units": 16912328,
+      "new_physical": 48,
+      "prompt_tokens": 34117
+    },
+    "historical/baseline/archive/correction": {
+      "archived_events": 110,
+      "archived_nominal_cost_units": 11368696,
+      "cached_prompt_tokens": 34048,
+      "completion_tokens": 14228,
+      "prompt_tokens": 90142
+    },
+    "historical/baseline/archive/first": {
+      "archived_events": 443,
+      "archived_nominal_cost_units": 55583640,
+      "cached_prompt_tokens": 43520,
+      "completion_tokens": 64675,
+      "prompt_tokens": 339786
+    },
+    "historical/baseline/live/correction": {
+      "cached_prompt_tokens": 1792,
+      "completion_tokens": 82,
+      "new_cost_units": 148568,
+      "new_physical": 1,
+      "prompt_tokens": 2171
+    },
+    "historical/baseline/live/first": {
+      "cached_prompt_tokens": 0,
+      "completion_tokens": 210,
+      "new_cost_units": 1392400,
+      "new_physical": 3,
+      "prompt_tokens": 6122
+    },
+    "historical/candidate/live/first": {
+      "cached_prompt_tokens": 69888,
+      "completion_tokens": 84912,
+      "new_cost_units": 141966752,
+      "new_physical": 446,
+      "prompt_tokens": 438676
+    }
+  },
+  "ceiling_cny": "30.00000000",
+  "cumulative_cny": "5.05791508",
+  "historical_unique_confirmed": 1875,
+  "live_fresh_nearest_rank": {
+    "baseline/final_endpoint_ms": {
+      "n": 48,
+      "p50_ms": 1945.5596999905538,
+      "p95_ms": 8730.110999982571
+    },
+    "baseline/first_provider_ms": {
+      "n": 48,
+      "p50_ms": 1398.9836999971885,
+      "p95_ms": 7552.252399997087
+    },
+    "candidate/final_endpoint_ms": {
+      "n": 48,
+      "p50_ms": 2163.728599989554,
+      "p95_ms": 4183.230099995853
+    },
+    "candidate/first_provider_ms": {
+      "n": 48,
+      "p50_ms": 1844.269199995324,
+      "p95_ms": 3957.874299987452
+    }
+  },
+  "new_corrections": 9,
+  "new_cost_cny": "1.79129496",
+  "new_cost_units": 179129496,
+  "new_physical": 554,
+  "new_unknown_count": 0,
+  "opening_cny": "3.26662012",
+  "opening_units": 326662012,
+  "prior_unknown_count": 2,
+  "prior_unknown_reserved_cny_already_in_opening": "0.04906200",
+  "remaining_cny": "24.94208492"
+}

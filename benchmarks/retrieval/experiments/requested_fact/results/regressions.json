@@ -1,0 +1,239 @@
+[
+  {
+    "id": "rf-fresh/CF016",
+    "qid": "CF016",
+    "cohort": "fresh",
+    "language": "zh",
+    "gold_conflict": false,
+    "stages": {
+      "final": {
+        "lost_paired": true,
+        "lost_prior_success": false,
+        "reason": "HTTP_502"
+      }
+    }
+  },
+  {
+    "id": "rf-history/0685065852d0e0e4975dc6c0bbd325397cf4b4944f79802f423c382a8e3ef0d7",
+    "qid": "2hop__636562_141689",
+    "cohort": "historical",
+    "language": "en",
+    "gold_conflict": true,
+    "stages": {
+      "first": {
+        "lost_paired": false,
+        "lost_prior_success": true,
+        "reason": "incorrect_or_incomplete_answer"
+      },
+      "final": {
+        "lost_paired": false,
+        "lost_prior_success": true,
+        "reason": "incorrect_or_incomplete_answer"
+      }
+    }
+  },
+  {
+    "id": "rf-history/14db1c0429d640218ba87c4d12e33c887847a94b3bc0b1452e460c208639fbdf",
+    "qid": "2hop__60984_77561",
+    "cohort": "historical",
+    "language": "en",
+    "gold_conflict": false,
+    "stages": {
+      "first": {
+        "lost_paired": true,
+        "lost_prior_success": true,
+        "reason": "citation_does_not_support_all_claims"
+      },
+      "final": {
+        "lost_paired": true,
+        "lost_prior_success": true,
+        "reason": "citation_does_not_support_all_claims"
+      }
+    }
+  },
+  {
+    "id": "rf-history/335a0c6eeb8b10e18ba57a324251cd47d51be704cb6e72525edd15b802aa7b87",
+    "qid": "B055",
+    "cohort": "historical",
+    "language": "en",
+    "gold_conflict": false,
+    "stages": {
+      "first": {
+        "lost_paired": true,
+        "lost_prior_success": true,
+        "reason": "empty_output"
+      },
+      "final": {
+        "lost_paired": true,
+        "lost_prior_success": true,
+        "reason": "HTTP_502"
+      }
+    }
+  },
+  {
+    "id": "rf-history/53e579dac09ada2c446fe5254cf591723f4bdaa56ad9ea3c225cc69e938fefed",
+    "qid": "2hop__659807_63963",
+    "cohort": "historical",
+    "language": "en",
+    "gold_conflict": false,
+    "stages": {
+      "first": {
+        "lost_paired": true,
+        "lost_prior_success": true,
+        "reason": "unsupported_refusal"
+      },
+      "final": {
+        "lost_paired": true,
+        "lost_prior_success": true,
+        "reason": "unsupported_refusal"
+      }
+    }
+  },
+  {
+    "id": "rf-history/57f249c34073717dace3a29e0b5b6de0097db7cdf8de3aadfa0506a77f703baf",
+    "qid": "2hop__71909_729660",
+    "cohort": "historical",
+    "language": "en",
+    "gold_conflict": false,
+    "stages": {
+      "first": {
+        "lost_paired": true,
+        "lost_prior_success": true,
+        "reason": "empty_output"
+      },
+      "final": {
+        "lost_paired": true,
+        "lost_prior_success": true,
+        "reason": "HTTP_502"
+      }
+    }
+  },
+  {
+    "id": "rf-history/5c52f917d77befc31a5625b9416fa8d09f0a7dba95c7f9101f699ef295ecbf34",
+    "qid": "2hop__636562_141689",
+    "cohort": "historical",
+    "language": "en",
+    "gold_conflict": true,
+    "stages": {
+      "first": {
+        "lost_paired": false,
+        "lost_prior_success": true,
+        "reason": "incorrect_or_incomplete_answer"
+      },
+      "final": {
+        "lost_paired": false,
+        "lost_prior_success": true,
+        "reason": "incorrect_or_incomplete_answer"
+      }
+    }
+  },
+  {
+    "id": "rf-history/62776c3af1a8d61b9ae4c4f9f77095a2b8290106698e042841ed10ca08460dea",
+    "qid": "2hop__511537_815069",
+    "cohort": "historical",
+    "language": "en",
+    "gold_conflict": false,
+    "stages": {
+      "first": {
+        "lost_paired": true,
+        "lost_prior_success": true,
+        "reason": "unsupported_refusal"
+      },
+      "final": {
+        "lost_paired": true,
+        "lost_prior_success": true,
+        "reason": "unsupported_refusal"
+      }
+    }
+  },
+  {
+    "id": "rf-history/7129858ee251bebafd884ab860fd9e6bc7e67a00a11e55dc1b7087bf468c47d1",
+    "qid": "FC045",
+    "cohort": "historical",
+    "language": "en",
+    "gold_conflict": false,
+    "stages": {
+      "first": {
+        "lost_paired": true,
+        "lost_prior_success": true,
+        "reason": "citation_does_not_support_all_claims"
+      },
+      "final": {
+        "lost_paired": true,
+        "lost_prior_success": true,
+        "reason": "citation_does_not_support_all_claims"
+      }
+    }
+  },
+  {
+    "id": "rf-history/920c309fe7100204d46632096ff14f8035beb1e47b281909a0e414b61a2fb16d",
+    "qid": "2hop__11874_25017",
+    "cohort": "historical",
+    "language": "en",
+    "gold_conflict": false,
+    "stages": {
+      "first": {
+        "lost_paired": true,
+        "lost_prior_success": true,
+        "reason": "json_parse"
+      },
+      "final": {
+        "lost_paired": true,
+        "lost_prior_success": true,
+        "reason": "HTTP_502"
+      }
+    }
+  },
+  {
+    "id": "rf-history/a92909aac1aed60cae8c98475c0901b31bc6b12904ef960f578dd08faf9ed264",
+    "qid": "N031",
+    "cohort": "historical",
+    "language": "zh",
+    "gold_conflict": false,
+    "stages": {
+      "final": {
+        "lost_paired": true,
+        "lost_prior_success": true,
+        "reason": "HTTP_502"
+      }
+    }
+  },
+  {
+    "id": "rf-history/deba88b98052fb7ab2ea6a7dd8e39870ed5c6ec9ae370154e51d266d9ff792d5",
+    "qid": "2hop__659807_63963",
+    "cohort": "historical",
+    "language": "en",
+    "gold_conflict": false,
+    "stages": {
+      "first": {
+        "lost_paired": true,
+        "lost_prior_success": true,
+        "reason": "unsupported_refusal"
+      },
+      "final": {
+        "lost_paired": true,
+        "lost_prior_success": true,
+        "reason": "unsupported_refusal"
+      }
+    }
+  },
+  {
+    "id": "rf-history/f46fee27bc5013ad9bf5b677f4f8c418530c49b15f3e7a0177b6c3c72d90922f",
+    "qid": "2hop__279137_85512",
+    "cohort": "historical",
+    "language": "en",
+    "gold_conflict": false,
+    "stages": {
+      "first": {
+        "lost_paired": true,
+        "lost_prior_success": true,
+        "reason": "empty_output"
+      },
+      "final": {
+        "lost_paired": true,
+        "lost_prior_success": true,
+        "reason": "HTTP_502"
+      }
+    }
+  }
+]
