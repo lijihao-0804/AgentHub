@@ -11,6 +11,7 @@ from packages.agent_runtime.runtime_config import (
     MAX_RUN_COST_LIMIT_MICRO_USD,
     MAX_RUNTIME_LIMITS,
 )
+from packages.knowledge.contracts import RetrievalStrategy
 
 
 class ModelRetryPolicyRequest(BaseModel):
@@ -22,6 +23,7 @@ class ModelRetryPolicyRequest(BaseModel):
 class RetrievalConfigRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
+    retrieval_strategy: RetrievalStrategy | None = None
     embedding_model: str | None = None
     reranker_model: str | None = None
     dense_top_k: int | None = Field(default=None, ge=1)

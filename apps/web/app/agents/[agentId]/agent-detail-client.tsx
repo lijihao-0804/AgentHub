@@ -1550,11 +1550,13 @@ function ToolBindingRow({
         <Select
           value={binding.tool_revision_id ?? ""}
           onChange={(next) => onChange({ ...binding, tool_revision_id: next || null })}
-          placeholder={t("agents.latestRevision")}
-          options={revisionList.map((revision) => ({
-            value: revision.id,
-            label: `#${revision.revision_number} · ${revision.spec_hash.slice(0, 12)}`,
-          }))}
+          options={[
+            { value: "", label: t("agents.latestRevision") },
+            ...revisionList.map((revision) => ({
+              value: revision.id,
+              label: `#${revision.revision_number} · ${revision.spec_hash.slice(0, 12)}`,
+            })),
+          ]}
         />
       </label>
       <span className="state-hint">

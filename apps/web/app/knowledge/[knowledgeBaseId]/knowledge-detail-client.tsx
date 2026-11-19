@@ -50,7 +50,10 @@ function ingestionStatusLabel(status: string, translate: (key: MessageKey) => st
 
 export default function KnowledgeBaseDetailClient({ knowledgeBaseId }: { knowledgeBaseId: string }) {
   const { t, formatDateTime, formatNumber } = useI18n();
-  const { connected, sessionId, workspaceId } = useFrontendSession();
+  const { connected, sessionId, workspaceId, permissions } = useFrontendSession();
+  const canUpload = permissions?.includes("knowledge_create") === true;
+  const canEdit = permissions?.includes("knowledge_edit") === true;
+  const canSnapshot = permissions?.includes("knowledge_run") === true;
 
   const [tab, setTab] = useState<Tab>("documents");
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null);
@@ -208,6 +211,7 @@ export default function KnowledgeBaseDetailClient({ knowledgeBaseId }: { knowled
     if (result) {
       if (revisionInputRef.current) revisionInputRef.current.value = "";
       setNotice(t("knowledge.uploadAccepted"));
+      documents.reload();
       revisions.reload();
     }
   }
@@ -270,21 +274,23 @@ export default function KnowledgeBaseDetailClient({ knowledgeBaseId }: { knowled
       {tab === "documents" && (
         <>
           <Panel ariaLabel={t("knowledge.documents")} title={t("knowledge.documents")}>
-            <form key={`${sessionId}:${scope}`} className="eval-form" onSubmit={submitUpload} noValidate>
-              <p className="eval-form-title">{t("knowledge.uploadDocument")}</p>
-              <label>
-                {t("knowledge.file")}
-                <input type="file" accept=".pdf,.txt,.md,.csv,.tsv,.json" ref={fileInputRef} />
-              </label>
-              <p className="state-hint">{t("knowledge.uploadFormats")}</p>
-              <ChunkingSelect inherit baseStrategy={base?.chunking_strategy} />
-              <InlineError error={documentMutation.error} fallback={t("errors.requestFailed")} />
-              <div className="form-actions">
-                <button type="submit" className="button button-primary" disabled={documentMutation.pending}>
-                  {t("knowledge.upload")}
-                </button>
-              </div>
-            </form>
+            {canUpload && (
+              <form key={`${sessionId}:${scope}`} className="eval-form" onSubmit={submitUpload}>
+                <p className="eval-form-title">{t("knowledge.uploadDocument")}</p>
+                <label>
+                  {t("knowledge.file")}
+                  <input type="file" required accept=".pdf,.txt,.md,.csv,.tsv,.json" ref={fileInputRef} />
+                </label>
+                <p className="state-hint">{t("knowledge.uploadFormats")}</p>
+                <ChunkingSelect inherit baseStrategy={base?.chunking_strategy} />
+                <InlineError error={documentMutation.error} fallback={t("errors.requestFailed")} />
+                <div className="form-actions">
+                  <button type="submit" className="button button-primary" disabled={documentMutation.pending}>
+                    {t("knowledge.upload")}
+                  </button>
+                </div>
+              </form>
+            )}
 
             {documents.error && (
               <ErrorState
@@ -330,7 +336,7 @@ export default function KnowledgeBaseDetailClient({ knowledgeBaseId }: { knowled
                             {document.created_at ? formatDateTime(document.created_at) : t("common.none")}
                           </td>
                           <td data-label={t("settings.models.actions")}>
-                            {document.current_revision_status === "FAILED" && (
+                            {canEdit && document.current_revision_status === "FAILED" && (
                               <button
                                 type="button"
                                 className="button button-ghost"
@@ -369,20 +375,22 @@ export default function KnowledgeBaseDetailClient({ knowledgeBaseId }: { knowled
               title={t("knowledge.revisions")}
               eyebrow={selectedDocument?.name ?? ""}
             >
-              <form key={`${sessionId}:${scope}:${selectedDocumentId}`} className="eval-form" onSubmit={submitRevision} noValidate>
-                <p className="eval-form-title">{t("knowledge.uploadRevision")}</p>
-                <label>
-                  {t("knowledge.file")}
-                  <input type="file" accept=".pdf,.txt,.md,.csv,.tsv,.json" ref={revisionInputRef} />
-                </label>
-                <p className="state-hint">{t("knowledge.uploadFormats")}</p>
-                <ChunkingSelect inherit baseStrategy={base?.chunking_strategy} />
-                <div className="form-actions">
-                  <button type="submit" className="button button-primary" disabled={documentMutation.pending}>
-                    {t("knowledge.upload")}
-                  </button>
-                </div>
-              </form>
+              {canEdit && (
+                <form key={`${sessionId}:${scope}:${selectedDocumentId}`} className="eval-form" onSubmit={submitRevision}>
+                  <p className="eval-form-title">{t("knowledge.uploadRevision")}</p>
+                  <label>
+                    {t("knowledge.file")}
+                    <input type="file" required accept=".pdf,.txt,.md,.csv,.tsv,.json" ref={revisionInputRef} />
+                  </label>
+                  <p className="state-hint">{t("knowledge.uploadFormats")}</p>
+                  <ChunkingSelect inherit baseStrategy={base?.chunking_strategy} />
+                  <div className="form-actions">
+                    <button type="submit" className="button button-primary" disabled={documentMutation.pending}>
+                      {t("knowledge.upload")}
+                    </button>
+                  </div>
+                </form>
+              )}
 
               {revisions.error && (
                 <ErrorState
@@ -451,7 +459,7 @@ export default function KnowledgeBaseDetailClient({ knowledgeBaseId }: { knowled
         <Panel
           ariaLabel={t("knowledge.snapshots")}
           title={t("knowledge.snapshots")}
-          actions={
+          actions={canSnapshot && (
             <button
               type="button"
               className="button button-primary"
@@ -460,7 +468,7 @@ export default function KnowledgeBaseDetailClient({ knowledgeBaseId }: { knowled
             >
               {t("knowledge.createSnapshot")}
             </button>
-          }
+          )}
         >
           <p className="state-hint">{t("knowledge.snapshotNote")}</p>
           <InlineError error={snapshotMutation.error} fallback={t("errors.requestFailed")} />
