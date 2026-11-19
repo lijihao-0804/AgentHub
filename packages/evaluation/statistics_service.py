@@ -26,7 +26,7 @@ from packages.evaluation.statistics import (
     paired_bootstrap_interval,
     statistical_summary,
 )
-from packages.evaluation.taxonomy import TAXONOMY_VERSION, classify_failure, summarize_labels
+from packages.evaluation.taxonomy import TAXONOMY_VERSION, case_failure_labels, summarize_labels
 
 
 class EvaluationStatisticsService:
@@ -148,11 +148,9 @@ class EvaluationStatisticsService:
                 and task.value is not None
             ):
                 task_success = float(task.value) >= 1.0
-            labels = case.observation.get("failure_taxonomy")
-            if not isinstance(labels, list):
-                labels = classify_failure(
-                    item.expected, case.observation, task_success=task_success
-                )
+            labels = case_failure_labels(
+                item.category, item.expected, case.observation, task_success=task_success
+            )
             bucket = per_variant.setdefault(
                 variant.id,
                 {

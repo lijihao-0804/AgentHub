@@ -123,6 +123,27 @@ def classify_failure(
     return labels
 
 
+def case_failure_labels(
+    category: str | None,
+    expected: Mapping[str, Any],
+    observation: Mapping[str, Any],
+    *,
+    task_success: bool | None,
+) -> list[dict[str, Any]]:
+    stored = observation.get("failure_taxonomy")
+    if isinstance(stored, list):
+        # The runtime writes structural labels before the frozen answer evaluator runs.
+        exact_answer_failed = (
+            category == "KNOWLEDGE_QA"
+            and expected.get("open_ended") is not True
+            and task_success is False
+            and any(observation.get(key) is not None for key in ("answer_hash", "answer"))
+        )
+        if stored or not exact_answer_failed:
+            return stored
+    return classify_failure(expected, observation, task_success=task_success)
+
+
 def summarize_labels(labels: Sequence[Mapping[str, Any]]) -> dict[str, int]:
     counts: dict[str, int] = {}
     for label in labels:
@@ -184,6 +205,7 @@ def _first_order_violation(
 __all__ = [
     "FAILURE_CODES",
     "TAXONOMY_VERSION",
+    "case_failure_labels",
     "classify_failure",
     "summarize_labels",
 ]

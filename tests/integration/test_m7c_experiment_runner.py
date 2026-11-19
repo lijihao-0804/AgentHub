@@ -35,7 +35,9 @@ from packages.evaluation.runner import (
     CaseExecutionObservation,
     ExperimentRunner,
 )
+from packages.evaluation.statistics_service import EvaluationStatisticsService
 from packages.model_gateway.contracts import ModelResponse, ModelUsage
+from packages.model_gateway.errors import ModelGatewayError, ModelGatewayErrorCode
 from tests.integration.test_m4c_agent_runtime import ScriptedGateway, _seed
 from tests.integration.test_m7b_experiments import (
     _item,
@@ -317,6 +319,41 @@ async def test_m7c_complete_attempt_flag_cannot_hide_billed_retries(db_factory) 
 
 
 @pytest.mark.asyncio
+async def test_failed_runtime_qa_without_output_has_no_answer_evidence(db_factory) -> None:
+    class FailingGateway:
+        async def generate_resolved(self, context, plan, request):
+            raise ModelGatewayError(ModelGatewayErrorCode.MODEL_PROVIDER_UNAVAILABLE)
+
+    async with db_factory() as session:
+        base = await _seed(session, label=f"m7c-no-output-{uuid4().hex}")
+        run = await _ready_run(session, base, case_count=1, category="KNOWLEDGE_QA")
+
+    async def context_factory(_run):
+        return _manager_context(base)
+
+    driver = AgentRuntimeEvaluationDriver(
+        AgentRunService(db_factory, model_gateway_factory=lambda _session: FailingGateway()),
+        context_factory,
+    )
+    await ExperimentRunner(db_factory, driver=driver).execute(
+        run_id=run.id, owner="no-output-worker", settings=Settings(testing=True)
+    )
+    async with db_factory() as session:
+        observations = list(
+            await session.scalars(
+                select(EvaluationExperimentCaseResult.observation).where(
+                    EvaluationExperimentCaseResult.experiment_run_id == run.id
+                )
+            )
+        )
+    assert len(observations) == 2
+    for observation in observations:
+        assert observation["observed_agent_status"] == "FAILED"
+        assert observation.get("output_hash") is None
+        assert "answer_hash" not in observation
+
+
+@pytest.mark.asyncio
 async def test_m7c_runtime_primary_retry_uses_frozen_limit_for_receipt_completeness(
     db_factory,
 ) -> None:
@@ -371,6 +408,17 @@ async def test_m7c_runtime_primary_retry_uses_frozen_limit_for_receipt_completen
 
     assert len(results) == 2
     assert all(row.status == EvaluationCaseResultStatus.SUCCEEDED for row in results)
+    assert all(
+        row.observation["answer_hash"] == canonical_json_hash("fixture final") for row in results
+    )
+    async with db_factory() as session:
+        taxonomy = await EvaluationStatisticsService().failure_taxonomy(
+            session, context=_manager_context(base), run_id=run.id
+        )
+    assert all(
+        variant["counts"] == {"ANSWER_MISMATCH": 1}
+        for variant in taxonomy["variants"].values()
+    )
     assert all(row.cost_amount is None for row in results)
     assert all(row.cost_currency is None for row in results)
     assert all(row.observation["cost_status"] != "KNOWN" for row in results)

@@ -265,6 +265,27 @@ def test_task_success_keeps_zero_and_missing_evidence_remains_null() -> None:
     assert unavailable["steps"] == []
 
 
+@pytest.mark.parametrize(
+    ("answer_hash", "open_ended", "expected_codes"),
+    [(None, False, []), ("a" * 64, True, []), ("a" * 64, False, ["ANSWER_MISMATCH"])],
+)
+def test_qa_case_evidence_uses_frozen_answer_verdict(answer_hash, open_ended, expected_codes):
+    run, case, item, variant, experiment, episode, turns, steps = _rows()
+    item.category = "KNOWLEDGE_QA"
+    item.expected = {"answer": "ground truth", "citations": [], "open_ended": open_ended}
+    case.observation = {
+        "category": item.category, "trajectory_version": "trajectory-v1",
+        "answer_hash": answer_hash, "failure_taxonomy": [],
+    }
+    result = build_evidence_view(
+        run=run, case=case, item=item, variant=variant, experiment=experiment,
+        episode=episode, turns=turns, agent_statuses={AGENT_RUN_ID: "SUCCEEDED"},
+        steps=steps, registry=EvaluatorRegistry(),
+    )
+    assert [label["code"] for label in result["failure_labels"]] == expected_codes
+    assert case.observation["failure_taxonomy"] == []
+
+
 def test_missing_trajectory_does_not_infer_failure_labels() -> None:
     run, case, item, variant, experiment, episode, turns, steps = _rows()
     case.observation = {
