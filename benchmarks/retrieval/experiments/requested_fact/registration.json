@@ -1,0 +1,148 @@
+{
+  "freeze_sha256": "e807f243a008b46ef5e58fc0503c18a76c12e8174275613ed2dfd92991245070",
+  "cases_sha256": "1178d2dd5ec2b3efdd3555fd7f904623b4886f0cc68ea87543ea82022b7238f4",
+  "system_and_user_wires_sha256": "5c2443c1e2bd46b8a73945ceba3b06ab966e64804d94ceb8ce45e223294fa1a3",
+  "source": {
+    "commit": "6a7a8d954cac4af7807dd3e003ec63e4adca00f6",
+    "main": "deb28ec77fa85a9cf2c888dd46d59a8360efa189",
+    "requested_fact_tree": "60d03b10b38db635aef5eca76d8b18874d57a5a6ebe1cdd0bd6a38926ab98fd1",
+    "tree": "1392e10dc4b98e39f23a3247f82f79cb23d7968dac87beb67a061ef545637ee9"
+  },
+  "previous_account": "0c6042cd77ee01d8b5ce00e1183689b58337ef7de66ca3e4bf21d5ba3d2deed5",
+  "plan": {
+    "archived_model_invocations": 553,
+    "available_cny": "26.73337988",
+    "conflicting_gold_note": "Two different physical evidence inputs. The question asks for a family and the frozen Zoothera answer is a genus; retain both grades and report sensitivity.",
+    "conflicting_question_qid": "2hop__636562_141689",
+    "earliest_wai_question_only": {
+      "covered": 14,
+      "previous_256_joint_successes": 20,
+      "questions": 14,
+      "same_input_certified": false
+    },
+    "early_joint_six": {
+      "distinct_correct_inputs": 250,
+      "registered_arms": 556,
+      "strict_arms": 259
+    },
+    "false_release": 17,
+    "fresh": 48,
+    "historical": 446,
+    "historical_same_input_baselines": 443,
+    "inputs": 494,
+    "max_new_physical": 1090,
+    "named": 7,
+    "new_first_calls": 545,
+    "new_historical_baselines": [
+      "W12",
+      "W07",
+      "W06"
+    ],
+    "prior_final_correct": 441,
+    "prior_first_correct": 394,
+    "projected_cost_at_archived_average_cny": "0.82367998",
+    "protected": 441
+  },
+  "cohorts": {
+    "fresh": 48,
+    "historical": 446
+  },
+  "roles": {
+    "named": 7,
+    "protected": 441,
+    "false_release": 17
+  },
+  "preparation": {
+    "complete_visible_source_sets": 48,
+    "distinct_historical_passages_checked": 1088,
+    "distinct_historical_questions_checked": 499,
+    "distinct_snapshots": 48,
+    "exact_passage_overlaps": 0,
+    "exact_question_overlaps": 0,
+    "fact_type_counts": {
+      "bound_or_range": 8,
+      "evidenced_negative": 6,
+      "evidenced_zero": 4,
+      "missing_attribution": 2,
+      "missing_event": 3,
+      "missing_exact_value": 16,
+      "missing_policy_or_behavior": 3,
+      "partially_answerable": 6
+    },
+    "frozen_cases_sha256": "2c398ef68cfe43d680e874e7438534f6736af9c60ecb6a28584bfebd6dae5e2d",
+    "history_sources_sha256": {
+      ".scratch/joint-six-review-packets-v1/blind-0.json": "8be35bfa4a409e8b4eace31b340a9f3fcd492f053fa87b09214aafd0e0e3637a",
+      ".scratch/joint-six-review-packets-v1/blind-1.json": "0cccfd516b6c1bf6e5d554f6c3a8eb254a6d97f74b1dd2025e76d94f91da4f44",
+      ".scratch/joint-six-review-packets-v1/blind-2.json": "fe46acf1071d5eece9fd4eb0fe5fb0878f45f9f1c2b24b744f183a71b009fb79",
+      ".scratch/output-limit-20261119/cases.json": "6707ba7bf88997d91bb1880db210418f9d92c345513834829e376bc344f272ea",
+      "benchmarks/retrieval/experiments/first_refusal_contract/fixtures/fresh.jsonl": "e1d1b437da3d1802cb5d1cf892cd13c7175b1a25816fb11f492a39ad19872af2",
+      "benchmarks/retrieval/experiments/refusal_prompt/fixtures/fresh.jsonl": "31794f4c4f6558697a7f188b42943319655d008fe38bd5f31318819e1db0a230",
+      "benchmarks/retrieval/experiments/requested_fact/fixtures/fresh.jsonl": "9ec3cf876b4db61d923fa6328502c8f2775167e06790e672eec461fe24e52edd"
+    },
+    "lexical_near_duplicate_audit": {
+      "containment_minimum_normalized_length": 28,
+      "containment_threshold": 0.72,
+      "feature": "character trigrams",
+      "jaccard_threshold": 0.4,
+      "normalization": "NFKC casefold alphanumeric",
+      "passages": {
+        "historical": {
+          "at_or_above_threshold": 0,
+          "max_containment": 0.520833,
+          "max_jaccard": 0.175758
+        },
+        "within_batch": {
+          "at_or_above_threshold": 0,
+          "max_containment": 0.306667,
+          "max_jaccard": 0.160839
+        }
+      },
+      "questions": {
+        "historical": {
+          "at_or_above_threshold": 0,
+          "max_containment": 0.37037,
+          "max_jaccard": 0.184783
+        },
+        "within_batch": {
+          "at_or_above_threshold": 0,
+          "max_containment": 0.230769,
+          "max_jaccard": 0.114754
+        }
+      }
+    },
+    "messages_canonical_sha256": "5c6e4f9654f933b4449303e9b73eb90cc4f77b6fa6a50c0662d16d70a5cf1827",
+    "per_language_answerability_counts": {
+      "en_answerable": 12,
+      "en_refusal": 12,
+      "zh_answerable": 12,
+      "zh_refusal": 12
+    },
+    "product_commit": "b2992baa5f33f25940473044ff824fc27db25601",
+    "product_system_content_sha256": "9921923abe84909a433d1333667a6cb16f7ba0928080ec0b21136d1b12238499",
+    "questions": 48,
+    "records_relative_path": ".scratch/requested-fact-confirm-20261119/independent/fresh-records.json",
+    "records_sha256": "ded02c60130bfda53377ab7876c6422423f6f4f19b1a888e7f37e3fc3f67ca5b",
+    "source_counts_per_outcome_by_language": {
+      "en": {
+        "1": 5,
+        "2": 5,
+        "3": 2
+      },
+      "zh": {
+        "1": 5,
+        "2": 5,
+        "3": 2
+      }
+    },
+    "source_sha256": "6b018bae72fb078df9621cceb822228fb36ab9fe33be4bec8ff6abd187d4a3d5",
+    "uploaded_documents": 84
+  },
+  "new_baseline_requests": 51,
+  "opening_cny": "3.26662012",
+  "ceiling_cny": "30.00000000",
+  "existing_unknown_reserve_cny": "0.04906200",
+  "model": "deepseek-v4.1-flash-1017",
+  "region": "Beijing",
+  "temperature": 0,
+  "output_limit": 2048
+}
