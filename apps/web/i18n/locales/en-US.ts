@@ -38,6 +38,8 @@ export const enUS = {
     status: { PENDING: "Awaiting review", APPROVED: "Approved", REJECTED: "Rejected" },
   },
   runEvidence: {
+    citations: "Sources cited in the answer",
+    inspectSnapshot: "Inspect snapshot",
     title: "Tool calls and fixed evidence", replayHint: "Recorded events may be incomplete. Argument summaries show field types only; sensitive values are omitted.",
     empty: "No recorded tool events", arguments: "Argument structure", status: "Status", summaryUnavailable: "No summary in historical data", evidence: "Retrieved evidence",
     noEvidence: "No fixed evidence references were recorded. Historical runs are not re-resolved against LATEST.",

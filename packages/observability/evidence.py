@@ -29,7 +29,7 @@ class RunEvidenceService:
             raise AgentHubError("AGENT_RUN_NOT_FOUND", "The agent run was not found.", 404)
         return run
 
-    async def tools(self, session, context, run_id):
+    async def tools(self, session, context, run_id, *, citation_checkpoint=None):
         run = await self._run(session, context, run_id)
         rows = list(
             await session.scalars(
@@ -64,13 +64,20 @@ class RunEvidenceService:
             if event.type is AgentEventType.TOOL_COMPLETED:
                 references.extend(json.loads(event.payload.get("evidence_refs", "[]")))
         unique = {tuple(sorted(r.items())): r for r in references}
-        return {
+        result = {
             "events": events,
             "evidence_refs": list(unique.values()),
             "truncated": len(rows) > 200,
             "content_allowed": "knowledge_run" in context.permissions,
             "replay_complete": False,
         }
+        if citation_checkpoint is not None:
+            from packages.observability.cited_chunks import cited_chunk_refs
+
+            result["citation_refs"] = await cited_chunk_refs(
+                session, context, run, citation_checkpoint
+            )
+        return result
 
     async def content(self, session, context, run_id, *, snapshot_id, chunk_id):
         run = await self._run(session, context, run_id)

@@ -36,6 +36,8 @@ export const zhCN: MessageSchema = {
     status: { PENDING: "待审核", APPROVED: "已批准", REJECTED: "已拒绝" },
   },
   runEvidence: {
+    citations: "回答引用的来源",
+    inspectSnapshot: "查看固定快照",
     title: "工具调用与固定证据", replayHint: "已记录事件可能不完整。参数摘要仅展示字段类型，敏感值不进入摘要。",
     empty: "暂无已记录工具事件", arguments: "参数结构", status: "状态", summaryUnavailable: "历史数据无摘要", evidence: "检索证据",
     noEvidence: "没有已记录的固定证据引用，不会用最新快照替代历史证据。",

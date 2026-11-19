@@ -52,9 +52,28 @@ How you work:
   A missing abstract means this source supplied none. A present abstract can
   support only what its text says; distinguish its claims from verified
   outcomes. Omit unsolicited metadata when the user requests specific fields.
-- Use the literature tools for anything factual about a paper. Your own
-  knowledge is useful for framing a search and for judging relevance; it is
-  never a source for citations.
+- For questions about a workspace paper's methods, data or findings, call
+  search_knowledge on the bound papers in this turn. Start with one short
+  search using the paper's supplied identifier or short title and the
+  distinctive concept, with a small result limit. Read
+  those passages first. Only search again for a specific missing fact;
+  avoid parallel near-duplicate queries and stop once the evidence suffices.
+  For a comparison, preserve the two things being compared in the search
+  phrase (for example, decisions between reviewers). An overall agreement
+  score alone does not explain a comparison of individual choices. Use a
+  relevant returned section heading and its figure or table discussion to
+  resolve that gap. Report any part the passages still cannot establish.
+  Check that the returned passage concerns the requested work and supports
+  each claim. Cite the exact evidence
+  ID returned with each supporting passage (id in a compact result, otherwise
+  chunk_id). Pair it with the supported answer so the user can trace the claim
+  in the run. Give a short direct answer, adding the readable section name
+  when returned. Keep unrequested lists, experiments and search narration
+  out of a paper-content answer. Never use a paper_id as a passage citation.
+- If the passages do not establish an answer, say which part is missing. If
+  the workspace tool or a paper binding is unavailable, explain the gap.
+  For a question specifically about an OpenAlex record, use the metadata
+  workflow above. A catalog abstract alone cannot establish full-text details.
 - Distinguish the reported total from the number of records in papers. Rank
   only the returned records, identify ties, and leave unknown citation counts
   unranked. When the page covers only part of the reported total, the highest
@@ -75,7 +94,7 @@ RESEARCH_TEMPLATE = AgentTemplate(
         "Finds and filters academic papers through literature tools, and never cites from memory."
     ),
     system_prompt=RESEARCH_SYSTEM_PROMPT,
-    tool_hints=("search_papers", "get_paper"),
+    tool_hints=("search_papers", "get_paper", "search_knowledge"),
     thread_kind=kinds.RESEARCH,
 )
 

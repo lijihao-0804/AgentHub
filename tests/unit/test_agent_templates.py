@@ -122,9 +122,12 @@ def test_the_prompts_describe_the_history_the_runtime_actually_supplies(
     assert "filter what you already retrieved" not in prompt
 
 
-def test_the_research_tool_hints_name_only_the_two_tools_v1_has() -> None:
-    # A third tool here would be a promise the literature server does not keep.
-    assert RESEARCH_TEMPLATE.tool_hints == ("search_papers", "get_paper")
+def test_research_keeps_catalog_tools_and_scopes_passage_answers_to_bound_evidence() -> None:
+    assert RESEARCH_TEMPLATE.tool_hints == ("search_papers", "get_paper", "search_knowledge")
+    prompt = RESEARCH_TEMPLATE.system_prompt
+    assert "search_knowledge on the bound papers in this turn" in prompt
+    assert "ID returned with each supporting passage" in prompt
+    assert "catalog abstract alone cannot establish full-text details" in prompt
 
 
 def test_the_incident_prompt_leaves_the_write_to_the_approval_gate() -> None:
