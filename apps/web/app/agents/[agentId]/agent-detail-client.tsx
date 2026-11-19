@@ -1,4 +1,5 @@
 "use client";
+import WorkspaceAccessNotice from "@/components/apps/workspace-access-notice";
 
 import Link from "next/link";
 import { useCallback, useEffect, useState, type FormEvent } from "react";
@@ -595,12 +596,12 @@ export default function AgentDetailClient({ agentId }: { agentId: string }) {
           className="button button-primary"
           onClick={() => void startPreflight()}
           disabled={preflightMutation.pending || publishMutation.pending || !loadedAgent || cannotPublish}
-          title={cannotPublish ? t("agents.noPermissionHint") : undefined}
+          title={permissions !== null && cannotPublish ? t("agents.noPermissionHint") : undefined}
         >
           {preflightMutation.pending ? t("agents.checkingReadiness") : t("agents.publish")}
         </button>
       </div>
-      {cannotPublish && <p className="state-hint" role="note">{t("agents.noPermissionHint")}</p>}
+      {cannotPublish && <WorkspaceAccessNotice denied="agents.noPermissionHint" />}
 
       {notice && <p className="inline-notice">{notice}</p>}
       {publishResult && (

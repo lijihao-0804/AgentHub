@@ -2139,6 +2139,8 @@ export const zhCN: MessageSchema = {
     },
   },
   appThread: {
+    accessChecking: "正在检查工作区权限…",
+    accessUnavailable: "未能确认工作区权限。",
     summaryDegraded: "部分数据加载失败，计数可能不完整。",
     railToggle: "详情",
     railToggleList: "会话",
@@ -2179,7 +2181,7 @@ export const zhCN: MessageSchema = {
       stopping: "停止中…",
       cancelRequested: "已发出取消请求，运行可能仍在停止中。",
       cancelFailed: "取消请求失败，仍会继续监控运行状态。",
-      contentRestricted: "当前角色无权查看这段对话内容。",
+      contentRestricted: "此轮对话的内容不可见。",
       readOnlyHint: "当前角色只有只读权限，不能发送消息或取消运行。",
       noOutput: "这次运行没有产生最终输出。",
       failure: "失败代码",

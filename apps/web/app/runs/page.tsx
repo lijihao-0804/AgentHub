@@ -48,9 +48,22 @@ function RunHistory() {
   const query = useSearchParams();
   const status = query.get("status")?.trim() ?? "";
   const agentVersionId = query.get("agent_version_id")?.trim() ?? "";
-  const [agents, setAgents] = useState<Agent[]>([]);
-  const [agentVersions, setAgentVersions] = useState<AgentVersion[]>([]);
-  const [selectedAgentId, setSelectedAgentId] = useState("");
+  const [roster, setRoster] = useState<{ workspaceId: string; items: Agent[]; failed: boolean } | null>(null);
+  const agents = roster?.workspaceId === workspaceId ? roster.items : [];
+  const [rosterAttempt, retryRoster] = useState(0);
+  const [versionAttempt, retryVersions] = useState(0);
+  const [versionList, setVersionList] = useState<{
+    workspaceId: string;
+    agentId: string;
+    items: AgentVersion[];
+    failed: boolean;
+  } | null>(null);
+  const [selection, setSelection] = useState<{ workspaceId: string; agentId: string } | null>(null);
+  const selectedAgentId = selection?.workspaceId === workspaceId ? selection.agentId : "";
+  const agentVersions =
+    versionList?.workspaceId === workspaceId && versionList.agentId === selectedAgentId
+      ? versionList.items
+      : [];
   const [runs, setRuns] = useState<RunListItem[]>([]);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [error, setError] = useState<ApiError | null>(null);
@@ -105,44 +118,41 @@ function RunHistory() {
     }
   }, [filterKey, refresh]);
 
-  // The version filter is a pick list, not a hand-typed UUID: load the agent
-  // roster once per workspace. Failure degrades silently — the raw id stays
-  // in the deep link and the selects simply stay empty.
   useEffect(() => {
     if (!connected || !accessToken) {
-      setAgents([]);
+      setRoster(null);
       return;
     }
     let cancelled = false;
     listAgents({ workspaceId, accessToken })
       .then((items) => {
-        if (!cancelled) setAgents(items);
+        if (!cancelled) setRoster({ workspaceId, items, failed: false });
       })
       .catch(() => {
-        if (!cancelled) setAgents([]);
+        if (!cancelled) setRoster({ workspaceId, items: [], failed: true });
       });
     return () => {
       cancelled = true;
     };
-  }, [connected, workspaceId, accessToken]);
+  }, [connected, workspaceId, accessToken, rosterAttempt]);
 
   useEffect(() => {
     if (!selectedAgentId || !connected || !accessToken) {
-      setAgentVersions([]);
+      setVersionList(null);
       return;
     }
     let cancelled = false;
     listAgentVersions({ workspaceId, accessToken }, selectedAgentId)
       .then((items) => {
-        if (!cancelled) setAgentVersions(items);
+        if (!cancelled) setVersionList({ workspaceId, agentId: selectedAgentId, items, failed: false });
       })
       .catch(() => {
-        if (!cancelled) setAgentVersions([]);
+        if (!cancelled) setVersionList({ workspaceId, agentId: selectedAgentId, items: [], failed: true });
       });
     return () => {
       cancelled = true;
     };
-  }, [connected, workspaceId, accessToken, selectedAgentId]);
+  }, [connected, workspaceId, accessToken, selectedAgentId, versionAttempt]);
 
   // Runs in flight go stale fast: poll page one while any visible row is
   // active and the tab is visible. Paging deeper pauses the poll so a refresh
@@ -200,7 +210,7 @@ function RunHistory() {
   }
 
   function clearFilters() {
-    setSelectedAgentId("");
+    setSelection(null);
     applyFilters("", "");
   }
 
@@ -276,7 +286,7 @@ function RunHistory() {
             <Select
               value={selectedAgentId}
               onChange={(next) => {
-                setSelectedAgentId(next);
+                setSelection({ workspaceId, agentId: next });
                 // Switching agents invalidates a version filter picked under
                 // the previous one; without a filter there is nothing to re-run.
                 if (agentVersionId) applyFilters(status, "");
@@ -294,7 +304,7 @@ function RunHistory() {
             <Select
               value={agentVersionId}
               onChange={(next) => applyFilters(status, next)}
-              disabled={!selectedAgentId && agentVersions.length === 0 && !agentVersionId}
+              disabled={agentVersions.length === 0 && !agentVersionId}
               options={[
                 { value: "", label: t("runs.filters.allVersions") },
                 ...(agentVersionId && !agentVersions.some((v) => v.id === agentVersionId)
@@ -317,6 +327,20 @@ function RunHistory() {
             )}
           </div>
         </div>
+        {roster?.workspaceId === workspaceId && roster.failed && (
+          <div role="alert">
+            <button type="button" className="button button-ghost" onClick={() => retryRoster(count => count + 1)}>
+              {locale === "zh-CN" ? "智能体列表加载失败，重试" : "Couldn’t load agents. Retry"}
+            </button>
+          </div>
+        )}
+        {versionList?.workspaceId === workspaceId && versionList.agentId === selectedAgentId && versionList.failed && (
+          <div role="alert">
+            <button type="button" className="button button-ghost" onClick={() => retryVersions(count => count + 1)}>
+              {locale === "zh-CN" ? "版本列表加载失败，重试" : "Couldn’t load versions. Retry"}
+            </button>
+          </div>
+        )}
       </section>
 
       {runs.length > 0 && (

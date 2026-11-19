@@ -191,16 +191,57 @@ function testAppearance() {
   console.log('PASS appearance first paint, legacy choice, live OS changes, accent persistence, storage events and private browsing');
 }
 
+async function testRetrievalSnapshotChanges() {
+  const replies = [];
+  const ui = harness({
+    '@/lib/api/retrieval-playground': {
+      runRetrievalPlayground: () => new Promise((resolve, reject) => replies.push({ resolve, reject })),
+      RetrievalPlaygroundError: class extends Error {},
+    },
+  });
+  const Page = load('app/knowledge/playground/page.tsx', ui.mocks).default;
+  const render = () => ui.render(Page);
+  const pickers = () => elements(render(), node => Array.isArray(node.props.options));
+  const submit = () => elements(render(), node => node.type === 'form')[0].props.onSubmit({ preventDefault() {} });
+  const state = (key) => elements(render(), node => node.props.title === key).length;
+  pickers()[0].props.onChange('base');
+  pickers()[1].props.onChange('first');
+  elements(render(), node => node.type === 'textarea')[0].props.onChange({ target: { value: 'question' } });
+  const first = submit();
+  pickers()[1].props.onChange('second');
+  const second = submit();
+  pickers()[1].props.onChange('first');
+  const third = submit();
+  const result = { snapshot_id: 'first', evidence: [], stages: {}, total_latency_ms: 1 };
+  replies[2].resolve(result);
+  await third;
+  assert.equal(state('playground.empty'), 1);
+  replies[1].reject(new Error('late failure'));
+  await second;
+  assert.equal(state('playground.empty'), 1, 'an old error cannot replace the newest result');
+  pickers()[0].props.onChange('other-base');
+  replies[0].resolve(result);
+  await first;
+  assert.equal(state('playground.initial'), 1, 'changing the knowledge base discards the old result');
+}
+
 async function testRunHistoryFilters() {
   const params = new URLSearchParams();
   const requests = [];
+  const versionRequests = [];
   const makeRun = (id, status) => ({
     id, status, trace_id: id, agent_version_number: 1, started_at: '2026-01-01',
     duration_ms: null, total_tokens: null, total_cost_amount: null, tool_call_count: 0,
   });
   const ui = harness({
     'next/navigation': { useSearchParams: () => params },
-    '@/lib/api/agents': { listAgents: async () => [] },
+    '@/lib/api/agents': {
+      listAgents: async () => [{ id: 'agent-a', name: 'A' }, { id: 'agent-b', name: 'B' }],
+      listAgentVersions: async ({ workspaceId }, agentId) => {
+        versionRequests.push({ workspaceId, agentId });
+        return [{ id: `version-${agentId}`, version_number: 1, resolved_spec_hash: 'a'.repeat(64) }];
+      },
+    },
     '@/lib/api/runs': { listRuns: async (input) => {
       requests.push(input);
       if (input.status) return { items: [makeRun('attention-run', input.status)], next_cursor: null };
@@ -243,6 +284,27 @@ async function testRunHistoryFilters() {
   assert.ok(elements(tree, node => node.props.value === 'NEEDS_ATTENTION').length);
   assert.ok(elements(tree, node => node.props.href === '/runs/attention-run').length);
   assert.equal(elements(tree, node => node.props.href === '/runs/older-run').length, 0);
+  const picker = (label) => elements(render(), node =>
+    Array.isArray(node.props.options) && node.props.options[0]?.label === label)[0];
+  const versions = () => picker('runs.filters.allVersions').props;
+  assert.equal(versions().disabled, true);
+  picker('runs.filters.allAgents').props.onChange('agent-a');
+  await flushChanges();
+  assert.ok(versions().options.some(option => option.value === 'version-agent-a'));
+  picker('runs.filters.allAgents').props.onChange('agent-b');
+  assert.equal(versions().disabled, true);
+  assert.deepEqual(versions().options.map(option => option.value), ['']);
+  await flushChanges();
+  assert.ok(versions().options.some(option => option.value === 'version-agent-b'));
+  ui.session.workspaceId = 'workspace-b';
+  await flushChanges();
+  assert.equal(picker('runs.filters.allAgents').props.value, '');
+  assert.ok(!versionRequests.some(request => request.workspaceId === 'workspace-b'));
+  assert.equal(versions().disabled, true);
+  params.set('agent_version_id', 'version-from-link');
+  const linked = versions();
+  assert.equal(linked.disabled, false);
+  assert.ok(linked.options.some(option => option.value === 'version-from-link'));
   console.log('PASS run-history URL filters, pagination after empty searches and token renewal');
 }
 
@@ -588,7 +650,138 @@ async function testRefreshCoalescing() {
   console.log('PASS same-tab refresh coalesces requests and releases failed requests for later use');
 }
 
+async function testRenewalIdentity() {
+  const pending = [];
+  let refreshForRequest;
+  const workspaceLoads = [];
+  const h = harness({
+    '@/lib/api/auth': {
+      login: async ({ email }) => ({ user_id: email, access_token: email + '-login' }),
+      logout: async () => {},
+      refresh: () => new Promise((resolve, reject) => pending.push({ resolve, reject })),
+    },
+    '@/lib/api/tenancy': {
+      getWorkspace: () => new Promise((resolve, reject) => workspaceLoads.push({ resolve, reject })),
+      listOrganizations: async () => [],
+      listWorkspaces: async () => [{ id: 'shared', organization_id: 'org' }],
+    },
+    '@/lib/api/client': { setTokenRefresher: fn => { refreshForRequest = fn; } },
+  });
+  const Provider = load('components/providers/session-provider.tsx', h.mocks).FrontendSessionProvider;
+  function render() {
+    const value = h.render(Provider, {}).props.value;
+    // Install the two callbacks used by timer/transport renewal without bootstrapping cookies.
+    for (const effect of h.effects) {
+      if (/setTokenRefresher|renewRef\.current =/.test(effect.toString())) effect();
+    }
+    return value;
+  }
+  await render().signIn({ email: 'a', password: 'fixture' });
+  let active = render();
+  const loadWorkspaceAccess = () => h.effects.find(effect => effect.toString().includes('getWorkspace'))();
+  loadWorkspaceAccess();
+  workspaceLoads.shift().reject(Error('temporary permission read failure'));
+  await tick();
+  active = render();
+  assert.equal(active.permissionsFailed, true);
+  active.retryPermissions();
+  active = render();
+  assert.equal(active.permissionsFailed, false);
+  loadWorkspaceAccess();
+  workspaceLoads.shift().resolve({ permissions: ['agent_run'] });
+  await tick();
+  active = render();
+  assert.deepEqual(active.permissions, ['agent_run']);
+  loadWorkspaceAccess();
+  const obsoleteAccess = workspaceLoads.shift();
+  active.setActiveWorkspace('other');
+  active = render();
+  assert.equal(active.permissions, null);
+  loadWorkspaceAccess();
+  workspaceLoads.shift().resolve({ permissions: [] });
+  obsoleteAccess.resolve({ permissions: ['agent_run'] });
+  await tick();
+  active = render();
+  assert.deepEqual(active.permissions, []);
+  active.setActiveWorkspace('shared');
+  active = render();
+  const firstSession = active.sessionId;
+  const same = refreshForRequest();
+  pending.shift().resolve({ user_id: 'a', access_token: 'a-renewed' });
+  assert.equal(await same, 'a-renewed');
+  active = render();
+  assert.equal(active.sessionId, firstSession);
+  assert.equal(active.accessToken, 'a-renewed');
+  assert.equal(active.workspaceId, 'shared');
+  const staleRequest = refreshForRequest;
+  const foreign = refreshForRequest();
+  pending.shift().resolve({ user_id: 'b', access_token: 'b-other-tab' });
+  assert.equal(await foreign, null);
+  active = render();
+  assert.equal(active.status, 'UNAUTHENTICATED');
+  assert.equal(active.workspaceId, '');
+  assert.equal(active.permissions, null);
+
+  for (const lateFailure of [false, true]) {
+    await active.signIn({ email: 'a', password: 'fixture' });
+    active = render();
+    const old = refreshForRequest();
+    const late = pending.shift();
+    await active.signOut();
+    await render().signIn({ email: 'b', password: 'fixture' });
+    active = render();
+    assert.equal(await staleRequest(), null);
+    const newSession = active.sessionId;
+    const own = refreshForRequest();
+    assert.equal(pending.length, 0, 'the previous cookie exchange must settle first');
+    if (lateFailure) late.reject(Error('obsolete renewal'));
+    else late.resolve({ user_id: 'a', access_token: 'stale' });
+    assert.equal(await old, null);
+    await tick();
+    assert.equal(render().accessToken, 'b-login');
+    pending.shift().resolve({ user_id: 'b', access_token: 'b-renewed' });
+    assert.equal(await own, 'b-renewed');
+    active = render();
+    assert.equal(active.userId, 'b');
+    assert.equal(active.sessionId, newSession);
+    await active.signOut();
+    active = render();
+  }
+  // A late 401 from an old request must consult its initiating identity.
+  const client = load('lib/api/client.ts');
+  const prevFetch = globalThis.fetch;
+  let answer, oldCalls = 0, newCalls = 0;
+  try {
+    globalThis.fetch = () => new Promise(resolve => { answer = resolve; });
+    client.setTokenRefresher(async () => { oldCalls++; return null; });
+    const old = client.apiRequest('/api/v1/test', 'old-token');
+    client.setTokenRefresher(async () => { newCalls++; return 'new-token'; });
+    answer(new Response(JSON.stringify({ error: { code: 'UNAUTHENTICATED' } }), { status: 401 }));
+    await assert.rejects(old, error => error.status === 401);
+    assert.deepEqual([oldCalls, newCalls], [1, 0]);
+  } finally {
+    globalThis.fetch = prevFetch;
+  }
+  console.log('PASS renewal identity, old response isolation, and origin-scoped 401 retry');
+}
+
 async function main() {
+  await testRenewalIdentity();
+  {
+    const h = harness();
+    const Notice = load('components/apps/workspace-access-notice.tsx', h.mocks).default;
+    const render = () => h.render(Notice, { denied: 'readOnly' });
+    h.session.permissions = null;
+    assert.match(renderToStaticMarkup(render()), /accessChecking/);
+    h.session.permissionsFailed = true;
+    let retries = 0;
+    h.session.retryPermissions = () => { retries++; };
+    assert.match(renderToStaticMarkup(render()), /accessUnavailable/);
+    elements(render(), node => node.type === 'button')[0].props.onClick();
+    assert.equal(retries, 1);
+    h.session.permissions = [];
+    assert.match(renderToStaticMarkup(render()), /readOnly/);
+  }
     await testWorkspaceCreationUsesTargetOrganization();
     await testRefreshCoalescing();
   testModelSettingsRoles();
@@ -661,6 +854,7 @@ async function main() {
   }
   testAppearance();
   await testRunHistoryFilters();
+  await testRetrievalSnapshotChanges();
   testLabeledSelect();
   await testIngestionAndPreferences();
   const { autoBreadcrumbs } = load('components/layout/breadcrumbs.tsx');

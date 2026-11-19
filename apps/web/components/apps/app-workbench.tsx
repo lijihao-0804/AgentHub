@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
 
 import type { AppThreadCopy } from "@/components/apps/app-thread-copy";
+import WorkspaceAccessNotice from "@/components/apps/workspace-access-notice";
 import AppConversationPane from "@/components/apps/app-conversation-pane";
 import Icon, { type IconName } from "@/components/ui/icon";
 import { InlineConfirm } from "@/components/evaluation/hash-value";
@@ -381,7 +382,7 @@ export default function AppWorkbench({
               type="button"
               className="button button-primary thread-new"
               disabled={cannotCreate}
-              title={cannotCreate ? t("appThread.createPermissionHint") : undefined}
+              title={cannotCreate && permissions !== null ? t("appThread.createPermissionHint") : undefined}
               onClick={() => {
                 if (threadId) router.push(copy.basePath);
                 else {
@@ -493,11 +494,11 @@ export default function AppWorkbench({
                       className="button button-ghost"
                       onClick={() => setConfirmDelete(true)}
                       disabled={!current || cannotDelete}
-                      title={cannotDelete ? t("appThread.noPermissionHint") : undefined}
+                      title={cannotDelete && permissions !== null ? t("appThread.noPermissionHint") : undefined}
                     >
                       {t("appThread.threads.delete")}
                     </button>
-                    {cannotDelete && <span className="state-hint" role="note">{t("appThread.noPermissionHint")}</span>}
+                    {cannotDelete && permissions !== null && <span className="state-hint" role="note">{t("appThread.noPermissionHint")}</span>}
                   </div>
                 )}
 
@@ -570,7 +571,7 @@ export default function AppWorkbench({
                   />
                 </label>
                 <InlineError error={mutation.error} fallback={t("errors.requestFailed")} />
-                {cannotCreate && <p className="state-hint" role="note">{t("appThread.createPermissionHint")}</p>}
+                {cannotCreate && <WorkspaceAccessNotice denied="appThread.createPermissionHint" />}
                 <div className="form-actions">
                   <button
                     type="submit"

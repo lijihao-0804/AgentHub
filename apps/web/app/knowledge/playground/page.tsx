@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 
 import { EmptyState, ErrorState, LoadingState, Panel, SessionRequired } from "@/components/ui/states";
 import {
@@ -79,6 +79,14 @@ export default function RetrievalPlaygroundPage() {
   const [pageState, setPageState] = useState<PageState>("initial");
   const [result, setResult] = useState<RetrievalPlaygroundResponse | null>(null);
   const [error, setError] = useState<{ code: string; message: string } | null>(null);
+  const queryGeneration = useRef(0);
+  const selectSnapshot = useCallback((id: string) => {
+    queryGeneration.current++;
+    setSnapshotId(id);
+    setResult(null);
+    setError(null);
+    setPageState("initial");
+  }, []);
 
   const loadKnowledgeBases = useCallback((auth: AuthInput) => listKnowledgeBases(auth), []);
   const knowledgeBases = useWorkspaceData<KnowledgeBase[]>(
@@ -109,17 +117,18 @@ export default function RetrievalPlaygroundPage() {
     if (!knowledgeBases.loaded || !knowledgeBaseId) return;
     if (!knowledgeBases.data?.some((base) => base.id === knowledgeBaseId)) {
       setKnowledgeBaseId("");
-      setSnapshotId("");
+      selectSnapshot("");
     }
-  }, [knowledgeBases.loaded, knowledgeBases.data, knowledgeBaseId, sessionId]);
+  }, [knowledgeBases.loaded, knowledgeBases.data, knowledgeBaseId, sessionId, selectSnapshot]);
 
   useEffect(() => {
     if (!snapshots.loaded || !snapshotId) return;
-    if (!snapshots.data?.some((snapshot) => snapshot.id === snapshotId)) setSnapshotId("");
-  }, [snapshots.loaded, snapshots.data, snapshotId, knowledgeBaseId, sessionId]);
+    if (!snapshots.data?.some((snapshot) => snapshot.id === snapshotId)) selectSnapshot("");
+  }, [snapshots.loaded, snapshots.data, snapshotId, knowledgeBaseId, sessionId, selectSnapshot]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const generation = ++queryGeneration.current;
     setResult(null);
     setError(null);
     if (!connected) {
@@ -156,9 +165,11 @@ export default function RetrievalPlaygroundPage() {
         candidateTopK: Number(candidateTopK),
         finalTopK: Number(finalTopK),
       });
+      if (generation !== queryGeneration.current) return;
       setResult(nextResult);
       setPageState(nextResult.evidence.length === 0 ? "empty" : "success");
     } catch (caught) {
+      if (generation !== queryGeneration.current) return;
       const nextError =
         caught instanceof RetrievalPlaygroundError
           ? caught
@@ -198,10 +209,7 @@ export default function RetrievalPlaygroundPage() {
               value={knowledgeBaseId}
               onChange={(next) => {
                 setKnowledgeBaseId(next);
-                setSnapshotId("");
-                setResult(null);
-                setError(null);
-                setPageState("initial");
+                selectSnapshot("");
               }}
               disabled={knowledgeBases.loading || Boolean(knowledgeBases.error)}
               placeholder={
@@ -216,12 +224,7 @@ export default function RetrievalPlaygroundPage() {
             {t("playground.snapshotId")}
             <Select
               value={snapshotId}
-              onChange={(next) => {
-                setSnapshotId(next);
-                setResult(null);
-                setError(null);
-                setPageState("initial");
-              }}
+              onChange={selectSnapshot}
               disabled={!knowledgeBaseId || snapshots.loading || Boolean(snapshots.error)}
               placeholder={
                 snapshots.loaded && (snapshots.data ?? []).length === 0

@@ -1,5 +1,6 @@
 "use client";
 
+import WorkspaceAccessNotice from "@/components/apps/workspace-access-notice";
 import Link from "next/link";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 
@@ -64,8 +65,11 @@ export default function AppConversationPane({
   onTurnCompleted: () => void;
 }) {
   const { t, locale, formatDateTime } = useI18n();
-  const { workspaceId, accessToken, permissions, takeTaskDraft } = useFrontendSession();
+  const { workspaceId, accessToken, permissions, permissionsFailed, takeTaskDraft } = useFrontendSession();
   const cannotRun = !permissions?.includes("agent_run");
+  const restrictedText = permissions === null
+    ? t(permissionsFailed ? "appThread.accessUnavailable" : "appThread.accessChecking")
+    : t("appThread.conversation.contentRestricted");
   const mutation = useWorkspaceMutation(`app-turns:${threadId}`);
   const submissionRef = useRef<TurnSubmissionState>(createSubmissionState());
   const [recoverySubmission, setRecoverySubmission] = useState<TurnSubmission | null>(null);
@@ -317,7 +321,7 @@ export default function AppConversationPane({
                 <div className="conversation-message conversation-message-user">
                   <p className="conversation-role">{t("appThread.conversation.user")}</p>
                   <p className="conversation-text">
-                    {contentRestricted ? t("appThread.conversation.contentRestricted") : turn.user_input}
+                    {contentRestricted ? restrictedText : turn.user_input}
                   </p>
                   <p className="conversation-meta">{formatDateTime(turn.created_at)}</p>
                 </div>
@@ -333,7 +337,7 @@ export default function AppConversationPane({
                   ) : (
                     <div className="conversation-text">
                       {contentRestricted ? (
-                        t("appThread.conversation.contentRestricted")
+                        restrictedText
                       ) : turn.final_output ? (
                         <Markdown text={turn.final_output} />
                       ) : (
@@ -465,8 +469,8 @@ export default function AppConversationPane({
       </div>
 
       <form className="conversation-composer" onSubmit={submit} noValidate>
-        {(cannotRun || turnList.some((turn) => turn.user_input === null)) && (
-          <p className="state-hint" role="note">{t("appThread.conversation.readOnlyHint")}</p>
+        {cannotRun && (
+          <WorkspaceAccessNotice denied="appThread.conversation.readOnlyHint" />
         )}
         <label className="conversation-input">
           <span className="sr-only">{t("appThread.conversation.composerLabel")}</span>

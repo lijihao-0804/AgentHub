@@ -65,9 +65,10 @@ async function transport<T>(
     });
   };
   const token = init.accessToken?.trim();
+  const refreshForRequest = tokenRefresher;
   let response = await send(token);
-  if (response.status === 401 && token && tokenRefresher) {
-    const renewed = await tokenRefresher().catch(() => null);
+  if (response.status === 401 && token && refreshForRequest) {
+    const renewed = await refreshForRequest().catch(() => null);
     // A renewal that returned the unchanged token (no rotation upstream) is
     // treated as "no renewal": replaying with it would just 401 again. The
     // caller keeps the original 401 even though the session is technically

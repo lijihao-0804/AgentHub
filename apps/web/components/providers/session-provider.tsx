@@ -46,13 +46,10 @@ type FrontendSessionContextValue = {
   workspaces: Workspace[];
   organizationId: string;
   workspaceId: string;
-  /**
-   * The signed-in user's permissions in the active workspace, or null while
-   * unknown (not yet loaded, or the load failed). Null disables nothing: the
-   * backend still enforces every permission, and a transient failure must
-   * not brick the UI -- it only loses the role-aware polish.
-   */
+  /** Confirmed access for this session and workspace; null while unavailable. */
   permissions: string[] | null;
+  permissionsFailed: boolean;
+  retryPermissions: () => void;
   /** Monotonic identity for the in-memory session + workspace selection. */
   sessionId: number;
   authenticated: boolean;
@@ -115,7 +112,19 @@ export function FrontendSessionProvider({ children }: { children: ReactNode }) {
     pendingTask.current = null;
     return task.text;
   }, [sessionId, workspaceId]);
-  const [permissions, setPermissions] = useState<string[] | null>(null);
+  const [access, setAccess] = useState<{
+    workspaceId: string;
+    sessionId: number;
+    permissions: string[] | null;
+  } | null>(null);
+  const [accessAttempt, setAccessAttempt] = useState(0);
+  const currentAccess = access?.workspaceId === workspaceId && access.sessionId === sessionId ? access : null;
+  const permissions = currentAccess?.permissions ?? null;
+  const permissionsFailed = currentAccess !== null && currentAccess.permissions === null;
+  const retryPermissions = useCallback(() => {
+    setAccess(null);
+    setAccessAttempt((attempt) => attempt + 1);
+  }, []);
   const [tenancyLoading, setTenancyLoading] = useState(false);
   const [tenancyError, setTenancyError] = useState<ApiError | null>(null);
   const [panelOpen, setPanelOpen] = useState(false);
@@ -129,7 +138,11 @@ export function FrontendSessionProvider({ children }: { children: ReactNode }) {
    * competing refresh calls (the cookie rotates; the loser would 401 and
    * look like a dead session). Holds the in-flight promise, or null.
    */
-  const refreshInFlightRef = useRef<Promise<string | null> | null>(null);
+  const authSessionRef = useRef<{ userId: string } | null>(null);
+  const refreshInFlightRef = useRef<{
+    session: { userId: string };
+    result: Promise<string | null>;
+  } | null>(null);
   /** Resolved by `renewAccessToken` below; lets the timer reach it without a
    * declaration-order cycle. */
   const renewRef = useRef<() => Promise<string | null>>(async () => null);
@@ -146,6 +159,7 @@ export function FrontendSessionProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const resetToUnauthenticated = useCallback(() => {
+    authSessionRef.current = null;
     clearRefreshTimer();
     tokenExpiresAtRef.current = null;
     tenancyGenerationRef.current += 1;
@@ -156,7 +170,7 @@ export function FrontendSessionProvider({ children }: { children: ReactNode }) {
     setOrganizations([]);
     setWorkspaces([]);
     setWorkspaceId("");
-    setPermissions(null);
+    setAccess(null);
     setTenancyError(null);
     setTenancyLoading(false);
     setPanelOpen(false);
@@ -234,21 +248,32 @@ export function FrontendSessionProvider({ children }: { children: ReactNode }) {
    * rather than retrying.
    */
   const renewAccessToken = useCallback((): Promise<string | null> => {
-    refreshInFlightRef.current ??= (async () => {
-      try {
-        const renewed = await refreshRequest();
-        setUserId(renewed.user_id);
-        setAccessToken(renewed.access_token);
-        scheduleRefresh(renewed.expires_in);
-        return renewed.access_token;
-      } catch {
+    const session = authSessionRef.current;
+    if (!session) return Promise.resolve(null);
+    const pending = refreshInFlightRef.current;
+    if (pending) {
+      if (pending.session === session) return pending.result;
+      // A new login must start its own exchange after the old cookie request settles.
+      return pending.result.then(() => authSessionRef.current === session ? renewRef.current() : null);
+    }
+    const result = refreshRequest().then((renewed) => {
+      if (authSessionRef.current !== session) return null;
+      if (renewed.user_id !== session.userId) {
+        // Another tab changed accounts. Drop only this tab's old identity.
         resetToUnauthenticated();
         return null;
-      } finally {
-        refreshInFlightRef.current = null;
       }
-    })();
-    return refreshInFlightRef.current;
+      setAccessToken(renewed.access_token);
+      scheduleRefresh(renewed.expires_in);
+      return renewed.access_token;
+    }).catch(() => {
+      if (authSessionRef.current === session) resetToUnauthenticated();
+      return null;
+    }).finally(() => {
+      if (refreshInFlightRef.current?.session === session) refreshInFlightRef.current = null;
+    });
+    refreshInFlightRef.current = { session, result };
+    return result;
   }, [scheduleRefresh, resetToUnauthenticated]);
 
   // Assign during an effect, not render: writing a ref during render is a
@@ -260,9 +285,10 @@ export function FrontendSessionProvider({ children }: { children: ReactNode }) {
   // The transport's 401 path replays a request once with the renewed token;
   // register the single-flight refresher for the provider's lifetime.
   useEffect(() => {
-    setTokenRefresher(renewAccessToken);
+    const session = authSessionRef.current;
+    setTokenRefresher(() => session && authSessionRef.current === session ? renewAccessToken() : Promise.resolve(null));
     return () => setTokenRefresher(null);
-  }, [renewAccessToken]);
+  }, [renewAccessToken, sessionId]);
 
   // A background tab's timers run late, so a token can already be expired
   // (or nearly) when the tab becomes visible again; refresh eagerly then.
@@ -283,7 +309,7 @@ export function FrontendSessionProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (status !== "AUTHENTICATED" || !accessToken || !workspaceId) {
       accessGenerationRef.current += 1;
-      setPermissions(null);
+      setAccess(null);
       return;
     }
     const generation = (accessGenerationRef.current += 1);
@@ -291,15 +317,16 @@ export function FrontendSessionProvider({ children }: { children: ReactNode }) {
       try {
         const workspace = await getWorkspace(workspaceId, accessToken);
         if (accessGenerationRef.current !== generation) return;
-        setPermissions(workspace?.permissions ?? null);
+        setAccess({ workspaceId, sessionId, permissions: workspace?.permissions ?? null });
       } catch {
-        if (accessGenerationRef.current === generation) setPermissions(null);
+        if (accessGenerationRef.current === generation) setAccess({ workspaceId, sessionId, permissions: null });
       }
     })();
-  }, [status, accessToken, workspaceId]);
+  }, [status, accessToken, workspaceId, sessionId, accessAttempt]);
 
   const adoptSession = useCallback(
     async (result: { user_id: string; access_token: string; expires_in?: number | null }) => {
+      authSessionRef.current = { userId: result.user_id };
       setSessionId((current) => current + 1);
       setUserId(result.user_id);
       setAccessToken(result.access_token);
@@ -405,6 +432,8 @@ export function FrontendSessionProvider({ children }: { children: ReactNode }) {
       organizationId,
       workspaceId,
       permissions,
+      permissionsFailed,
+      retryPermissions,
       sessionId,
       authenticated,
       connected: authenticated && Boolean(workspaceId && accessToken),
@@ -430,6 +459,8 @@ export function FrontendSessionProvider({ children }: { children: ReactNode }) {
       organizationId,
       workspaceId,
       permissions,
+      permissionsFailed,
+      retryPermissions,
       sessionId,
       authenticated,
       tenancyLoading,

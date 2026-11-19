@@ -2156,6 +2156,8 @@ export const enUS = {
     },
   },
   appThread: {
+    accessChecking: "Checking workspace access…",
+    accessUnavailable: "Could not verify workspace access.",
     summaryDegraded: "Some data failed to load; counts may be incomplete.",
     railToggle: "Details",
     railToggleList: "Chats",
@@ -2196,7 +2198,7 @@ export const enUS = {
       stopping: "Stopping…",
       cancelRequested: "Cancellation requested; the run may still be stopping.",
       cancelFailed: "Could not request cancellation. The run is still being monitored.",
-      contentRestricted: "Your role cannot read this conversation content.",
+      contentRestricted: "This turn’s content is unavailable.",
       readOnlyHint: "Your role is read-only. You cannot send messages or cancel runs.",
       noOutput: "The run produced no final output.",
       failure: "Failure code",
