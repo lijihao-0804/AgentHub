@@ -20,6 +20,7 @@ from __future__ import annotations
 import sqlite3
 import time
 from datetime import date, timedelta
+from fractions import Fraction
 from pathlib import Path
 from typing import Any
 
@@ -172,8 +173,9 @@ METRICS: dict[str, dict[str, Any]] = {
             "The denominator is raw views, so anything that makes users retry the "
             "page -- a crash, a slow form, a validation loop -- lowers this metric "
             "without a single user changing their mind. It is also not a cohort "
-            "measure: a view late on the last day of the window has no chance to "
-            "become a registration inside it. Deduplicating by device was "
+            "measure: a view shortly before the window closes has less time to "
+            "result in an in-window registration. Same-day registration is possible. "
+            "Deduplicating by device was "
             "considered and rejected because signup_page_views carries no stable "
             "device key."
         ),
@@ -322,6 +324,106 @@ class Warehouse:
             ],
             "row_count": row_count,
             "sample_values": sample_values,
+        }
+
+    def registration_conversion(
+        self, windows: Any, platform: str | None = None, breakdown: str = "none"
+    ) -> dict[str, Any]:
+        """Count each event once, including segments with only one kind of event."""
+        if not isinstance(windows, list) or not 1 <= len(windows) <= 2:
+            raise WarehouseError("Supply one or two chronological UTC date windows.")
+        bounds: list[tuple[str, str]] = []
+        for window in windows:
+            if not isinstance(window, dict) or set(window) != {"start_date", "end_date"}:
+                raise WarehouseError("Each window needs start_date and end_date.")
+            start, end = window["start_date"], window["end_date"]
+            try:
+                if any(date.fromisoformat(v).isoformat() != v for v in (start, end)):
+                    raise ValueError
+            except (TypeError, ValueError):
+                raise WarehouseError("Use valid UTC dates in YYYY-MM-DD form.") from None
+            if start > end or (bounds and bounds[-1][1] >= start):
+                raise WarehouseError("Date windows must be chronological and non-overlapping.")
+            bounds.append((start, end))
+        if platform not in (None, "android", "ios") or breakdown not in (
+            "none",
+            "platform",
+            "platform_version",
+        ):
+            raise WarehouseError("Unknown platform or breakdown.")
+
+        # SQLite date() normalizes offset-bearing timestamps to UTC. Aggregate
+        # the two streams separately: a signup must never multiply page views.
+        start1, end1 = bounds[0]
+        start2, end2 = bounds[1] if len(bounds) == 2 else (None, None)
+        sql = """
+            WITH windows(period, first_day, last_day) AS (VALUES (0, ?, ?), (1, ?, ?)),
+            counts AS (
+                SELECT period, platform, app_version, count(*) AS signups, 0 AS views
+                FROM windows JOIN signups ON date(signed_up_at) BETWEEN first_day AND last_day
+                WHERE (? IS NULL OR platform = ?) GROUP BY period, platform, app_version
+                UNION ALL
+                SELECT period, platform, app_version, 0, count(*)
+                FROM windows JOIN signup_page_views
+                    ON date(viewed_at) BETWEEN first_day AND last_day
+                WHERE (? IS NULL OR platform = ?) GROUP BY period, platform, app_version
+            )
+            SELECT period, platform, app_version, sum(signups), sum(views)
+            FROM counts GROUP BY period, platform, app_version
+            ORDER BY platform, app_version, period
+        """
+
+        def empty_counts() -> list[list[int]]:
+            return [[0, 0] for _ in bounds]
+
+        totals = empty_counts()
+        platforms: dict[str, list[list[int]]] = {}
+        versions: dict[tuple[str, str], list[list[int]]] = {}
+        connection = connect_read_only(self._path)
+        try:
+            with statement_timeout(connection):
+                for period, plat, version, signups, views in connection.execute(
+                    sql, (start1, end1, start2, end2, platform, platform, platform, platform)
+                ):
+                    groups = [totals]
+                    if breakdown != "none":
+                        groups.append(platforms.setdefault(plat, empty_counts()))
+                    if breakdown == "platform_version":
+                        groups.append(versions.setdefault((plat, version), empty_counts()))
+                    if 1 + len(platforms) + len(versions) > MAX_ROW_CAP:
+                        raise WarehouseError(
+                            f"Conversion breakdown exceeds {MAX_ROW_CAP} result groups. "
+                            "Narrow the dates, filter by platform, or request a coarser breakdown."
+                        )
+                    for group in groups:
+                        group[period][0] += signups
+                        group[period][1] += views
+        except sqlite3.DatabaseError as exc:
+            raise WarehouseError(f"The warehouse rejected the conversion query: {exc}") from None
+        finally:
+            connection.close()
+
+        def summary(counts: list[list[int]]) -> dict[str, Any]:
+            rates = [Fraction(100 * n, d) if d else None for n, d in counts]
+            change = None
+            if len(rates) == 2 and rates[0] is not None and rates[1] is not None:
+                change = float(rates[1] - rates[0])
+            return {
+                "periods": [
+                    {"signups": n, "views": d, "rate_pct": float(r) if r is not None else None}
+                    for (n, d), r in zip(counts, rates, strict=True)
+                ],
+                "change_pp": change,
+            }
+
+        return {
+            "windows": windows,
+            "overall": summary(totals),
+            "platforms": [{"platform": p, **summary(cnt)} for p, cnt in platforms.items()],
+            "versions": [
+                {"platform": p, "app_version": v, **summary(cnt)}
+                for (p, v), cnt in versions.items()
+            ],
         }
 
     def query(self, sql: str, limit: int) -> dict[str, Any]:

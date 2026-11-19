@@ -39,7 +39,13 @@ from apps.warehouse_mcp.sql_guard import (
 )
 from apps.warehouse_mcp.warehouse import METRICS, TABLE_NAMES, Warehouse
 
-EXPECTED_TOOLS = (GET_METRIC_DEFINITION, LIST_TABLES, DESCRIBE_TABLE, QUERY_SQL)
+EXPECTED_TOOLS = (
+    GET_METRIC_DEFINITION,
+    LIST_TABLES,
+    DESCRIBE_TABLE,
+    QUERY_SQL,
+    server.GET_REGISTRATION_CONVERSION,
+)
 
 # Grouped conversion over the seeded window, split at the 5.2.0 rollout. This
 # is the query an analyst would arrive at, and the numbers below are whatever
@@ -103,7 +109,7 @@ def text_of(result: mcp_types.CallToolResult) -> str:
 
 
 @pytest.mark.asyncio
-async def test_the_tool_list_is_exactly_the_four_read_tools(warehouse: Warehouse) -> None:
+async def test_original_read_tools_and_optional_conversion_are_listed(warehouse: Warehouse) -> None:
     entry = server.build_server(warehouse).get_request_handler("tools/list")
     assert entry is not None
     listed = await entry.handler(None, None)  # type: ignore[arg-type]
@@ -338,7 +344,10 @@ async def test_a_query_against_a_missing_table_is_an_error_not_a_crash(
 async def test_every_defined_metric_answers_with_the_full_contract(
     warehouse: Warehouse, metric: str
 ) -> None:
-    result = await call_tool(warehouse, GET_METRIC_DEFINITION, {"metric": metric})
+    field = server.METRIC_INPUT_SCHEMA["properties"]["metric"]
+    assert metric in field["description"].split(": ")[-1].split(", ")
+    assert "enum" not in field
+    result = await call_tool(warehouse, GET_METRIC_DEFINITION, {"metric": f" {metric.upper()} "})
     assert result.is_error is False
     payload = result.structured_content
     assert payload is not None
@@ -457,3 +466,136 @@ def _pooled(rows: list[list[Any]], platform: str, period: str) -> float:
     views = sum(row[3] for row in rows if row[0] == platform and row[2] == period)
     signups = sum(row[4] for row in rows if row[0] == platform and row[2] == period)
     return signups / views
+
+
+def window(start: str, end: str) -> dict[str, str]:
+    return {"start_date": start, "end_date": end}
+
+
+@pytest.mark.asyncio
+async def test_conversion_keeps_platform_and_version_grains_separate(warehouse: Warehouse) -> None:
+    result = await call_tool(
+        warehouse,
+        server.GET_REGISTRATION_CONVERSION,
+        {
+            "windows": [window("2026-02-15", "2026-02-28"), window("2026-03-01", "2026-03-14")],
+            "breakdown": "platform_version",
+        },
+    )
+    data = result.structured_content
+    assert data and not result.is_error
+    assert [(r["signups"], r["views"]) for r in data["overall"]["periods"]] == [
+        (406, 1330),
+        (336, 1358),
+    ]
+    assert data["overall"]["change_pp"] == pytest.approx(100 * (336 / 1358 - 406 / 1330))
+    assert next(r for r in data["platforms"] if r["platform"] == "ios")["change_pp"] == 0
+    versions = {(r["platform"], r["app_version"]): r for r in data["versions"]}
+    assert versions["ios", "5.1.1"]["change_pp"] == pytest.approx(100 * (84 / 252 - 112 / 378))
+    assert versions["android", "5.2.0"]["change_pp"] is None
+    assert versions["android", "5.2.0"]["periods"][0] == {
+        "signups": 0,
+        "views": 0,
+        "rate_pct": None,
+    }
+
+
+@pytest.mark.asyncio
+async def test_conversion_single_day_filter_and_offset_boundary(warehouse: Warehouse) -> None:
+    # UTC midnight is the exact cut; view-only and signup-only groups both survive.
+    with sqlite3.connect(warehouse.path) as db:
+        db.executemany(
+            "INSERT INTO signup_page_views VALUES (?, ?, ?, ?, ?)",
+            [
+                (900000, "2028-02-29T23:59:59Z", "ios", "old", "US"),
+                (900001, "2028-03-01T01:00:00+01:00", "ios", "new", "US"),
+                (900002, "2028-03-01T00:00:00Z", "android", "other", "US"),
+            ],
+        )
+        db.execute(
+            "INSERT INTO signups VALUES "
+            "(900000, '2028-03-01T00:00:00Z', 'ios', 'signup-only', 'US')"
+        )
+    result = await call_tool(
+        warehouse,
+        server.GET_REGISTRATION_CONVERSION,
+        {
+            "windows": [window("2028-02-29", "2028-02-29"), window("2028-03-01", "2028-03-01")],
+            "platform": "ios",
+            "breakdown": "platform_version",
+        },
+    )
+    data = result.structured_content
+    assert data and [(p["signups"], p["views"]) for p in data["overall"]["periods"]] == [
+        (0, 1),
+        (1, 1),
+    ]
+    assert data["overall"]["change_pp"] == 100
+    assert (
+        next(v for v in data["versions"] if v["app_version"] == "signup-only")["periods"][1][
+            "rate_pct"
+        ]
+        is None
+    )
+    single = warehouse.registration_conversion([window("2026-03-15", "2026-03-15")], "ios")
+    assert single["overall"]["periods"][0]["rate_pct"] == pytest.approx(100 * 14 / 45)
+    assert (
+        single["overall"]["change_pp"] is None and single["platforms"] == single["versions"] == []
+    )
+
+
+@pytest.mark.parametrize(
+    "args",
+    [
+        {"windows": []},
+        {"windows": [window("2026-03-01", "2026-02-28")]},
+        {"windows": [window("2026-02-29", "2026-03-01")]},
+        {"windows": [window("2026-03-01", "2026-03-02"), window("2026-03-02", "2026-03-03")]},
+        {"windows": [window("2026-03-01", "2026-03-01")] * 3},
+        {"windows": [window("2026-03-01", "2026-03-01")], "sql": "SELECT 1"},
+        {"windows": [window("2026-03-01", "2026-03-01")], "platform": "ios OR 1=1"},
+    ],
+)
+@pytest.mark.asyncio
+async def test_conversion_rejects_invalid_date_windows_and_open_filters(
+    warehouse: Warehouse, args: dict
+) -> None:
+    assert (await call_tool(warehouse, server.GET_REGISTRATION_CONVERSION, args)).is_error
+
+
+@pytest.mark.asyncio
+async def test_conversion_large_breakdown_fails_without_partial_totals(
+    warehouse: Warehouse,
+) -> None:
+    from apps.warehouse_mcp.sql_guard import MAX_ROW_CAP
+
+    with sqlite3.connect(warehouse.path) as db:
+        db.executemany(
+            "INSERT INTO signup_page_views VALUES (?, '2029-05-01T00:00:00Z', 'ios', ?, 'US')",
+            [(910000 + i, str(i)) for i in range(MAX_ROW_CAP)],
+        )
+    args = {"windows": [window("2029-05-01", "2029-05-01")]}
+    large = await call_tool(
+        warehouse,
+        server.GET_REGISTRATION_CONVERSION,
+        {
+            **args,
+            "breakdown": "platform_version",
+        },
+    )
+    assert large.is_error and not large.structured_content
+    assert "coarser breakdown" in text_of(large)
+    coarse = await call_tool(
+        warehouse,
+        server.GET_REGISTRATION_CONVERSION,
+        {
+            **args,
+            "breakdown": "platform",
+        },
+    )
+    assert coarse.structured_content["overall"]["periods"][0]["views"] == MAX_ROW_CAP
+    empty = warehouse.registration_conversion([window("2029-05-02", "2029-05-02")])
+    assert empty["overall"] == {
+        "periods": [{"signups": 0, "views": 0, "rate_pct": None}],
+        "change_pp": None,
+    }
