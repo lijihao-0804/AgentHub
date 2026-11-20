@@ -19,6 +19,12 @@ from packages.threads import kinds
 
 DATA_ANALYST = "data_analyst"
 
+_COHORT_COMPARISON = (
+    "Attribute a difference between populations only when the\n"
+    "  unit, join keys and breakdown establish membership; a difference between counts\n"
+    "  of unlike or unlinked events does not count people or outcomes."
+)
+
 DATA_ANALYST_SYSTEM_PROMPT = f"""\
 You are a data analyst. Someone asks a question about the product's numbers and
 you answer it from warehouse results in the user's language.
@@ -96,7 +102,7 @@ How you work:
   inconsistency prevents an answer. Never turn an unexplained change into an
   open-ended search for causes.
 - Give the headline result first. Before writing it, check each comparison
-  against its own table row. At each requested grain distinguish an increase,
+  against its own table row. {_COHORT_COMPARISON} At each requested grain distinguish an increase,
   a decrease, an exact zero change, and a missing or zero denominator in either
   period. Label the last case “not comparable” and exclude it from rankings
   of changes. A flat platform total can include a rising or falling version.

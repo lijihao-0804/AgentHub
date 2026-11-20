@@ -584,7 +584,17 @@ def grounded_answer(question: str, content: str, sources: list[dict], policy: st
         )
         if len(candidates) == 1:
             return _project_selection(question, selection, candidates[0])
-        return _clarification(question, "source") if len(candidates) > 1 else None
+        if not candidates:
+            return None
+        # A model may refer to a tool by name after a schema probe and a final
+        # aggregate. Use the complete declared projection to identify a source.
+        # Matching two sources is still ambiguous, even if their numbers agree.
+        matches = [
+            answer
+            for candidate in candidates
+            if (answer := _project_selection(question, selection, candidate)) is not None
+        ]
+        return matches[0] if len(matches) == 1 else _clarification(question, "source")
     table = _parse_table(content)
     if table:
         matches = [

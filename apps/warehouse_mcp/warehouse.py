@@ -159,9 +159,9 @@ METRICS: dict[str, dict[str, Any]] = {
     "registration_conversion_rate": {
         "display_name": "Registration conversion rate",
         "definition": (
-            "The share of registration page views that ended in a completed "
-            "registration, measured within the reporting window rather than by "
-            "following a given viewer forward."
+            "Completed registrations divided by registration page views in the same "
+            "reporting window. The tables do not link a view to a registration, so "
+            "their count difference cannot identify unsuccessful views or visitors."
         ),
         "formula": "COUNT(signups) / COUNT(signup_page_views)",
         "numerator": "Completed registrations in signups.",
@@ -199,8 +199,9 @@ METRICS: dict[str, dict[str, Any]] = {
             "'First payment succeeded' excludes a user whose first attempt failed "
             "and whose retry went through -- commercially a customer, definitionally "
             "not one here. Finance owns that line and has kept it deliberately "
-            "strict; growth reporting that wants the looser reading should say so "
-            "rather than silently switch to 'any successful payment'."
+            "strict. A nonqualifying first attempt can also have other statuses: "
+            "use the returned first-attempt breakdown when attributing the difference "
+            "from 'any successful payment'."
         ),
         "source_tables": ["signups", "orders", "payments"],
     },

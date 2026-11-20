@@ -386,6 +386,21 @@ def test_v2_sql_projection_and_translated_headers():
     assert grounded_answer(question, choice, [ambiguous], V2) == expected
 
 
+def test_tool_name_resolves_only_a_unique_complete_projection():
+    shipping = _shipping_source([["west", 9, 1]])
+    probe = {
+        **shipping,
+        "columns": ["min_date", "max_date"],
+        "rows": [["2025-01-01", "2025-03-31"]],
+        "call_id": "metadata",
+    }
+    selection = json.dumps({"source": "query_sql", "columns": ["zone", "net"]})
+    expected = "| zone | net |\n| --- | --- |\n| west | 9 |"
+    assert grounded_answer("Table only", selection, [probe, shipping], V2) == expected
+    same_shape = {**shipping, "call_id": "different-window"}
+    assert "Clarification" in grounded_answer("Table only", selection, [same_shape, shipping], V2)
+
+
 def test_v2_empty_results_missing_input_and_ambiguous_sources_stay_distinct():
     empty = _shipping_source([])
     question = "Only output the shipping volume table."
