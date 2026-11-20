@@ -110,6 +110,7 @@ _RUNTIME_KEYS = frozenset(DEFAULT_RUNTIME_CONFIG) | {
     "history_policy",
     "summary_policy",
     "support_answer_policy",
+    "analysis_answer_policy",
 }
 # Validated on their own terms: neither is a step count. ``max_cost_micro_usd``
 # is the one runtime key that may be ``None``; ``memory`` is a block of booleans
@@ -123,6 +124,7 @@ _RUNTIME_SCALAR_KEYS = _RUNTIME_KEYS - {
     "memory",
     "summary_policy",
     "support_answer_policy",
+    "analysis_answer_policy",
 }
 _CONTEXT_BUDGET_KEYS = frozenset(DEFAULT_RUNTIME_CONFIG["context_budget"])
 _MEMORY_KEYS = frozenset(
@@ -154,7 +156,7 @@ _RETRIEVAL_OPTIONAL_KEYS = frozenset(
 _RETRIEVAL_KEYS = (
     frozenset(DEFAULT_RETRIEVAL_CONFIG)
     | _RETRIEVAL_OPTIONAL_KEYS
-    | {"evidence_projection", "evidence_set_selector", "rerank_method"}
+    | {"evidence_projection", "evidence_set_selector", "rerank_method", "query_rewrite"}
 )
 
 
@@ -1155,6 +1157,10 @@ def _validate_retrieval_config(
         raise AgentHubError("INVALID_AGENT_CONFIG", "The retrieval config is invalid.", 422)
     if projection is None:
         result.pop("evidence_projection", None)
+    if result.get("query_rewrite") is None:
+        result.pop("query_rewrite", None)
+    elif result["query_rewrite"] not in ("paper_comparison_v1", "paper_comparison_v2"):
+        raise AgentHubError("INVALID_AGENT_CONFIG", "The query rewrite is invalid.", 422)
     method = result.get("rerank_method")
     if method is None:
         result.pop("rerank_method", None)
@@ -1396,6 +1402,11 @@ def _validate_runtime_config(
             raise AgentHubError(
                 "INVALID_CONTEXT_POLICY", "The context policy is invalid.", 422
             ) from None
+    analysis_policy = value.get("analysis_answer_policy")
+    if analysis_policy is None:
+        result.pop("analysis_answer_policy", None)
+    elif analysis_policy not in ("grounded_table_v1", "grounded_table_v2"):
+        raise AgentHubError("INVALID_AGENT_CONFIG", "The analysis answer policy is invalid.", 422)
     support_policy = value.get("support_answer_policy")
     if support_policy is None:
         result.pop("support_answer_policy", None)

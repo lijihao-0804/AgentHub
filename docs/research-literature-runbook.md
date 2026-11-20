@@ -124,3 +124,51 @@ Create a thread against that agent and ask a question. What should happen:
   ARTIFACT_NOT_EDITABLE`); it is the record of one execution. Save a copy.
 - With the tools unbound, the agent has no search ability and the prompt
   requires it to say so rather than answer from memory.
+
+## Comparison questions about a bound paper
+
+The Research Assistant template supplies `retrieval_config.query_rewrite` with the
+value `paper_comparison_v2` when creating a draft. API clients can copy the
+template's `retrieval_config` field into the ordinary agent creation request.
+For an existing agent, set the field in its draft and publish a new version.
+
+On the first built-in `search_knowledge` proposal of each turn, this setting
+can express a plural possessive as a relation, e.g. “reviewers’ ratings” becomes
+“ratings between reviewers”. It leaves explicit comparisons and model queries
+already using relational wording as proposed. Versions published with
+`paper_comparison_v1` retain their broader first-search rewrite. Both recognize
+English comparisons with an explicit leading or trailing paper title, including
+“comparison of costs across regions” and “how were ratings compared”. For a bare
+trailing reference, use a quoted title, uppercase acronym, or title accompanied
+by an arXiv identifier. The search keeps a supplied title and identifier together.
+A matching chunk still needs to be checked against its document revision,
+especially where titles coincide.
+
+A time range or cohort named before the comparison remains in the query. A second
+sentence after the question must be a simple citation request for the rewrite to
+apply. Direct knowledge-base search takes the caller's explicit search text.
+
+For an ID alone, an unsupported language, or an ambiguous comparison, the
+runtime uses the model's search phrase. Follow-up searches within the turn keep
+their proposed arguments. The existing result limit, bound snapshots, relevance
+and context budgets also apply to rewritten searches.
+
+### Checking a research answer
+
+1. Open the run's published AgentVersion and confirm the retrieval setting and
+   knowledge snapshot. In authorized checkpoint history, select the state after
+   the `POLICY` step and before the read executes. Match the call ID in the
+   assistant message's `tool_calls` to `pending_tool_calls[].tool_call_id`.
+   The assistant message contains the model's original proposal. The pending
+   entry contains the allowed query and limit passed to the tool. The observation
+   step clears the pending list, so a terminal checkpoint can have an empty list.
+2. Check the tool result for that same call ID and its success status. Where
+   only content-free run steps are available, `TOOL_PROPOSAL.arguments_hashes`
+   records the canonical hash of each proposal's effective arguments, in the
+   same order as `tool_call_ids`. A known query and limit can be checked this
+   way without exposing the raw checkpoint.
+3. Open each citation in the final answer and confirm the snapshot, document
+   revision and returned passage. Check the specific method or value the answer
+   attributes to that passage. For a numerical comparison, also check the groups,
+   units and time range. A resolvable handle establishes where the citation points.
+   Factual support requires reading the cited text.

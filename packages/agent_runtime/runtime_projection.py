@@ -118,6 +118,8 @@ class AgentRunState(TypedDict, total=False):
     model_round_count: int
     tool_call_count: int
     identical_call_counts: dict[str, int]
+    analysis_table_sources: list[dict[str, Any]]
+    analysis_table_blocked: bool
     final_output: str | None
     failure_code: str | None
     model_response: ModelResponse | None

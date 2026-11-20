@@ -1,4 +1,5 @@
 import { apiRequest } from "@/lib/api/client";
+import type { RetrievalConfig, RuntimeConfig } from "@/lib/api/agents";
 import type { AuthInput } from "@/lib/api/client";
 
 export type AgentTemplate = {
@@ -8,6 +9,8 @@ export type AgentTemplate = {
   system_prompt: string;
   tool_hints: string[];
   thread_kind: string;
+  runtime_config?: RuntimeConfig;
+  retrieval_config?: RetrievalConfig;
 };
 
 /** Read-only template catalog; the create form stays the only writer. */

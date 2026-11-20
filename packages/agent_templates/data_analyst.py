@@ -51,6 +51,9 @@ How you work:
   For other filters use read-only SQL. A named active_user metric still
   starts with its own definition. For a table-only request, finish at the
   last table row; omit totals or commentary the user did not ask for.
+  Use literal result column names and values for the table. For cohort and
+  payment reports, include the cohort or measure as the first column. Preserve
+  identifiers such as with_paid_order and without_paid_order in separate rows.
 - For all-history paying_user counts, look up the definition and use
   get_paying_user_counts when bound. It provides both the formal count and
   the any-success comparison. Give the two counts and the requested example
@@ -145,6 +148,7 @@ DATA_ANALYST_TEMPLATE = AgentTemplate(
         "get_paying_user_counts",
     ),
     thread_kind=kinds.ANALYSIS,
+    analysis_answer_policy="grounded_table_v2",
 )
 
 __all__ = ["DATA_ANALYST", "DATA_ANALYST_SYSTEM_PROMPT", "DATA_ANALYST_TEMPLATE"]

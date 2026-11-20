@@ -37,6 +37,8 @@ class AgentTemplateResponse(BaseModel):
     # The UI uses it to send a new thread to the right page; nothing in the
     # runtime reads it.
     thread_kind: str
+    retrieval_config: dict[str, str]
+    runtime_config: dict[str, str]
 
 
 def _response(template: AgentTemplate) -> AgentTemplateResponse:
@@ -47,6 +49,11 @@ def _response(template: AgentTemplate) -> AgentTemplateResponse:
         system_prompt=template.system_prompt,
         tool_hints=list(template.tool_hints),
         thread_kind=template.thread_kind,
+        runtime_config={"analysis_answer_policy": template.analysis_answer_policy}
+        if template.analysis_answer_policy else {},
+        retrieval_config={"query_rewrite": template.query_rewrite}
+        if template.query_rewrite
+        else {},
     )
 
 

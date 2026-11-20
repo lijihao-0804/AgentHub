@@ -96,6 +96,7 @@ RESEARCH_TEMPLATE = AgentTemplate(
     system_prompt=RESEARCH_SYSTEM_PROMPT,
     tool_hints=("search_papers", "get_paper", "search_knowledge"),
     thread_kind=kinds.RESEARCH,
+    query_rewrite="paper_comparison_v2",
 )
 
 __all__ = [
