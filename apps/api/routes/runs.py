@@ -77,10 +77,21 @@ __all__ = ["router"]
 async def get_run_tools(
     workspace_id: UUID,
     run_id: UUID,
+    request: Request,
+    include_citations: bool = False,
     context: WorkspaceExecutionContext = context_dependency,
     session: AsyncSession = db_session_dependency,
 ):
-    return await RunEvidenceService().tools(session, context, run_id)
+    from packages.agent_runtime.adapters.langgraph.checkpoint import LangGraphCheckpointAdapter
+
+    checkpoint = (
+        LangGraphCheckpointAdapter(request.app.state.settings.database_url)
+        if include_citations
+        else None
+    )
+    return await RunEvidenceService().tools(
+        session, context, run_id, citation_checkpoint=checkpoint
+    )
 
 
 @router.get("/runs/{run_id}/evidence/{snapshot_id}/{chunk_id}")

@@ -20,6 +20,7 @@ from __future__ import annotations
 import sqlite3
 import time
 from datetime import date, timedelta
+from fractions import Fraction
 from pathlib import Path
 from typing import Any
 
@@ -158,9 +159,9 @@ METRICS: dict[str, dict[str, Any]] = {
     "registration_conversion_rate": {
         "display_name": "Registration conversion rate",
         "definition": (
-            "The share of registration page views that ended in a completed "
-            "registration, measured within the reporting window rather than by "
-            "following a given viewer forward."
+            "Completed registrations divided by registration page views in the same "
+            "reporting window. The tables do not link a view to a registration, so "
+            "their count difference cannot identify unsuccessful views or visitors."
         ),
         "formula": "COUNT(signups) / COUNT(signup_page_views)",
         "numerator": "Completed registrations in signups.",
@@ -172,8 +173,9 @@ METRICS: dict[str, dict[str, Any]] = {
             "The denominator is raw views, so anything that makes users retry the "
             "page -- a crash, a slow form, a validation loop -- lowers this metric "
             "without a single user changing their mind. It is also not a cohort "
-            "measure: a view late on the last day of the window has no chance to "
-            "become a registration inside it. Deduplicating by device was "
+            "measure: a view shortly before the window closes has less time to "
+            "result in an in-window registration. Same-day registration is possible. "
+            "Deduplicating by device was "
             "considered and rejected because signup_page_views carries no stable "
             "device key."
         ),
@@ -186,8 +188,10 @@ METRICS: dict[str, dict[str, Any]] = {
             "were later refunded do not count, and neither do cancelled orders."
         ),
         "formula": (
-            "users with EXISTS (payments.status = 'SUCCEEDED' JOIN orders "
-            "ON payments.order_id = orders.order_id WHERE orders.status = 'PAID')"
+            "Rank payment attempts per orders.user_id by payments.paid_at, payments.payment_id "
+            "across their order history. Count distinct registered users whose first attempt "
+            "has payments.status = 'SUCCEEDED' and whose corresponding orders.status = 'PAID'. "
+            "Apply status filters after selecting the first attempt."
         ),
         "numerator": "Distinct signups.user_id meeting the condition.",
         "denominator": None,
@@ -195,8 +199,9 @@ METRICS: dict[str, dict[str, Any]] = {
             "'First payment succeeded' excludes a user whose first attempt failed "
             "and whose retry went through -- commercially a customer, definitionally "
             "not one here. Finance owns that line and has kept it deliberately "
-            "strict; growth reporting that wants the looser reading should say so "
-            "rather than silently switch to 'any successful payment'."
+            "strict. A nonqualifying first attempt can also have other statuses: "
+            "use the returned first-attempt breakdown when attributing the difference "
+            "from 'any successful payment'."
         ),
         "source_tables": ["signups", "orders", "payments"],
     },
@@ -210,9 +215,9 @@ METRICS: dict[str, dict[str, Any]] = {
         "numerator": "Distinct users with one or more orders.",
         "denominator": None,
         "caveats": (
-            "Activity is defined on orders because this warehouse holds no session "
-            "or event stream, so a user who opened the app every day and bought "
-            "nothing is not active by this definition. Cancelled orders still "
+            "Orders establish activity under this definition. signup_page_views counts visits "
+            "to the registration page; it cannot identify everyone who opened the app. "
+            "There is no general app-open or session source. Cancelled orders still "
             "count as activity: the intent was real even though the revenue was not."
         ),
         "source_tables": ["signups", "orders"],
@@ -247,6 +252,20 @@ class WarehouseError(Exception):
     The message is written to be read by an agent: it says what was wrong and,
     where a closed set exists, what the valid options are.
     """
+
+
+def _utc_date_window(window: Any) -> tuple[str, str]:
+    if not isinstance(window, dict) or set(window) != {"start_date", "end_date"}:
+        raise WarehouseError("Each window needs start_date and end_date.")
+    start, end = window["start_date"], window["end_date"]
+    try:
+        if any(date.fromisoformat(v).isoformat() != v for v in (start, end)):
+            raise ValueError
+    except (TypeError, ValueError):
+        raise WarehouseError("Use valid UTC dates in YYYY-MM-DD form.") from None
+    if start > end:
+        raise WarehouseError("Date windows must be chronological and non-overlapping.")
+    return start, end
 
 
 class Warehouse:
@@ -322,6 +341,190 @@ class Warehouse:
             ],
             "row_count": row_count,
             "sample_values": sample_values,
+        }
+
+    def registration_conversion(
+        self, windows: Any, platform: str | None = None, breakdown: str = "none"
+    ) -> dict[str, Any]:
+        """Count each event once, including segments with only one kind of event."""
+        if not isinstance(windows, list) or not 1 <= len(windows) <= 2:
+            raise WarehouseError("Supply one or two chronological UTC date windows.")
+        bounds: list[tuple[str, str]] = []
+        for window in windows:
+            start, end = _utc_date_window(window)
+            if bounds and bounds[-1][1] >= start:
+                raise WarehouseError("Date windows must be chronological and non-overlapping.")
+            bounds.append((start, end))
+        if platform not in (None, "android", "ios") or breakdown not in (
+            "none",
+            "platform",
+            "platform_version",
+        ):
+            raise WarehouseError("Unknown platform or breakdown.")
+
+        # SQLite date() normalizes offset-bearing timestamps to UTC. Aggregate
+        # the two streams separately: a signup must never multiply page views.
+        start1, end1 = bounds[0]
+        start2, end2 = bounds[1] if len(bounds) == 2 else (None, None)
+        sql = """
+            WITH windows(period, first_day, last_day) AS (VALUES (0, ?, ?), (1, ?, ?)),
+            counts AS (
+                SELECT period, platform, app_version, count(*) AS signups, 0 AS views
+                FROM windows JOIN signups ON date(signed_up_at) BETWEEN first_day AND last_day
+                WHERE (? IS NULL OR platform = ?) GROUP BY period, platform, app_version
+                UNION ALL
+                SELECT period, platform, app_version, 0, count(*)
+                FROM windows JOIN signup_page_views
+                    ON date(viewed_at) BETWEEN first_day AND last_day
+                WHERE (? IS NULL OR platform = ?) GROUP BY period, platform, app_version
+            )
+            SELECT period, platform, app_version, sum(signups), sum(views)
+            FROM counts GROUP BY period, platform, app_version
+            ORDER BY platform, app_version, period
+        """
+
+        def empty_counts() -> list[list[int]]:
+            return [[0, 0] for _ in bounds]
+
+        totals = empty_counts()
+        platforms: dict[str, list[list[int]]] = {}
+        versions: dict[tuple[str, str], list[list[int]]] = {}
+        connection = connect_read_only(self._path)
+        try:
+            with statement_timeout(connection):
+                for period, plat, version, signups, views in connection.execute(
+                    sql, (start1, end1, start2, end2, platform, platform, platform, platform)
+                ):
+                    groups = [totals]
+                    if breakdown != "none":
+                        groups.append(platforms.setdefault(plat, empty_counts()))
+                    if breakdown == "platform_version":
+                        groups.append(versions.setdefault((plat, version), empty_counts()))
+                    if 1 + len(platforms) + len(versions) > MAX_ROW_CAP:
+                        raise WarehouseError(
+                            f"Conversion breakdown exceeds {MAX_ROW_CAP} result groups. "
+                            "Narrow the dates, filter by platform, or request a coarser breakdown."
+                        )
+                    for group in groups:
+                        group[period][0] += signups
+                        group[period][1] += views
+        except sqlite3.DatabaseError as exc:
+            raise WarehouseError(f"The warehouse rejected the conversion query: {exc}") from None
+        finally:
+            connection.close()
+
+        def summary(counts: list[list[int]]) -> dict[str, Any]:
+            rates = [Fraction(100 * n, d) if d else None for n, d in counts]
+            change = None
+            if len(rates) == 2 and rates[0] is not None and rates[1] is not None:
+                change = float(rates[1] - rates[0])
+            return {
+                "periods": [
+                    {"signups": n, "views": d, "rate_pct": float(r) if r is not None else None}
+                    for (n, d), r in zip(counts, rates, strict=True)
+                ],
+                "change_pp": change,
+            }
+
+        return {
+            "windows": windows,
+            "overall": summary(totals),
+            "platforms": [{"platform": p, **summary(cnt)} for p, cnt in platforms.items()],
+            "versions": [
+                {"platform": p, "app_version": v, **summary(cnt)}
+                for (p, v), cnt in versions.items()
+            ],
+        }
+
+    def order_activity(self, window: dict[str, Any]) -> dict[str, Any]:
+        """Group people by whether any of their orders in this UTC window was PAID."""
+        start, end = _utc_date_window(window)
+        sql = """
+            WITH per_user AS (
+                SELECT user_id, count(*) AS n, sum(status = 'PAID') AS paid,
+                       sum(status = 'REFUNDED') AS refunded, sum(status = 'CANCELLED') AS cancelled
+                FROM orders WHERE date(ordered_at) BETWEEN ? AND ?
+                GROUP BY user_id
+            )
+            SELECT paid > 0 AS has_paid, count(*), sum(n), sum(paid), sum(refunded), sum(cancelled)
+            FROM per_user GROUP BY has_paid
+        """
+        fields = (
+            "users",
+            "order_rows",
+            "paid_rows",
+            "non_paid_rows",
+            "refunded_rows",
+            "cancelled_rows",
+            "other_status_rows",
+        )
+        groups = {
+            key: dict.fromkeys(fields, 0) for key in ("with_paid_order", "without_paid_order")
+        }
+        connection = connect_read_only(self._path)
+        try:
+            with statement_timeout(connection):
+                for has_paid, users, n, paid, refunded, cancelled in connection.execute(
+                    sql, (start, end)
+                ):
+                    groups["with_paid_order" if has_paid else "without_paid_order"] = dict(
+                        users=users,
+                        order_rows=n,
+                        paid_rows=paid,
+                        non_paid_rows=n - paid,
+                        refunded_rows=refunded,
+                        cancelled_rows=cancelled,
+                        other_status_rows=n - paid - refunded - cancelled,
+                    )
+        except sqlite3.DatabaseError as exc:
+            raise WarehouseError(
+                f"The warehouse rejected the order activity query: {exc}"
+            ) from None
+        finally:
+            connection.close()
+        return {
+            "window": window,
+            "ordered_users": sum(g["users"] for g in groups.values()),
+            **groups,
+        }
+
+    def paying_user_counts(self) -> dict[str, Any]:
+        """Compare registered users' first attempt with any attempt across all history."""
+        # Rank the complete history before applying either status condition.
+        # Once reduced to the first row, each user can enter only one difference bucket.
+        sql = """
+            WITH history AS (
+                SELECT o.user_id, p.paid_at, p.payment_id, p.status AS first_status,
+                       (p.status = 'SUCCEEDED' AND o.status = 'PAID') AS qualified
+                FROM signups s
+                JOIN orders o ON o.user_id = s.user_id
+                JOIN payments p ON p.order_id = o.order_id
+            ), ranked AS (
+                SELECT first_status, qualified,
+                       row_number() OVER (
+                           PARTITION BY user_id ORDER BY paid_at, payment_id
+                       ) AS attempt_number,
+                       max(qualified) OVER (PARTITION BY user_id) AS any_qualified
+                FROM history
+            )
+            SELECT count(*) FILTER (WHERE qualified),
+                   count(*),
+                   count(*) FILTER (WHERE NOT qualified AND first_status = 'FAILED'),
+                   count(*) FILTER (WHERE NOT qualified AND first_status = 'REFUNDED'),
+                   count(*) FILTER (
+                       WHERE NOT qualified AND first_status NOT IN ('FAILED', 'REFUNDED')
+                   )
+            FROM ranked WHERE attempt_number = 1 AND any_qualified
+        """
+        first, any_attempt, failed, refunded, other = self.query(sql, 1)["rows"][0]
+        return {
+            "strict_first_qualified_users": first,
+            "any_qualified_users": any_attempt,
+            "any_only_by_first_payment_status": {
+                "failed": failed,
+                "refunded": refunded,
+                "other": other,
+            },
         }
 
     def query(self, sql: str, limit: int) -> dict[str, Any]:

@@ -1063,7 +1063,7 @@ class AgentRunService:
         )
         emitter = AgentEventEmitter(
             run_id=str(run.id),
-            agent_version_id=str(agent_version_id),
+            agent_version_id=str(run.agent_version_id),
             request_id=context.request_id,
             # Persist before the execution lease is released, rather than
             # waiting for the hub pump; resume may begin in another process.
@@ -1074,7 +1074,7 @@ class AgentRunService:
             self._produce_stream(
                 context,
                 run,
-                agent_version_id,
+                run.agent_version_id,
                 queue,
                 emitter,
                 graph_holder,

@@ -22,6 +22,12 @@ from packages.agent_runtime.adapters.langgraph import (
     approval_interrupt,
     compile_agent_graph,
 )
+from packages.agent_runtime.analysis_table import (
+    analysis_system_prompt,
+    grounded_answer,
+    table_evidence,
+    table_only_turn,
+)
 from packages.agent_runtime.context_budget import (
     MEMORY_PROJECTION_VERSION,
     ApproxTokenEstimator,
@@ -56,6 +62,19 @@ from packages.agent_runtime.memory_tools import (
     thread_history_search_definition,
 )
 from packages.agent_runtime.models import AgentRun, AgentVersion, RunStep
+from packages.agent_runtime.paper_quotes import (
+    current_paper_registry,
+    current_paper_sources,
+    quote_sources,
+    render_quotes,
+    selection_instruction,
+)
+from packages.agent_runtime.paper_sentences import (
+    admit_sentence_selection,
+    build_sentence_selection,
+    render_sentence_selection,
+    sentence_target,
+)
 from packages.agent_runtime.rag_evidence import project_rag_evidence_payload
 from packages.agent_runtime.runtime_projection import (
     _RUNTIME_POLICY,
@@ -117,6 +136,7 @@ from packages.core.execution_context.call_scope import capture_auxiliary_model_c
 from packages.core.execution_context.models import PrincipalContext, WorkspaceExecutionContext
 from packages.knowledge.evidence_plan import assemble_evidence_plan
 from packages.knowledge.models import DocumentChunk, KnowledgeSnapshotItem
+from packages.knowledge.paper_comparison import paper_comparison_query
 from packages.knowledge.snapshots import KnowledgeSnapshotService
 from packages.memory.contracts import (
     MAX_INJECTED_MEMORIES,
@@ -131,6 +151,7 @@ from packages.memory.selection_policy import (
     apply_memory_selection_policy,
 )
 from packages.model_gateway.contracts import (
+    AliyunDeepSeekRequestMode,
     ModelGateway,
     ModelMessage,
     ModelRequest,
@@ -140,8 +161,16 @@ from packages.model_gateway.contracts import (
     ModelToolCall,
     ModelToolDefinition,
 )
-from packages.model_gateway.errors import ModelGatewayError, ModelGatewayErrorCode
-from packages.model_gateway.gateway import ModelGatewayService, SessionScopedModelGenerator
+from packages.model_gateway.errors import (
+    EmptyModelResponseError,
+    ModelGatewayError,
+    ModelGatewayErrorCode,
+)
+from packages.model_gateway.gateway import (
+    ModelGatewayService,
+    SessionScopedModelGenerator,
+    capture_rejected_model_responses,
+)
 from packages.model_gateway.run_budget_adapter import ModelAttemptBudgetError
 from packages.observability.timing import mark_visible_text
 from packages.threads.models import AgentThread, ThreadTurn
@@ -273,6 +302,15 @@ def _context_policy_metadata(
         "hard_trigger_tokens": thresholds["hard"],
         "target_tokens": thresholds["target"],
     }
+
+
+def _searched_knowledge_this_turn(state: AgentRunState) -> bool:
+    for message in reversed(state.get("turn_transcript", state.get("messages", ()))):
+        if message.role == "user":
+            break
+        if message.role == "tool" and message.name == "search_knowledge":
+            return True
+    return False
 
 
 class _AgentRunGraph:
@@ -1082,6 +1120,7 @@ class _AgentRunGraph:
             system_prompt = support_system_prompt(
                 spec.system_prompt, spec.runtime, tool_definitions.values()
             )
+            system_prompt = analysis_system_prompt(system_prompt, spec.runtime, self.run.input_text)
             history_plan_metadata = None
             history_checkpoint_binding_value = None
             history_exchange_ids = None
@@ -1705,8 +1744,12 @@ class _AgentRunGraph:
                 ModelMessage("system", _RUNTIME_POLICY),
                 ModelMessage(
                     "system",
-                    support_system_prompt(
-                        frozen_spec.system_prompt, frozen_spec.runtime, definitions
+                    analysis_system_prompt(
+                        support_system_prompt(
+                            frozen_spec.system_prompt, frozen_spec.runtime, definitions
+                        ),
+                        frozen_spec.runtime,
+                        persisted.input_text,
                     ),
                 ),
                 ModelMessage("user", persisted.input_text),
@@ -2589,6 +2632,53 @@ class _AgentRunGraph:
             if state["runtime"].get("summary_policy", {}).get("enabled") is True:
                 await self._assert_summary_run_lease()
             admission = self._admit_context(state)
+            question = getattr(self.run, "input_text", "")
+            target = sentence_target(state, question)
+            sentence_selection = None
+            selector_admission = None
+            if state.get("paper_sentence_selection_pending"):
+                if not target:
+                    raise AgentHubError(
+                        "PAPER_SENTENCE_EVIDENCE_MISSING", "The selected paper is unavailable.", 422
+                    )
+                current = current_paper_registry(state, admission.messages, question)
+                sources = current_paper_sources(
+                    state, admission.messages, question, target, eligible_registry=current
+                )
+                sentence_selection = build_sentence_selection(
+                    question,
+                    sources,
+                    visible_sources={
+                        key: entry["record"]["snippet"] for key, entry in current.items()
+                    },
+                )
+                selector_admission = admit_sentence_selection(
+                    sentence_selection,
+                    state["spec"],
+                    state["runtime"]["context_budget"],
+                )
+            quotes = quote_sources(state, admission.messages, question)
+            if quotes:
+                # Price the selection contract with the same frozen budget. Use
+                # it only if admission still delivers all selectable passages.
+                base_system = state["messages"][0]
+                augmented = replace(
+                    base_system,
+                    content=(base_system.content or "") + "\n\n" + selection_instruction(quotes),
+                )
+                try:
+                    candidate = self._admit_context(
+                        {**state, "messages": [augmented, *state["messages"][1:]]}
+                    )
+                except AgentHubError as exc:
+                    if exc.code != "AGENT_CONTEXT_BUDGET_EXCEEDED":
+                        raise
+                    quotes = {}
+                else:
+                    if quote_sources(state, candidate.messages, self.run.input_text) == quotes:
+                        admission = candidate
+                    else:
+                        quotes = {}
         except AgentHubError as error:
             await self.step(
                 "MODEL",
@@ -2601,8 +2691,10 @@ class _AgentRunGraph:
             }
 
         _retain_admission(state, admission)
-        memory_delivery = _memory_delivery_metadata(state, admission)
-        context_policy_metadata = _context_policy_metadata(state, admission)
+        if quotes:
+            state["messages"][0] = base_system
+        memory_delivery = {} if selector_admission else _memory_delivery_metadata(state, admission)
+        context_policy_metadata = _context_policy_metadata(state, selector_admission or admission)
         evidence_update = {
             "memory_message_count": int(state.get("memory_message_count", 0)),
             "history_message_count": int(state.get("history_message_count", 0)),
@@ -2617,8 +2709,10 @@ class _AgentRunGraph:
         state["tool_definitions"] = {
             definition.identity: definition for definition in state["tool_definitions"].values()
         }
-        await self._touch_admitted_memories(state, admission)
-        usage = admission.usage
+        if selector_admission is None:
+            await self._touch_admitted_memories(state, admission)
+        delivery = selector_admission or admission
+        usage = delivery.usage
         budget_data = {
             "model_round": next_round,
             "context_limit": usage.context_limit,
@@ -2651,8 +2745,17 @@ class _AgentRunGraph:
         )
         await _safe_end_span(budget_span, trace_data, status="ok", failure_code=None)
         request = ModelRequest(
-            messages=admission.messages,
-            tools=admission.tool_definitions,
+            messages=delivery.messages,
+            tools=delivery.tool_definitions,
+            request_mode=(
+                AliyunDeepSeekRequestMode.SELECTOR_NON_THINKING
+                if sentence_selection is not None
+                and state["tool_definitions"]["search_knowledge"].retrieval_config.get(
+                    "paper_answer_policy"
+                )
+                == "sentence_ids_v2"
+                else AliyunDeepSeekRequestMode.PROVIDER_DEFAULT
+            ),
         )
         self.model_round_count = next_round
         await self._emit(AgentEventType.MESSAGE_STARTED, {"model_round": next_round})
@@ -2714,33 +2817,46 @@ class _AgentRunGraph:
                         request,
                         operation="stream" if self.mode == "stream" else "generate",
                     )
-            local_summary_experiment = getattr(
-                self.service, "local_summary_experiment", None
-            )
+            local_summary_experiment = getattr(self.service, "local_summary_experiment", None)
             if local_summary_experiment is not None and (
-                    prepare_resolved is None
+                prepare_resolved is None
                 or not local_summary_experiment.authorizes_prepared_gateway(
-                        prepared_gateway,
-                        profile_id=state["spec"].model_plan.primary.id,
-                    )
-                ):
-                    raise AgentHubError(
-                        "SUMMARY_EXPERIMENT_ROUTE_MISMATCH",
-                        "The resolved model credential is outside the local experiment route.",
-                        403,
-                    )
+                    prepared_gateway,
+                    profile_id=state["spec"].model_plan.primary.id,
+                )
+            ):
+                raise AgentHubError(
+                    "SUMMARY_EXPERIMENT_ROUTE_MISMATCH",
+                    "The resolved model credential is outside the local experiment route.",
+                    403,
+                )
             # Provider completion/streaming must not retain the credential-resolution
             # session.  The prepared production facade contains only frozen identities
             # and decrypted credentials; test gateways are likewise invoked here, after
             # their factory session has exited.
             if state["runtime"].get("summary_policy", {}).get("enabled") is True:
                 await self._assert_summary_run_lease(lock=True)
-            if self.mode == "stream":
-                response = await self._stream_model(prepared_gateway, state, request)
-            else:
-                response = await prepared_gateway.generate_resolved(
-                    self.context, state["spec"].model_plan, request
-                )
+            with capture_rejected_model_responses() as rejected_responses:
+                try:
+                    if self.mode == "stream":
+                        response = await self._stream_model(
+                            prepared_gateway, state, request, buffer_text=bool(quotes or target)
+                        )
+                    else:
+                        response = await prepared_gateway.generate_resolved(
+                            self.context, state["spec"].model_plan, request
+                        )
+                except EmptyModelResponseError as error:
+                    if error.response is not None and all(
+                        receipt is not error.response for receipt in rejected_responses
+                    ):
+                        rejected_responses.append(error.response)
+                    raise
+                finally:
+                    self.usage_records.extend(
+                        _usage_record(receipt) or {"usage": None, "cost": None}
+                        for receipt in rejected_responses
+                    )
             if callable(getattr(experiment_attempt_budget, "record_response", None)):
                 try:
                     await experiment_attempt_budget.record_response(response)
@@ -2757,18 +2873,31 @@ class _AgentRunGraph:
             return {
                 **evidence_update,
                 "model_round_count": next_round,
+                "usage_records": list(self.usage_records),
                 **_context_runtime_failure_fields(error.code),
             }
         except ModelGatewayError as error:
+            receipt = error.response if isinstance(error, EmptyModelResponseError) else None
+            error_code = error.code.value
+            purpose = {"model_purpose": "paper_sentence_selection"} if sentence_selection else {}
+            if sentence_selection and receipt is not None and receipt.finish_reason == "length":
+                error_code = "MODEL_OUTPUT_TRUNCATED"
             await self.step(
                 "MODEL",
                 "FAILED",
-                {"model_round": next_round, "error_code": error.code.value, **memory_delivery},
+                {
+                    "model_round": next_round,
+                    "error_code": error_code,
+                    **purpose,
+                    **memory_delivery,
+                    **(_usage_step_metadata(receipt) if receipt is not None else {}),
+                },
             )
             return {
                 **evidence_update,
                 "model_round_count": next_round,
-                "failure_code": error.code.value,
+                "usage_records": list(self.usage_records),
+                "failure_code": error_code,
             }
         except AgentHubError as error:
             await self.step(
@@ -2779,6 +2908,7 @@ class _AgentRunGraph:
             return {
                 **evidence_update,
                 "model_round_count": next_round,
+                "usage_records": list(self.usage_records),
                 **_context_runtime_failure_fields(error.code),
             }
         except Exception:
@@ -2790,6 +2920,7 @@ class _AgentRunGraph:
             return {
                 **evidence_update,
                 "model_round_count": next_round,
+                "usage_records": list(self.usage_records),
                 "failure_code": "MODEL_BAD_RESPONSE",
             }
         usage_record = _usage_record(response)
@@ -2798,6 +2929,13 @@ class _AgentRunGraph:
         self.usage_records.append(usage_record or {"usage": None, "cost": None})
         state["usage_records"] = list(self.usage_records)
         messages = list(state["messages"])
+        table_only = self._wants_warehouse_table(state)
+        if (
+            table_only
+            and state["runtime"]["analysis_answer_policy"] == "grounded_table_v2"
+            and response.finish_reason in {"content_filter", "refusal"}
+        ):
+            response = replace(response, content="", tool_calls=())
         normalized_tool_calls = tuple(
             replace(
                 call,
@@ -2805,11 +2943,114 @@ class _AgentRunGraph:
             )
             for index, call in enumerate(response.tool_calls)
         )
+        schedule_selector = bool(
+            target
+            and sentence_selection is None
+            and not response.tool_calls
+            and response.content.strip()
+            and response.finish_reason not in {"length", "refusal", "content_filter"}
+        )
+        if sentence_selection and response.finish_reason not in {
+            "length",
+            "refusal",
+            "content_filter",
+        }:
+            try:
+                if response.tool_calls:
+                    raise AgentHubError(
+                        "PAPER_SENTENCE_FORMAT_INVALID", "The selector returned a tool call.", 422
+                    )
+                response = replace(
+                    response,
+                    content=render_sentence_selection(response.content, sentence_selection),
+                )
+            except AgentHubError as exc:
+                await self.step(
+                    "MODEL",
+                    "FAILED",
+                    {
+                        "model_round": next_round,
+                        "model_purpose": "paper_sentence_selection",
+                        "error_code": exc.code,
+                        **_usage_step_metadata(response),
+                    },
+                )
+                return {
+                    **evidence_update,
+                    "failure_code": exc.code,
+                    "model_round_count": next_round,
+                    "usage_records": list(self.usage_records),
+                }
+        if target and response.finish_reason in {"refusal", "content_filter"}:
+            response = replace(response, content="", tool_calls=())
+            normalized_tool_calls = ()
+        if target and response.tool_calls:
+            response = replace(response, content="")
+        if quotes and response.tool_calls:
+            response = replace(response, content="")
+        if (
+            quotes
+            and not response.tool_calls
+            and response.finish_reason not in {"length", "refusal", "content_filter"}
+        ):
+            answer = render_quotes(response.content, quotes)
+            if answer is None:
+                code = "PAPER_QUOTE_SELECTION_INVALID"
+                await self.step(
+                    "MODEL",
+                    "FAILED",
+                    {
+                        "model_round": next_round,
+                        "error_code": code,
+                        **_usage_step_metadata(response),
+                    },
+                )
+                return {
+                    **evidence_update,
+                    "failure_code": code,
+                    "model_round_count": next_round,
+                    "usage_records": list(self.usage_records),
+                }
+            response = replace(response, content=answer)
+        if quotes and response.finish_reason in {"refusal", "content_filter"}:
+            response = replace(response, content="", tool_calls=())
+            normalized_tool_calls = ()
+        if table_only and not response.tool_calls:
+            if response.finish_reason in {"content_filter", "refusal"}:
+                response = replace(response, content="")
+            elif response.finish_reason != "length" and response.content.strip():
+                answer = None
+                if not state.get("analysis_table_blocked"):
+                    answer = grounded_answer(
+                        self.run.input_text,
+                        response.content,
+                        state.get("analysis_table_sources", []),
+                        state["runtime"]["analysis_answer_policy"],
+                    )
+                if answer is None:
+                    code = "ANALYSIS_TABLE_EVIDENCE_UNAVAILABLE"
+                    await self.step(
+                        "MODEL",
+                        "FAILED",
+                        {
+                            "model_round": next_round,
+                            "error_code": code,
+                            **_usage_step_metadata(response),
+                        },
+                    )
+                    return {
+                        **evidence_update,
+                        "failure_code": code,
+                        "model_round_count": next_round,
+                        "usage_records": list(self.usage_records),
+                    }
+                response = replace(response, content=answer)
         assistant = ModelMessage(
             role="assistant", content=response.content, tool_calls=normalized_tool_calls
         )
-        messages.append(assistant)
-        if "turn_transcript" in state:
+        if not schedule_selector:
+            messages.append(assistant)
+        if not schedule_selector and "turn_transcript" in state:
             evidence_update["turn_transcript"] = [*state["turn_transcript"], assistant]
         if not response.tool_calls and not response.content.strip():
             empty_code = (
@@ -2848,6 +3089,12 @@ class _AgentRunGraph:
                 "failure_code": "MODEL_OUTPUT_TRUNCATED",
                 **evidence_update,
             }
+        if (
+            (table_only or quotes or sentence_selection)
+            and self.mode == "stream"
+            and not response.tool_calls
+        ):
+            await self._emit(AgentEventType.MESSAGE_DELTA, {"delta": response.content})
         await self._emit(
             AgentEventType.MESSAGE_COMPLETED,
             {"model_round": next_round, "status": "SUCCEEDED"},
@@ -2858,6 +3105,8 @@ class _AgentRunGraph:
             {
                 "model_round": next_round,
                 "tool_count": len(response.tool_calls),
+                **({"model_purpose": "paper_sentence_selection"} if sentence_selection else {}),
+                **({"paper_sentence_selection_scheduled": True} if schedule_selector else {}),
                 "context_limit": usage.context_limit,
                 "estimated_input_before": usage.estimated_input_before,
                 "estimated_input_after": usage.estimated_input_after,
@@ -2874,8 +3123,11 @@ class _AgentRunGraph:
         return {
             "messages": messages,
             "model_round_count": next_round,
-            "model_response": response,
-            "final_output": response.content if not response.tool_calls else None,
+            "model_response": None if schedule_selector else response,
+            **({"paper_sentence_selection_pending": schedule_selector} if target else {}),
+            "final_output": response.content
+            if not response.tool_calls and not schedule_selector
+            else None,
             "usage_records": list(self.usage_records),
             **evidence_update,
         }
@@ -3032,11 +3284,21 @@ class _AgentRunGraph:
             # asyncio cancellation/SystemExit remain uncaught by Exception.
             logger.warning("memory_touch_failed", exc_info=True)
 
+    def _wants_warehouse_table(self, state: AgentRunState) -> bool:
+        policy = state.get("runtime", {}).get("analysis_answer_policy")
+        return bool(policy) and table_only_turn(self.run.input_text, policy)
+
     async def _stream_model(
-        self, gateway: ModelGateway, state: AgentRunState, request: ModelRequest
+        self,
+        gateway: ModelGateway,
+        state: AgentRunState,
+        request: ModelRequest,
+        *,
+        buffer_text: bool = False,
     ):
         stream = gateway.stream_resolved(self.context, state["spec"].model_plan, request)
         self.active_model_stream = stream
+        table_only = self._wants_warehouse_table(state)
         content_parts: list[str] = []
         tool_parts: dict[int, dict[str, Any]] = {}
         usage = None
@@ -3046,7 +3308,7 @@ class _AgentRunGraph:
                 if event.event_type is ModelStreamEventType.MESSAGE_DELTA:
                     delta = event.message_delta or ""
                     content_parts.append(delta)
-                    if delta:
+                    if delta and not table_only and not buffer_text:
                         await self._emit(AgentEventType.MESSAGE_DELTA, {"delta": delta})
                 elif event.event_type is ModelStreamEventType.TOOL_CALL_DELTA:
                     delta = event.tool_call_delta
@@ -3100,6 +3362,28 @@ class _AgentRunGraph:
             )
             valid = bool(name) and isinstance(arguments, Mapping)
             normalized_arguments = dict(arguments) if isinstance(arguments, Mapping) else {}
+            if name == "search_knowledge" and isinstance(normalized_arguments.get("query"), str):
+                definition = state.get("tool_definitions", {}).get(name)
+                if (
+                    definition is not None
+                    and definition.source_kind is ToolSourceKind.BUILTIN
+                    and definition.retrieval_config.get("query_rewrite") in (
+                        "paper_comparison_v1", "paper_comparison_v2"
+                    )
+                    and normalized_arguments["query"].strip()
+                    and len(normalized_arguments["query"]) <= 4000
+                    and not any(previous["name"] == name for previous in calls)
+                    and not _searched_knowledge_this_turn(state)
+                ):
+                    selective = (
+                        definition.retrieval_config["query_rewrite"] == "paper_comparison_v2"
+                    )
+                    rewritten = paper_comparison_query(
+                        self.run.input_text,
+                        proposed_query=normalized_arguments["query"] if selective else None,
+                    )
+                    if rewritten is not None:
+                        normalized_arguments["query"] = rewritten
             item = {
                 "name": name,
                 "arguments": normalized_arguments,
@@ -3902,6 +4186,9 @@ class _AgentRunGraph:
         rag_sequence = state.get("rag_evidence_sequence", 0)
         compact_updated = False
         terminal_code: str | None = None
+        table_only = self._wants_warehouse_table(state)
+        table_sources = list(state.get("analysis_table_sources", []))
+        table_blocked = state.get("analysis_table_blocked", False)
         for call in state.get("proposed_tool_calls", []):
             result = pre.get(call["tool_call_id"], executed.get(call["tool_call_id"]))
             if result is None:
@@ -3910,6 +4197,28 @@ class _AgentRunGraph:
                 terminal_code = result.error_code
             budget = ContextBudgetConfig(**state["runtime"]["context_budget"])
             definition = definitions.get(call["name"])
+            if table_only:
+                if result.status is not ToolResultStatus.SUCCESS:
+                    table_blocked = True
+                elif (
+                    isinstance(definition, ToolDefinition)
+                    and definition.effect is ToolEffect.READ
+                    and isinstance(result.data, dict)
+                ):
+                    recorded = RecordedToolCall(
+                        call["name"],
+                        call["tool_call_id"],
+                        self.sequence,
+                        dict(call.get("arguments") or {}),
+                        result.data,
+                    )
+                    candidate = table_evidence(
+                        recorded,
+                        self.run.id,
+                        v2=state["runtime"]["analysis_answer_policy"] == "grounded_table_v2",
+                    )
+                    if candidate is not None and candidate not in table_sources:
+                        table_sources.append(candidate)
             configured_bytes = (
                 definition.retrieval_config.get("context_budget_bytes")
                 if isinstance(definition, ToolDefinition)
@@ -4086,6 +4395,11 @@ class _AgentRunGraph:
                 if "turn_transcript" in state and compact_updated
                 else {}
             ),
+            **(
+                {"analysis_table_sources": table_sources, "analysis_table_blocked": table_blocked}
+                if table_only
+                else {}
+            ),
             "tool_observations": observations,
             "pending_tool_calls": [],
             "proposed_tool_calls": [],
@@ -4163,6 +4477,10 @@ class _AgentRunGraph:
         return "finish" if state.get("failure_code") else "model"
 
     def after_model(self, state: AgentRunState) -> str:
+        if state.get("paper_sentence_selection_pending") and not (
+            state.get("failure_code") or state.get("run_status")
+        ):
+            return "model"
         return (
             "finish"
             if state.get("failure_code") or state.get("final_output") is not None

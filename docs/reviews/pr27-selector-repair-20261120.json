@@ -1,0 +1,3536 @@
+{
+  "plan": {
+    "opening_upper_cny": "10.85725908",
+    "cap_upper_cny": "29.93642708",
+    "budget_cny": "30.00",
+    "max_requests": 137,
+    "per_request_reserved_cny": "0.139264",
+    "locked_unknowns": 2,
+    "previous_build": "d146b31b3b0114afe49e937dd1f72debbfa1c6c1",
+    "cases_sha256": "878900a02985059d49e80d5d0ca18c7c6f93036bad4faae3dd3d3b6e0103f8a7",
+    "fixed_manifest_sha256": "0f99b07602f24af9cca9efe983c80713c7a45f0304d737fe96a0ad37e0e1640a",
+    "model": "deepseek-v4.1-flash-1017",
+    "max_tokens": 2048,
+    "live": "Frozen 8 fresh and 9 historical cases per arm. Same repaired-build API, fully resolved specs identical except retrieval.paper_answer_policy. Baseline normal research answer; candidate versioned sentence_ids_v2 with enable_thinking=false only in the final selector. Same pinned five-paper BGE-M3 snapshot. First submitted turn only, no retry. No intentional change in retrieval.",
+    "fixed": "p4/p6/p7 compare exact historical selector messages with the same model, temperature zero and max_tokens=2048. Each off-mode once. Original with-thinking results already exist; do not resend. Judge technical delivery, selected fact support and absent R@3 separately.",
+    "release_gate": "Recover correct, supported delivery on p4 and p6 fixed. Candidate shows an improvement on fresh questions (full-topic accuracy, citation support or strict pass). No paired loss on any primary/strict metric or historical success, and known model usage agrees with provider receipts. CI checked. No UNKNOWN resends.",
+    "pricing": "https://help.aliyun.com/zh/model-studio/deepseek-v4-1-flash",
+    "request_contract": "https://help.aliyun.com/en/model-studio/deepseek-api"
+  },
+  "build": "af15ea7c2405d719ff8a9830205923732ddc0e25",
+  "repository_compatibility_commit": "4177627fe5473761c69a3ce69855426fce624afc",
+  "snapshot": "3b1c6937-4d12-4683-937d-7178f50d96ed",
+  "arms": {
+    "baseline": {
+      "version": "f6e50be2-9483-458d-8613-51e94815c7cf",
+      "spec_hash": "b96eef6d5060e8041bc6a69ea264bcaa4d48ea589f999d2be411be7a5e21f5c4"
+    },
+    "candidate": {
+      "version": "4569ecaa-6a4f-4d22-912b-97f603356624",
+      "spec_hash": "6ff169585ab04c591005567b0ccd4ada1a794a277b344f5ff263e04070ab2e77"
+    }
+  },
+  "fixed": [
+    {
+      "case": "p4",
+      "historical": {
+        "input_tokens": 5875,
+        "output_tokens": 2048,
+        "finish": "length"
+      },
+      "visible_segments": 16,
+      "eligible_segments": 15,
+      "selectable_sentences": 187,
+      "evidence_coverage": "complete",
+      "message_sha256": "10ac578dfb46d93df427210d55c6de2d28e322c099235d3b7a264f865ee22a65",
+      "finish": "stop",
+      "reasoning_tokens": null,
+      "selected": [
+        {
+          "handle": "R00001E5",
+          "start": 69,
+          "end": 131,
+          "id": "S47"
+        },
+        {
+          "handle": "R00001E5",
+          "start": 132,
+          "end": 360,
+          "id": "S48"
+        },
+        {
+          "handle": "R00001E2",
+          "start": 807,
+          "end": 1062,
+          "id": "S25"
+        },
+        {
+          "handle": "R00001E2",
+          "start": 1112,
+          "end": 1199,
+          "id": "S27"
+        }
+      ],
+      "seconds": 1.333,
+      "rendered": true,
+      "error": null,
+      "usage": {
+        "calls": 1,
+        "input_tokens": 5850,
+        "output_tokens": 9,
+        "cached_tokens": 0,
+        "spent_cny": "0.01177200",
+        "upper_cny": "0.011772"
+      },
+      "sequences": [
+        1
+      ],
+      "grade": {
+        "complete_primary": false,
+        "citation_entails": false,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": false,
+        "eligible_evidence": "complete",
+        "failure_kind": "incomplete_selection",
+        "reason": "Delivered source-verbatim positive/negative predicate classes and signed labels assigned on direct seed matches, plus appendix examples. Omitted Cause versus Concession propagation, which prior passing answers covered and the frozen evidence contained. The final clipped negative-list example adds no incorrect claim.",
+        "correct_sources": [
+          "R00001E5"
+        ],
+        "cited_handles": [
+          "R00001E5",
+          "R00001E2"
+        ],
+        "current_target_handles": [
+          "R00001E1",
+          "R00001E2",
+          "R00001E3",
+          "R00001E4",
+          "R00001E5",
+          "R00001E6",
+          "R00002E1",
+          "R00002E2",
+          "R00002E3",
+          "R00002E4",
+          "R00002E5",
+          "R00002E6",
+          "R00003E1",
+          "R00003E2",
+          "R00003E4"
+        ],
+        "status": "SUCCEEDED",
+        "answer_delivered": true,
+        "model_calls": 1,
+        "tool_calls": 0,
+        "tool_errors": 0,
+        "seconds": 1.333
+      }
+    },
+    {
+      "case": "p6",
+      "historical": {
+        "input_tokens": 3926,
+        "output_tokens": 2048,
+        "finish": "length"
+      },
+      "visible_segments": 11,
+      "eligible_segments": 11,
+      "selectable_sentences": 93,
+      "evidence_coverage": "complete",
+      "message_sha256": "a8804460798fe35f59009335113e46c85a5f54b1f6ad0c18d7ebabab38f0b3a1",
+      "finish": "stop",
+      "reasoning_tokens": null,
+      "selected": [
+        {
+          "handle": "R00001E6",
+          "start": 31,
+          "end": 336,
+          "id": "S44"
+        },
+        {
+          "handle": "R00001E5",
+          "start": 1027,
+          "end": 1199,
+          "id": "S42"
+        },
+        {
+          "handle": "R00001E6",
+          "start": 427,
+          "end": 824,
+          "id": "S46"
+        },
+        {
+          "handle": "R00001E6",
+          "start": 825,
+          "end": 1043,
+          "id": "S47"
+        }
+      ],
+      "seconds": 0.927,
+      "rendered": true,
+      "error": null,
+      "usage": {
+        "calls": 1,
+        "input_tokens": 3901,
+        "output_tokens": 9,
+        "cached_tokens": 0,
+        "spent_cny": "0.00787400",
+        "upper_cny": "0.007874"
+      },
+      "sequences": [
+        2
+      ],
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "reason": "The citations cover both languages and the clean-data/size interaction. Twi improves with 742k selected versus 16M noisy tokens; Yorùbá benefits from enough clean data and the provided clean/noisy configurations distinguish their word-similarity results. The Twi clip ends mid-sentence after the required contrast, which remains complete and attributable. No false universal claim.",
+        "correct_sources": [
+          "R00001E6",
+          "R00001E5"
+        ],
+        "cited_handles": [
+          "R00001E6",
+          "R00001E5"
+        ],
+        "current_target_handles": [
+          "R00001E1",
+          "R00001E2",
+          "R00001E3",
+          "R00001E4",
+          "R00001E5",
+          "R00001E6",
+          "R00002E1",
+          "R00002E2",
+          "R00002E3",
+          "R00002E4",
+          "R00002E5"
+        ],
+        "status": "SUCCEEDED",
+        "answer_delivered": true,
+        "model_calls": 1,
+        "tool_calls": 0,
+        "tool_errors": 0,
+        "seconds": 0.927
+      }
+    },
+    {
+      "case": "p7",
+      "historical": {
+        "input_tokens": 1904,
+        "output_tokens": 2048,
+        "finish": "length"
+      },
+      "visible_segments": 6,
+      "eligible_segments": 6,
+      "selectable_sentences": 51,
+      "evidence_coverage": "missing_required_R@3",
+      "message_sha256": "bfa2140d7ab612a6780cd7f32ab0a9d2f2b3ce0c113aaffa7b1ccc777f86b1bb",
+      "finish": "stop",
+      "reasoning_tokens": null,
+      "selected": [
+        {
+          "handle": "R00001E1",
+          "start": 637,
+          "end": 804,
+          "id": "S7"
+        },
+        {
+          "handle": "R00001E2",
+          "start": 942,
+          "end": 1199,
+          "id": "S18"
+        },
+        {
+          "handle": "R00001E5",
+          "start": 536,
+          "end": 732,
+          "id": "S42"
+        }
+      ],
+      "seconds": 1.46,
+      "rendered": true,
+      "error": null,
+      "usage": {
+        "calls": 1,
+        "input_tokens": 1879,
+        "output_tokens": 7,
+        "cached_tokens": 0,
+        "spent_cny": "0.00381400",
+        "upper_cny": "0.003814"
+      },
+      "sequences": [
+        3
+      ],
+      "grade": {
+        "complete_primary": false,
+        "citation_entails": false,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": false,
+        "eligible_evidence": "partial",
+        "failure_kind": "missing_retrieval",
+        "reason": "Delivered a bound, accurate comparison for perplexity, latency and energy, with a generic prediction-accuracy mention. Explicit next-word recall at three or an equivalent formulation was absent from the frozen admitted evidence and the answer. This is a missing-source case for strict scoring, even though selection and delivery succeeded.",
+        "correct_sources": [
+          "R00001E1",
+          "R00001E2",
+          "R00001E5"
+        ],
+        "cited_handles": [
+          "R00001E1",
+          "R00001E2",
+          "R00001E5"
+        ],
+        "current_target_handles": [
+          "R00001E1",
+          "R00001E2",
+          "R00001E3",
+          "R00001E4",
+          "R00001E5",
+          "R00001E6"
+        ],
+        "status": "SUCCEEDED",
+        "answer_delivered": true,
+        "model_calls": 1,
+        "tool_calls": 0,
+        "tool_errors": 0,
+        "seconds": 1.46
+      }
+    }
+  ],
+  "fixed_usage": {
+    "calls": 3,
+    "input_tokens": 11630,
+    "output_tokens": 25,
+    "cached_tokens": 0,
+    "spent_cny": "0.02346000",
+    "upper_cny": "0.023460"
+  },
+  "cases": {
+    "baseline-f1": {
+      "case": "f1",
+      "question": "In the workspace paper arXiv:2003.07723, in the expert annotation workflow, what did annotators read before assigning line labels, and what maximum number of labels could they assign per line? Cite supporting passages from this workspace.",
+      "paper_id": "2003.07723",
+      "group": "new",
+      "status": "SUCCEEDED",
+      "failure": null,
+      "delivered": true,
+      "seconds": 39.391,
+      "model_rounds": 2,
+      "tool_calls": 1,
+      "tool_errors": [],
+      "known_usage_matches_receipts": true,
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "reason": "Complete stanza or full poem and up to two labels per line correctly cited. The added same-59-stanza percentage is corroborated by the separate cited analysis.",
+        "correct_sources": [
+          "R00001E2",
+          "R00001E5"
+        ],
+        "cited_handles": [
+          "R00001E2",
+          "R00001E5"
+        ],
+        "current_target_handles": [
+          "R00001E1",
+          "R00001E2",
+          "R00001E3",
+          "R00001E4",
+          "R00001E5",
+          "R00001E6"
+        ],
+        "status": "SUCCEEDED",
+        "answer_delivered": true,
+        "model_calls": 2,
+        "tool_calls": 1,
+        "tool_errors": 0,
+        "seconds": 39.391,
+        "run_id": "5a38cd98-2168-489e-b1a9-ecdfdc374ec0"
+      },
+      "usage": {
+        "calls": 2,
+        "input_tokens": 5779,
+        "output_tokens": 391,
+        "cached_tokens": 1792,
+        "spent_cny": "0.01117368",
+        "upper_cny": "0.014686"
+      },
+      "sequences": [
+        4,
+        5
+      ],
+      "selection_request": null,
+      "selector_finish": null,
+      "selection_message_sha256": null,
+      "selection_spans": []
+    },
+    "baseline-f2": {
+      "case": "f2",
+      "question": "In the workspace paper arXiv:1811.00942, what was the vocabulary size for each of the two language-model evaluation datasets? Cite supporting passages from this workspace.",
+      "paper_id": "1811.00942",
+      "group": "new",
+      "status": "SUCCEEDED",
+      "failure": null,
+      "delivered": true,
+      "seconds": 15.297,
+      "model_rounds": 2,
+      "tool_calls": 1,
+      "tool_errors": [],
+      "known_usage_matches_receipts": true,
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "reason": "Correctly binds both PTB 10,000 and WT103 267,000 vocabulary sizes to the Experimental Setup evidence. Additional split token counts are in the quoted passage.",
+        "correct_sources": [
+          "R00001E1"
+        ],
+        "cited_handles": [
+          "R00001E1"
+        ],
+        "current_target_handles": [
+          "R00001E1",
+          "R00001E5"
+        ],
+        "status": "SUCCEEDED",
+        "answer_delivered": true,
+        "model_calls": 2,
+        "tool_calls": 1,
+        "tool_errors": 0,
+        "seconds": 15.297,
+        "run_id": "8f56b817-3fc5-4131-a167-c8c709c980b1"
+      },
+      "usage": {
+        "calls": 2,
+        "input_tokens": 5563,
+        "output_tokens": 295,
+        "cached_tokens": 2816,
+        "spent_cny": "0.00796664",
+        "upper_cny": "0.013486"
+      },
+      "sequences": [
+        6,
+        7
+      ],
+      "selection_request": null,
+      "selector_finish": null,
+      "selection_message_sha256": null,
+      "selection_spans": []
+    },
+    "baseline-f3": {
+      "case": "f3",
+      "question": "In the workspace paper arXiv:1909.00694, in the appendix, what source was used to pretrain the Japanese BERT model and what tool segmented input sentences into words? Cite supporting passages from this workspace.",
+      "paper_id": "1909.00694",
+      "group": "new",
+      "status": "SUCCEEDED",
+      "failure": null,
+      "delivered": true,
+      "seconds": 24.532,
+      "model_rounds": 2,
+      "tool_calls": 2,
+      "tool_errors": [],
+      "known_usage_matches_receipts": true,
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "reason": "Japanese Wikipedia and Juman++ are both covered by the cited BERT appendix. BPE, subword vocabulary size and the BiGRU comparison are supported.",
+        "correct_sources": [
+          "R00001E2",
+          "R00002E1"
+        ],
+        "cited_handles": [
+          "R00001E2",
+          "R00002E1"
+        ],
+        "current_target_handles": [
+          "R00001E2",
+          "R00001E5",
+          "R00002E1"
+        ],
+        "status": "SUCCEEDED",
+        "answer_delivered": true,
+        "model_calls": 2,
+        "tool_calls": 2,
+        "tool_errors": 0,
+        "seconds": 24.532,
+        "run_id": "72be4b2b-723b-4f58-a2ca-58a4d35799b3"
+      },
+      "usage": {
+        "calls": 2,
+        "input_tokens": 7327,
+        "output_tokens": 443,
+        "cached_tokens": 2816,
+        "spent_cny": "0.01267864",
+        "upper_cny": "0.018198"
+      },
+      "sequences": [
+        8,
+        9
+      ],
+      "selection_request": null,
+      "selector_finish": null,
+      "selection_message_sha256": null,
+      "selection_spans": []
+    },
+    "baseline-f4": {
+      "case": "f4",
+      "question": "In the workspace paper arXiv:1909.11189, how many topics did the LDA experiment use and for how many epochs was it trained? Cite supporting passages from this workspace.",
+      "paper_id": "1909.11189",
+      "group": "new",
+      "status": "SUCCEEDED",
+      "failure": null,
+      "delivered": true,
+      "seconds": 14.359,
+      "model_rounds": 2,
+      "tool_calls": 1,
+      "tool_errors": [],
+      "known_usage_matches_receipts": true,
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "reason": "Correctly reports 100 topics and 50 epochs. The cited methods also support the downstream motivation and the implementation.",
+        "correct_sources": [
+          "R00001E2"
+        ],
+        "cited_handles": [
+          "R00001E2"
+        ],
+        "current_target_handles": [
+          "R00001E1",
+          "R00001E2",
+          "R00001E3",
+          "R00001E4",
+          "R00001E5"
+        ],
+        "status": "SUCCEEDED",
+        "answer_delivered": true,
+        "model_calls": 2,
+        "tool_calls": 1,
+        "tool_errors": 0,
+        "seconds": 14.359,
+        "run_id": "10156b88-4982-4287-ad52-114617a008cc"
+      },
+      "usage": {
+        "calls": 2,
+        "input_tokens": 5491,
+        "output_tokens": 318,
+        "cached_tokens": 3584,
+        "spent_cny": "0.00650136",
+        "upper_cny": "0.013526"
+      },
+      "sequences": [
+        10,
+        11
+      ],
+      "selection_request": null,
+      "selector_finish": null,
+      "selection_message_sha256": null,
+      "selection_spans": []
+    },
+    "baseline-f5": {
+      "case": "f5",
+      "question": "In the workspace paper arXiv:1912.02481, what were the fastText training embedding dimensionality, context window size, and character n-gram length range? Cite supporting passages from this workspace.",
+      "paper_id": "1912.02481",
+      "group": "new",
+      "status": "SUCCEEDED",
+      "failure": null,
+      "delivered": true,
+      "seconds": 16.188,
+      "model_rounds": 2,
+      "tool_calls": 1,
+      "tool_errors": [],
+      "known_usage_matches_receipts": true,
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "reason": "Correctly gives 300 dimensions, window 5 and character n-grams of length 3 to 6. The cited sources support the additional pretrained fastText and CWE-LP setup details.",
+        "correct_sources": [
+          "R00001E2",
+          "R00001E1",
+          "R00001E4"
+        ],
+        "cited_handles": [
+          "R00001E2",
+          "R00001E1",
+          "R00001E4"
+        ],
+        "current_target_handles": [
+          "R00001E1",
+          "R00001E2",
+          "R00001E3",
+          "R00001E4",
+          "R00001E5"
+        ],
+        "status": "SUCCEEDED",
+        "answer_delivered": true,
+        "model_calls": 2,
+        "tool_calls": 1,
+        "tool_errors": 0,
+        "seconds": 16.188,
+        "run_id": "253454c4-7bc7-4b03-b38c-a565e9a936e3"
+      },
+      "usage": {
+        "calls": 2,
+        "input_tokens": 5465,
+        "output_tokens": 497,
+        "cached_tokens": 2048,
+        "spent_cny": "0.01089192",
+        "upper_cny": "0.014906"
+      },
+      "sequences": [
+        12,
+        13
+      ],
+      "selection_request": null,
+      "selector_finish": null,
+      "selection_message_sha256": null,
+      "selection_spans": []
+    },
+    "baseline-f6": {
+      "case": "f6",
+      "question": "In the workspace paper arXiv:2003.07723, for the crowdsourced annotation, how many stanzas were uploaded and how many people annotated each instance? Cite supporting passages from this workspace.",
+      "paper_id": "2003.07723",
+      "group": "new",
+      "status": "SUCCEEDED",
+      "failure": null,
+      "delivered": true,
+      "seconds": 12.047,
+      "model_rounds": 2,
+      "tool_calls": 1,
+      "tool_errors": [],
+      "known_usage_matches_receipts": true,
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "reason": "Correctly gives 59 four-line stanzas and ten annotators per instance with distinct supporting citations. The cited setup supports the selection and independent stanza rating.",
+        "correct_sources": [
+          "R00001E1",
+          "R00001E2"
+        ],
+        "cited_handles": [
+          "R00001E1",
+          "R00001E2"
+        ],
+        "current_target_handles": [
+          "R00001E1",
+          "R00001E2",
+          "R00001E3",
+          "R00001E4",
+          "R00001E5",
+          "R00001E6"
+        ],
+        "status": "SUCCEEDED",
+        "answer_delivered": true,
+        "model_calls": 2,
+        "tool_calls": 1,
+        "tool_errors": 0,
+        "seconds": 12.047,
+        "run_id": "eb25fd49-8573-4caf-b765-7d925495ad02"
+      },
+      "usage": {
+        "calls": 2,
+        "input_tokens": 5616,
+        "output_tokens": 240,
+        "cached_tokens": 2816,
+        "spent_cny": "0.00763264",
+        "upper_cny": "0.013152"
+      },
+      "sequences": [
+        14,
+        15
+      ],
+      "selection_request": null,
+      "selector_finish": null,
+      "selection_message_sha256": null,
+      "selection_spans": []
+    },
+    "baseline-f7": {
+      "case": "f7",
+      "question": "In the workspace paper arXiv:1909.00694, what dataset split was used for hyperparameter optimization and which split was used for evaluation? Cite supporting passages from this workspace.",
+      "paper_id": "1909.00694",
+      "group": "new",
+      "status": "SUCCEEDED",
+      "failure": null,
+      "delivered": true,
+      "seconds": 14.203,
+      "model_rounds": 2,
+      "tool_calls": 1,
+      "tool_errors": [],
+      "known_usage_matches_receipts": true,
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "reason": "ACP development for tuning and ACP test for evaluation are directly supported. Limited claim about missing split counts refers to passages visible to the model, while the cited source points to the table.",
+        "correct_sources": [
+          "R00001E2",
+          "R00001E3"
+        ],
+        "cited_handles": [
+          "R00001E2",
+          "R00001E3"
+        ],
+        "current_target_handles": [
+          "R00001E1",
+          "R00001E2",
+          "R00001E3",
+          "R00001E4"
+        ],
+        "status": "SUCCEEDED",
+        "answer_delivered": true,
+        "model_calls": 2,
+        "tool_calls": 1,
+        "tool_errors": 0,
+        "seconds": 14.203,
+        "run_id": "6ff8455d-d239-4225-acf4-9820a93a5bf1"
+      },
+      "usage": {
+        "calls": 2,
+        "input_tokens": 5594,
+        "output_tokens": 285,
+        "cached_tokens": 2816,
+        "spent_cny": "0.00794864",
+        "upper_cny": "0.013468"
+      },
+      "sequences": [
+        16,
+        17
+      ],
+      "selection_request": null,
+      "selector_finish": null,
+      "selection_message_sha256": null,
+      "selection_spans": []
+    },
+    "baseline-f8": {
+      "case": "f8",
+      "question": "In the workspace paper arXiv:1912.02481, what minimum word count gave the best performance in the experiments for each of fastText and the character-enhanced word embeddings? Cite supporting passages from this workspace.",
+      "paper_id": "1912.02481",
+      "group": "new",
+      "status": "SUCCEEDED",
+      "failure": null,
+      "delivered": true,
+      "seconds": 13.656,
+      "model_rounds": 2,
+      "tool_calls": 1,
+      "tool_errors": [],
+      "known_usage_matches_receipts": true,
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "reason": "Both minimum counts are correct and correctly associated with fastText and CWE-LP. Extra hyperparameters and the effective vocabulary explanation are cited.",
+        "correct_sources": [
+          "R00001E2",
+          "R00001E1"
+        ],
+        "cited_handles": [
+          "R00001E2",
+          "R00001E1"
+        ],
+        "current_target_handles": [
+          "R00001E1",
+          "R00001E2",
+          "R00001E3",
+          "R00001E4",
+          "R00001E5"
+        ],
+        "status": "SUCCEEDED",
+        "answer_delivered": true,
+        "model_calls": 2,
+        "tool_calls": 1,
+        "tool_errors": 0,
+        "seconds": 13.656,
+        "run_id": "dd954efd-cb3d-4710-9fa3-b9a11dbe4ae1"
+      },
+      "usage": {
+        "calls": 2,
+        "input_tokens": 5426,
+        "output_tokens": 289,
+        "cached_tokens": 2816,
+        "spent_cny": "0.00764464",
+        "upper_cny": "0.013164"
+      },
+      "sequences": [
+        18,
+        19
+      ],
+      "selection_request": null,
+      "selector_finish": null,
+      "selection_message_sha256": null,
+      "selection_spans": []
+    },
+    "baseline-p2": {
+      "case": "p2",
+      "question": "In the workspace paper Progress and Tradeoffs in Neural Language Models (arXiv:1811.00942), what is a commonly used evaluation metric for language models? Cite supporting passages from this workspace.",
+      "paper_id": "1811.00942",
+      "group": "regression",
+      "status": "SUCCEEDED",
+      "failure": null,
+      "delivered": true,
+      "seconds": 14.078,
+      "model_rounds": 2,
+      "tool_calls": 1,
+      "tool_errors": [],
+      "known_usage_matches_receipts": true,
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "reason": "Perplexity is clearly named and cited. Descriptions of recall-at-k, the weak constraint, and the log-perplexity correlation agree with the cited passages.",
+        "correct_sources": [
+          "R00001E1",
+          "R00001E2",
+          "R00001E4",
+          "R00001E3"
+        ],
+        "cited_handles": [
+          "R00001E1",
+          "R00001E2",
+          "R00001E4",
+          "R00001E3"
+        ],
+        "current_target_handles": [
+          "R00001E1",
+          "R00001E2",
+          "R00001E3",
+          "R00001E4",
+          "R00001E5"
+        ],
+        "status": "SUCCEEDED",
+        "answer_delivered": true,
+        "model_calls": 2,
+        "tool_calls": 1,
+        "tool_errors": 0,
+        "seconds": 14.078,
+        "run_id": "ec5518c9-b018-4c42-a1b4-1625520a2e33"
+      },
+      "usage": {
+        "calls": 2,
+        "input_tokens": 5531,
+        "output_tokens": 446,
+        "cached_tokens": 3584,
+        "spent_cny": "0.00760536",
+        "upper_cny": "0.014630"
+      },
+      "sequences": [
+        20,
+        21
+      ],
+      "selection_request": null,
+      "selector_finish": null,
+      "selection_message_sha256": null,
+      "selection_spans": []
+    },
+    "baseline-p3": {
+      "case": "p3",
+      "question": "In the workspace paper Massive vs. Curated Word Embeddings for Low-Resourced Languages. The Case of Yor\\`ub\\'a and Twi (arXiv:1912.02481), what two architectures are used? Cite supporting passages from this workspace.",
+      "paper_id": "1912.02481",
+      "group": "regression",
+      "status": "SUCCEEDED",
+      "failure": null,
+      "delivered": true,
+      "seconds": 23.0,
+      "model_rounds": 3,
+      "tool_calls": 2,
+      "tool_errors": [],
+      "known_usage_matches_receipts": true,
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": false,
+        "format_ok": true,
+        "strict": false,
+        "eligible_evidence": "complete",
+        "failure_kind": "unsupported_extra",
+        "reason": "The fastText and CWE-LP comparison is fully supported. The final aside says BERT was only a pretrained contextualized baseline and unavailable for Twi. Its attached clip only introduces BERT, and the full paper actually fine-tunes pretrained BERT on Yorùbá, so the absolute baseline-only statement overreaches.",
+        "correct_sources": [
+          "R00002E3",
+          "R00002E2",
+          "R00002E1"
+        ],
+        "cited_handles": [
+          "R00002E3",
+          "R00002E2",
+          "R00002E1"
+        ],
+        "current_target_handles": [
+          "R00001E1",
+          "R00001E2",
+          "R00001E3",
+          "R00001E4",
+          "R00001E5",
+          "R00002E1",
+          "R00002E2",
+          "R00002E3"
+        ],
+        "status": "SUCCEEDED",
+        "answer_delivered": true,
+        "model_calls": 3,
+        "tool_calls": 2,
+        "tool_errors": 0,
+        "seconds": 23.0,
+        "run_id": "77d09546-67ac-4fac-b25e-a27315515022"
+      },
+      "usage": {
+        "calls": 3,
+        "input_tokens": 10053,
+        "output_tokens": 881,
+        "cached_tokens": 6144,
+        "spent_cny": "0.01511176",
+        "upper_cny": "0.027154"
+      },
+      "sequences": [
+        22,
+        23,
+        24
+      ],
+      "selection_request": null,
+      "selector_finish": null,
+      "selection_message_sha256": null,
+      "selection_spans": []
+    },
+    "baseline-p4": {
+      "case": "p4",
+      "question": "In the workspace paper arXiv:1909.00694 on affective events, what makes up its seed lexicon and how is it used to label events? Cite supporting passages from this workspace.",
+      "paper_id": "1909.00694",
+      "group": "regression",
+      "status": "SUCCEEDED",
+      "failure": null,
+      "delivered": true,
+      "seconds": 28.61,
+      "model_rounds": 3,
+      "tool_calls": 2,
+      "tool_errors": [],
+      "known_usage_matches_receipts": true,
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "reason": "Cited methods give positive and negative predicates, direct signed matches, and AL Cause versus Concession propagation. The displayed appendix citations jointly contain all positive and negative entries even though the first clip stops after 12 positive examples. Results and the seed-only comparison agree with the cited results.",
+        "correct_sources": [
+          "R00002E3",
+          "R00002E4",
+          "R00001E6",
+          "R00001E4",
+          "R00001E3",
+          "R00001E2",
+          "R00002E2"
+        ],
+        "cited_handles": [
+          "R00001E2",
+          "R00002E2",
+          "R00002E4",
+          "R00002E3",
+          "R00001E6",
+          "R00001E4",
+          "R00001E3"
+        ],
+        "current_target_handles": [
+          "R00001E1",
+          "R00001E2",
+          "R00001E3",
+          "R00001E4",
+          "R00001E5",
+          "R00001E6",
+          "R00002E1",
+          "R00002E2",
+          "R00002E3",
+          "R00002E4"
+        ],
+        "status": "SUCCEEDED",
+        "answer_delivered": true,
+        "model_calls": 3,
+        "tool_calls": 2,
+        "tool_errors": 0,
+        "seconds": 28.61,
+        "run_id": "de6d475b-1b4c-4027-b37f-aa9c7ab07b87"
+      },
+      "usage": {
+        "calls": 3,
+        "input_tokens": 11358,
+        "output_tokens": 1389,
+        "cached_tokens": 6656,
+        "spent_cny": "0.02078224",
+        "upper_cny": "0.033828"
+      },
+      "sequences": [
+        25,
+        26,
+        27
+      ],
+      "selection_request": null,
+      "selector_finish": null,
+      "selection_message_sha256": null,
+      "selection_spans": []
+    },
+    "baseline-p5": {
+      "case": "p5",
+      "question": "In the workspace paper Diachronic Topics in New High German Poetry (arXiv:1909.11189), what is the algorithm used for the classification tasks? Cite the supporting passage.",
+      "paper_id": "1909.11189",
+      "group": "regression",
+      "status": "SUCCEEDED",
+      "failure": null,
+      "delivered": true,
+      "seconds": 22.688,
+      "model_rounds": 3,
+      "tool_calls": 2,
+      "tool_errors": [],
+      "known_usage_matches_receipts": true,
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "reason": "Both excerpts directly name Random Forest Ensemble. Grid search, time-slot and authorship tasks, and feature comparison are supported.",
+        "correct_sources": [
+          "R00002E1",
+          "R00002E3"
+        ],
+        "cited_handles": [
+          "R00002E1",
+          "R00002E3"
+        ],
+        "current_target_handles": [
+          "R00001E1",
+          "R00001E2",
+          "R00001E3",
+          "R00001E4",
+          "R00002E1",
+          "R00002E2",
+          "R00002E3"
+        ],
+        "status": "SUCCEEDED",
+        "answer_delivered": true,
+        "model_calls": 3,
+        "tool_calls": 2,
+        "tool_errors": 0,
+        "seconds": 22.688,
+        "run_id": "6df40605-f08b-4ce0-aae1-64509283da3f"
+      },
+      "usage": {
+        "calls": 3,
+        "input_tokens": 10931,
+        "output_tokens": 455,
+        "cached_tokens": 6400,
+        "spent_cny": "0.01295800",
+        "upper_cny": "0.025502"
+      },
+      "sequences": [
+        28,
+        29,
+        30
+      ],
+      "selection_request": null,
+      "selector_finish": null,
+      "selection_message_sha256": null,
+      "selection_spans": []
+    },
+    "baseline-p6": {
+      "case": "p6",
+      "question": "In the workspace paper Massive vs. Curated Word Embeddings for Low-Resourced Languages (arXiv:1912.02481), compare the effects of corpus quality and corpus size on word similarity for Twi and Yorùbá. Cite supporting passages from this workspace.",
+      "paper_id": "1912.02481",
+      "group": "regression",
+      "status": "SUCCEEDED",
+      "failure": null,
+      "delivered": true,
+      "seconds": 17.093,
+      "model_rounds": 2,
+      "tool_calls": 1,
+      "tool_errors": [],
+      "known_usage_matches_receipts": true,
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "reason": "Correctly distinguishes the C2 Twi optimum from the C3 Yorùbá optimum and shows why more verified clean text can help while noisy vocabulary additions can hurt. Claimed token counts, correlations, percentages and corpus distinctions are grounded in cited passages.",
+        "correct_sources": [
+          "R00001E3",
+          "R00001E4",
+          "R00001E6",
+          "R00001E2"
+        ],
+        "cited_handles": [
+          "R00001E3",
+          "R00001E4",
+          "R00001E6",
+          "R00001E2"
+        ],
+        "current_target_handles": [
+          "R00001E1",
+          "R00001E2",
+          "R00001E3",
+          "R00001E4",
+          "R00001E5",
+          "R00001E6"
+        ],
+        "status": "SUCCEEDED",
+        "answer_delivered": true,
+        "model_calls": 2,
+        "tool_calls": 1,
+        "tool_errors": 0,
+        "seconds": 17.093,
+        "run_id": "f3be035d-bfab-43d9-bb96-ce7539571dd9"
+      },
+      "usage": {
+        "calls": 2,
+        "input_tokens": 5852,
+        "output_tokens": 1071,
+        "cached_tokens": 2816,
+        "spent_cny": "0.01475264",
+        "upper_cny": "0.020272"
+      },
+      "sequences": [
+        31,
+        32
+      ],
+      "selection_request": null,
+      "selector_finish": null,
+      "selection_message_sha256": null,
+      "selection_spans": []
+    },
+    "baseline-p7": {
+      "case": "p7",
+      "question": "In the workspace paper Progress and Tradeoffs in Neural Language Models (arXiv:1811.00942), how did the authors compare neural and classic language models in terms of quality and computational performance? Cite supporting passages from this workspace.",
+      "paper_id": "1811.00942",
+      "group": "regression",
+      "status": "SUCCEEDED",
+      "failure": null,
+      "delivered": true,
+      "seconds": 16.188,
+      "model_rounds": 2,
+      "tool_calls": 1,
+      "tool_errors": [],
+      "known_usage_matches_receipts": true,
+      "grade": {
+        "complete_primary": false,
+        "citation_entails": false,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": false,
+        "eligible_evidence": "partial",
+        "failure_kind": "missing_retrieval",
+        "reason": "Accurately reports perplexity, energy and per-query latency including benchmark results. Generic next-word prediction and accuracy do not specify recall at three. The admitted passages for this fresh run did not expose R@3 or its criterion.",
+        "correct_sources": [
+          "R00001E1",
+          "R00001E5",
+          "R00001E3",
+          "R00001E4",
+          "R00001E2"
+        ],
+        "cited_handles": [
+          "R00001E1",
+          "R00001E5",
+          "R00001E3",
+          "R00001E4",
+          "R00001E2"
+        ],
+        "current_target_handles": [
+          "R00001E1",
+          "R00001E2",
+          "R00001E3",
+          "R00001E4",
+          "R00001E5"
+        ],
+        "status": "SUCCEEDED",
+        "answer_delivered": true,
+        "model_calls": 2,
+        "tool_calls": 1,
+        "tool_errors": 0,
+        "seconds": 16.188,
+        "run_id": "b7135606-34c5-40c6-b762-7da4038f3a85"
+      },
+      "usage": {
+        "calls": 2,
+        "input_tokens": 5386,
+        "output_tokens": 781,
+        "cached_tokens": 2816,
+        "spent_cny": "0.01150064",
+        "upper_cny": "0.017020"
+      },
+      "sequences": [
+        33,
+        34
+      ],
+      "selection_request": null,
+      "selector_finish": null,
+      "selection_message_sha256": null,
+      "selection_spans": []
+    },
+    "baseline-p8": {
+      "case": "p8",
+      "question": "In the workspace paper Diachronic Topics in New High German Poetry (arXiv:1909.11189), which digital collection supplied the verse corpus? Cite a supporting passage.",
+      "paper_id": "1909.11189",
+      "group": "regression",
+      "status": "SUCCEEDED",
+      "failure": null,
+      "delivered": true,
+      "seconds": 12.953,
+      "model_rounds": 2,
+      "tool_calls": 1,
+      "tool_errors": [],
+      "known_usage_matches_receipts": true,
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "reason": "Correctly identifies the Digital Library in the TextGrid Repository and distinguishes its upstream zeno.org source. Corpus size, range and filtering details are supported.",
+        "correct_sources": [
+          "R00001E1",
+          "R00001E4"
+        ],
+        "cited_handles": [
+          "R00001E1",
+          "R00001E4"
+        ],
+        "current_target_handles": [
+          "R00001E1",
+          "R00001E4"
+        ],
+        "status": "SUCCEEDED",
+        "answer_delivered": true,
+        "model_calls": 2,
+        "tool_calls": 1,
+        "tool_errors": 0,
+        "seconds": 12.953,
+        "run_id": "33db0a29-ea53-4678-a8ee-ddc2669a6b65"
+      },
+      "usage": {
+        "calls": 2,
+        "input_tokens": 5864,
+        "output_tokens": 292,
+        "cached_tokens": 3584,
+        "spent_cny": "0.00703936",
+        "upper_cny": "0.014064"
+      },
+      "sequences": [
+        35,
+        36
+      ],
+      "selection_request": null,
+      "selector_finish": null,
+      "selection_message_sha256": null,
+      "selection_spans": []
+    },
+    "baseline-p9": {
+      "case": "p9",
+      "question": "In the workspace paper Minimally Supervised Learning of Affective Events Using Discourse Relations (arXiv:1909.00694), how were the automatically labeled AL pairs balanced, and which part of each ACP sentence did the authors extract as an affective event? Cite a supporting passage for each step.",
+      "paper_id": "1909.00694",
+      "group": "regression",
+      "status": "SUCCEEDED",
+      "failure": null,
+      "delivered": true,
+      "seconds": 19.343,
+      "model_rounds": 2,
+      "tool_calls": 2,
+      "tool_errors": [],
+      "known_usage_matches_receipts": true,
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "reason": "The cited dataset passage confirms random sampling for equal positive and negative latter AL events and extraction of the last clause of parsed ACP sentences. Added relative sizes and parsing context are supported.",
+        "correct_sources": [
+          "R00002E1",
+          "R00002E2"
+        ],
+        "cited_handles": [
+          "R00002E1",
+          "R00002E2"
+        ],
+        "current_target_handles": [
+          "R00001E1",
+          "R00001E2",
+          "R00001E3",
+          "R00001E4",
+          "R00001E5",
+          "R00001E6",
+          "R00002E1",
+          "R00002E2",
+          "R00002E3",
+          "R00002E4",
+          "R00002E5",
+          "R00002E6"
+        ],
+        "status": "SUCCEEDED",
+        "answer_delivered": true,
+        "model_calls": 2,
+        "tool_calls": 2,
+        "tool_errors": 0,
+        "seconds": 19.343,
+        "run_id": "46ba7c92-ca03-4e92-8fe0-e799cad83794"
+      },
+      "usage": {
+        "calls": 2,
+        "input_tokens": 7720,
+        "output_tokens": 419,
+        "cached_tokens": 2816,
+        "spent_cny": "0.01327264",
+        "upper_cny": "0.018792"
+      },
+      "sequences": [
+        37,
+        38
+      ],
+      "selection_request": null,
+      "selector_finish": null,
+      "selection_message_sha256": null,
+      "selection_spans": []
+    },
+    "baseline-n2": {
+      "case": "n2",
+      "question": "In the workspace paper Progress and Tradeoffs in Neural Language Models (arXiv:1811.00942), which classic non-neural language model served as the baseline, including its order and smoothing method? Cite supporting passages from this workspace.",
+      "paper_id": "1811.00942",
+      "group": "regression",
+      "status": "SUCCEEDED",
+      "failure": null,
+      "delivered": true,
+      "seconds": 14.688,
+      "model_rounds": 2,
+      "tool_calls": 1,
+      "tool_errors": [],
+      "known_usage_matches_receipts": true,
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "reason": "Cited results explicitly define KN-5 as traditional five-gram with modified Kneser–Ney smoothing. Added context about the comparison and inference operations is consistent with the cited passages.",
+        "correct_sources": [
+          "R00001E2",
+          "R00001E5"
+        ],
+        "cited_handles": [
+          "R00001E2",
+          "R00001E5"
+        ],
+        "current_target_handles": [
+          "R00001E2",
+          "R00001E5"
+        ],
+        "status": "SUCCEEDED",
+        "answer_delivered": true,
+        "model_calls": 2,
+        "tool_calls": 1,
+        "tool_errors": 0,
+        "seconds": 14.688,
+        "run_id": "02de8c59-943e-49cc-a11b-07ecfdc5077e"
+      },
+      "usage": {
+        "calls": 2,
+        "input_tokens": 5513,
+        "output_tokens": 473,
+        "cached_tokens": 2816,
+        "spent_cny": "0.00929064",
+        "upper_cny": "0.014810"
+      },
+      "sequences": [
+        39,
+        40
+      ],
+      "selection_request": null,
+      "selector_finish": null,
+      "selection_message_sha256": null,
+      "selection_spans": []
+    },
+    "candidate-f1": {
+      "case": "f1",
+      "question": "In the workspace paper arXiv:2003.07723, in the expert annotation workflow, what did annotators read before assigning line labels, and what maximum number of labels could they assign per line? Cite supporting passages from this workspace.",
+      "paper_id": "2003.07723",
+      "group": "new",
+      "status": "SUCCEEDED",
+      "failure": null,
+      "delivered": true,
+      "seconds": 15.0,
+      "model_rounds": 3,
+      "tool_calls": 1,
+      "tool_errors": [],
+      "known_usage_matches_receipts": true,
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "reason": "Two bound lines give a complete stanza or full poem, stanza context for each line, and a cap of two labels per line. The additional annotation motivation is part of the same passage.",
+        "correct_sources": [
+          "R00001E1"
+        ],
+        "cited_handles": [
+          "R00001E1"
+        ],
+        "current_target_handles": [
+          "R00001E1",
+          "R00001E2",
+          "R00001E3",
+          "R00001E4",
+          "R00001E5"
+        ],
+        "status": "SUCCEEDED",
+        "answer_delivered": true,
+        "model_calls": 3,
+        "tool_calls": 1,
+        "tool_errors": 0,
+        "seconds": 15.0,
+        "run_id": "fe4ff1db-9c24-467e-bc83-7f1fb304ed62"
+      },
+      "usage": {
+        "calls": 3,
+        "input_tokens": 7306,
+        "output_tokens": 242,
+        "cached_tokens": 2816,
+        "spent_cny": "0.01102864",
+        "upper_cny": "0.016548"
+      },
+      "sequences": [
+        41,
+        42,
+        43
+      ],
+      "selection_request": 43,
+      "selector_finish": "stop",
+      "selection_message_sha256": "583ffd1d4daecae249fcfe478a9a8ee80f87b43d03faca7e1af322cc32041c78",
+      "selection_spans": [
+        {
+          "id": "S4",
+          "handle": "R00001E1",
+          "offsets": [
+            312,
+            443
+          ],
+          "chunk_offsets": [
+            312,
+            443
+          ],
+          "text_sha256": "f1ac83611539745c4dd4531f358901af6ad7717c3632b64248f4d77d7652f70c",
+          "reference": {
+            "snapshot_id": "3b1c6937-4d12-4683-937d-7178f50d96ed",
+            "knowledge_base_id": "eb665e87-7a3b-46e3-915a-41429dd17e8f",
+            "document_revision_id": "229b668d-9d12-4eb5-9e04-1a86985d2782",
+            "chunk_id": "94de17c23f71a60216bb06aba5e837fac0f17df9da98263563c385b8ba82332a"
+          }
+        },
+        {
+          "id": "S5",
+          "handle": "R00001E1",
+          "offsets": [
+            444,
+            660
+          ],
+          "chunk_offsets": [
+            444,
+            660
+          ],
+          "text_sha256": "d0b6ef8dfcf42063af1fd24b4daf8aa78f76438e28fa757718e2468daebe5adf",
+          "reference": {
+            "snapshot_id": "3b1c6937-4d12-4683-937d-7178f50d96ed",
+            "knowledge_base_id": "eb665e87-7a3b-46e3-915a-41429dd17e8f",
+            "document_revision_id": "229b668d-9d12-4eb5-9e04-1a86985d2782",
+            "chunk_id": "94de17c23f71a60216bb06aba5e837fac0f17df9da98263563c385b8ba82332a"
+          }
+        }
+      ]
+    },
+    "candidate-f2": {
+      "case": "f2",
+      "question": "In the workspace paper arXiv:1811.00942, what was the vocabulary size for each of the two language-model evaluation datasets? Cite supporting passages from this workspace.",
+      "paper_id": "1811.00942",
+      "group": "new",
+      "status": "SUCCEEDED",
+      "failure": null,
+      "delivered": true,
+      "seconds": 30.578,
+      "model_rounds": 5,
+      "tool_calls": 3,
+      "tool_errors": [],
+      "known_usage_matches_receipts": true,
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "reason": "The bound clip distinguishes PTB vocabulary 10,000 and WT103 vocabulary 267,000. The extra token totals are correctly identified as split sizes in the same passage. This answer required three search executions.",
+        "correct_sources": [
+          "R00003E1"
+        ],
+        "cited_handles": [
+          "R00003E1"
+        ],
+        "current_target_handles": [
+          "R00003E1",
+          "R00003E2",
+          "R00003E4"
+        ],
+        "status": "SUCCEEDED",
+        "answer_delivered": true,
+        "model_calls": 5,
+        "tool_calls": 3,
+        "tool_errors": 0,
+        "seconds": 30.578,
+        "run_id": "d8653f08-41bb-4a2c-85be-70f4680c1d95"
+      },
+      "usage": {
+        "calls": 5,
+        "input_tokens": 22952,
+        "output_tokens": 707,
+        "cached_tokens": 11008,
+        "spent_cny": "0.02998432",
+        "upper_cny": "0.051560"
+      },
+      "sequences": [
+        44,
+        45,
+        46,
+        47,
+        48
+      ],
+      "selection_request": 48,
+      "selector_finish": "stop",
+      "selection_message_sha256": "e09008f2a45da9f84ce5b80f68d208229798d95f3591f7efba81adb064b70e64",
+      "selection_spans": [
+        {
+          "id": "S7",
+          "handle": "R00003E1",
+          "offsets": [
+            678,
+            815
+          ],
+          "chunk_offsets": [
+            678,
+            815
+          ],
+          "text_sha256": "8883f4b9a6f3b7cdd40e82c88cb322694cbfa460fe9b29f86d69f41a9ac9b53c",
+          "reference": {
+            "snapshot_id": "3b1c6937-4d12-4683-937d-7178f50d96ed",
+            "knowledge_base_id": "eb665e87-7a3b-46e3-915a-41429dd17e8f",
+            "document_revision_id": "63ffd77f-1f2c-427b-b980-fb7a7357d1e0",
+            "chunk_id": "9fbf4bcd636e6ab4be1180957103a2c97fc7c3dd37f164fa3efa50628815721d"
+          }
+        },
+        {
+          "id": "S8",
+          "handle": "R00003E1",
+          "offsets": [
+            816,
+            968
+          ],
+          "chunk_offsets": [
+            816,
+            968
+          ],
+          "text_sha256": "30cc3c2a2f655f3c7856f26e99e0fd31156deb1ea9418d8985b1c25d168fe7bf",
+          "reference": {
+            "snapshot_id": "3b1c6937-4d12-4683-937d-7178f50d96ed",
+            "knowledge_base_id": "eb665e87-7a3b-46e3-915a-41429dd17e8f",
+            "document_revision_id": "63ffd77f-1f2c-427b-b980-fb7a7357d1e0",
+            "chunk_id": "9fbf4bcd636e6ab4be1180957103a2c97fc7c3dd37f164fa3efa50628815721d"
+          }
+        }
+      ]
+    },
+    "candidate-f3": {
+      "case": "f3",
+      "question": "In the workspace paper arXiv:1909.00694, in the appendix, what source was used to pretrain the Japanese BERT model and what tool segmented input sentences into words? Cite supporting passages from this workspace.",
+      "paper_id": "1909.00694",
+      "group": "new",
+      "status": "SUCCEEDED",
+      "failure": null,
+      "delivered": true,
+      "seconds": 14.782,
+      "model_rounds": 3,
+      "tool_calls": 1,
+      "tool_errors": [],
+      "known_usage_matches_receipts": true,
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "reason": "Both cited lines are in the Japanese BERT appendix and directly answer Japanese Wikipedia and Juman++. The source also states the BPE step.",
+        "correct_sources": [
+          "R00001E1"
+        ],
+        "cited_handles": [
+          "R00001E1"
+        ],
+        "current_target_handles": [
+          "R00001E1",
+          "R00001E6"
+        ],
+        "status": "SUCCEEDED",
+        "answer_delivered": true,
+        "model_calls": 3,
+        "tool_calls": 1,
+        "tool_errors": 0,
+        "seconds": 14.782,
+        "run_id": "1ed9285d-7ea3-420b-927e-7b070cf4c9dc"
+      },
+      "usage": {
+        "calls": 3,
+        "input_tokens": 7967,
+        "output_tokens": 313,
+        "cached_tokens": 2816,
+        "spent_cny": "0.01291864",
+        "upper_cny": "0.018438"
+      },
+      "sequences": [
+        49,
+        50,
+        51
+      ],
+      "selection_request": 51,
+      "selector_finish": "stop",
+      "selection_message_sha256": "1e2bcc207658f63ac716425d562d8b8636ba1d257162fc0e0c449edeeca754c0",
+      "selection_spans": [
+        {
+          "id": "S15",
+          "handle": "R00001E1",
+          "offsets": [
+            968,
+            1033
+          ],
+          "chunk_offsets": [
+            968,
+            1033
+          ],
+          "text_sha256": "5eea2c1e22fd4f93a9d6b70b6c11646cf2cb0fec2da6430d2947dc3a0b40f856",
+          "reference": {
+            "snapshot_id": "3b1c6937-4d12-4683-937d-7178f50d96ed",
+            "knowledge_base_id": "eb665e87-7a3b-46e3-915a-41429dd17e8f",
+            "document_revision_id": "9e1649c0-f936-4106-a39f-7fda41132da0",
+            "chunk_id": "d93b4e65f22b7d6b6748c910d7c0dee7b560f15b28a13c14edf6f05b24c30d2c"
+          }
+        },
+        {
+          "id": "S16",
+          "handle": "R00001E1",
+          "offsets": [
+            1034,
+            1153
+          ],
+          "chunk_offsets": [
+            1034,
+            1153
+          ],
+          "text_sha256": "de87cdbd0b2a2ab02da047aeb484b2f19ee24bec63fe8d930ff57f033051584b",
+          "reference": {
+            "snapshot_id": "3b1c6937-4d12-4683-937d-7178f50d96ed",
+            "knowledge_base_id": "eb665e87-7a3b-46e3-915a-41429dd17e8f",
+            "document_revision_id": "9e1649c0-f936-4106-a39f-7fda41132da0",
+            "chunk_id": "d93b4e65f22b7d6b6748c910d7c0dee7b560f15b28a13c14edf6f05b24c30d2c"
+          }
+        }
+      ]
+    },
+    "candidate-f4": {
+      "case": "f4",
+      "question": "In the workspace paper arXiv:1909.11189, how many topics did the LDA experiment use and for how many epochs was it trained? Cite supporting passages from this workspace.",
+      "paper_id": "1909.11189",
+      "group": "new",
+      "status": "SUCCEEDED",
+      "failure": null,
+      "delivered": true,
+      "seconds": 13.782,
+      "model_rounds": 3,
+      "tool_calls": 1,
+      "tool_errors": [],
+      "known_usage_matches_receipts": true,
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "reason": "Both the 100 topics and 50 epochs appear in the first bound line. Filtering and the downstream-feature rationale agree with the cited passage.",
+        "correct_sources": [
+          "R00001E2"
+        ],
+        "cited_handles": [
+          "R00001E2"
+        ],
+        "current_target_handles": [
+          "R00001E1",
+          "R00001E2",
+          "R00001E3",
+          "R00001E4",
+          "R00001E5"
+        ],
+        "status": "SUCCEEDED",
+        "answer_delivered": true,
+        "model_calls": 3,
+        "tool_calls": 1,
+        "tool_errors": 0,
+        "seconds": 13.782,
+        "run_id": "2f7bb068-b539-45a5-ac2a-3ccacee14fef"
+      },
+      "usage": {
+        "calls": 3,
+        "input_tokens": 7376,
+        "output_tokens": 232,
+        "cached_tokens": 2816,
+        "spent_cny": "0.01108864",
+        "upper_cny": "0.016608"
+      },
+      "sequences": [
+        52,
+        53,
+        54
+      ],
+      "selection_request": 54,
+      "selector_finish": "stop",
+      "selection_message_sha256": "a08edbd599dd45885fbcd7dddf26f46e5d40ffa0adeccb8098c654ac93852b37",
+      "selection_spans": [
+        {
+          "id": "S16",
+          "handle": "R00001E2",
+          "offsets": [
+            372,
+            594
+          ],
+          "chunk_offsets": [
+            372,
+            594
+          ],
+          "text_sha256": "dd4a604b4827f50d84978ead210bd76600cf21898e2153c41b38a313e1e978d3",
+          "reference": {
+            "snapshot_id": "3b1c6937-4d12-4683-937d-7178f50d96ed",
+            "knowledge_base_id": "eb665e87-7a3b-46e3-915a-41429dd17e8f",
+            "document_revision_id": "a3c9b1b4-fd50-435b-aab0-f50d6e1df370",
+            "chunk_id": "03ff68287ea3884ac670be0c69aabe00c6baa23f1f38a86b47257fc1faafe628"
+          }
+        },
+        {
+          "id": "S17",
+          "handle": "R00001E2",
+          "offsets": [
+            595,
+            763
+          ],
+          "chunk_offsets": [
+            595,
+            763
+          ],
+          "text_sha256": "e57ebf1957b338ce26023dfd378bb72954a4bf1712395221f3107dd1501d6ab4",
+          "reference": {
+            "snapshot_id": "3b1c6937-4d12-4683-937d-7178f50d96ed",
+            "knowledge_base_id": "eb665e87-7a3b-46e3-915a-41429dd17e8f",
+            "document_revision_id": "a3c9b1b4-fd50-435b-aab0-f50d6e1df370",
+            "chunk_id": "03ff68287ea3884ac670be0c69aabe00c6baa23f1f38a86b47257fc1faafe628"
+          }
+        }
+      ]
+    },
+    "candidate-f5": {
+      "case": "f5",
+      "question": "In the workspace paper arXiv:1912.02481, what were the fastText training embedding dimensionality, context window size, and character n-gram length range? Cite supporting passages from this workspace.",
+      "paper_id": "1912.02481",
+      "group": "new",
+      "status": "SUCCEEDED",
+      "failure": null,
+      "delivered": true,
+      "seconds": 16.312,
+      "model_rounds": 3,
+      "tool_calls": 1,
+      "tool_errors": [],
+      "known_usage_matches_receipts": true,
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "reason": "The exact training sentence provides all three values and associates them with the paper’s fastText systems. The extra negative-sample count is supported.",
+        "correct_sources": [
+          "R00001E2"
+        ],
+        "cited_handles": [
+          "R00001E2"
+        ],
+        "current_target_handles": [
+          "R00001E1",
+          "R00001E2",
+          "R00001E3",
+          "R00001E4",
+          "R00001E5"
+        ],
+        "status": "SUCCEEDED",
+        "answer_delivered": true,
+        "model_calls": 3,
+        "tool_calls": 1,
+        "tool_errors": 0,
+        "seconds": 16.312,
+        "run_id": "9b1e0047-31a3-41ae-851d-41c958f088f5"
+      },
+      "usage": {
+        "calls": 3,
+        "input_tokens": 7216,
+        "output_tokens": 340,
+        "cached_tokens": 3584,
+        "spent_cny": "0.01012736",
+        "upper_cny": "0.017152"
+      },
+      "sequences": [
+        55,
+        56,
+        57
+      ],
+      "selection_request": 57,
+      "selector_finish": "stop",
+      "selection_message_sha256": "845743c7e280e42e4726943d06b9f2251e46b23b01262497e874d4deedc01f85",
+      "selection_spans": [
+        {
+          "id": "S11",
+          "handle": "R00001E2",
+          "offsets": [
+            117,
+            351
+          ],
+          "chunk_offsets": [
+            117,
+            351
+          ],
+          "text_sha256": "ce1e15228bd5e8b615deb955fd72cc5b7de9041ff5f15446ac4495040e229771",
+          "reference": {
+            "snapshot_id": "3b1c6937-4d12-4683-937d-7178f50d96ed",
+            "knowledge_base_id": "eb665e87-7a3b-46e3-915a-41429dd17e8f",
+            "document_revision_id": "91c34997-5eee-4ff3-bcd7-d33d909d8922",
+            "chunk_id": "a67bf61e7a6ba2577b7c42072de737213ccb64172cf80983522709d9d96b0a20"
+          }
+        }
+      ]
+    },
+    "candidate-f6": {
+      "case": "f6",
+      "question": "In the workspace paper arXiv:2003.07723, for the crowdsourced annotation, how many stanzas were uploaded and how many people annotated each instance? Cite supporting passages from this workspace.",
+      "paper_id": "2003.07723",
+      "group": "new",
+      "status": "SUCCEEDED",
+      "failure": null,
+      "delivered": true,
+      "seconds": 14.359,
+      "model_rounds": 3,
+      "tool_calls": 1,
+      "tool_errors": [],
+      "known_usage_matches_receipts": true,
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "reason": "The cited statements give 59 stanzas uploaded and ten people per annotated instance. Each number is bound to the correct unit.",
+        "correct_sources": [
+          "R00001E1",
+          "R00001E2"
+        ],
+        "cited_handles": [
+          "R00001E1",
+          "R00001E2"
+        ],
+        "current_target_handles": [
+          "R00001E1",
+          "R00001E2",
+          "R00001E3",
+          "R00001E4",
+          "R00001E5",
+          "R00001E6"
+        ],
+        "status": "SUCCEEDED",
+        "answer_delivered": true,
+        "model_calls": 3,
+        "tool_calls": 1,
+        "tool_errors": 0,
+        "seconds": 14.359,
+        "run_id": "e0dc3c83-77a5-4c44-a45c-14285f418131"
+      },
+      "usage": {
+        "calls": 3,
+        "input_tokens": 7653,
+        "output_tokens": 276,
+        "cached_tokens": 2816,
+        "spent_cny": "0.01199464",
+        "upper_cny": "0.017514"
+      },
+      "sequences": [
+        58,
+        59,
+        60
+      ],
+      "selection_request": 60,
+      "selector_finish": "stop",
+      "selection_message_sha256": "6729a16405b086f986e8854299c4997c65171fc5d7495ab98b067726d6a36006",
+      "selection_spans": [
+        {
+          "id": "S9",
+          "handle": "R00001E1",
+          "offsets": [
+            835,
+            916
+          ],
+          "chunk_offsets": [
+            835,
+            916
+          ],
+          "text_sha256": "dcb4f9760a14540776e6a48752cec7933a756b5461f114e17e260c6392c1c175",
+          "reference": {
+            "snapshot_id": "3b1c6937-4d12-4683-937d-7178f50d96ed",
+            "knowledge_base_id": "eb665e87-7a3b-46e3-915a-41429dd17e8f",
+            "document_revision_id": "229b668d-9d12-4eb5-9e04-1a86985d2782",
+            "chunk_id": "9393ad5599b68f6d4c3bc18bf940a1a759ceeb136535da6876543ec1ecf99eca"
+          }
+        },
+        {
+          "id": "S18",
+          "handle": "R00001E2",
+          "offsets": [
+            454,
+            495
+          ],
+          "chunk_offsets": [
+            454,
+            495
+          ],
+          "text_sha256": "9455e004a5ec76e83401705a985fe422c0830936bd99de0d174780db39096548",
+          "reference": {
+            "snapshot_id": "3b1c6937-4d12-4683-937d-7178f50d96ed",
+            "knowledge_base_id": "eb665e87-7a3b-46e3-915a-41429dd17e8f",
+            "document_revision_id": "229b668d-9d12-4eb5-9e04-1a86985d2782",
+            "chunk_id": "9a57a14a5eb10ea4a7dcbdc49ae695ff1d74880550861dd20169a8985a5f47de"
+          }
+        }
+      ]
+    },
+    "candidate-f7": {
+      "case": "f7",
+      "question": "In the workspace paper arXiv:1909.00694, what dataset split was used for hyperparameter optimization and which split was used for evaluation? Cite supporting passages from this workspace.",
+      "paper_id": "1909.00694",
+      "group": "new",
+      "status": "SUCCEEDED",
+      "failure": null,
+      "delivered": true,
+      "seconds": 15.156,
+      "model_rounds": 3,
+      "tool_calls": 1,
+      "tool_errors": [],
+      "known_usage_matches_receipts": true,
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "reason": "Two extractive statements explicitly identify ACP development for hyperparameter optimization and ACP test for evaluation.",
+        "correct_sources": [
+          "R00001E2"
+        ],
+        "cited_handles": [
+          "R00001E2"
+        ],
+        "current_target_handles": [
+          "R00001E1",
+          "R00001E2",
+          "R00001E3",
+          "R00001E4"
+        ],
+        "status": "SUCCEEDED",
+        "answer_delivered": true,
+        "model_calls": 3,
+        "tool_calls": 1,
+        "tool_errors": 0,
+        "seconds": 15.156,
+        "run_id": "7f867231-e769-48ef-a1d3-5a6726018a07"
+      },
+      "usage": {
+        "calls": 3,
+        "input_tokens": 7659,
+        "output_tokens": 280,
+        "cached_tokens": 4096,
+        "spent_cny": "0.00952984",
+        "upper_cny": "0.017558"
+      },
+      "sequences": [
+        61,
+        62,
+        63
+      ],
+      "selection_request": 63,
+      "selector_finish": "stop",
+      "selection_message_sha256": "9c7f0ac6d8a9ca0e6c7d72bc4e347b69659698d34e2103ce00286f4e737aa29e",
+      "selection_spans": [
+        {
+          "id": "S16",
+          "handle": "R00001E2",
+          "offsets": [
+            205,
+            276
+          ],
+          "chunk_offsets": [
+            205,
+            276
+          ],
+          "text_sha256": "d0802bb2a41ce572e1c99d420339d538969201480537d076fb546ce195d764e2",
+          "reference": {
+            "snapshot_id": "3b1c6937-4d12-4683-937d-7178f50d96ed",
+            "knowledge_base_id": "eb665e87-7a3b-46e3-915a-41429dd17e8f",
+            "document_revision_id": "9e1649c0-f936-4106-a39f-7fda41132da0",
+            "chunk_id": "5214ee2631ee8cf57b5361ae1be9904e7f175583f08ecbf0d35267ad57d2c73f"
+          }
+        },
+        {
+          "id": "S17",
+          "handle": "R00001E2",
+          "offsets": [
+            277,
+            336
+          ],
+          "chunk_offsets": [
+            277,
+            336
+          ],
+          "text_sha256": "7d38cbff609cb2ada996580752174b288be719fe14a278cfed82aea77d6578a3",
+          "reference": {
+            "snapshot_id": "3b1c6937-4d12-4683-937d-7178f50d96ed",
+            "knowledge_base_id": "eb665e87-7a3b-46e3-915a-41429dd17e8f",
+            "document_revision_id": "9e1649c0-f936-4106-a39f-7fda41132da0",
+            "chunk_id": "5214ee2631ee8cf57b5361ae1be9904e7f175583f08ecbf0d35267ad57d2c73f"
+          }
+        }
+      ]
+    },
+    "candidate-f8": {
+      "case": "f8",
+      "question": "In the workspace paper arXiv:1912.02481, what minimum word count gave the best performance in the experiments for each of fastText and the character-enhanced word embeddings? Cite supporting passages from this workspace.",
+      "paper_id": "1912.02481",
+      "group": "new",
+      "status": "SUCCEEDED",
+      "failure": null,
+      "delivered": true,
+      "seconds": 19.36,
+      "model_rounds": 3,
+      "tool_calls": 2,
+      "tool_errors": [],
+      "known_usage_matches_receipts": true,
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "reason": "Both model-specific thresholds are supported: the first line quotes the final sentence of the fastText setup and the second quotes the CWE-LP threshold while contrasting with fastText. The paired statements need their cited surrounding context to recover the model labels, which weakens stand-alone usability but remains within the frozen fragment allowance.",
+        "correct_sources": [
+          "R00001E4",
+          "R00001E1"
+        ],
+        "cited_handles": [
+          "R00001E4",
+          "R00001E1"
+        ],
+        "current_target_handles": [
+          "R00001E1",
+          "R00001E2",
+          "R00001E3",
+          "R00001E4",
+          "R00001E5",
+          "R00001E6",
+          "R00002E1",
+          "R00002E3"
+        ],
+        "status": "SUCCEEDED",
+        "answer_delivered": true,
+        "model_calls": 3,
+        "tool_calls": 2,
+        "tool_errors": 0,
+        "seconds": 19.36,
+        "run_id": "28e305cd-b4a6-438f-8cba-ebabfd53eb0f"
+      },
+      "usage": {
+        "calls": 3,
+        "input_tokens": 11879,
+        "output_tokens": 373,
+        "cached_tokens": 2048,
+        "spent_cny": "0.02272792",
+        "upper_cny": "0.026742"
+      },
+      "sequences": [
+        64,
+        65,
+        66
+      ],
+      "selection_request": 66,
+      "selector_finish": "stop",
+      "selection_message_sha256": "98a393fe5b5b1bd40d4cc29604769e7a90836c678e54c7a5db15b34c2a3ddbd1",
+      "selection_spans": [
+        {
+          "id": "S26",
+          "handle": "R00001E4",
+          "offsets": [
+            352,
+            407
+          ],
+          "chunk_offsets": [
+            352,
+            407
+          ],
+          "text_sha256": "2ca3f008519ff6e2131875429108d9cfacc6bd02dcc282b60dd29303f3481d28",
+          "reference": {
+            "snapshot_id": "3b1c6937-4d12-4683-937d-7178f50d96ed",
+            "knowledge_base_id": "eb665e87-7a3b-46e3-915a-41429dd17e8f",
+            "document_revision_id": "91c34997-5eee-4ff3-bcd7-d33d909d8922",
+            "chunk_id": "a67bf61e7a6ba2577b7c42072de737213ccb64172cf80983522709d9d96b0a20"
+          }
+        },
+        {
+          "id": "S5",
+          "handle": "R00001E1",
+          "offsets": [
+            711,
+            943
+          ],
+          "chunk_offsets": [
+            711,
+            943
+          ],
+          "text_sha256": "aa6a353cc6c7c1176a708d54fa76de4e1794c3bf3509b9b6efd07f1c48aa9306",
+          "reference": {
+            "snapshot_id": "3b1c6937-4d12-4683-937d-7178f50d96ed",
+            "knowledge_base_id": "eb665e87-7a3b-46e3-915a-41429dd17e8f",
+            "document_revision_id": "91c34997-5eee-4ff3-bcd7-d33d909d8922",
+            "chunk_id": "d15e439259a62b386c7334d302a392a7c9607bd63ea703fbb78d7409e7b7cab4"
+          }
+        }
+      ]
+    },
+    "candidate-p2": {
+      "case": "p2",
+      "question": "In the workspace paper Progress and Tradeoffs in Neural Language Models (arXiv:1811.00942), what is a commonly used evaluation metric for language models? Cite supporting passages from this workspace.",
+      "paper_id": "1811.00942",
+      "group": "regression",
+      "status": "SUCCEEDED",
+      "failure": null,
+      "delivered": true,
+      "seconds": 27.219,
+      "model_rounds": 4,
+      "tool_calls": 2,
+      "tool_errors": [],
+      "known_usage_matches_receipts": true,
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "reason": "The answer identifies perplexity in the two source statements on progress and the evaluation-methods statement. The accompanying metrics are reported accurately. The first two statements duplicate each other across retrieval rounds, which adds clutter but no factual or required-format error.",
+        "correct_sources": [
+          "R00001E1",
+          "R00002E1",
+          "R00002E2"
+        ],
+        "cited_handles": [
+          "R00001E1",
+          "R00002E1",
+          "R00002E2"
+        ],
+        "current_target_handles": [
+          "R00001E1",
+          "R00001E2",
+          "R00001E3",
+          "R00001E4",
+          "R00001E5",
+          "R00002E1",
+          "R00002E2",
+          "R00002E3",
+          "R00002E4"
+        ],
+        "status": "SUCCEEDED",
+        "answer_delivered": true,
+        "model_calls": 4,
+        "tool_calls": 2,
+        "tool_errors": 0,
+        "seconds": 27.219,
+        "run_id": "803316c2-fbe0-4d3d-ba55-3cb857bcf881"
+      },
+      "usage": {
+        "calls": 4,
+        "input_tokens": 13493,
+        "output_tokens": 749,
+        "cached_tokens": 5888,
+        "spent_cny": "0.02143752",
+        "upper_cny": "0.032978"
+      },
+      "sequences": [
+        67,
+        68,
+        69,
+        70
+      ],
+      "selection_request": 70,
+      "selector_finish": "stop",
+      "selection_message_sha256": "cac1ed0eccb5998b476e518b49efc7d1e3fb9f0d19013631cd3811534b8eaaf1",
+      "selection_spans": [
+        {
+          "id": "S4",
+          "handle": "R00001E1",
+          "offsets": [
+            193,
+            282
+          ],
+          "chunk_offsets": [
+            193,
+            282
+          ],
+          "text_sha256": "6674a45be09e1906abbdbfdb2aa0a6400a7f981202cfde9b0dbeafe6c4ad37a1",
+          "reference": {
+            "snapshot_id": "3b1c6937-4d12-4683-937d-7178f50d96ed",
+            "knowledge_base_id": "eb665e87-7a3b-46e3-915a-41429dd17e8f",
+            "document_revision_id": "63ffd77f-1f2c-427b-b980-fb7a7357d1e0",
+            "chunk_id": "34ed6f6fcec3572f77567c303e8d2dbfb716a4cca00946c432323be5d23f9fbc"
+          }
+        },
+        {
+          "id": "S48",
+          "handle": "R00002E1",
+          "offsets": [
+            193,
+            282
+          ],
+          "chunk_offsets": [
+            193,
+            282
+          ],
+          "text_sha256": "6674a45be09e1906abbdbfdb2aa0a6400a7f981202cfde9b0dbeafe6c4ad37a1",
+          "reference": {
+            "snapshot_id": "3b1c6937-4d12-4683-937d-7178f50d96ed",
+            "knowledge_base_id": "eb665e87-7a3b-46e3-915a-41429dd17e8f",
+            "document_revision_id": "63ffd77f-1f2c-427b-b980-fb7a7357d1e0",
+            "chunk_id": "34ed6f6fcec3572f77567c303e8d2dbfb716a4cca00946c432323be5d23f9fbc"
+          }
+        },
+        {
+          "id": "S59",
+          "handle": "R00002E2",
+          "offsets": [
+            458,
+            578
+          ],
+          "chunk_offsets": [
+            458,
+            578
+          ],
+          "text_sha256": "a2af29f4c25b0198975dd02aebc80d3d9f9385dc40050a332950d4abf754f294",
+          "reference": {
+            "snapshot_id": "3b1c6937-4d12-4683-937d-7178f50d96ed",
+            "knowledge_base_id": "eb665e87-7a3b-46e3-915a-41429dd17e8f",
+            "document_revision_id": "63ffd77f-1f2c-427b-b980-fb7a7357d1e0",
+            "chunk_id": "95d9e7d3a96cac933bbdf64d17ed411ec4ab9560e3320f3b941e75a32bb37d77"
+          }
+        }
+      ]
+    },
+    "candidate-p3": {
+      "case": "p3",
+      "question": "In the workspace paper Massive vs. Curated Word Embeddings for Low-Resourced Languages. The Case of Yor\\`ub\\'a and Twi (arXiv:1912.02481), what two architectures are used? Cite supporting passages from this workspace.",
+      "paper_id": "1912.02481",
+      "group": "regression",
+      "status": "SUCCEEDED",
+      "failure": null,
+      "delivered": true,
+      "seconds": 25.062,
+      "model_rounds": 4,
+      "tool_calls": 2,
+      "tool_errors": [],
+      "known_usage_matches_receipts": true,
+      "grade": {
+        "complete_primary": false,
+        "citation_entails": false,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": false,
+        "eligible_evidence": "complete",
+        "failure_kind": "incomplete_selection",
+        "reason": "Correctly names fastText and the generic CWE family, but the frozen criterion requires the variant actually used, position-based clustered CWE-LP. The selected passage only establishes the family. The final admitted registry did include the paper’s distinction among CWE variants, and the earlier candidate answered it precisely.",
+        "correct_sources": [
+          "R00002E6"
+        ],
+        "cited_handles": [
+          "R00002E6"
+        ],
+        "current_target_handles": [
+          "R00001E1",
+          "R00001E2",
+          "R00001E3",
+          "R00001E4",
+          "R00001E5",
+          "R00001E6",
+          "R00002E1",
+          "R00002E2",
+          "R00002E3",
+          "R00002E4",
+          "R00002E5",
+          "R00002E6"
+        ],
+        "status": "SUCCEEDED",
+        "answer_delivered": true,
+        "model_calls": 4,
+        "tool_calls": 2,
+        "tool_errors": 0,
+        "seconds": 25.062,
+        "run_id": "3c26ae50-25fd-40e4-ac69-b5b44c10fb52"
+      },
+      "usage": {
+        "calls": 4,
+        "input_tokens": 15743,
+        "output_tokens": 723,
+        "cached_tokens": 5120,
+        "spent_cny": "0.02723480",
+        "upper_cny": "0.037270"
+      },
+      "sequences": [
+        71,
+        72,
+        73,
+        74
+      ],
+      "selection_request": 74,
+      "selector_finish": "stop",
+      "selection_message_sha256": "8ea8b34a4601483bd8c90357865c5a63f08fa24fc60736dda7ede25804639a40",
+      "selection_spans": [
+        {
+          "id": "S98",
+          "handle": "R00002E6",
+          "offsets": [
+            177,
+            359
+          ],
+          "chunk_offsets": [
+            177,
+            359
+          ],
+          "text_sha256": "859eb492d16828d31a2776a38054a23eaf118722a7a9a8d48faf725981fd7a4a",
+          "reference": {
+            "snapshot_id": "3b1c6937-4d12-4683-937d-7178f50d96ed",
+            "knowledge_base_id": "eb665e87-7a3b-46e3-915a-41429dd17e8f",
+            "document_revision_id": "91c34997-5eee-4ff3-bcd7-d33d909d8922",
+            "chunk_id": "c480965cde7dd90883eb6aa38574413bf2e1ea0e8887c66af34ebb15ed8520b0"
+          }
+        },
+        {
+          "id": "S99",
+          "handle": "R00002E6",
+          "offsets": [
+            360,
+            530
+          ],
+          "chunk_offsets": [
+            360,
+            530
+          ],
+          "text_sha256": "4f014c505120c949603f7cfa7eadc4266e15438ee20e31ce9050cac3cefb8ce9",
+          "reference": {
+            "snapshot_id": "3b1c6937-4d12-4683-937d-7178f50d96ed",
+            "knowledge_base_id": "eb665e87-7a3b-46e3-915a-41429dd17e8f",
+            "document_revision_id": "91c34997-5eee-4ff3-bcd7-d33d909d8922",
+            "chunk_id": "c480965cde7dd90883eb6aa38574413bf2e1ea0e8887c66af34ebb15ed8520b0"
+          }
+        }
+      ]
+    },
+    "candidate-p4": {
+      "case": "p4",
+      "question": "In the workspace paper arXiv:1909.00694 on affective events, what makes up its seed lexicon and how is it used to label events? Cite supporting passages from this workspace.",
+      "paper_id": "1909.00694",
+      "group": "regression",
+      "status": "SUCCEEDED",
+      "failure": null,
+      "delivered": true,
+      "seconds": 27.812,
+      "model_rounds": 4,
+      "tool_calls": 2,
+      "tool_errors": [],
+      "known_usage_matches_receipts": true,
+      "grade": {
+        "complete_primary": false,
+        "citation_entails": false,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": false,
+        "eligible_evidence": "complete",
+        "failure_kind": "incomplete_selection",
+        "reason": "Direct signed polarity on non-negated seed matches, the positive and negative predicate classes, and 15 of each are all correctly bound. The candidate did not select the Cause/Concession propagation rules despite their presence in the cited methods clip and a second admitted clip. Delivery recovered; the required mechanisms remain incomplete.",
+        "correct_sources": [
+          "R00001E3",
+          "R00002E4"
+        ],
+        "cited_handles": [
+          "R00001E3",
+          "R00002E4"
+        ],
+        "current_target_handles": [
+          "R00001E1",
+          "R00001E2",
+          "R00001E3",
+          "R00001E4",
+          "R00001E5",
+          "R00001E6",
+          "R00002E1",
+          "R00002E2",
+          "R00002E3",
+          "R00002E4"
+        ],
+        "status": "SUCCEEDED",
+        "answer_delivered": true,
+        "model_calls": 4,
+        "tool_calls": 2,
+        "tool_errors": 0,
+        "seconds": 27.812,
+        "run_id": "a547bfc1-5270-438a-82f8-102526e97765"
+      },
+      "usage": {
+        "calls": 4,
+        "input_tokens": 15187,
+        "output_tokens": 1112,
+        "cached_tokens": 7680,
+        "spent_cny": "0.02421720",
+        "upper_cny": "0.039270"
+      },
+      "sequences": [
+        75,
+        76,
+        77,
+        78
+      ],
+      "selection_request": 78,
+      "selector_finish": "stop",
+      "selection_message_sha256": "7255edae238a953a2425a2d4ec5865e350663ac5ba2f9a931e72ac1867a663e2",
+      "selection_spans": [
+        {
+          "id": "S25",
+          "handle": "R00001E3",
+          "offsets": [
+            69,
+            131
+          ],
+          "chunk_offsets": [
+            69,
+            131
+          ],
+          "text_sha256": "9f19ebb3147b3e43aee7b04c2b593a8333c56f7153cdbd82fd83eb325ffbf3ef",
+          "reference": {
+            "snapshot_id": "3b1c6937-4d12-4683-937d-7178f50d96ed",
+            "knowledge_base_id": "eb665e87-7a3b-46e3-915a-41429dd17e8f",
+            "document_revision_id": "9e1649c0-f936-4106-a39f-7fda41132da0",
+            "chunk_id": "35b7ef062a1f6020bf7adea70e3d9b84d853735b7a0dc60519958e2dd4e7ded5"
+          }
+        },
+        {
+          "id": "S26",
+          "handle": "R00001E3",
+          "offsets": [
+            132,
+            360
+          ],
+          "chunk_offsets": [
+            132,
+            360
+          ],
+          "text_sha256": "52e99e763ecaf55fb49161767689d95aae707ec86f3422b6e8b609135160dde3",
+          "reference": {
+            "snapshot_id": "3b1c6937-4d12-4683-937d-7178f50d96ed",
+            "knowledge_base_id": "eb665e87-7a3b-46e3-915a-41429dd17e8f",
+            "document_revision_id": "9e1649c0-f936-4106-a39f-7fda41132da0",
+            "chunk_id": "35b7ef062a1f6020bf7adea70e3d9b84d853735b7a0dc60519958e2dd4e7ded5"
+          }
+        },
+        {
+          "id": "S138",
+          "handle": "R00002E4",
+          "offsets": [
+            776,
+            892
+          ],
+          "chunk_offsets": [
+            776,
+            892
+          ],
+          "text_sha256": "7df009ceffaaa34c7d96f2def58a6a72d86168b3eb62cc21a489d9a2c4aa11e4",
+          "reference": {
+            "snapshot_id": "3b1c6937-4d12-4683-937d-7178f50d96ed",
+            "knowledge_base_id": "eb665e87-7a3b-46e3-915a-41429dd17e8f",
+            "document_revision_id": "9e1649c0-f936-4106-a39f-7fda41132da0",
+            "chunk_id": "65918e5af819311baba2cdaba77bd1bb665e3bb038a7b34a5fbaa8d1c9a478e5"
+          }
+        }
+      ]
+    },
+    "candidate-p5": {
+      "case": "p5",
+      "question": "In the workspace paper Diachronic Topics in New High German Poetry (arXiv:1909.11189), what is the algorithm used for the classification tasks? Cite the supporting passage.",
+      "paper_id": "1909.11189",
+      "group": "regression",
+      "status": "SUCCEEDED",
+      "failure": null,
+      "delivered": true,
+      "seconds": 25.562,
+      "model_rounds": 4,
+      "tool_calls": 2,
+      "tool_errors": [],
+      "known_usage_matches_receipts": true,
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "reason": "The exact sentence directly identifies Random Forest Ensemble classifiers for the two tasks, and the second bound line supports parameter grid search.",
+        "correct_sources": [
+          "R00002E2",
+          "R00002E1"
+        ],
+        "cited_handles": [
+          "R00002E2",
+          "R00002E1"
+        ],
+        "current_target_handles": [
+          "R00001E1",
+          "R00001E2",
+          "R00001E3",
+          "R00001E4",
+          "R00002E1",
+          "R00002E2",
+          "R00002E3",
+          "R00002E4",
+          "R00002E5"
+        ],
+        "status": "SUCCEEDED",
+        "answer_delivered": true,
+        "model_calls": 4,
+        "tool_calls": 2,
+        "tool_errors": 0,
+        "seconds": 25.562,
+        "run_id": "e3f057fa-64d5-4234-93c6-5e379c93241c"
+      },
+      "usage": {
+        "calls": 4,
+        "input_tokens": 14369,
+        "output_tokens": 519,
+        "cached_tokens": 6400,
+        "spent_cny": "0.02034600",
+        "upper_cny": "0.032890"
+      },
+      "sequences": [
+        79,
+        80,
+        81,
+        82
+      ],
+      "selection_request": 82,
+      "selector_finish": "stop",
+      "selection_message_sha256": "4c5130645622c6d0120f80dc12c52ef1582799da1701ab1b44fc596c374d3d6b",
+      "selection_spans": [
+        {
+          "id": "S59",
+          "handle": "R00002E2",
+          "offsets": [
+            527,
+            702
+          ],
+          "chunk_offsets": [
+            527,
+            702
+          ],
+          "text_sha256": "6b3a86a89b2db498e210f44d87323e9ec244b173cc9b27523e7920a54d4e52ef",
+          "reference": {
+            "snapshot_id": "3b1c6937-4d12-4683-937d-7178f50d96ed",
+            "knowledge_base_id": "eb665e87-7a3b-46e3-915a-41429dd17e8f",
+            "document_revision_id": "a3c9b1b4-fd50-435b-aab0-f50d6e1df370",
+            "chunk_id": "6af48ef5cf190360934fed16290c5e0799201f3739e65109eeb55f0722e4302f"
+          }
+        },
+        {
+          "id": "S48",
+          "handle": "R00002E1",
+          "offsets": [
+            500,
+            630
+          ],
+          "chunk_offsets": [
+            500,
+            630
+          ],
+          "text_sha256": "29608413819958504fd9119215bfa1d83edb3949be3fbe056408bb1b40775a77",
+          "reference": {
+            "snapshot_id": "3b1c6937-4d12-4683-937d-7178f50d96ed",
+            "knowledge_base_id": "eb665e87-7a3b-46e3-915a-41429dd17e8f",
+            "document_revision_id": "a3c9b1b4-fd50-435b-aab0-f50d6e1df370",
+            "chunk_id": "2a17628bd7aa992e78175ab7d28c78308b308f77be29550134ca3d4f7f124c3e"
+          }
+        }
+      ]
+    },
+    "candidate-p6": {
+      "case": "p6",
+      "question": "In the workspace paper Massive vs. Curated Word Embeddings for Low-Resourced Languages (arXiv:1912.02481), compare the effects of corpus quality and corpus size on word similarity for Twi and Yorùbá. Cite supporting passages from this workspace.",
+      "paper_id": "1912.02481",
+      "group": "regression",
+      "status": "SUCCEEDED",
+      "failure": null,
+      "delivered": true,
+      "seconds": 28.093,
+      "model_rounds": 3,
+      "tool_calls": 2,
+      "tool_errors": [],
+      "known_usage_matches_receipts": true,
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "reason": "Bound excerpts correctly cover the clean-data/size interaction and language-specific effects: C3 is optimal for Yorùbá while C2 is optimal for Twi; 742k selected tokens beat 16M noisy tokens for Twi. C2 and C3 are left unexplained in the visible selection, although their implications and the quality-size answer are correct and attributable.",
+        "correct_sources": [
+          "R00002E1",
+          "R00002E4",
+          "R00002E5"
+        ],
+        "cited_handles": [
+          "R00002E1",
+          "R00002E4",
+          "R00002E5"
+        ],
+        "current_target_handles": [
+          "R00001E1",
+          "R00001E2",
+          "R00001E3",
+          "R00001E4",
+          "R00001E5",
+          "R00001E6",
+          "R00002E1",
+          "R00002E2",
+          "R00002E3",
+          "R00002E4",
+          "R00002E5",
+          "R00002E6"
+        ],
+        "status": "SUCCEEDED",
+        "answer_delivered": true,
+        "model_calls": 3,
+        "tool_calls": 2,
+        "tool_errors": 0,
+        "seconds": 28.093,
+        "run_id": "37233a34-35e2-4b39-b8fc-caffde659240"
+      },
+      "usage": {
+        "calls": 3,
+        "input_tokens": 12048,
+        "output_tokens": 1514,
+        "cached_tokens": 2816,
+        "spent_cny": "0.03068864",
+        "upper_cny": "0.036208"
+      },
+      "sequences": [
+        83,
+        84,
+        85
+      ],
+      "selection_request": 85,
+      "selector_finish": "stop",
+      "selection_message_sha256": "881d0668e30da1ba6ad8a973fcedca0098c4da78b2c1deaf18fd48b78c455fd6",
+      "selection_spans": [
+        {
+          "id": "S53",
+          "handle": "R00002E1",
+          "offsets": [
+            31,
+            336
+          ],
+          "chunk_offsets": [
+            31,
+            336
+          ],
+          "text_sha256": "90525974da8e4caad1adcbe6ba67a599ddd442595cbc60974ac279f471c190d5",
+          "reference": {
+            "snapshot_id": "3b1c6937-4d12-4683-937d-7178f50d96ed",
+            "knowledge_base_id": "eb665e87-7a3b-46e3-915a-41429dd17e8f",
+            "document_revision_id": "91c34997-5eee-4ff3-bcd7-d33d909d8922",
+            "chunk_id": "87f4cfd7e69c45e7979075f8a476e2646893e5d46f5669a3f2bee33594f6bd33"
+          }
+        },
+        {
+          "id": "S78",
+          "handle": "R00002E4",
+          "offsets": [
+            215,
+            404
+          ],
+          "chunk_offsets": [
+            215,
+            404
+          ],
+          "text_sha256": "01d3bf8a107ea5022a5f42bac3cca7ea67e20d20dfbef9afc2d9645b5f478fe3",
+          "reference": {
+            "snapshot_id": "3b1c6937-4d12-4683-937d-7178f50d96ed",
+            "knowledge_base_id": "eb665e87-7a3b-46e3-915a-41429dd17e8f",
+            "document_revision_id": "91c34997-5eee-4ff3-bcd7-d33d909d8922",
+            "chunk_id": "6791a847afc3d0f0bdbeac3f2a0c8d855c927d3b95cdb21a8a2379b8b66ba85f"
+          }
+        },
+        {
+          "id": "S80",
+          "handle": "R00002E4",
+          "offsets": [
+            578,
+            710
+          ],
+          "chunk_offsets": [
+            578,
+            710
+          ],
+          "text_sha256": "d22b4451aca916aa15f47770fe27a3ec1b7d37a07afffe466d2feb00cb371634",
+          "reference": {
+            "snapshot_id": "3b1c6937-4d12-4683-937d-7178f50d96ed",
+            "knowledge_base_id": "eb665e87-7a3b-46e3-915a-41429dd17e8f",
+            "document_revision_id": "91c34997-5eee-4ff3-bcd7-d33d909d8922",
+            "chunk_id": "6791a847afc3d0f0bdbeac3f2a0c8d855c927d3b95cdb21a8a2379b8b66ba85f"
+          }
+        },
+        {
+          "id": "S86",
+          "handle": "R00002E5",
+          "offsets": [
+            28,
+            288
+          ],
+          "chunk_offsets": [
+            28,
+            288
+          ],
+          "text_sha256": "b1f7d1617535900d19fa7aabdce9448cefc711b1cfa2f79014d7b0e1f20a81bc",
+          "reference": {
+            "snapshot_id": "3b1c6937-4d12-4683-937d-7178f50d96ed",
+            "knowledge_base_id": "eb665e87-7a3b-46e3-915a-41429dd17e8f",
+            "document_revision_id": "91c34997-5eee-4ff3-bcd7-d33d909d8922",
+            "chunk_id": "0c804c100a7075571aa1cabafcef4992ce21a2346e05b32e7180367bfe2f0c61"
+          }
+        }
+      ]
+    },
+    "candidate-p7": {
+      "case": "p7",
+      "question": "In the workspace paper Progress and Tradeoffs in Neural Language Models (arXiv:1811.00942), how did the authors compare neural and classic language models in terms of quality and computational performance? Cite supporting passages from this workspace.",
+      "paper_id": "1811.00942",
+      "group": "regression",
+      "status": "SUCCEEDED",
+      "failure": null,
+      "delivered": true,
+      "seconds": 30.953,
+      "model_rounds": 4,
+      "tool_calls": 2,
+      "tool_errors": [],
+      "known_usage_matches_receipts": true,
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "reason": "Explicit R@3 and perplexity changes address model quality. Bound support gives latency and energy and the benchmark comparison; 2.5 times lower perplexity, 49 times longer latency and 32 times energy agree with the paper. The R@3 passage first appears after the second search. Two overlapping quotes repeat the headline tradeoff.",
+        "correct_sources": [
+          "R00001E1",
+          "R00001E2",
+          "R00001E5",
+          "R00002E1"
+        ],
+        "cited_handles": [
+          "R00001E1",
+          "R00001E2",
+          "R00001E5",
+          "R00002E1"
+        ],
+        "current_target_handles": [
+          "R00001E1",
+          "R00001E2",
+          "R00001E3",
+          "R00001E4",
+          "R00001E5",
+          "R00001E6",
+          "R00002E1",
+          "R00002E2",
+          "R00002E3",
+          "R00002E4"
+        ],
+        "status": "SUCCEEDED",
+        "answer_delivered": true,
+        "model_calls": 4,
+        "tool_calls": 2,
+        "tool_errors": 0,
+        "seconds": 30.953,
+        "run_id": "48097a50-a080-41ee-8834-83a21d808bbc"
+      },
+      "usage": {
+        "calls": 4,
+        "input_tokens": 13927,
+        "output_tokens": 1568,
+        "cached_tokens": 6912,
+        "spent_cny": "0.02685048",
+        "upper_cny": "0.040398"
+      },
+      "sequences": [
+        86,
+        87,
+        88,
+        89
+      ],
+      "selection_request": 89,
+      "selector_finish": "stop",
+      "selection_message_sha256": "30734cc68db65141ad93a386f9fcb6e0045bff886150c2e00fa0d32d16da98c1",
+      "selection_spans": [
+        {
+          "id": "S7",
+          "handle": "R00001E1",
+          "offsets": [
+            637,
+            804
+          ],
+          "chunk_offsets": [
+            637,
+            804
+          ],
+          "text_sha256": "398e73752dc717873dfdbcb1edb4be8d75bf23f8e37af7d50e35213ca31de0f6",
+          "reference": {
+            "snapshot_id": "3b1c6937-4d12-4683-937d-7178f50d96ed",
+            "knowledge_base_id": "eb665e87-7a3b-46e3-915a-41429dd17e8f",
+            "document_revision_id": "63ffd77f-1f2c-427b-b980-fb7a7357d1e0",
+            "chunk_id": "34ed6f6fcec3572f77567c303e8d2dbfb716a4cca00946c432323be5d23f9fbc"
+          }
+        },
+        {
+          "id": "S18",
+          "handle": "R00001E2",
+          "offsets": [
+            942,
+            1199
+          ],
+          "chunk_offsets": [
+            942,
+            1199
+          ],
+          "text_sha256": "754499d0c24abf07efbb7e25b8620c42c488a2c044556695d3cfc37e7399952d",
+          "reference": {
+            "snapshot_id": "3b1c6937-4d12-4683-937d-7178f50d96ed",
+            "knowledge_base_id": "eb665e87-7a3b-46e3-915a-41429dd17e8f",
+            "document_revision_id": "63ffd77f-1f2c-427b-b980-fb7a7357d1e0",
+            "chunk_id": "86a3b196a1fe95b610ceaa33f79fbc4bcf2b1b583305e7e8aa6d9b866dc236f8"
+          }
+        },
+        {
+          "id": "S42",
+          "handle": "R00001E5",
+          "offsets": [
+            536,
+            732
+          ],
+          "chunk_offsets": [
+            536,
+            732
+          ],
+          "text_sha256": "a169abfde2c2b49e6fde62fba66db7a23952b88accee37647b57b79da4a18d2a",
+          "reference": {
+            "snapshot_id": "3b1c6937-4d12-4683-937d-7178f50d96ed",
+            "knowledge_base_id": "eb665e87-7a3b-46e3-915a-41429dd17e8f",
+            "document_revision_id": "63ffd77f-1f2c-427b-b980-fb7a7357d1e0",
+            "chunk_id": "c89d56699b1eec31a05f760c2a155ef617b0571a01d83f5538d914d0a11f6056"
+          }
+        },
+        {
+          "id": "S58",
+          "handle": "R00002E1",
+          "offsets": [
+            770,
+            926
+          ],
+          "chunk_offsets": [
+            770,
+            926
+          ],
+          "text_sha256": "190deda21ac2e91eda32d9fda7a2a508a44d96f969987a7f6b6be23d2447a291",
+          "reference": {
+            "snapshot_id": "3b1c6937-4d12-4683-937d-7178f50d96ed",
+            "knowledge_base_id": "eb665e87-7a3b-46e3-915a-41429dd17e8f",
+            "document_revision_id": "63ffd77f-1f2c-427b-b980-fb7a7357d1e0",
+            "chunk_id": "5f52d1fbcc625485065e13a6807c9cf44608a65215b1511825e06920aa87afa1"
+          }
+        }
+      ]
+    },
+    "candidate-p8": {
+      "case": "p8",
+      "question": "In the workspace paper Diachronic Topics in New High German Poetry (arXiv:1909.11189), which digital collection supplied the verse corpus? Cite a supporting passage.",
+      "paper_id": "1909.11189",
+      "group": "regression",
+      "status": "SUCCEEDED",
+      "failure": null,
+      "delivered": true,
+      "seconds": 14.11,
+      "model_rounds": 3,
+      "tool_calls": 1,
+      "tool_errors": [],
+      "known_usage_matches_receipts": true,
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "reason": "Directly identifies the Digital Library in the TextGrid Repository. The extra collection size, upstream site, and temporal coverage are in the cited passage.",
+        "correct_sources": [
+          "R00001E1"
+        ],
+        "cited_handles": [
+          "R00001E1"
+        ],
+        "current_target_handles": [
+          "R00001E1",
+          "R00001E2",
+          "R00001E3"
+        ],
+        "status": "SUCCEEDED",
+        "answer_delivered": true,
+        "model_calls": 3,
+        "tool_calls": 1,
+        "tool_errors": 0,
+        "seconds": 14.11,
+        "run_id": "82fb62dc-a293-4ee8-86d8-26094d7c12df"
+      },
+      "usage": {
+        "calls": 3,
+        "input_tokens": 7162,
+        "output_tokens": 261,
+        "cached_tokens": 2816,
+        "spent_cny": "0.01089264",
+        "upper_cny": "0.016412"
+      },
+      "sequences": [
+        90,
+        91,
+        92
+      ],
+      "selection_request": 92,
+      "selector_finish": "stop",
+      "selection_message_sha256": "1e9bf2888f5f9cae9f10e714409e82d77f5f43db981aa0d14431e375ced1ead8",
+      "selection_spans": [
+        {
+          "id": "S6",
+          "handle": "R00001E1",
+          "offsets": [
+            417,
+            659
+          ],
+          "chunk_offsets": [
+            417,
+            659
+          ],
+          "text_sha256": "b7ac6b9c8375c5e0cf6c6046e4f700afbb2cb64f4460fa1c2837f4e77d672095",
+          "reference": {
+            "snapshot_id": "3b1c6937-4d12-4683-937d-7178f50d96ed",
+            "knowledge_base_id": "eb665e87-7a3b-46e3-915a-41429dd17e8f",
+            "document_revision_id": "a3c9b1b4-fd50-435b-aab0-f50d6e1df370",
+            "chunk_id": "8b39b02733d9b5427c738f387199a6908a66ef8832cffa7ff9132e4e279327a1"
+          }
+        },
+        {
+          "id": "S8",
+          "handle": "R00001E1",
+          "offsets": [
+            669,
+            791
+          ],
+          "chunk_offsets": [
+            669,
+            791
+          ],
+          "text_sha256": "da3faf833b93c2c17257683caf52f729c321d67398c8a3e8754bfdb6c71c6240",
+          "reference": {
+            "snapshot_id": "3b1c6937-4d12-4683-937d-7178f50d96ed",
+            "knowledge_base_id": "eb665e87-7a3b-46e3-915a-41429dd17e8f",
+            "document_revision_id": "a3c9b1b4-fd50-435b-aab0-f50d6e1df370",
+            "chunk_id": "8b39b02733d9b5427c738f387199a6908a66ef8832cffa7ff9132e4e279327a1"
+          }
+        },
+        {
+          "id": "S9",
+          "handle": "R00001E1",
+          "offsets": [
+            792,
+            921
+          ],
+          "chunk_offsets": [
+            792,
+            921
+          ],
+          "text_sha256": "5d0d3fbe9944e3a348f109b9be5f6da4d71f2ea3c6c8a9fed1fcceab81dbd0d2",
+          "reference": {
+            "snapshot_id": "3b1c6937-4d12-4683-937d-7178f50d96ed",
+            "knowledge_base_id": "eb665e87-7a3b-46e3-915a-41429dd17e8f",
+            "document_revision_id": "a3c9b1b4-fd50-435b-aab0-f50d6e1df370",
+            "chunk_id": "8b39b02733d9b5427c738f387199a6908a66ef8832cffa7ff9132e4e279327a1"
+          }
+        }
+      ]
+    },
+    "candidate-p9": {
+      "case": "p9",
+      "question": "In the workspace paper Minimally Supervised Learning of Affective Events Using Discourse Relations (arXiv:1909.00694), how were the automatically labeled AL pairs balanced, and which part of each ACP sentence did the authors extract as an affective event? Cite a supporting passage for each step.",
+      "paper_id": "1909.00694",
+      "group": "regression",
+      "status": "SUCCEEDED",
+      "failure": null,
+      "delivered": true,
+      "seconds": 21.562,
+      "model_rounds": 3,
+      "tool_calls": 2,
+      "tool_errors": [],
+      "known_usage_matches_receipts": true,
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "reason": "Random AL balancing equalizes positive and negative latter events; extracting the last clause follows the distinct ACP paragraph in the same bound clip. The second selected sentence relies on cited context for the ACP label, within the same fragment rule applied to the earlier candidate.",
+        "correct_sources": [
+          "R00002E1"
+        ],
+        "cited_handles": [
+          "R00002E1"
+        ],
+        "current_target_handles": [
+          "R00001E1",
+          "R00001E2",
+          "R00001E3",
+          "R00001E4",
+          "R00001E5",
+          "R00001E6",
+          "R00002E1",
+          "R00002E2",
+          "R00002E3",
+          "R00002E4",
+          "R00002E5",
+          "R00002E6"
+        ],
+        "status": "SUCCEEDED",
+        "answer_delivered": true,
+        "model_calls": 3,
+        "tool_calls": 2,
+        "tool_errors": 0,
+        "seconds": 21.562,
+        "run_id": "457f39f4-94d9-4dbf-a2ff-8805cd1950a5"
+      },
+      "usage": {
+        "calls": 3,
+        "input_tokens": 12329,
+        "output_tokens": 541,
+        "cached_tokens": 2816,
+        "spent_cny": "0.02346664",
+        "upper_cny": "0.028986"
+      },
+      "sequences": [
+        93,
+        94,
+        95
+      ],
+      "selection_request": 95,
+      "selector_finish": "stop",
+      "selection_message_sha256": "b52a2f7e11db419c2ca34605c2b65e4a50e597a85604fe8444975a99d32542bb",
+      "selection_spans": [
+        {
+          "id": "S86",
+          "handle": "R00002E1",
+          "offsets": [
+            29,
+            141
+          ],
+          "chunk_offsets": [
+            29,
+            141
+          ],
+          "text_sha256": "8db2d9abe561554167b0d94d358c53cf5187b5e9b78d349e98ede0874bc1eaf2",
+          "reference": {
+            "snapshot_id": "3b1c6937-4d12-4683-937d-7178f50d96ed",
+            "knowledge_base_id": "eb665e87-7a3b-46e3-915a-41429dd17e8f",
+            "document_revision_id": "9e1649c0-f936-4106-a39f-7fda41132da0",
+            "chunk_id": "816381e1b713f8f7b8afcbcd9b4e53be86981a5b3542c5bc0691ca957301817f"
+          }
+        },
+        {
+          "id": "S100",
+          "handle": "R00002E1",
+          "offsets": [
+            886,
+            946
+          ],
+          "chunk_offsets": [
+            886,
+            946
+          ],
+          "text_sha256": "fc57ba0ec924935c51ad8921de012e1bc8a981edab504eac15f867fea3a40cfe",
+          "reference": {
+            "snapshot_id": "3b1c6937-4d12-4683-937d-7178f50d96ed",
+            "knowledge_base_id": "eb665e87-7a3b-46e3-915a-41429dd17e8f",
+            "document_revision_id": "9e1649c0-f936-4106-a39f-7fda41132da0",
+            "chunk_id": "816381e1b713f8f7b8afcbcd9b4e53be86981a5b3542c5bc0691ca957301817f"
+          }
+        }
+      ]
+    },
+    "candidate-n2": {
+      "case": "n2",
+      "question": "In the workspace paper Progress and Tradeoffs in Neural Language Models (arXiv:1811.00942), which classic non-neural language model served as the baseline, including its order and smoothing method? Cite supporting passages from this workspace.",
+      "paper_id": "1811.00942",
+      "group": "regression",
+      "status": "SUCCEEDED",
+      "failure": null,
+      "delivered": true,
+      "seconds": 14.25,
+      "model_rounds": 3,
+      "tool_calls": 1,
+      "tool_errors": [],
+      "known_usage_matches_receipts": true,
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "reason": "The exact cited sentence names KN-5 and gives both five-gram order and modified Kneser–Ney smoothing. Its supplementary AWD expansion is accurate.",
+        "correct_sources": [
+          "R00001E3"
+        ],
+        "cited_handles": [
+          "R00001E3"
+        ],
+        "current_target_handles": [
+          "R00001E3"
+        ],
+        "status": "SUCCEEDED",
+        "answer_delivered": true,
+        "model_calls": 3,
+        "tool_calls": 1,
+        "tool_errors": 0,
+        "seconds": 14.25,
+        "run_id": "6a47c19d-aef5-4fbe-b3e6-685ddfdfb48b"
+      },
+      "usage": {
+        "calls": 3,
+        "input_tokens": 8017,
+        "output_tokens": 275,
+        "cached_tokens": 2816,
+        "spent_cny": "0.01271464",
+        "upper_cny": "0.018234"
+      },
+      "sequences": [
+        96,
+        97,
+        98
+      ],
+      "selection_request": 98,
+      "selector_finish": "stop",
+      "selection_message_sha256": "82812991146d2d555c0a584b782179d66f124a30ebf5d1e667e34a96f9f3dd01",
+      "selection_spans": [
+        {
+          "id": "S7",
+          "handle": "R00001E3",
+          "offsets": [
+            635,
+            768
+          ],
+          "chunk_offsets": [
+            635,
+            768
+          ],
+          "text_sha256": "bbf26ce60f7341e113a7f3e8244cd08e8cff97bd4953de3d55a3f49666ace549",
+          "reference": {
+            "snapshot_id": "3b1c6937-4d12-4683-937d-7178f50d96ed",
+            "knowledge_base_id": "eb665e87-7a3b-46e3-915a-41429dd17e8f",
+            "document_revision_id": "63ffd77f-1f2c-427b-b980-fb7a7357d1e0",
+            "chunk_id": "b1a75146b6d30496fc8dee07285c15df6933f8477bcdd8e1d91f7fc8690c907d"
+          }
+        }
+      ]
+    }
+  },
+  "summary": {
+    "baseline-fresh": {
+      "cases": 8,
+      "delivered": 8,
+      "passes": {
+        "complete_primary": 8,
+        "citation_entails": 8,
+        "strict": 8
+      },
+      "complete_evidence": 8,
+      "tool_calls": 9,
+      "tool_error_runs": 0,
+      "usage_matches": 8,
+      "selector_rounds": 0,
+      "median_seconds": 14.828,
+      "calls": 16,
+      "input_tokens": 46261,
+      "output_tokens": 2758,
+      "cached_tokens": 21504,
+      "spent_cny": "0.07243816",
+      "upper_cny": "0.114586"
+    },
+    "candidate-fresh": {
+      "cases": 8,
+      "delivered": 8,
+      "passes": {
+        "complete_primary": 8,
+        "citation_entails": 8,
+        "strict": 8
+      },
+      "complete_evidence": 8,
+      "tool_calls": 11,
+      "tool_error_runs": 0,
+      "usage_matches": 8,
+      "selector_rounds": 8,
+      "median_seconds": 15.078,
+      "calls": 26,
+      "input_tokens": 80008,
+      "output_tokens": 2763,
+      "cached_tokens": 32000,
+      "spent_cny": "0.11940000",
+      "upper_cny": "0.182120"
+    },
+    "baseline-regression": {
+      "cases": 9,
+      "delivered": 9,
+      "passes": {
+        "complete_primary": 8,
+        "citation_entails": 8,
+        "strict": 7
+      },
+      "complete_evidence": 8,
+      "tool_calls": 13,
+      "tool_error_runs": 0,
+      "usage_matches": 9,
+      "selector_rounds": 0,
+      "median_seconds": 17.093,
+      "calls": 21,
+      "input_tokens": 68208,
+      "output_tokens": 6207,
+      "cached_tokens": 37632,
+      "spent_cny": "0.11231328",
+      "upper_cny": "0.186072"
+    },
+    "candidate-regression": {
+      "cases": 9,
+      "delivered": 9,
+      "passes": {
+        "complete_primary": 7,
+        "citation_entails": 7,
+        "strict": 7
+      },
+      "complete_evidence": 9,
+      "tool_calls": 16,
+      "tool_error_runs": 0,
+      "usage_matches": 9,
+      "selector_rounds": 9,
+      "median_seconds": 25.562,
+      "calls": 32,
+      "input_tokens": 112275,
+      "output_tokens": 7262,
+      "cached_tokens": 43264,
+      "spent_cny": "0.19784856",
+      "upper_cny": "0.282646"
+    },
+    "baseline-all": {
+      "cases": 17,
+      "delivered": 17,
+      "passes": {
+        "complete_primary": 16,
+        "citation_entails": 16,
+        "strict": 15
+      },
+      "complete_evidence": 16,
+      "tool_calls": 22,
+      "tool_error_runs": 0,
+      "usage_matches": 17,
+      "selector_rounds": 0,
+      "median_seconds": 16.188,
+      "calls": 37,
+      "input_tokens": 114469,
+      "output_tokens": 8965,
+      "cached_tokens": 59136,
+      "spent_cny": "0.18475144",
+      "upper_cny": "0.300658"
+    },
+    "candidate-all": {
+      "cases": 17,
+      "delivered": 17,
+      "passes": {
+        "complete_primary": 15,
+        "citation_entails": 15,
+        "strict": 15
+      },
+      "complete_evidence": 17,
+      "tool_calls": 27,
+      "tool_error_runs": 0,
+      "usage_matches": 17,
+      "selector_rounds": 17,
+      "median_seconds": 19.36,
+      "calls": 58,
+      "input_tokens": 192283,
+      "output_tokens": 10025,
+      "cached_tokens": 75264,
+      "spent_cny": "0.31724856",
+      "upper_cny": "0.464766"
+    }
+  },
+  "paired": {
+    "fresh": {
+      "complete_primary": {
+        "gained": [],
+        "lost": []
+      },
+      "citation_entails": {
+        "gained": [],
+        "lost": []
+      },
+      "strict": {
+        "gained": [],
+        "lost": []
+      }
+    },
+    "regression": {
+      "complete_primary": {
+        "gained": [
+          "p7"
+        ],
+        "lost": [
+          "p3",
+          "p4"
+        ]
+      },
+      "citation_entails": {
+        "gained": [
+          "p7"
+        ],
+        "lost": [
+          "p3",
+          "p4"
+        ]
+      },
+      "strict": {
+        "gained": [
+          "p7"
+        ],
+        "lost": [
+          "p4"
+        ]
+      }
+    },
+    "all": {
+      "complete_primary": {
+        "gained": [
+          "p7"
+        ],
+        "lost": [
+          "p3",
+          "p4"
+        ]
+      },
+      "citation_entails": {
+        "gained": [
+          "p7"
+        ],
+        "lost": [
+          "p3",
+          "p4"
+        ]
+      },
+      "strict": {
+        "gained": [
+          "p7"
+        ],
+        "lost": [
+          "p4"
+        ]
+      }
+    }
+  },
+  "release": {
+    "fixed_sufficient_ok": false,
+    "fresh_gain": false,
+    "paired_losses": {
+      "complete_primary": [
+        "p3",
+        "p4"
+      ],
+      "citation_entails": [
+        "p3",
+        "p4"
+      ],
+      "strict": [
+        "p4"
+      ]
+    },
+    "historical_losses": [
+      "p3",
+      "p4"
+    ],
+    "all_usage_matched": true,
+    "merge_allowed": false
+  },
+  "usage": {
+    "calls": 98,
+    "input_tokens": 318382,
+    "output_tokens": 19015,
+    "cached_tokens": 134400,
+    "spent_cny": "0.52546000",
+    "upper_cny": "0.788884"
+  },
+  "transport_summary": {
+    "baseline": {
+      "runs": 17,
+      "receipts": 37,
+      "runs_expected": 17,
+      "selector_receipts": 0,
+      "ordinary_receipts_with_thinking_disabled": 0,
+      "selector_reasoning_tokens": [],
+      "selector_declines": [],
+      "selector_failures": [],
+      "verified_spans": 0,
+      "all_step_and_run_token_totals_match": true
+    },
+    "candidate": {
+      "runs": 17,
+      "receipts": 58,
+      "runs_expected": 17,
+      "selector_receipts": 17,
+      "ordinary_receipts_with_thinking_disabled": 0,
+      "selector_reasoning_tokens": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "selector_declines": [],
+      "selector_failures": [],
+      "verified_spans": 39,
+      "all_step_and_run_token_totals_match": true
+    }
+  },
+  "cumulative_upper_cny": "11.64614308",
+  "new_unknown": 0
+}

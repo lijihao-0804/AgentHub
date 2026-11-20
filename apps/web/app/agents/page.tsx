@@ -146,7 +146,9 @@ function AgentCatalog() {
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!canCreate) return;
+    const template = templates.data?.find((item) => item.key === form.templateKey);
     const runtimeConfig = {
+      ...template?.runtime_config,
       memory: form.memoryScope === "OFF"
         ? { long_term_memory: false }
         : { long_term_memory: true, scope: form.memoryScope },
@@ -160,6 +162,7 @@ function AgentCatalog() {
         system_prompt: form.system_prompt,
         model_profile_id: form.model_profile_id,
         knowledge_binding_mode: form.knowledge_binding_mode,
+        retrieval_config: template?.retrieval_config,
         ...(form.max_attempts ? { model_retry_policy: { max_attempts: Number(form.max_attempts) } } : {}),
         runtime_config: runtimeConfig,
       }),

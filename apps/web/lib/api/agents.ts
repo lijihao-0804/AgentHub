@@ -18,6 +18,8 @@ function agentsBase(workspaceId: string): string {
 export type ModelRetryPolicy = { max_attempts?: number };
 
 export type RetrievalConfig = {
+  paper_answer_policy?: "verified_quotes_v1" | "sentence_ids_v1" | "sentence_ids_v2" | null;
+  query_rewrite?: "paper_comparison_v1" | "paper_comparison_v2" | null;
   embedding_model?: string | null;
   reranker_model?: string | null;
   dense_top_k?: number | null;
@@ -147,6 +149,7 @@ export type RuntimeConfig = {
   context_budget_sources?: ContextBudgetSources | null;
   memory?: MemoryConfig | null;
   context_policy?: ContextPolicyRequest | null;
+  analysis_answer_policy?: "grounded_table_v1" | "grounded_table_v2" | null;
   support_answer_policy?: "support_facts_v1" | null;
   history_policy?: "deterministic_history_v1" | null;
   summary_policy?: SummaryPolicy | null;

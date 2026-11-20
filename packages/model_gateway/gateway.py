@@ -5,7 +5,9 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
-from collections.abc import AsyncIterator, Awaitable, Callable, Mapping
+from collections.abc import AsyncIterator, Awaitable, Callable, Iterator, Mapping
+from contextlib import contextmanager
+from contextvars import ContextVar
 from dataclasses import replace
 from typing import Any, Literal, Protocol
 from uuid import UUID
@@ -55,6 +57,21 @@ from packages.observability.noop import NoopTraceSink, NoopTraceSpan
 from packages.observability.timing import timed_span
 
 logger = logging.getLogger(__name__)
+
+_rejected_model_responses: ContextVar[list[ModelResponse] | None] = ContextVar(
+    "agenthub_rejected_model_responses", default=None
+)
+
+
+@contextmanager
+def capture_rejected_model_responses() -> Iterator[list[ModelResponse]]:
+    """Collect empty completed attempts alongside the logical call result."""
+    responses: list[ModelResponse] = []
+    token = _rejected_model_responses.set(responses)
+    try:
+        yield responses
+    finally:
+        _rejected_model_responses.reset(token)
 
 
 class ModelProviderAdapter(Protocol):
@@ -505,13 +522,19 @@ class ModelGatewayService(ModelGateway):
                     attempt_count += 1
                     buffered: list[ModelStreamEvent] = []
                     visible = False
+                    stream_usage = None
                     final_response: ModelResponse | None = None
                     try:
                         async with asyncio.timeout(float(profile.timeout_seconds)):
                             async for event in self.adapter.stream(profile, credential, request):
+                                if event.usage is not None:
+                                    stream_usage = event.usage
                                 if event.response is not None:
                                     active_budget_reservation = None
                                     final_response = event.response
+                                    if final_response.usage is None and stream_usage is not None:
+                                        final_response = replace(final_response, usage=stream_usage)
+                                        event = replace(event, response=final_response)
                                     try:
                                         _validate_usable_response(final_response)
                                     except EmptyModelResponseError:
@@ -891,7 +914,13 @@ def _validate_usable_response(response: ModelResponse) -> None:
         # around the provider's safety decision.
         if response.finish_reason in {"content_filter", "refusal"}:
             return
-        raise EmptyModelResponseError(output_limit_reached=response.finish_reason == "length")
+        receipt = replace(response, content="")
+        rejected_responses = _rejected_model_responses.get()
+        if rejected_responses is not None:
+            rejected_responses.append(receipt)
+        raise EmptyModelResponseError(
+            output_limit_reached=response.finish_reason == "length", response=receipt
+        )
 
 
 def _initial_trace_attributes(

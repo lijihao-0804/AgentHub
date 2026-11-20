@@ -11,7 +11,13 @@ from packages.model_gateway.contracts import (
 )
 from packages.model_gateway.errors import ModelGatewayError, ModelGatewayErrorCode
 
-_BOOLEAN_CAPABILITIES = ("tool_calling", "streaming", "structured_output", "vision")
+_BOOLEAN_CAPABILITIES = (
+    "tool_calling",
+    "streaming",
+    "structured_output",
+    "vision",
+    "aliyun_deepseek_non_thinking",
+)
 
 
 def capabilities_from_mapping(values: Mapping[str, Any]) -> ModelCapabilities:
@@ -37,6 +43,7 @@ def capabilities_from_mapping(values: Mapping[str, Any]) -> ModelCapabilities:
         vision=values.get("vision") is True,
         max_context_tokens=max_context_tokens,
         context_metadata=context_metadata_from_mapping(values.get("context_metadata")),
+        aliyun_deepseek_non_thinking=values.get("aliyun_deepseek_non_thinking") is True,
     )
 
 

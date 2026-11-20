@@ -285,6 +285,13 @@ def parse_frozen_agent_spec(
         runtime["context_budget_sources"] = dict(sources)
     elif policy_value is not None:
         raise _invalid_binding()
+    if "analysis_answer_policy" in runtime_value:
+        if runtime_value["analysis_answer_policy"] not in (
+            "grounded_table_v1",
+            "grounded_table_v2",
+        ):
+            raise _invalid_binding()
+        runtime["analysis_answer_policy"] = runtime_value["analysis_answer_policy"]
     if "support_answer_policy" in runtime_value:
         if runtime_value["support_answer_policy"] != "support_facts_v1":
             raise _invalid_binding()

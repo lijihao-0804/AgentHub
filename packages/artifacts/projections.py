@@ -83,6 +83,27 @@ def _number(value: Any) -> float | int | None:
 
 
 def project_paper_search(call: RecordedToolCall, run_id: UUID) -> BuiltArtifact | None:
+    if tool_tail(call.tool_identity) == "get_paper":
+        structured = _structured(call)
+        if structured is None:
+            return None
+        paper = structured.get("paper")
+        requested_id = _text(call.arguments.get("paper_id"))
+        if not requested_id or not isinstance(paper, dict) or paper.get("paper_id") != requested_id:
+            return None
+        # The research pane and shortlist accept this existing paper-list shape.
+        # The lookup supplies one record and makes no claim about a search corpus.
+        return BuiltArtifact(
+            schemas.PAPER_SEARCH,
+            f"Paper: {requested_id}"[:MAX_TITLE_LENGTH],
+            {
+                "query": requested_id,
+                "source": structured.get("source") or "unknown",
+                "filters": {},
+                "total": 1,
+                "papers": [{**paper, "provenance": _provenance(call, run_id)}],
+            },
+        )
     if not is_search_tool(call.tool_identity):
         return None
     built = build_search_content(call, run_id=run_id)
@@ -286,8 +307,148 @@ def project_incident_timeline(call: RecordedToolCall, run_id: UUID) -> BuiltArti
 # analysis
 
 
+def _metric_table(
+    call: RecordedToolCall, run_id: UUID, title: str, columns: list[str], rows: list[list]
+) -> BuiltArtifact:
+    return BuiltArtifact(
+        schemas.ANALYSIS_QUERY_RESULT,
+        title,
+        {
+            "question": None,
+            "metric_arguments": call.arguments,
+            "columns": columns,
+            "rows": rows[: schemas.MAX_ROWS],
+            "row_count": len(rows),
+            "truncated": len(rows) > schemas.MAX_ROWS,
+            "provenance": _provenance(call, run_id),
+        },
+    )
+
+
+def _registration_conversion(call: RecordedToolCall, run_id: UUID) -> BuiltArtifact | None:
+    result = _structured(call)
+    if not result:
+        return None
+    windows = result.get("windows")
+    if (
+        not isinstance(windows, list)
+        or not 1 <= len(windows) <= 2
+        or windows != call.arguments.get("windows")
+    ):
+        return None
+    overall, platforms, versions = (result.get(key) for key in ("overall", "platforms", "versions"))
+    if (
+        not isinstance(overall, dict)
+        or not isinstance(platforms, list)
+        or not isinstance(versions, list)
+    ):
+        return None
+    rows = []
+    for scope, groups in (("overall", [overall]), ("platform", platforms), ("version", versions)):
+        for group in groups:
+            if not isinstance(group, dict) or "change_pp" not in group:
+                return None
+            if scope != "overall" and not _text(group.get("platform")):
+                return None
+            if scope == "version" and not _text(group.get("app_version")):
+                return None
+            periods = group.get("periods")
+            if not isinstance(periods, list) or len(periods) != len(windows):
+                return None
+            for index, (window, period) in enumerate(zip(windows, periods, strict=True)):
+                if not isinstance(window, dict) or not isinstance(period, dict):
+                    return None
+                if not {"signups", "views", "rate_pct"} <= period.keys():
+                    return None
+                if any(
+                    type(period[key]) is not int or period[key] < 0 for key in ("signups", "views")
+                ):
+                    return None
+                if any(
+                    value is not None and _number(value) is None
+                    for value in (group["change_pp"], period["rate_pct"])
+                ):
+                    return None
+                rows.append(
+                    [
+                        scope,
+                        group.get("platform"),
+                        group.get("app_version"),
+                        window.get("start_date"),
+                        window.get("end_date"),
+                        period["signups"],
+                        period["views"],
+                        period["rate_pct"],
+                        group["change_pp"] if index == 1 else None,
+                    ]
+                )
+    columns = [
+        "scope",
+        "platform",
+        "app_version",
+        "start_date",
+        "end_date",
+        "signups",
+        "views",
+        "rate_pct",
+        "change_pp",
+    ]
+    return _metric_table(call, run_id, "Registration conversion", columns, rows)
+
+
+def _order_activity(call: RecordedToolCall, run_id: UUID) -> BuiltArtifact | None:
+    result = _structured(call)
+    if not result or result.get("window") != call.arguments:
+        return None
+    fields = [
+        "users",
+        "order_rows",
+        "paid_rows",
+        "non_paid_rows",
+        "refunded_rows",
+        "cancelled_rows",
+        "other_status_rows",
+    ]
+    rows = []
+    for cohort in ("with_paid_order", "without_paid_order"):
+        counts = result.get(cohort)
+        if not isinstance(counts, dict) or any(
+            type(counts.get(key)) is not int or counts[key] < 0 for key in fields
+        ):
+            return None
+        rows.append([cohort, *(counts[key] for key in fields)])
+    return _metric_table(call, run_id, "Order activity by user", ["cohort", *fields], rows)
+
+
+def _paying_users(call: RecordedToolCall, run_id: UUID) -> BuiltArtifact | None:
+    result = _structured(call)
+    if not result or call.arguments:
+        return None
+    groups = result.get("any_only_by_first_payment_status")
+    if not isinstance(groups, dict):
+        return None
+    rows = [
+        ["strict_first_qualified_users", result.get("strict_first_qualified_users")],
+        ["any_qualified_users", result.get("any_qualified_users")],
+    ]
+    for status in ("failed", "refunded", "other"):
+        rows.append([f"any_only_first_{status}", groups.get(status)])
+    if any(type(value) is not int or value < 0 for _, value in rows):
+        return None
+    return _metric_table(
+        call, run_id, "Paying users by payment history", ["measure", "users"], rows
+    )
+
+
 def project_analysis_query(call: RecordedToolCall, run_id: UUID) -> BuiltArtifact | None:
-    if tool_tail(call.tool_identity) != "query_sql":
+    name = tool_tail(call.tool_identity)
+    if name == "get_paying_user_counts":
+        return _paying_users(call, run_id)
+    if name == "get_order_activity":
+        return _order_activity(call, run_id)
+    if name == "get_registration_conversion":
+        return _registration_conversion(call, run_id)
+    if name != "query_sql":
         return None
     structured = _structured(call)
     if structured is None:

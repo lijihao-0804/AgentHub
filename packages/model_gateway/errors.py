@@ -1,6 +1,10 @@
 """Safe, provider-independent model gateway errors."""
 
 from enum import StrEnum
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from packages.model_gateway.contracts import ModelResponse
 
 
 class ModelGatewayErrorCode(StrEnum):
@@ -53,9 +57,12 @@ class ModelGatewayError(Exception):
 class EmptyModelResponseError(ModelGatewayError):
     """A completed call with neither visible text nor tool calls."""
 
-    def __init__(self, *, output_limit_reached: bool) -> None:
+    def __init__(
+        self, *, output_limit_reached: bool, response: "ModelResponse | None" = None
+    ) -> None:
         super().__init__(ModelGatewayErrorCode.MODEL_BAD_RESPONSE)
         self.output_limit_reached = output_limit_reached
+        self.response = response
 
 
 __all__ = ["EmptyModelResponseError", "ModelGatewayError", "ModelGatewayErrorCode"]

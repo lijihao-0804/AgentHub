@@ -124,3 +124,117 @@ Create a thread against that agent and ask a question. What should happen:
   ARTIFACT_NOT_EDITABLE`); it is the record of one execution. Save a copy.
 - With the tools unbound, the agent has no search ability and the prompt
   requires it to say so rather than answer from memory.
+
+## Comparison questions about a bound paper
+
+The Research Assistant template supplies `retrieval_config.query_rewrite` with the
+value `paper_comparison_v2` when creating a draft. API clients can copy the
+template's `retrieval_config` field into the ordinary agent creation request.
+For an existing agent, set the field in its draft and publish a new version.
+
+On the first built-in `search_knowledge` proposal of each turn, this setting
+can express a plural possessive as a relation, e.g. “reviewers’ ratings” becomes
+“ratings between reviewers”. It leaves explicit comparisons and model queries
+already using relational wording as proposed. Versions published with
+`paper_comparison_v1` retain their broader first-search rewrite. Both recognize
+English comparisons with an explicit leading or trailing paper title, including
+“comparison of costs across regions” and “how were ratings compared”. For a bare
+trailing reference, use a quoted title, uppercase acronym, or title accompanied
+by an arXiv identifier. The search keeps a supplied title and identifier together.
+A matching chunk still needs to be checked against its document revision,
+especially where titles coincide.
+
+A time range or cohort named before the comparison remains in the query. A second
+sentence after the question must be a simple citation request for the rewrite to
+apply. Direct knowledge-base search takes the caller's explicit search text.
+
+For an ID alone, an unsupported language, or an ambiguous comparison, the
+runtime uses the model's search phrase. Follow-up searches within the turn keep
+their proposed arguments. The existing result limit, bound snapshots, relevance
+and context budgets also apply to rewritten searches.
+
+### Checking a research answer
+
+1. Open the run's published AgentVersion and confirm the retrieval setting and
+   knowledge snapshot. In authorized checkpoint history, select the state after
+   the `POLICY` step and before the read executes. Match the call ID in the
+   assistant message's `tool_calls` to `pending_tool_calls[].tool_call_id`.
+   The assistant message contains the model's original proposal. The pending
+   entry contains the allowed query and limit passed to the tool. The observation
+   step clears the pending list, so a terminal checkpoint can have an empty list.
+2. Check the tool result for that same call ID and its success status. Where
+   only content-free run steps are available, `TOOL_PROPOSAL.arguments_hashes`
+   records the canonical hash of each proposal's effective arguments, in the
+   same order as `tool_call_ids`. A known query and limit can be checked this
+   way without exposing the raw checkpoint.
+3. Open each citation in the final answer and confirm the snapshot, document
+   revision and returned passage. Check the specific method or value the answer
+   attributes to that passage. For a numerical comparison, also check the groups,
+   units and time range. A resolvable handle establishes where the citation points.
+   Factual support requires reading the cited text.
+
+
+### Optional verified source sentences
+
+The ordinary template leaves this policy off. For an evaluation draft, request
+`GET /api/v1/workspaces/{workspace_id}/agent-templates/research?paper_answer_policy=verified_quotes_v1`.
+Copy its returned retrieval configuration into the ordinary agent creation
+request, bind the papers and publish. This variant uses `compact_v1` and a
+12,500-byte retrieval budget. The published version freezes these settings.
+
+The opt-in applies to explicitly cited English questions of the form “In the
+workspace paper *title*, how …? Cite supporting passages.” Each eligible
+passage must come from this turn's admitted built-in search results and match
+the requested document filename or arXiv identifier. When no eligible passage
+is available, or the question falls outside that scope, the ordinary research
+flow continues. On an eligible round the model can search again or select up
+to four sentences from the identified revision. The server checks each quote
+and renders the source wording beside its handle. An invalid final selection
+ends the run with `PAPER_QUOTE_SELECTION_INVALID`. Streamed runs also withhold
+unverified selections. Authentic sentences can still miss the question, omit a
+condition or leave part of a comparison unanswered. Grade those dimensions
+independently before choosing this policy for an agent.
+
+
+### Optional numbered-sentence delivery
+
+Request the research template with `?paper_answer_policy=sentence_ids_v1`,
+then use its retrieval configuration to create and publish a draft. The general
+research template leaves this option off. In a qualifying single-paper citation
+question, the normal model keeps its usual tools. It may search multiple times.
+When it proposes a final answer, the runtime withholds that draft and schedules
+one more model round. This round uses the same published model plan, step limit,
+cost guard and usage accounting. Look for `paper_sentence_selection_scheduled`
+on the draft's model step and `model_purpose=paper_sentence_selection` on the
+selection step. A run at its step limit cannot dispatch the selection round.
+
+The selector receives the question and all current-turn admitted compact
+knowledge-search passages in their observed order. It has no tools or provider
+JSON-schema requirement. Only passages matching the requested paper have
+selectable IDs. The other passages are present as reference-only text.
+The server maps selected IDs back to exact source spans and renders them with
+the original evidence handles. Both synchronous and streaming runs withhold the
+draft and raw selector output.
+
+`PAPER_SENTENCE_FORMAT_INVALID` reports malformed selections.
+`PAPER_SENTENCE_ID_OUT_OF_RANGE` reports IDs absent from the delivered list.
+`PAPER_SENTENCE_EVIDENCE_MISSING` reports missing eligible evidence or an
+explicit empty selection. `PAPER_SENTENCE_BUDGET_EXCEEDED` means the entire
+numbered view did not fit the retrieval pool or model input window. Each
+underlying search still observes its own byte cap. Assess directness,
+comparison conditions and coverage separately after a successful selection.
+
+`sentence_ids_v2` uses the same selection prompt and source mapping. Publish
+the version with a model profile that declares
+`capabilities.aliyun_deepseek_non_thinking=true` when its OpenAI-compatible
+endpoint supports Alibaba Cloud's `enable_thinking` option for DeepSeek V4.1
+Flash. Only the final selector sends `enable_thinking: false`. The ordinary
+Agent rounds and the older versions use the provider defaults. The published
+output token limit applies to both rounds.
+
+The Run and its failed model step include measured usage from completed
+responses with empty visible text. An empty selector response with a confirmed
+length stop is reported as `MODEL_OUTPUT_TRUNCATED`. Fees stay unavailable if
+the provider or the configured pricing adapter leaves the corresponding
+monetary amount unknown.
+[DeepSeek API reference](https://help.aliyun.com/en/model-studio/deepseek-api)

@@ -33,6 +33,7 @@ from apps.commerce_mcp.commerce_data import (
     ORDER_STATUSES,
     REFUND_STATUSES,
     CommerceError,
+    find_customer_order,
     find_customer_orders,
     find_order,
     find_refunds,
@@ -65,7 +66,11 @@ GET_ORDER_INPUT_SCHEMA: dict[str, Any] = {
     "type": "object",
     "properties": {
         "order_ref": {"type": "string", "minLength": 1},
-        "customer_ref": {"type": "string", "minLength": 1},
+        "customer_ref": {
+            "type": "string",
+            "minLength": 1,
+            "description": "For a specific customer's order, supply this together with order_ref.",
+        },
     },
     # JSON Schema cannot say "at least one of these" in a way every MCP client
     # renders usefully, so neither is listed as required here and the handler
@@ -225,7 +230,8 @@ TOOLS: tuple[mcp_types.Tool, ...] = (
         title="Get order",
         description=(
             "Look up one order by 'order_ref', or a customer's recent orders by 'customer_ref'. "
-            "At least one of the two is required. Returns order records with line items and "
+            "With both references, returns only their match, or an empty list. "
+            "At least one is required. Returns order records with line items and "
             "shipping timestamps."
         ),
         inputSchema=GET_ORDER_INPUT_SCHEMA,
@@ -346,9 +352,9 @@ def _get_order(arguments: dict[str, Any]) -> dict[str, Any]:
     customer_ref = arguments.get("customer_ref")
     if order_ref is None and customer_ref is None:
         raise CommerceError("Either order_ref or customer_ref is required.")
-    if order_ref is not None:
-        # The order reference is the narrower of the two, so it wins when both
-        # are given rather than being silently intersected with the customer.
+    if customer_ref is not None and order_ref is not None:
+        orders = find_customer_order(customer_ref, order_ref)
+    elif order_ref is not None:
         orders = [find_order(order_ref)]
     else:
         orders = find_customer_orders(customer_ref)

@@ -1,0 +1,2472 @@
+{
+  "plan": {
+    "baseline_commit": "c72124383cd8015c1eb9b50fa9dbc2773550ae42",
+    "historical_charged_or_reserved_cny": "9.91977108",
+    "existing_unknowns_locked": 2,
+    "budget_cny": "30.00",
+    "max_requests": 144,
+    "per_request_reserve_cny": "0.139264",
+    "worst_case_cumulative_cny": "29.97378708",
+    "model": "deepseek-v4.1-flash-1017",
+    "region": "Beijing",
+    "temperature": 0,
+    "max_tokens": 2048,
+    "cases_sha256": "f52566530ae7844073cfc15999b98c946998e4ada31212f901868ab24f575e20",
+    "phases": [
+      "Reconstruct and sign four admitting checkpoints; one final selection each, no retrieval, no sample replays.",
+      "After the fixed-evidence trial, run the ordinary and candidate versions separately through real threads on the same 8 fresh and 8 prior correct cases. Retain all first answers including failures. No automatic experiment retries and no extra retrieval policy."
+    ],
+    "release_gate": "Positive recovery on frozen evidence, positive live improvement on fresh paired cases with no lost strict or supported historical/baseline answer; report all planned cases even when a response is invalid. Changes for missing-evidence retrieval explicitly deferred. Merge only after CI on verified PR tip. No UNKNOWN resends.",
+    "pricing": "https://help.aliyun.com/zh/model-studio/deepseek-v4-1-flash"
+  },
+  "candidate_commit": "15095e3c9d14b17b505a0f9f8d238d1bf4cbd650",
+  "fixed_manifest_sha256": "4e29a6e5d7284e5d24ed0e9270a1640f9be74e04d5a0fd68e0847fe1e82e37f1",
+  "snapshot": "3b1c6937-4d12-4683-937d-7178f50d96ed",
+  "versions": {
+    "baseline": {
+      "version": "b1cb0e87-56e5-4969-9a92-0dc6b9000f26",
+      "spec_hash": "f6c6404a5c6b89f50a8241e814e8b4be0cc8be6317aa7247537646fd900a9e28"
+    },
+    "candidate": {
+      "version": "e964c49b-b458-4c0a-8c07-9667c1da7367",
+      "spec_hash": "c98ce8f6776994239fb4ae72e4ea0c0121f05649ce540c810c758f623ad727f6"
+    }
+  },
+  "totals": {
+    "calls": 100,
+    "input_tokens": 334376,
+    "cached_tokens": 143616,
+    "output_tokens": 33592,
+    "tariff_cny": "0.65600064",
+    "peak_uncached_cny": "0.937488"
+  },
+  "cumulative_upper_cny": "10.85725908",
+  "new_unknown": 0,
+  "groups": {
+    "fixed": {
+      "cases": 4,
+      "passes": {
+        "complete_primary": 3,
+        "citation_entails": 3,
+        "strict": 3
+      },
+      "median_seconds": null,
+      "calls": 4,
+      "input_tokens": 10285,
+      "cached_tokens": 0,
+      "output_tokens": 3031,
+      "tariff_cny": "0.04481800",
+      "peak_uncached_cny": "0.044818"
+    },
+    "baseline-new": {
+      "cases": 8,
+      "passes": {
+        "complete_primary": 8,
+        "citation_entails": 8,
+        "strict": 7
+      },
+      "median_seconds": 24.36,
+      "calls": 21,
+      "input_tokens": 74502,
+      "cached_tokens": 40192,
+      "output_tokens": 3867,
+      "tariff_cny": "0.10116368",
+      "peak_uncached_cny": "0.179940"
+    },
+    "candidate-new": {
+      "cases": 8,
+      "passes": {
+        "complete_primary": 8,
+        "citation_entails": 8,
+        "strict": 8
+      },
+      "median_seconds": 20.687,
+      "calls": 26,
+      "input_tokens": 79092,
+      "cached_tokens": 24832,
+      "output_tokens": 5291,
+      "tariff_cny": "0.15184128",
+      "peak_uncached_cny": "0.200512"
+    },
+    "baseline-regression": {
+      "cases": 8,
+      "passes": {
+        "complete_primary": 8,
+        "citation_entails": 7,
+        "strict": 6
+      },
+      "median_seconds": 21.524,
+      "calls": 21,
+      "input_tokens": 74340,
+      "cached_tokens": 39168,
+      "output_tokens": 6047,
+      "tariff_cny": "0.12028672",
+      "peak_uncached_cny": "0.197056"
+    },
+    "candidate-regression": {
+      "cases": 8,
+      "passes": {
+        "complete_primary": 5,
+        "citation_entails": 5,
+        "strict": 5
+      },
+      "median_seconds": 29.4295,
+      "calls": 28,
+      "input_tokens": 96157,
+      "cached_tokens": 39424,
+      "output_tokens": 15356,
+      "tariff_cny": "0.23789096",
+      "peak_uncached_cny": "0.315162"
+    },
+    "baseline-all": {
+      "cases": 16,
+      "passes": {
+        "complete_primary": 16,
+        "citation_entails": 15,
+        "strict": 13
+      },
+      "median_seconds": 23.063,
+      "calls": 42,
+      "input_tokens": 148842,
+      "cached_tokens": 79360,
+      "output_tokens": 9914,
+      "tariff_cny": "0.22145040",
+      "peak_uncached_cny": "0.376996"
+    },
+    "candidate-all": {
+      "cases": 16,
+      "passes": {
+        "complete_primary": 13,
+        "citation_entails": 13,
+        "strict": 13
+      },
+      "median_seconds": 25.6405,
+      "calls": 54,
+      "input_tokens": 175249,
+      "cached_tokens": 64256,
+      "output_tokens": 20647,
+      "tariff_cny": "0.38973224",
+      "peak_uncached_cny": "0.515674"
+    }
+  },
+  "paired": {
+    "new": {
+      "complete_primary": {
+        "gained": [],
+        "lost": []
+      },
+      "citation_entails": {
+        "gained": [],
+        "lost": []
+      },
+      "strict": {
+        "gained": [
+          "n2"
+        ],
+        "lost": []
+      }
+    },
+    "regression": {
+      "complete_primary": {
+        "gained": [],
+        "lost": [
+          "p4",
+          "p6",
+          "p7"
+        ]
+      },
+      "citation_entails": {
+        "gained": [],
+        "lost": [
+          "p6",
+          "p7"
+        ]
+      },
+      "strict": {
+        "gained": [],
+        "lost": [
+          "p7"
+        ]
+      }
+    }
+  },
+  "gate": {
+    "fixed_recovered": true,
+    "positive_new_strict": true,
+    "historical_strict_losses": [
+      "p4",
+      "p6",
+      "p7"
+    ],
+    "paired_losses": {
+      "complete_primary": [
+        "p4",
+        "p6",
+        "p7"
+      ],
+      "citation_entails": [
+        "p6",
+        "p7"
+      ],
+      "strict": [
+        "p7"
+      ]
+    },
+    "merge_allowed": false
+  },
+  "rows": [
+    {
+      "label": "fixed-p2",
+      "paper_id": "1811.00942",
+      "question": "In the workspace paper Progress and Tradeoffs in Neural Language Models (arXiv:1811.00942), what is a commonly used evaluation metric for language models? Cite supporting passages from this workspace.",
+      "required": "perplexity",
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "correct_sources": [
+          "S12/R00001E2"
+        ],
+        "reason": "Perplexity is explicitly named as the standard metric in the selected sentence, directly supporting the requested answer."
+      },
+      "receipt_sequences": [
+        1
+      ],
+      "usage": {
+        "calls": 1,
+        "input_tokens": 1741,
+        "cached_tokens": 0,
+        "output_tokens": 216,
+        "tariff_cny": "0.00521000",
+        "peak_uncached_cny": "0.005210"
+      },
+      "historical_run_id": "9ae2b449-af72-44e3-b1a2-dd5bbaf3aaca",
+      "admitted_segments": 5,
+      "eligible_segments": 5,
+      "original_ordered_snippets_sha256": "5b6321a941fb7c44a41a921de2cafb0e7feb5bb81bf1e3a6fd07bbb607bfb498",
+      "selection_message_sha256": "1d30f55323c1bdbcae53b0f4397746dde2f98026c8fd4911d23c8381f42c8022",
+      "selected": [
+        {
+          "id": "S12",
+          "handle": "R00001E2",
+          "start": 216,
+          "end": 436,
+          "document_revision_id": "63ffd77f-1f2c-427b-b980-fb7a7357d1e0",
+          "chunk_id": "5bf229d2145ee09f34831d0f2126aa019eb8c8c19a50b2f84c4e72369702e313",
+          "chunk_locator": {
+            "type": "text_range",
+            "char_end": 2200,
+            "char_start": 1000
+          },
+          "sentence_sha256": "39f00fded86966a25a23e032fd09a9e24002f3d1fe69d206c9d8c8a086fd30eb"
+        }
+      ],
+      "error": null,
+      "finish_reason": "stop",
+      "visible_characters": 3,
+      "provider_reasoning_tokens": 212,
+      "provider_text_tokens": 3
+    },
+    {
+      "label": "fixed-p4",
+      "paper_id": "1909.00694",
+      "question": "In the workspace paper arXiv:1909.00694 on affective events, what makes up its seed lexicon and how is it used to label events? Cite supporting passages from this workspace.",
+      "required": "positive and negative predicates and assignment/propagation of polarity to events",
+      "grade": {
+        "complete_primary": false,
+        "citation_entails": false,
+        "all_extra_supported": false,
+        "format_ok": false,
+        "strict": false,
+        "eligible_evidence": "complete",
+        "failure_kind": "provider_length_non_delivery",
+        "correct_sources": [
+          "R00001E5"
+        ],
+        "reason": "The target passage covers seed predicates and direct/discourse labels. The provider returned finish_reason=length with no selection, so no semantic choice exists to mark wrong; first final not delivered."
+      },
+      "receipt_sequences": [
+        2
+      ],
+      "usage": {
+        "calls": 1,
+        "input_tokens": 3521,
+        "cached_tokens": 0,
+        "output_tokens": 2048,
+        "tariff_cny": "0.02342600",
+        "peak_uncached_cny": "0.023426"
+      },
+      "historical_run_id": "968a50e9-2ed1-4afe-952a-1eab449e13a7",
+      "admitted_segments": 9,
+      "eligible_segments": 9,
+      "original_ordered_snippets_sha256": "5ba3d1e1158d13136716badb0b779c1c2895c011e4a9834873b699f43aec70ec",
+      "selection_message_sha256": "b62e17316fd07b39d1c570cb64661d1e7a58b81c4082c453837a99437e62c6ec",
+      "selected": [],
+      "error": "selector did not finish normally: length",
+      "finish_reason": "length",
+      "visible_characters": 0,
+      "provider_reasoning_tokens": 2048,
+      "provider_text_tokens": 0
+    },
+    {
+      "label": "fixed-p5",
+      "paper_id": "1909.11189",
+      "question": "In the workspace paper Diachronic Topics in New High German Poetry (arXiv:1909.11189), what is the algorithm used for the classification tasks? Cite the supporting passage.",
+      "required": "Random Forest ensemble classifier",
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "correct_sources": [
+          "S16/R00002E1",
+          "S38/R00002E3"
+        ],
+        "reason": "Both sentences directly identify the Random Forest ensemble; parameter tuning is true and cited."
+      },
+      "receipt_sequences": [
+        3
+      ],
+      "usage": {
+        "calls": 1,
+        "input_tokens": 3267,
+        "cached_tokens": 0,
+        "output_tokens": 296,
+        "tariff_cny": "0.00890200",
+        "peak_uncached_cny": "0.008902"
+      },
+      "historical_run_id": "4d183212-669b-4442-9157-75cea2e917d8",
+      "admitted_segments": 10,
+      "eligible_segments": 5,
+      "original_ordered_snippets_sha256": "5fdc2384c2e23e03db25e3f146b8c4a78887414720679b227a67bfa0ba13d5f4",
+      "selection_message_sha256": "a8bd68a26c4544f4bb93db11e828ba16a1b4c01e0c95eec50fb58d28b8ac7449",
+      "selected": [
+        {
+          "id": "S16",
+          "handle": "R00002E1",
+          "start": 527,
+          "end": 702,
+          "document_revision_id": "a3c9b1b4-fd50-435b-aab0-f50d6e1df370",
+          "chunk_id": "6af48ef5cf190360934fed16290c5e0799201f3739e65109eeb55f0722e4302f",
+          "chunk_locator": {
+            "type": "text_range",
+            "char_end": 6200,
+            "char_start": 5000
+          },
+          "sentence_sha256": "6b3a86a89b2db498e210f44d87323e9ec244b173cc9b27523e7920a54d4e52ef"
+        },
+        {
+          "id": "S38",
+          "handle": "R00002E3",
+          "start": 500,
+          "end": 630,
+          "document_revision_id": "a3c9b1b4-fd50-435b-aab0-f50d6e1df370",
+          "chunk_id": "2a17628bd7aa992e78175ab7d28c78308b308f77be29550134ca3d4f7f124c3e",
+          "chunk_locator": {
+            "type": "text_range",
+            "char_end": 7200,
+            "char_start": 6000
+          },
+          "sentence_sha256": "29608413819958504fd9119215bfa1d83edb3949be3fbe056408bb1b40775a77"
+        }
+      ],
+      "error": null,
+      "finish_reason": "stop",
+      "visible_characters": 7,
+      "provider_reasoning_tokens": 290,
+      "provider_text_tokens": 5
+    },
+    {
+      "label": "fixed-p8",
+      "paper_id": "1909.11189",
+      "question": "In the workspace paper Diachronic Topics in New High German Poetry (arXiv:1909.11189), which digital collection supplied the verse corpus? Cite a supporting passage.",
+      "required": "Digital Library in the TextGrid Repository (TextGrid or its verse subset TGRID-V with source identification acceptable); zeno.org alone is the repository upstream, not the named collection.",
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "correct_sources": [
+          "S6/R00001E1",
+          "S8/R00001E1",
+          "S9/R00001E1"
+        ],
+        "reason": "S8 names the Digital Library in the TextGrid Repository; S6 and S9 provide correct corpus context. The additional Zeno upstream does not replace the collection name."
+      },
+      "receipt_sequences": [
+        4
+      ],
+      "usage": {
+        "calls": 1,
+        "input_tokens": 1756,
+        "cached_tokens": 0,
+        "output_tokens": 471,
+        "tariff_cny": "0.00728000",
+        "peak_uncached_cny": "0.007280"
+      },
+      "historical_run_id": "c3d8642f-338e-4972-8ac6-76cfe38bc4bd",
+      "admitted_segments": 5,
+      "eligible_segments": 3,
+      "original_ordered_snippets_sha256": "0dbce09b093274222f46b802bcde4e892f29092380f9aa00e9bdda7f7f86a4d5",
+      "selection_message_sha256": "6fc34e602ba1bafa6b79027f244b641abe1dd640d2cc23703dbf484781c2c928",
+      "selected": [
+        {
+          "id": "S6",
+          "handle": "R00001E1",
+          "start": 417,
+          "end": 659,
+          "document_revision_id": "a3c9b1b4-fd50-435b-aab0-f50d6e1df370",
+          "chunk_id": "8b39b02733d9b5427c738f387199a6908a66ef8832cffa7ff9132e4e279327a1",
+          "chunk_locator": {
+            "type": "text_range",
+            "char_end": 1200,
+            "char_start": 0
+          },
+          "sentence_sha256": "b7ac6b9c8375c5e0cf6c6046e4f700afbb2cb64f4460fa1c2837f4e77d672095"
+        },
+        {
+          "id": "S8",
+          "handle": "R00001E1",
+          "start": 669,
+          "end": 791,
+          "document_revision_id": "a3c9b1b4-fd50-435b-aab0-f50d6e1df370",
+          "chunk_id": "8b39b02733d9b5427c738f387199a6908a66ef8832cffa7ff9132e4e279327a1",
+          "chunk_locator": {
+            "type": "text_range",
+            "char_end": 1200,
+            "char_start": 0
+          },
+          "sentence_sha256": "da3faf833b93c2c17257683caf52f729c321d67398c8a3e8754bfdb6c71c6240"
+        },
+        {
+          "id": "S9",
+          "handle": "R00001E1",
+          "start": 792,
+          "end": 921,
+          "document_revision_id": "a3c9b1b4-fd50-435b-aab0-f50d6e1df370",
+          "chunk_id": "8b39b02733d9b5427c738f387199a6908a66ef8832cffa7ff9132e4e279327a1",
+          "chunk_locator": {
+            "type": "text_range",
+            "char_end": 1200,
+            "char_start": 0
+          },
+          "sentence_sha256": "5d0d3fbe9944e3a348f109b9be5f6da4d71f2ea3c6c8a9fed1fcceab81dbd0d2"
+        }
+      ],
+      "error": null,
+      "finish_reason": "stop",
+      "visible_characters": 8,
+      "provider_reasoning_tokens": 463,
+      "provider_text_tokens": 7
+    },
+    {
+      "label": "baseline-n1",
+      "paper_id": "2003.07723",
+      "question": "In the workspace paper PO-EMO (arXiv:2003.07723), what two roles of a feeling such as suspense make it an aesthetic emotion in the authors’ definition? Cite supporting passages from this workspace.",
+      "required": "Responds to events/content and contributes to aesthetic evaluation, liking or disliking. Both roles.",
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "correct_sources": [
+          "R00001E2"
+        ],
+        "reason": "Both content response and prediction of aesthetic liking are stated explicitly. Mixed affect and artistic safety are supported in the additional passages."
+      },
+      "receipt_sequences": [
+        5,
+        6,
+        7
+      ],
+      "usage": {
+        "calls": 3,
+        "input_tokens": 7706,
+        "cached_tokens": 4608,
+        "output_tokens": 646,
+        "tariff_cny": "0.01154832",
+        "peak_uncached_cny": "0.020580"
+      },
+      "group": "new",
+      "source_question_id": "48b12eb53e2d507343f19b8a667696a39b719807",
+      "run_id": "ad1f4c70-c9fc-49bd-b67e-3cc8330078f5",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "seconds": 58.125,
+      "bound_citations": {
+        "R00001E2": true,
+        "R00001E4": true,
+        "R00001E6": true,
+        "R00001E5": true
+      },
+      "run_usage_matches_provider": true,
+      "selector_rounds": 0,
+      "selector_scheduled": 0
+    },
+    {
+      "label": "baseline-n2",
+      "paper_id": "1811.00942",
+      "question": "In the workspace paper Progress and Tradeoffs in Neural Language Models (arXiv:1811.00942), which classic non-neural language model served as the baseline, including its order and smoothing method? Cite supporting passages from this workspace.",
+      "required": "5-gram with modified Kneser–Ney smoothing. Both required.",
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": false,
+        "format_ok": true,
+        "strict": false,
+        "eligible_evidence": "complete",
+        "failure_kind": "unsupported_extra",
+        "correct_sources": [
+          "R00001E1",
+          "R00001E3"
+        ],
+        "reason": "Five-gram and modified Kneser–Ney are explicit. The final aside attributes KN-5 to the Table 1 model comparison; the cited passage and caption identify Table 1 as the neural-model comparison, while Fig 1 explicitly uses KN-5. Report does not substantiate its Table 1 inclusion."
+      },
+      "receipt_sequences": [
+        8,
+        9
+      ],
+      "usage": {
+        "calls": 2,
+        "input_tokens": 5975,
+        "cached_tokens": 2816,
+        "output_tokens": 333,
+        "tariff_cny": "0.00909464",
+        "peak_uncached_cny": "0.014614"
+      },
+      "group": "new",
+      "source_question_id": "a9d530d68fb45b52d9bad9da2cd139db5a4b2f7c",
+      "run_id": "239a7273-f3a1-4fcb-8cfd-aeb874f590d1",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "seconds": 22.438,
+      "bound_citations": {
+        "R00001E1": true,
+        "R00001E3": true
+      },
+      "run_usage_matches_provider": true,
+      "selector_rounds": 0,
+      "selector_scheduled": 0
+    },
+    {
+      "label": "baseline-n3",
+      "paper_id": "1909.00694",
+      "question": "In the workspace paper Minimally Supervised Learning of Affective Events Using Discourse Relations (arXiv:1909.00694), roughly how large was the raw Japanese corpus, measured in sentences? Cite supporting passages from this workspace.",
+      "required": "About 100 million sentences; event-pair counts cannot substitute.",
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "correct_sources": [
+          "R00002E1"
+        ],
+        "reason": "About 100 million sentences directly supported, extraction pipeline and 1.4/41/6 million event pairs grounded in E1/E3."
+      },
+      "receipt_sequences": [
+        10,
+        11,
+        12
+      ],
+      "usage": {
+        "calls": 3,
+        "input_tokens": 11266,
+        "cached_tokens": 5888,
+        "output_tokens": 325,
+        "tariff_cny": "0.01359152",
+        "peak_uncached_cny": "0.025132"
+      },
+      "group": "new",
+      "source_question_id": "a592498ba2fac994cd6fad7372836f0adb37e22a",
+      "run_id": "b0909e17-47db-4222-bdbc-2064de2439d7",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "seconds": 28.937,
+      "bound_citations": {
+        "R00002E3": true,
+        "R00002E1": true
+      },
+      "run_usage_matches_provider": true,
+      "selector_rounds": 0,
+      "selector_scheduled": 0
+    },
+    {
+      "label": "baseline-n4",
+      "paper_id": "1909.11189",
+      "question": "In the workspace paper Diachronic Topics in New High German Poetry (arXiv:1909.11189), what accuracies did the authors report for style features alone, LDA features alone and the two together in the time-period classification experiment? Cite supporting passages from this workspace.",
+      "required": "83% style, 89% LDA, 90% combined, correctly paired.",
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "correct_sources": [
+          "R00001E1"
+        ],
+        "reason": "83% style, 89% LDA, 90% combined. Reported split, full-poem decline and feature values match passages."
+      },
+      "receipt_sequences": [
+        13,
+        14
+      ],
+      "usage": {
+        "calls": 2,
+        "input_tokens": 5855,
+        "cached_tokens": 2816,
+        "output_tokens": 609,
+        "tariff_cny": "0.01106264",
+        "peak_uncached_cny": "0.016582"
+      },
+      "group": "new",
+      "source_question_id": "a2a66726a5dca53af58aafd8494c4de833a06f14",
+      "run_id": "ed7aa62c-e016-45a5-aad3-d603231c7434",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "seconds": 18.625,
+      "bound_citations": {
+        "R00001E1": true,
+        "R00001E5": true
+      },
+      "run_usage_matches_provider": true,
+      "selector_rounds": 0,
+      "selector_scheduled": 0
+    },
+    {
+      "label": "baseline-n5",
+      "paper_id": "1912.02481",
+      "question": "In the workspace paper Massive vs. Curated Word Embeddings for Low-Resourced Languages (arXiv:1912.02481), how many WordSim-353 pairs were retained in Twi, and why were the others omitted? Cite supporting passages from this workspace.",
+      "required": "274 retained; excluded pairs contain words that translate into longer phrases.",
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "correct_sources": [
+          "R00001E1"
+        ],
+        "reason": "274 retained, 79 excluded for multiword translations. Supplementary vocabulary statistics, ambiguity examples and passage truncation checked."
+      },
+      "receipt_sequences": [
+        15,
+        16
+      ],
+      "usage": {
+        "calls": 2,
+        "input_tokens": 5849,
+        "cached_tokens": 2816,
+        "output_tokens": 421,
+        "tariff_cny": "0.00954664",
+        "peak_uncached_cny": "0.015066"
+      },
+      "group": "new",
+      "source_question_id": null,
+      "run_id": "64d171ba-1f40-4ed0-822f-6e9c11628b2f",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "seconds": 15.75,
+      "bound_citations": {
+        "R00001E1": true
+      },
+      "run_usage_matches_provider": true,
+      "selector_rounds": 0,
+      "selector_scheduled": 0
+    },
+    {
+      "label": "baseline-n6",
+      "paper_id": "1912.02481",
+      "question": "In the workspace paper Massive vs. Curated Word Embeddings for Low-Resourced Languages (arXiv:1912.02481), which four entity categories did the authors annotate in the Global Voices corpus, and what proportions were allocated to training, development, and test? Cite supporting passages from this workspace.",
+      "required": "DATE, LOC, ORG, PER; 70% train, 10% development, 20% test.",
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "correct_sources": [
+          "R00002E1",
+          "R00002E2"
+        ],
+        "reason": "DATE/LOC/ORG/PER and 70/10/20 directly supported. 25k, O tag and Table 2 are accurate."
+      },
+      "receipt_sequences": [
+        17,
+        18,
+        19
+      ],
+      "usage": {
+        "calls": 3,
+        "input_tokens": 11820,
+        "cached_tokens": 6656,
+        "output_tokens": 534,
+        "tariff_cny": "0.01486624",
+        "peak_uncached_cny": "0.027912"
+      },
+      "group": "new",
+      "source_question_id": null,
+      "run_id": "4ea162c4-9e10-4e0c-b516-10638fb9cd36",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "seconds": 26.282,
+      "bound_citations": {
+        "R00002E1": true,
+        "R00002E2": true
+      },
+      "run_usage_matches_provider": true,
+      "selector_rounds": 0,
+      "selector_scheduled": 0
+    },
+    {
+      "label": "baseline-n7",
+      "paper_id": "1811.00942",
+      "question": "In the workspace paper Progress and Tradeoffs in Neural Language Models (arXiv:1811.00942), what training hardware did the authors use for the QRNNs, and why did they collect only latency statistics on the desktop system? Cite supporting passages from this workspace.",
+      "required": "NVIDIA Titan V GPU; desktop baseline power load much higher than incremental model load, so only latency.",
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "correct_sources": [
+          "R00001E5",
+          "R00001E1"
+        ],
+        "reason": "Titan V GPU and high desktop baseline power load correctly supported by separate passages. Meter, idle draw subtraction and full desktop test set are grounded."
+      },
+      "receipt_sequences": [
+        20,
+        21
+      ],
+      "usage": {
+        "calls": 2,
+        "input_tokens": 6026,
+        "cached_tokens": 2816,
+        "output_tokens": 380,
+        "tariff_cny": "0.00957264",
+        "peak_uncached_cny": "0.015092"
+      },
+      "group": "new",
+      "source_question_id": null,
+      "run_id": "f950e72f-b06b-461f-9bcf-d094465b0d1b",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "seconds": 15.0,
+      "bound_citations": {
+        "R00001E5": true,
+        "R00001E1": true
+      },
+      "run_usage_matches_provider": true,
+      "selector_rounds": 0,
+      "selector_scheduled": 0
+    },
+    {
+      "label": "baseline-n8",
+      "paper_id": "1909.00694",
+      "question": "In the workspace paper Minimally Supervised Learning of Affective Events Using Discourse Relations (arXiv:1909.00694), which two encoders were compared for event polarity prediction? Cite supporting passages from this workspace.",
+      "required": "Bidirectional GRU and BERT; identify both, no other implementation numbers required.",
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "correct_sources": [
+          "R00003E1"
+        ],
+        "reason": "BiGRU and BERT named explicitly; encoder details and comparison of training variants match passages."
+      },
+      "receipt_sequences": [
+        22,
+        23,
+        24,
+        25
+      ],
+      "usage": {
+        "calls": 4,
+        "input_tokens": 20005,
+        "cached_tokens": 11776,
+        "output_tokens": 619,
+        "tariff_cny": "0.02188104",
+        "peak_uncached_cny": "0.044962"
+      },
+      "group": "new",
+      "source_question_id": null,
+      "run_id": "390b46f8-0968-4c88-8603-eedb774881ca",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "seconds": 35.344,
+      "bound_citations": {
+        "R00002E3": true,
+        "R00003E1": true,
+        "R00003E4": true
+      },
+      "run_usage_matches_provider": true,
+      "selector_rounds": 0,
+      "selector_scheduled": 0
+    },
+    {
+      "label": "baseline-p2",
+      "paper_id": "1811.00942",
+      "question": "In the workspace paper Progress and Tradeoffs in Neural Language Models (arXiv:1811.00942), what is a commonly used evaluation metric for language models? Cite supporting passages from this workspace.",
+      "required": "perplexity",
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "correct_sources": [
+          "R00001E2",
+          "R00001E1"
+        ],
+        "reason": "Perplexity, complementary log perplexity and next-word recall discussion accurately grounded."
+      },
+      "receipt_sequences": [
+        26,
+        27
+      ],
+      "usage": {
+        "calls": 2,
+        "input_tokens": 5531,
+        "cached_tokens": 3584,
+        "output_tokens": 567,
+        "tariff_cny": "0.00857336",
+        "peak_uncached_cny": "0.015598"
+      },
+      "group": "regression",
+      "source_question_id": "e07df8f613dbd567a35318cd6f6f4cb959f5c82d",
+      "run_id": "e0b88320-1dfc-4bd9-9e43-ada345c6f1de",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "seconds": 16.094,
+      "bound_citations": {
+        "R00001E2": true,
+        "R00001E1": true,
+        "R00001E3": true,
+        "R00001E4": true
+      },
+      "run_usage_matches_provider": true,
+      "selector_rounds": 0,
+      "selector_scheduled": 0
+    },
+    {
+      "label": "baseline-p3",
+      "paper_id": "1912.02481",
+      "question": "In the workspace paper Massive vs. Curated Word Embeddings for Low-Resourced Languages. The Case of Yor\\`ub\\'a and Twi (arXiv:1912.02481), what two architectures are used? Cite supporting passages from this workspace.",
+      "required": "fastText AND CWE-LP",
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "correct_sources": [
+          "R00002E1",
+          "R00002E3"
+        ],
+        "reason": "Explicit fastText and CWE-LP with character/position distinction. Supplementary training settings are grounded."
+      },
+      "receipt_sequences": [
+        28,
+        29,
+        30
+      ],
+      "usage": {
+        "calls": 3,
+        "input_tokens": 11920,
+        "cached_tokens": 6656,
+        "output_tokens": 729,
+        "tariff_cny": "0.01662624",
+        "peak_uncached_cny": "0.029672"
+      },
+      "group": "regression",
+      "source_question_id": "cbf1137912a47262314c94d36ced3232d5fa1926",
+      "run_id": "08d34d84-c49d-4f58-a9f8-0eaf263f4a8a",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "seconds": 26.781,
+      "bound_citations": {
+        "R00002E1": true,
+        "R00001E6": true,
+        "R00002E3": true,
+        "R00002E5": true,
+        "R00001E2": true
+      },
+      "run_usage_matches_provider": true,
+      "selector_rounds": 0,
+      "selector_scheduled": 0
+    },
+    {
+      "label": "baseline-p4",
+      "paper_id": "1909.00694",
+      "question": "In the workspace paper arXiv:1909.00694 on affective events, what makes up its seed lexicon and how is it used to label events? Cite supporting passages from this workspace.",
+      "required": "positive and negative predicates and assignment/propagation of polarity to events",
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": false,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": false,
+        "eligible_evidence": "complete",
+        "failure_kind": "citation_misattribution",
+        "correct_sources": [
+          "R00003E1",
+          "R00003E2"
+        ],
+        "reason": "Answer correctly describes predicate lists and direct/propagated labels; however the only citation attached to the quotations defining direct seeding and Cause/Concession polarity is R00002E1, an appendix word list. The correct methods passage R00003E1 appears only in the late sentence discussing an evidence gap, not attached to those quoted rules. Extra facts and examples are source accurate."
+      },
+      "receipt_sequences": [
+        31,
+        32,
+        33,
+        34
+      ],
+      "usage": {
+        "calls": 4,
+        "input_tokens": 18080,
+        "cached_tokens": 11008,
+        "output_tokens": 1358,
+        "tariff_cny": "0.02544832",
+        "peak_uncached_cny": "0.047024"
+      },
+      "group": "regression",
+      "source_question_id": "753990d0b621d390ed58f20c4d9e4f065f0dc672",
+      "run_id": "49504764-4fda-40a6-b92a-dab0d5de385d",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "seconds": 38.016,
+      "bound_citations": {
+        "R00002E1": true,
+        "R00003E2": true,
+        "R00002E2": true,
+        "R00001E1": true,
+        "R00001E4": true,
+        "R00002E3": true,
+        "R00003E1": true,
+        "R00003E3": true
+      },
+      "run_usage_matches_provider": true,
+      "selector_rounds": 0,
+      "selector_scheduled": 0
+    },
+    {
+      "label": "baseline-p5",
+      "paper_id": "1909.11189",
+      "question": "In the workspace paper Diachronic Topics in New High German Poetry (arXiv:1909.11189), what is the algorithm used for the classification tasks? Cite the supporting passage.",
+      "required": "Random Forest ensemble classifier",
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "correct_sources": [
+          "R00002E3",
+          "R00002E1"
+        ],
+        "reason": "Random Forest ensemble and supplementary hyperparameter search, setups and results are source-supported."
+      },
+      "receipt_sequences": [
+        35,
+        36,
+        37
+      ],
+      "usage": {
+        "calls": 3,
+        "input_tokens": 10926,
+        "cached_tokens": 5120,
+        "output_tokens": 618,
+        "tariff_cny": "0.01676080",
+        "peak_uncached_cny": "0.026796"
+      },
+      "group": "regression",
+      "source_question_id": "bfa3776c30cb30e0088e185a5908e5172df79236",
+      "run_id": "68f3e956-4365-45df-ba4c-f9c4b9eb2a2d",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "seconds": 23.688,
+      "bound_citations": {
+        "R00002E3": true,
+        "R00002E1": true,
+        "R00002E4": true,
+        "R00002E2": true
+      },
+      "run_usage_matches_provider": true,
+      "selector_rounds": 0,
+      "selector_scheduled": 0
+    },
+    {
+      "label": "baseline-p6",
+      "paper_id": "1912.02481",
+      "question": "In the workspace paper Massive vs. Curated Word Embeddings for Low-Resourced Languages (arXiv:1912.02481), compare the effects of corpus quality and corpus size on word similarity for Twi and Yorùbá. Cite supporting passages from this workspace.",
+      "required": "Quality of curated texts helps, extra low-quality mass collection does not reliably improve word-similarity results even with larger vocabulary; cite supporting target-paper passages. Accept accurately stated differences for each language, do not universally assert all added data degrades both. Require effective first search argument verified from checkpoint; score rewrite exposure separately from answer accuracy.",
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": false,
+        "format_ok": true,
+        "strict": false,
+        "eligible_evidence": "complete",
+        "failure_kind": "unsupported_extra",
+        "correct_sources": [
+          "R00001E5",
+          "R00001E6"
+        ],
+        "reason": "Quality/volume interaction and distinct best datasets C2/C3 correctly cited. Ascribes failure of pretrained results to wrong text and explicitly excludes too little text, while paper attributes the problem to both quantity and quality. Numerical results and language-specific outcomes are correct."
+      },
+      "receipt_sequences": [
+        38,
+        39
+      ],
+      "usage": {
+        "calls": 2,
+        "input_tokens": 5843,
+        "cached_tokens": 2048,
+        "output_tokens": 1045,
+        "tariff_cny": "0.01603192",
+        "peak_uncached_cny": "0.020046"
+      },
+      "group": "regression",
+      "source_question_id": "347e86893e8002024c2d10f618ca98e14689675f",
+      "run_id": "36f2164a-68a5-41e8-b1f1-b8e742603210",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "seconds": 19.36,
+      "bound_citations": {
+        "R00001E1": true,
+        "R00001E4": true,
+        "R00001E2": true,
+        "R00001E5": true,
+        "R00001E6": true
+      },
+      "run_usage_matches_provider": true,
+      "selector_rounds": 0,
+      "selector_scheduled": 0
+    },
+    {
+      "label": "baseline-p7",
+      "paper_id": "1811.00942",
+      "question": "In the workspace paper Progress and Tradeoffs in Neural Language Models (arXiv:1811.00942), how did the authors compare neural and classic language models in terms of quality and computational performance? Cite supporting passages from this workspace.",
+      "required": "Quality: perplexity AND next-word prediction recall (R@3 or equivalent). Computational performance: per-query latency AND energy usage. Must cite actual target-paper passages covering both comparisons; numerical claims must remain factually accurate. Measure first-search rewrite exposure independently.",
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "correct_sources": [
+          "R00002E1",
+          "R00001E1"
+        ],
+        "reason": "Both perplexity/R@3 quality measures, latency and energy for comparing model families explicit. Detailed ratios and device-specific qualifiers are consistent with reported results."
+      },
+      "receipt_sequences": [
+        40,
+        41,
+        42
+      ],
+      "usage": {
+        "calls": 3,
+        "input_tokens": 10667,
+        "cached_tokens": 5120,
+        "output_tokens": 1030,
+        "tariff_cny": "0.01953880",
+        "peak_uncached_cny": "0.029574"
+      },
+      "group": "regression",
+      "source_question_id": "dd155f01f6f4a14f9d25afc97504aefdc6d29c13",
+      "run_id": "afeb38f4-e311-4b4a-9d11-184fea7ecf7c",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "seconds": 26.203,
+      "bound_citations": {
+        "R00001E1": true,
+        "R00001E4": true,
+        "R00001E3": true,
+        "R00002E1": true,
+        "R00001E5": true,
+        "R00002E4": true,
+        "R00002E2": true,
+        "R00002E3": true
+      },
+      "run_usage_matches_provider": true,
+      "selector_rounds": 0,
+      "selector_scheduled": 0
+    },
+    {
+      "label": "baseline-p8",
+      "paper_id": "1909.11189",
+      "question": "In the workspace paper Diachronic Topics in New High German Poetry (arXiv:1909.11189), which digital collection supplied the verse corpus? Cite a supporting passage.",
+      "required": "Digital Library in the TextGrid Repository (TextGrid or its verse subset TGRID-V with source identification acceptable); zeno.org alone is the repository upstream, not the named collection.",
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "correct_sources": [
+          "R00001E1"
+        ],
+        "reason": "TextGrid Digital Library supported; upstream Zeno, content and dates are grounded."
+      },
+      "receipt_sequences": [
+        43,
+        44
+      ],
+      "usage": {
+        "calls": 2,
+        "input_tokens": 5464,
+        "cached_tokens": 2816,
+        "output_tokens": 267,
+        "tariff_cny": "0.00754464",
+        "peak_uncached_cny": "0.013064"
+      },
+      "group": "regression",
+      "source_question_id": "ee87608419e4807b9b566681631a8cd72197a71a",
+      "run_id": "776f9885-3e6a-4dca-b0a4-e5dc87f5fbdd",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "seconds": 13.562,
+      "bound_citations": {
+        "R00001E1": true,
+        "R00001E4": true
+      },
+      "run_usage_matches_provider": true,
+      "selector_rounds": 0,
+      "selector_scheduled": 0
+    },
+    {
+      "label": "baseline-p9",
+      "paper_id": "1909.00694",
+      "question": "In the workspace paper Minimally Supervised Learning of Affective Events Using Discourse Relations (arXiv:1909.00694), how were the automatically labeled AL pairs balanced, and which part of each ACP sentence did the authors extract as an affective event? Cite a supporting passage for each step.",
+      "required": "AL: randomly subsample until positive and negative latter events are equal in number (no requirement for exact numbers). ACP: parse each sentence and take its last clause. Correctly attribute each transformation to its own dataset, and provide supporting evidence for both.",
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "correct_sources": [
+          "R00001E1"
+        ],
+        "reason": "One passage supplies both random AL balancing on the latter event(s) and retention of the last ACP clause, plus sampling ratio and ACP origin."
+      },
+      "receipt_sequences": [
+        45,
+        46
+      ],
+      "usage": {
+        "calls": 2,
+        "input_tokens": 5909,
+        "cached_tokens": 2816,
+        "output_tokens": 433,
+        "tariff_cny": "0.00976264",
+        "peak_uncached_cny": "0.015282"
+      },
+      "group": "regression",
+      "source_question_id": "44c4bd6decc86f1091b5fc0728873d9324cdde4e",
+      "run_id": "5f169794-6054-4bd8-b24d-01b5fa583e47",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "seconds": 16.547,
+      "bound_citations": {
+        "R00001E1": true
+      },
+      "run_usage_matches_provider": true,
+      "selector_rounds": 0,
+      "selector_scheduled": 0
+    },
+    {
+      "label": "candidate-n1",
+      "paper_id": "2003.07723",
+      "question": "In the workspace paper PO-EMO (arXiv:2003.07723), what two roles of a feeling such as suspense make it an aesthetic emotion in the authors’ definition? Cite supporting passages from this workspace.",
+      "required": "Responds to events/content and contributes to aesthetic evaluation, liking or disliking. Both roles.",
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "correct_sources": [
+          "R00001E1"
+        ],
+        "reason": "The cited passage explicitly describes both responding to the plot and predicting aesthetic liking or disliking."
+      },
+      "receipt_sequences": [
+        47,
+        48,
+        49
+      ],
+      "usage": {
+        "calls": 3,
+        "input_tokens": 7001,
+        "cached_tokens": 2048,
+        "output_tokens": 963,
+        "tariff_cny": "0.01769192",
+        "peak_uncached_cny": "0.021706"
+      },
+      "group": "new",
+      "source_question_id": "48b12eb53e2d507343f19b8a667696a39b719807",
+      "run_id": "cf950189-59d9-4c8c-ab51-4d8d7feed0f0",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "seconds": 43.907,
+      "bound_citations": {
+        "R00001E1": true
+      },
+      "run_usage_matches_provider": true,
+      "selector_rounds": 1,
+      "selector_scheduled": 1,
+      "transport": {
+        "selector_checkpoint_count": 1,
+        "visible_count": 5,
+        "eligible_count": 5,
+        "sentences": 48,
+        "messages_sha256": "d91b02cccc4c28394d264418073ad56e6d79f7489e06fb5a97501b6544c2a07b",
+        "finish": "stop",
+        "reverse_validation": "provider_output_digest_and_render",
+        "selected": [
+          {
+            "id": "S6",
+            "handle": "R00001E1",
+            "offsets": [
+              548,
+              732
+            ],
+            "chunk_offsets": [
+              548,
+              732
+            ],
+            "text_sha256": "f72d656650f348aae9a3d91ce9deb7d5656eba2e396f116ac0aeafa777706036",
+            "revision_and_snapshot_membership_verified": true
+          },
+          {
+            "id": "S7",
+            "handle": "R00001E1",
+            "offsets": [
+              733,
+              824
+            ],
+            "chunk_offsets": [
+              733,
+              824
+            ],
+            "text_sha256": "2e3e43b0a267ff521c6eba5055b1bf02db7fd1a78dd18f41b4cb30676e5fb7fa",
+            "revision_and_snapshot_membership_verified": true
+          }
+        ]
+      }
+    },
+    {
+      "label": "candidate-n2",
+      "paper_id": "1811.00942",
+      "question": "In the workspace paper Progress and Tradeoffs in Neural Language Models (arXiv:1811.00942), which classic non-neural language model served as the baseline, including its order and smoothing method? Cite supporting passages from this workspace.",
+      "required": "5-gram with modified Kneser–Ney smoothing. Both required.",
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "correct_sources": [
+          "R00001E2"
+        ],
+        "reason": "The cited sentence identifies KN-5 as the five-gram model with modified Kneser-Ney smoothing and correctly expands AWD."
+      },
+      "receipt_sequences": [
+        50,
+        51,
+        52
+      ],
+      "usage": {
+        "calls": 3,
+        "input_tokens": 7973,
+        "cached_tokens": 2048,
+        "output_tokens": 612,
+        "tariff_cny": "0.01682792",
+        "peak_uncached_cny": "0.020842"
+      },
+      "group": "new",
+      "source_question_id": "a9d530d68fb45b52d9bad9da2cd139db5a4b2f7c",
+      "run_id": "7111b9b5-49ea-4c61-8ee8-b14ff9dacc69",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "seconds": 17.109,
+      "bound_citations": {
+        "R00001E2": true
+      },
+      "run_usage_matches_provider": true,
+      "selector_rounds": 1,
+      "selector_scheduled": 1,
+      "transport": {
+        "selector_checkpoint_count": 1,
+        "visible_count": 6,
+        "eligible_count": 3,
+        "sentences": 29,
+        "messages_sha256": "0d9ef3bf587a55580b08b472d566a64613b67a48d77a7e17dc28069f2f919abc",
+        "finish": "stop",
+        "reverse_validation": "provider_output_digest_and_render",
+        "selected": [
+          {
+            "id": "S7",
+            "handle": "R00001E2",
+            "offsets": [
+              635,
+              768
+            ],
+            "chunk_offsets": [
+              635,
+              768
+            ],
+            "text_sha256": "bbf26ce60f7341e113a7f3e8244cd08e8cff97bd4953de3d55a3f49666ace549",
+            "revision_and_snapshot_membership_verified": true
+          }
+        ]
+      }
+    },
+    {
+      "label": "candidate-n3",
+      "paper_id": "1909.00694",
+      "question": "In the workspace paper Minimally Supervised Learning of Affective Events Using Discourse Relations (arXiv:1909.00694), roughly how large was the raw Japanese corpus, measured in sentences? Cite supporting passages from this workspace.",
+      "required": "About 100 million sentences; event-pair counts cannot substitute.",
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "correct_sources": [
+          "R00002E1"
+        ],
+        "reason": "The cited sentence gives about 100 million sentences and correctly states the additional event-pair counts."
+      },
+      "receipt_sequences": [
+        53,
+        54,
+        55,
+        56
+      ],
+      "usage": {
+        "calls": 4,
+        "input_tokens": 15169,
+        "cached_tokens": 5120,
+        "output_tokens": 502,
+        "tariff_cny": "0.02431880",
+        "peak_uncached_cny": "0.034354"
+      },
+      "group": "new",
+      "source_question_id": "a592498ba2fac994cd6fad7372836f0adb37e22a",
+      "run_id": "366b83b7-9dc8-4fc9-90db-53363221dd71",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "seconds": 25.813,
+      "bound_citations": {
+        "R00002E1": true
+      },
+      "run_usage_matches_provider": true,
+      "selector_rounds": 1,
+      "selector_scheduled": 1,
+      "transport": {
+        "selector_checkpoint_count": 1,
+        "visible_count": 10,
+        "eligible_count": 10,
+        "sentences": 149,
+        "messages_sha256": "6ca3a535a5bd2f4acb770ca3726d63251cb814d81c55c305af260f4136cc1ce7",
+        "finish": "stop",
+        "reverse_validation": "provider_output_digest_and_render",
+        "selected": [
+          {
+            "id": "S82",
+            "handle": "R00002E1",
+            "offsets": [
+              893,
+              1028
+            ],
+            "chunk_offsets": [
+              893,
+              1028
+            ],
+            "text_sha256": "f91d30959fad5abe2e84a9eb9f9dac6f25cd371495d4ce4e4ccff2b9cc3ea2bb",
+            "revision_and_snapshot_membership_verified": true
+          }
+        ]
+      }
+    },
+    {
+      "label": "candidate-n4",
+      "paper_id": "1909.11189",
+      "question": "In the workspace paper Diachronic Topics in New High German Poetry (arXiv:1909.11189), what accuracies did the authors report for style features alone, LDA features alone and the two together in the time-period classification experiment? Cite supporting passages from this workspace.",
+      "required": "83% style, 89% LDA, 90% combined, correctly paired.",
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "correct_sources": [
+          "R00001E4"
+        ],
+        "reason": "The cited sentence pairs 83%, 89%, and 90% with style, LDA, and combined features respectively."
+      },
+      "receipt_sequences": [
+        57,
+        58,
+        59
+      ],
+      "usage": {
+        "calls": 3,
+        "input_tokens": 8059,
+        "cached_tokens": 2816,
+        "output_tokens": 460,
+        "tariff_cny": "0.01427864",
+        "peak_uncached_cny": "0.019798"
+      },
+      "group": "new",
+      "source_question_id": "a2a66726a5dca53af58aafd8494c4de833a06f14",
+      "run_id": "6df7c13c-a16d-4371-b766-c860ee42578b",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "seconds": 17.031,
+      "bound_citations": {
+        "R00001E4": true
+      },
+      "run_usage_matches_provider": true,
+      "selector_rounds": 1,
+      "selector_scheduled": 1,
+      "transport": {
+        "selector_checkpoint_count": 1,
+        "visible_count": 6,
+        "eligible_count": 6,
+        "sentences": 63,
+        "messages_sha256": "d629c9a968e358c85b391f97d0ea0ce7ad7762954019ffcad7c107cbda6798ca",
+        "finish": "stop",
+        "reverse_validation": "provider_output_digest_and_render",
+        "selected": [
+          {
+            "id": "S38",
+            "handle": "R00001E4",
+            "offsets": [
+              687,
+              790
+            ],
+            "chunk_offsets": [
+              687,
+              790
+            ],
+            "text_sha256": "9cd2a8ffab1904f64ab216cd883cf102c120efd7f0108875631d675d60a79e68",
+            "revision_and_snapshot_membership_verified": true
+          }
+        ]
+      }
+    },
+    {
+      "label": "candidate-n5",
+      "paper_id": "1912.02481",
+      "question": "In the workspace paper Massive vs. Curated Word Embeddings for Low-Resourced Languages (arXiv:1912.02481), how many WordSim-353 pairs were retained in Twi, and why were the others omitted? Cite supporting passages from this workspace.",
+      "required": "274 retained; excluded pairs contain words that translate into longer phrases.",
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "correct_sources": [
+          "R00001E6"
+        ],
+        "reason": "The cited Twi passage supports both 274 retained pairs and the longer-phrase translations in the 79 excluded pairs."
+      },
+      "receipt_sequences": [
+        60,
+        61,
+        62
+      ],
+      "usage": {
+        "calls": 3,
+        "input_tokens": 8029,
+        "cached_tokens": 2048,
+        "output_tokens": 437,
+        "tariff_cny": "0.01553992",
+        "peak_uncached_cny": "0.019554"
+      },
+      "group": "new",
+      "source_question_id": null,
+      "run_id": "dde777a8-4387-4bba-a933-fdc926464425",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "seconds": 16.328,
+      "bound_citations": {
+        "R00001E6": true
+      },
+      "run_usage_matches_provider": true,
+      "selector_rounds": 1,
+      "selector_scheduled": 1,
+      "transport": {
+        "selector_checkpoint_count": 1,
+        "visible_count": 6,
+        "eligible_count": 6,
+        "sentences": 57,
+        "messages_sha256": "4b34f48e04415e793fd6267a4e2ea754190f8c3104a5778fd3a0789946e708a6",
+        "finish": "stop",
+        "reverse_validation": "provider_output_digest_and_render",
+        "selected": [
+          {
+            "id": "S49",
+            "handle": "R00001E6",
+            "offsets": [
+              242,
+              296
+            ],
+            "chunk_offsets": [
+              242,
+              296
+            ],
+            "text_sha256": "32ace7adfc8c442106b030ce85f7530ba2663f10a51178e6cfa3feb3c5784f01",
+            "revision_and_snapshot_membership_verified": true
+          },
+          {
+            "id": "S50",
+            "handle": "R00001E6",
+            "offsets": [
+              297,
+              369
+            ],
+            "chunk_offsets": [
+              297,
+              369
+            ],
+            "text_sha256": "53695d2cd3a6090c5f99b0348193e3018546d46583f4a6f0c36f5bd0cef48c86",
+            "revision_and_snapshot_membership_verified": true
+          }
+        ]
+      }
+    },
+    {
+      "label": "candidate-n6",
+      "paper_id": "1912.02481",
+      "question": "In the workspace paper Massive vs. Curated Word Embeddings for Low-Resourced Languages (arXiv:1912.02481), which four entity categories did the authors annotate in the Global Voices corpus, and what proportions were allocated to training, development, and test? Cite supporting passages from this workspace.",
+      "required": "DATE, LOC, ORG, PER; 70% train, 10% development, 20% test.",
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "correct_sources": [
+          "R00001E1"
+        ],
+        "reason": "The cited paragraph supports all four categories, all three split percentages, and the corpus size and annotation purpose."
+      },
+      "receipt_sequences": [
+        63,
+        64,
+        65
+      ],
+      "usage": {
+        "calls": 3,
+        "input_tokens": 7372,
+        "cached_tokens": 2816,
+        "output_tokens": 582,
+        "tariff_cny": "0.01388064",
+        "peak_uncached_cny": "0.019400"
+      },
+      "group": "new",
+      "source_question_id": null,
+      "run_id": "c9a0ffdc-d3cc-4705-a8c9-558769c09c7a",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "seconds": 16.844,
+      "bound_citations": {
+        "R00001E1": true
+      },
+      "run_usage_matches_provider": true,
+      "selector_rounds": 1,
+      "selector_scheduled": 1,
+      "transport": {
+        "selector_checkpoint_count": 1,
+        "visible_count": 5,
+        "eligible_count": 3,
+        "sentences": 33,
+        "messages_sha256": "943d4871dd96ad1f29b40d477a97aeb6044ab44c1fe429dc44169ffaa13033b0",
+        "finish": "stop",
+        "reverse_validation": "provider_output_digest_and_render",
+        "selected": [
+          {
+            "id": "S5",
+            "handle": "R00001E1",
+            "offsets": [
+              573,
+              721
+            ],
+            "chunk_offsets": [
+              573,
+              721
+            ],
+            "text_sha256": "72ab7eb4e8a35b444078d0df908413b8bfcf19d6ebe2285a6661eb9ca223ba1a",
+            "revision_and_snapshot_membership_verified": true
+          },
+          {
+            "id": "S6",
+            "handle": "R00001E1",
+            "offsets": [
+              722,
+              871
+            ],
+            "chunk_offsets": [
+              722,
+              871
+            ],
+            "text_sha256": "cb737511fbdedafa1fa6fd1fbcf106b13f3ce868e9346db4adce9ef3d02cdca3",
+            "revision_and_snapshot_membership_verified": true
+          },
+          {
+            "id": "S8",
+            "handle": "R00001E1",
+            "offsets": [
+              956,
+              1050
+            ],
+            "chunk_offsets": [
+              956,
+              1050
+            ],
+            "text_sha256": "34999086b12cf91ad54c26c67cbd416bfb7e01ee28f3bb13dbcc35acde97e749",
+            "revision_and_snapshot_membership_verified": true
+          }
+        ]
+      }
+    },
+    {
+      "label": "candidate-n7",
+      "paper_id": "1811.00942",
+      "question": "In the workspace paper Progress and Tradeoffs in Neural Language Models (arXiv:1811.00942), what training hardware did the authors use for the QRNNs, and why did they collect only latency statistics on the desktop system? Cite supporting passages from this workspace.",
+      "required": "NVIDIA Titan V GPU; desktop baseline power load much higher than incremental model load, so only latency.",
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "correct_sources": [
+          "R00001E5",
+          "R00002E1"
+        ],
+        "reason": "The first citation supports Titan V training and the PyTorch version. The second supports the desktop base-load explanation for reporting latency alone."
+      },
+      "receipt_sequences": [
+        66,
+        67,
+        68
+      ],
+      "usage": {
+        "calls": 3,
+        "input_tokens": 11204,
+        "cached_tokens": 2816,
+        "output_tokens": 848,
+        "tariff_cny": "0.02367264",
+        "peak_uncached_cny": "0.029192"
+      },
+      "group": "new",
+      "source_question_id": null,
+      "run_id": "004c711e-ebb4-4e2b-bb4d-984f9ff8f807",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "seconds": 24.265,
+      "bound_citations": {
+        "R00001E5": true,
+        "R00002E1": true
+      },
+      "run_usage_matches_provider": true,
+      "selector_rounds": 1,
+      "selector_scheduled": 1,
+      "transport": {
+        "selector_checkpoint_count": 1,
+        "visible_count": 10,
+        "eligible_count": 10,
+        "sentences": 102,
+        "messages_sha256": "ae99323341349a81c24c69a24a7efc30ee493e81147415e2f72658541f56a72b",
+        "finish": "stop",
+        "reverse_validation": "provider_output_digest_and_render",
+        "selected": [
+          {
+            "id": "S50",
+            "handle": "R00001E5",
+            "offsets": [
+              742,
+              817
+            ],
+            "chunk_offsets": [
+              742,
+              817
+            ],
+            "text_sha256": "5c820a9b426a3350024115a891156b0717c0fd6d90c91f734e3bf006da53bbe6",
+            "revision_and_snapshot_membership_verified": true
+          },
+          {
+            "id": "S61",
+            "handle": "R00002E1",
+            "offsets": [
+              736,
+              876
+            ],
+            "chunk_offsets": [
+              736,
+              876
+            ],
+            "text_sha256": "80dc6b4fd5e9b543c4ac451f7a89e098e30409652ec139abcecc92c8e55bc7fe",
+            "revision_and_snapshot_membership_verified": true
+          }
+        ]
+      }
+    },
+    {
+      "label": "candidate-n8",
+      "paper_id": "1909.00694",
+      "question": "In the workspace paper Minimally Supervised Learning of Affective Events Using Discourse Relations (arXiv:1909.00694), which two encoders were compared for event polarity prediction? Cite supporting passages from this workspace.",
+      "required": "Bidirectional GRU and BERT; identify both, no other implementation numbers required.",
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "correct_sources": [
+          "R00002E4"
+        ],
+        "reason": "The comparison sentence names both BiGRU and BERT. Copied math escapes do not obscure the encoder names or citation."
+      },
+      "receipt_sequences": [
+        69,
+        70,
+        71,
+        72
+      ],
+      "usage": {
+        "calls": 4,
+        "input_tokens": 14285,
+        "cached_tokens": 5120,
+        "output_tokens": 887,
+        "tariff_cny": "0.02563080",
+        "peak_uncached_cny": "0.035666"
+      },
+      "group": "new",
+      "source_question_id": null,
+      "run_id": "a58fa43e-97aa-4c8f-8e51-feb338492294",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "seconds": 26.563,
+      "bound_citations": {
+        "R00002E4": true
+      },
+      "run_usage_matches_provider": true,
+      "selector_rounds": 1,
+      "selector_scheduled": 1,
+      "transport": {
+        "selector_checkpoint_count": 1,
+        "visible_count": 10,
+        "eligible_count": 10,
+        "sentences": 141,
+        "messages_sha256": "d0a7455754be7798530f7180a29258f35cf506336e02cbdafcc83332ff4b02b3",
+        "finish": "stop",
+        "reverse_validation": "provider_output_digest_and_render",
+        "selected": [
+          {
+            "id": "S115",
+            "handle": "R00002E4",
+            "offsets": [
+              466,
+              547
+            ],
+            "chunk_offsets": [
+              466,
+              547
+            ],
+            "text_sha256": "a04722101c9a8a753b54599387da60867de66cc4b027928ecd704768e0fd81cd",
+            "revision_and_snapshot_membership_verified": true
+          }
+        ]
+      }
+    },
+    {
+      "label": "candidate-p2",
+      "paper_id": "1811.00942",
+      "question": "In the workspace paper Progress and Tradeoffs in Neural Language Models (arXiv:1811.00942), what is a commonly used evaluation metric for language models? Cite supporting passages from this workspace.",
+      "required": "perplexity",
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "correct_sources": [
+          "R00001E2",
+          "R00001E3"
+        ],
+        "reason": "The final identifies perplexity through the comparison and its validation/test reporting. Both cited passages substantiate its use as a language-model quality metric and the supplemental comparison details."
+      },
+      "receipt_sequences": [
+        73,
+        74,
+        75
+      ],
+      "usage": {
+        "calls": 3,
+        "input_tokens": 7473,
+        "cached_tokens": 4096,
+        "output_tokens": 1438,
+        "tariff_cny": "0.01842184",
+        "peak_uncached_cny": "0.026450"
+      },
+      "group": "regression",
+      "source_question_id": "e07df8f613dbd567a35318cd6f6f4cb959f5c82d",
+      "run_id": "78655adb-86eb-4598-9fde-577cfa991dcf",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "seconds": 22.454,
+      "bound_citations": {
+        "R00001E2": true,
+        "R00001E3": true
+      },
+      "run_usage_matches_provider": true,
+      "selector_rounds": 1,
+      "selector_scheduled": 1,
+      "transport": {
+        "selector_checkpoint_count": 1,
+        "visible_count": 5,
+        "eligible_count": 5,
+        "sentences": 50,
+        "messages_sha256": "b9d600c9e369b88481ed7e9ad85d4d29cbaa2d04566c8c4aeb6ae408126222fe",
+        "finish": "stop",
+        "reverse_validation": "provider_output_digest_and_render",
+        "selected": [
+          {
+            "id": "S16",
+            "handle": "R00001E2",
+            "offsets": [
+              637,
+              804
+            ],
+            "chunk_offsets": [
+              637,
+              804
+            ],
+            "text_sha256": "398e73752dc717873dfdbcb1edb4be8d75bf23f8e37af7d50e35213ca31de0f6",
+            "revision_and_snapshot_membership_verified": true
+          },
+          {
+            "id": "S28",
+            "handle": "R00001E3",
+            "offsets": [
+              1009,
+              1164
+            ],
+            "chunk_offsets": [
+              1009,
+              1164
+            ],
+            "text_sha256": "027eb08647aefe6d08f590cac0c0b8cb9d894b188f23a340174992a40cd683b0",
+            "revision_and_snapshot_membership_verified": true
+          }
+        ]
+      }
+    },
+    {
+      "label": "candidate-p3",
+      "paper_id": "1912.02481",
+      "question": "In the workspace paper Massive vs. Curated Word Embeddings for Low-Resourced Languages. The Case of Yor\\`ub\\'a and Twi (arXiv:1912.02481), what two architectures are used? Cite supporting passages from this workspace.",
+      "required": "fastText AND CWE-LP",
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "correct_sources": [
+          "R00002E1",
+          "R00002E3"
+        ],
+        "reason": "The target passages name fastText and identify the precise CWE-LP variant, supporting the distinction between subword and position-clustered character information."
+      },
+      "receipt_sequences": [
+        76,
+        77,
+        78,
+        79
+      ],
+      "usage": {
+        "calls": 4,
+        "input_tokens": 14339,
+        "cached_tokens": 5888,
+        "output_tokens": 1418,
+        "tariff_cny": "0.02848152",
+        "peak_uncached_cny": "0.040022"
+      },
+      "group": "regression",
+      "source_question_id": "cbf1137912a47262314c94d36ced3232d5fa1926",
+      "run_id": "f77c37db-d8c8-4c6e-9bac-1bf4fe5c4b7c",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "seconds": 30.344,
+      "bound_citations": {
+        "R00002E1": true,
+        "R00002E3": true
+      },
+      "run_usage_matches_provider": true,
+      "selector_rounds": 1,
+      "selector_scheduled": 1,
+      "transport": {
+        "selector_checkpoint_count": 1,
+        "visible_count": 10,
+        "eligible_count": 10,
+        "sentences": 78,
+        "messages_sha256": "13208e9f36cfc1c9d5d3334090833e26e11c8917e65b12d3d7302cb89c5cb7a1",
+        "finish": "stop",
+        "reverse_validation": "provider_output_digest_and_render",
+        "selected": [
+          {
+            "id": "S43",
+            "handle": "R00002E1",
+            "offsets": [
+              177,
+              359
+            ],
+            "chunk_offsets": [
+              177,
+              359
+            ],
+            "text_sha256": "859eb492d16828d31a2776a38054a23eaf118722a7a9a8d48faf725981fd7a4a",
+            "revision_and_snapshot_membership_verified": true
+          },
+          {
+            "id": "S58",
+            "handle": "R00002E3",
+            "offsets": [
+              122,
+              334
+            ],
+            "chunk_offsets": [
+              122,
+              334
+            ],
+            "text_sha256": "0bcd12bee690c55ba418c06f3c6f44ef403c92dc0a424ede96c6a5a00473113b",
+            "revision_and_snapshot_membership_verified": true
+          }
+        ]
+      }
+    },
+    {
+      "label": "candidate-p4",
+      "paper_id": "1909.00694",
+      "question": "In the workspace paper arXiv:1909.00694 on affective events, what makes up its seed lexicon and how is it used to label events? Cite supporting passages from this workspace.",
+      "required": "positive and negative predicates and assignment/propagation of polarity to events",
+      "grade": {
+        "complete_primary": false,
+        "citation_entails": false,
+        "all_extra_supported": false,
+        "format_ok": false,
+        "strict": false,
+        "eligible_evidence": "complete",
+        "failure_kind": "provider_length_non_delivery",
+        "correct_sources": [
+          "R00001E5",
+          "R00002E2"
+        ],
+        "reason": "Two admitted passages include both predicate classes, direct polarity labeling, and propagation. Selector receipt 83 reached 2048 output tokens with finish_reason=length, and round 4 failed MODEL_BAD_RESPONSE with no visible final."
+      },
+      "receipt_sequences": [
+        80,
+        81,
+        82,
+        83
+      ],
+      "usage": {
+        "calls": 4,
+        "input_tokens": 21324,
+        "cached_tokens": 9984,
+        "output_tokens": 3110,
+        "tariff_cny": "0.04795936",
+        "peak_uncached_cny": "0.067528"
+      },
+      "group": "regression",
+      "source_question_id": "753990d0b621d390ed58f20c4d9e4f065f0dc672",
+      "run_id": "c583f328-3e28-449a-ba5e-150119d96b01",
+      "status": "FAILED",
+      "failure_code": "MODEL_BAD_RESPONSE",
+      "seconds": 42.094,
+      "bound_citations": {},
+      "run_usage_matches_provider": false,
+      "selector_rounds": 0,
+      "selector_scheduled": 1,
+      "transport": {
+        "selector_checkpoint_count": 1,
+        "visible_count": 16,
+        "eligible_count": 15,
+        "sentences": 187,
+        "messages_sha256": "10ac578dfb46d93df427210d55c6de2d28e322c099235d3b7a264f865ee22a65",
+        "finish": "length",
+        "usage_reconciliation": {
+          "run_input_output": [
+            15449,
+            1062
+          ],
+          "ledger_input_output": [
+            21324,
+            3110
+          ],
+          "ledger_minus_run_input_output": [
+            5875,
+            2048
+          ],
+          "reason": "Empty length-limited provider response rejected before recording model-step usage."
+        },
+        "selected": []
+      }
+    },
+    {
+      "label": "candidate-p5",
+      "paper_id": "1909.11189",
+      "question": "In the workspace paper Diachronic Topics in New High German Poetry (arXiv:1909.11189), what is the algorithm used for the classification tasks? Cite the supporting passage.",
+      "required": "Random Forest ensemble classifier",
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "correct_sources": [
+          "R00002E1"
+        ],
+        "reason": "The cited classifier sentence identifies Random Forest ensembles and corroborates the additional grid-search detail."
+      },
+      "receipt_sequences": [
+        84,
+        85,
+        86,
+        87
+      ],
+      "usage": {
+        "calls": 4,
+        "input_tokens": 14451,
+        "cached_tokens": 5888,
+        "output_tokens": 824,
+        "tariff_cny": "0.02395352",
+        "peak_uncached_cny": "0.035494"
+      },
+      "group": "regression",
+      "source_question_id": "bfa3776c30cb30e0088e185a5908e5172df79236",
+      "run_id": "614b7ccd-e0c3-4294-8904-a50408ad5795",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "seconds": 29.359,
+      "bound_citations": {
+        "R00002E1": true
+      },
+      "run_usage_matches_provider": true,
+      "selector_rounds": 1,
+      "selector_scheduled": 1,
+      "transport": {
+        "selector_checkpoint_count": 1,
+        "visible_count": 10,
+        "eligible_count": 4,
+        "sentences": 46,
+        "messages_sha256": "8030910463c64fe26a7e6a4d3d45c5fcab0d98ab3fd7dfa5b3fb7a720596db1a",
+        "finish": "stop",
+        "reverse_validation": "provider_output_digest_and_render",
+        "selected": [
+          {
+            "id": "S28",
+            "handle": "R00002E1",
+            "offsets": [
+              500,
+              630
+            ],
+            "chunk_offsets": [
+              500,
+              630
+            ],
+            "text_sha256": "29608413819958504fd9119215bfa1d83edb3949be3fbe056408bb1b40775a77",
+            "revision_and_snapshot_membership_verified": true
+          }
+        ]
+      }
+    },
+    {
+      "label": "candidate-p6",
+      "paper_id": "1912.02481",
+      "question": "In the workspace paper Massive vs. Curated Word Embeddings for Low-Resourced Languages (arXiv:1912.02481), compare the effects of corpus quality and corpus size on word similarity for Twi and Yorùbá. Cite supporting passages from this workspace.",
+      "required": "Quality of curated texts helps, extra low-quality mass collection does not reliably improve word-similarity results even with larger vocabulary; cite supporting target-paper passages. Accept accurately stated differences for each language, do not universally assert all added data degrades both. Require effective first search argument verified from checkpoint; score rewrite exposure separately from answer accuracy.",
+      "grade": {
+        "complete_primary": false,
+        "citation_entails": false,
+        "all_extra_supported": false,
+        "format_ok": false,
+        "strict": false,
+        "eligible_evidence": "complete",
+        "failure_kind": "provider_length_non_delivery",
+        "correct_sources": [
+          "R00001E5",
+          "R00001E6",
+          "R00002E4"
+        ],
+        "reason": "The model saw the clean-data and vocabulary interaction, Twi's selected-versus-noisy token comparison, and Yoruba's reduced correlation with added noisy Common Crawl despite a larger vocabulary. Receipt 91 reached 2048 tokens with finish_reason=length, and the selector failed MODEL_BAD_RESPONSE without a final."
+      },
+      "receipt_sequences": [
+        88,
+        89,
+        90,
+        91
+      ],
+      "usage": {
+        "calls": 4,
+        "input_tokens": 15636,
+        "cached_tokens": 6656,
+        "output_tokens": 3923,
+        "tariff_cny": "0.04961024",
+        "peak_uncached_cny": "0.062656"
+      },
+      "group": "regression",
+      "source_question_id": "347e86893e8002024c2d10f618ca98e14689675f",
+      "run_id": "bc1c3c57-ceb8-4e42-9efd-0911f3a22f7e",
+      "status": "FAILED",
+      "failure_code": "MODEL_BAD_RESPONSE",
+      "seconds": 52.109,
+      "bound_citations": {},
+      "run_usage_matches_provider": false,
+      "selector_rounds": 0,
+      "selector_scheduled": 1,
+      "transport": {
+        "selector_checkpoint_count": 1,
+        "visible_count": 11,
+        "eligible_count": 11,
+        "sentences": 93,
+        "messages_sha256": "a8804460798fe35f59009335113e46c85a5f54b1f6ad0c18d7ebabab38f0b3a1",
+        "finish": "length",
+        "usage_reconciliation": {
+          "run_input_output": [
+            11710,
+            1875
+          ],
+          "ledger_input_output": [
+            15636,
+            3923
+          ],
+          "ledger_minus_run_input_output": [
+            3926,
+            2048
+          ],
+          "reason": "Empty length-limited provider response rejected before recording model-step usage."
+        },
+        "selected": []
+      }
+    },
+    {
+      "label": "candidate-p7",
+      "paper_id": "1811.00942",
+      "question": "In the workspace paper Progress and Tradeoffs in Neural Language Models (arXiv:1811.00942), how did the authors compare neural and classic language models in terms of quality and computational performance? Cite supporting passages from this workspace.",
+      "required": "Quality: perplexity AND next-word prediction recall (R@3 or equivalent). Computational performance: per-query latency AND energy usage. Must cite actual target-paper passages covering both comparisons; numerical claims must remain factually accurate. Measure first-search rewrite exposure independently.",
+      "grade": {
+        "complete_primary": false,
+        "citation_entails": false,
+        "all_extra_supported": false,
+        "format_ok": false,
+        "strict": false,
+        "eligible_evidence": "partial",
+        "failure_kind": "provider_length_non_delivery",
+        "correct_sources": [
+          "R00001E1",
+          "R00001E3",
+          "R00001E5",
+          "R00001E6"
+        ],
+        "reason": "The clips cover perplexity, latency, energy and next-word prediction, with recall-error figure captions, but no explicit next-word prediction recall measure or metric linkage. Receipt 94 reached 2048 tokens with finish_reason=length, and the selector failed MODEL_BAD_RESPONSE without a final."
+      },
+      "receipt_sequences": [
+        92,
+        93,
+        94
+      ],
+      "usage": {
+        "calls": 3,
+        "input_tokens": 7447,
+        "cached_tokens": 2048,
+        "output_tokens": 2875,
+        "tariff_cny": "0.03387992",
+        "peak_uncached_cny": "0.037894"
+      },
+      "group": "regression",
+      "source_question_id": "dd155f01f6f4a14f9d25afc97504aefdc6d29c13",
+      "run_id": "d0ad13fc-7fab-4640-857e-4bdd8e9e8380",
+      "status": "FAILED",
+      "failure_code": "MODEL_BAD_RESPONSE",
+      "seconds": 29.5,
+      "bound_citations": {},
+      "run_usage_matches_provider": false,
+      "selector_rounds": 0,
+      "selector_scheduled": 1,
+      "transport": {
+        "selector_checkpoint_count": 1,
+        "visible_count": 6,
+        "eligible_count": 6,
+        "sentences": 51,
+        "messages_sha256": "bfa2140d7ab612a6780cd7f32ab0a9d2f2b3ce0c113aaffa7b1ccc777f86b1bb",
+        "finish": "length",
+        "usage_reconciliation": {
+          "run_input_output": [
+            5543,
+            827
+          ],
+          "ledger_input_output": [
+            7447,
+            2875
+          ],
+          "ledger_minus_run_input_output": [
+            1904,
+            2048
+          ],
+          "reason": "Empty length-limited provider response rejected before recording model-step usage."
+        },
+        "selected": []
+      }
+    },
+    {
+      "label": "candidate-p8",
+      "paper_id": "1909.11189",
+      "question": "In the workspace paper Diachronic Topics in New High German Poetry (arXiv:1909.11189), which digital collection supplied the verse corpus? Cite a supporting passage.",
+      "required": "Digital Library in the TextGrid Repository (TextGrid or its verse subset TGRID-V with source identification acceptable); zeno.org alone is the repository upstream, not the named collection.",
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "correct_sources": [
+          "R00001E1"
+        ],
+        "reason": "The named collection is the Digital Library in the TextGrid Repository; the same citation supports the study context, the zeno.org upstream and date coverage."
+      },
+      "receipt_sequences": [
+        95,
+        96,
+        97
+      ],
+      "usage": {
+        "calls": 3,
+        "input_tokens": 7044,
+        "cached_tokens": 2816,
+        "output_tokens": 1184,
+        "tariff_cny": "0.01804064",
+        "peak_uncached_cny": "0.023560"
+      },
+      "group": "regression",
+      "source_question_id": "ee87608419e4807b9b566681631a8cd72197a71a",
+      "run_id": "a92e11a8-fe05-4c63-aa4b-377da5dad854",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "seconds": 22.469,
+      "bound_citations": {
+        "R00001E1": true
+      },
+      "run_usage_matches_provider": true,
+      "selector_rounds": 1,
+      "selector_scheduled": 1,
+      "transport": {
+        "selector_checkpoint_count": 1,
+        "visible_count": 5,
+        "eligible_count": 1,
+        "sentences": 11,
+        "messages_sha256": "f4f19cdf2fae76b37443cd5587245a1542958fac68b9bafe5147cafcf3410a63",
+        "finish": "stop",
+        "reverse_validation": "provider_output_digest_and_render",
+        "selected": [
+          {
+            "id": "S6",
+            "handle": "R00001E1",
+            "offsets": [
+              417,
+              659
+            ],
+            "chunk_offsets": [
+              417,
+              659
+            ],
+            "text_sha256": "b7ac6b9c8375c5e0cf6c6046e4f700afbb2cb64f4460fa1c2837f4e77d672095",
+            "revision_and_snapshot_membership_verified": true
+          },
+          {
+            "id": "S8",
+            "handle": "R00001E1",
+            "offsets": [
+              669,
+              791
+            ],
+            "chunk_offsets": [
+              669,
+              791
+            ],
+            "text_sha256": "da3faf833b93c2c17257683caf52f729c321d67398c8a3e8754bfdb6c71c6240",
+            "revision_and_snapshot_membership_verified": true
+          },
+          {
+            "id": "S9",
+            "handle": "R00001E1",
+            "offsets": [
+              792,
+              921
+            ],
+            "chunk_offsets": [
+              792,
+              921
+            ],
+            "text_sha256": "5d0d3fbe9944e3a348f109b9be5f6da4d71f2ea3c6c8a9fed1fcceab81dbd0d2",
+            "revision_and_snapshot_membership_verified": true
+          }
+        ]
+      }
+    },
+    {
+      "label": "candidate-p9",
+      "paper_id": "1909.00694",
+      "question": "In the workspace paper Minimally Supervised Learning of Affective Events Using Discourse Relations (arXiv:1909.00694), how were the automatically labeled AL pairs balanced, and which part of each ACP sentence did the authors extract as an affective event? Cite a supporting passage for each step.",
+      "required": "AL: randomly subsample until positive and negative latter events are equal in number (no requirement for exact numbers). ACP: parse each sentence and take its last clause. Correctly attribute each transformation to its own dataset, and provide supporting evidence for both.",
+      "grade": {
+        "complete_primary": true,
+        "citation_entails": true,
+        "all_extra_supported": true,
+        "format_ok": true,
+        "strict": true,
+        "eligible_evidence": "complete",
+        "failure_kind": "none",
+        "correct_sources": [
+          "R00001E2"
+        ],
+        "reason": "The two selected sentences show random balancing on the latter AL events and extracting the last clause of each ACP sentence, with both facets directly supported by the same citation."
+      },
+      "receipt_sequences": [
+        98,
+        99,
+        100
+      ],
+      "usage": {
+        "calls": 3,
+        "input_tokens": 8443,
+        "cached_tokens": 2048,
+        "output_tokens": 584,
+        "tariff_cny": "0.01754392",
+        "peak_uncached_cny": "0.021558"
+      },
+      "group": "regression",
+      "source_question_id": "44c4bd6decc86f1091b5fc0728873d9324cdde4e",
+      "run_id": "76b5d15a-b114-4ead-9984-9d096e79ce91",
+      "status": "SUCCEEDED",
+      "failure_code": null,
+      "seconds": 25.468,
+      "bound_citations": {
+        "R00001E2": true
+      },
+      "run_usage_matches_provider": true,
+      "selector_rounds": 1,
+      "selector_scheduled": 1,
+      "transport": {
+        "selector_checkpoint_count": 1,
+        "visible_count": 6,
+        "eligible_count": 6,
+        "sentences": 85,
+        "messages_sha256": "c553283068603ae183d81f8a3069e39c3e6b15af645ab6a417c119c73069f4a1",
+        "finish": "stop",
+        "reverse_validation": "provider_output_digest_and_render",
+        "selected": [
+          {
+            "id": "S14",
+            "handle": "R00001E2",
+            "offsets": [
+              29,
+              141
+            ],
+            "chunk_offsets": [
+              29,
+              141
+            ],
+            "text_sha256": "8db2d9abe561554167b0d94d358c53cf5187b5e9b78d349e98ede0874bc1eaf2",
+            "revision_and_snapshot_membership_verified": true
+          },
+          {
+            "id": "S28",
+            "handle": "R00001E2",
+            "offsets": [
+              886,
+              946
+            ],
+            "chunk_offsets": [
+              886,
+              946
+            ],
+            "text_sha256": "fc57ba0ec924935c51ad8921de012e1bc8a981edab504eac15f867fea3a40cfe",
+            "revision_and_snapshot_membership_verified": true
+          }
+        ]
+      }
+    }
+  ]
+}

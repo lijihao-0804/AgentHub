@@ -21,7 +21,13 @@ from packages.model_gateway.adapters.litellm.provider_http import (
     GuardedProviderTransport,
     _PinnedProviderBackend,
 )
-from packages.model_gateway.contracts import ModelMessage, ModelRequest, ModelStreamEventType
+from packages.model_gateway.contracts import (
+    AliyunDeepSeekRequestMode,
+    ModelCapabilities,
+    ModelMessage,
+    ModelRequest,
+    ModelStreamEventType,
+)
 from packages.model_gateway.egress import (
     PEER_FORBIDDEN,
     TARGET_FORBIDDEN,
@@ -511,6 +517,59 @@ async def test_default_litellm_openai_sdk_uses_guarded_v1_default(
     assert factory.built[0].endpoint.url == "https://api.openai.com/v1"
     assert factory.built[0].backend.connect_calls == [("8.8.8.8", 443)]
     assert factory.built[0].backend.streams[0].tls_calls[0][1] == "api.openai.com"
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "mode",
+    [
+        AliyunDeepSeekRequestMode.SELECTOR_NON_THINKING,
+        AliyunDeepSeekRequestMode.PROVIDER_DEFAULT,
+    ],
+)
+@pytest.mark.parametrize("stream", [False, True])
+async def test_default_litellm_sdk_serializes_thinking_override_for_selector_only(
+    mode: AliyunDeepSeekRequestMode,
+    stream: bool,
+) -> None:
+    model = "deepseek-v4.1-flash"
+    factory = _RecordingFactory(
+        _http_response(_stream_body(model), content_type="text/event-stream")
+        if stream
+        else _http_response(_completion_body(model))
+    )
+    adapter = LiteLLMProviderAdapter(
+        egress_policy=ProviderEgressPolicy(resolver=_Resolver(("8.8.8.8",))),
+        egress_transport_factory=factory,
+    )
+    profile, credential = _profile(
+        "openai-compatible", base_url="https://controlled-relay.example/v1", model=model
+    )
+    profile.capabilities = ModelCapabilities(aliyun_deepseek_non_thinking=True)
+    profile.max_tokens = 2048
+    request = ModelRequest(
+        messages=(ModelMessage(role="user", content="synthetic"),), request_mode=mode
+    )
+
+    if stream:
+        events = [event async for event in adapter.stream(profile, credential, request)]
+        assert events[-1].response.content == "streamed"
+    else:
+        response = await adapter.complete(profile, credential, request)
+        assert response.content == "guarded"
+
+    assert len(factory.built) == 1
+    assert len(factory.built[0].backend.streams) == 1
+    headers, payload = b"".join(factory.built[0].backend.streams[0].writes).split(b"\r\n\r\n", 1)
+    assert headers.startswith(b"POST /v1/chat/completions HTTP/1.1\r\n")
+    body = json.loads(payload)
+    assert body["model"] == model
+    assert body["max_tokens"] == 2048
+    assert "extra_body" not in body
+    if mode is AliyunDeepSeekRequestMode.SELECTOR_NON_THINKING:
+        assert body["enable_thinking"] is False
+    else:
+        assert "enable_thinking" not in body
 
 
 @pytest.mark.asyncio

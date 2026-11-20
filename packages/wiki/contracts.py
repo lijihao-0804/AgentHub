@@ -20,6 +20,8 @@ def freeze_plan(plan: ResolvedModelExecutionPlan) -> dict:
         data = asdict(p)
         if data.get("provider_egress") is None:
             data.pop("provider_egress", None)
+        if not p.capabilities.aliyun_deepseek_non_thinking:
+            data["capabilities"].pop("aliyun_deepseek_non_thinking")
         for key in (
             "id",
             "workspace_id",

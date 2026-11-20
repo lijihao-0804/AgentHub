@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useCallback, useState } from "react";
 import { useFrontendSession } from "@/components/providers/session-provider";
 import { useWorkspaceData } from "@/hooks/use-workspace-data";
@@ -7,7 +8,7 @@ import { EmptyState, ErrorState, LoadingState, Panel } from "@/components/ui/sta
 import { apiRequest, type AuthInput } from "@/lib/api/client";
 
 type Ref = { snapshot_id: string; knowledge_base_id: string; document_revision_id: string; chunk_id: string };
-type Tools = { events: { sequence: number; type: string; payload: Record<string, unknown> }[]; evidence_refs: Ref[]; content_allowed: boolean; truncated: boolean };
+type Tools = { events: { sequence: number; type: string; payload: Record<string, unknown> }[]; evidence_refs: Ref[]; citation_refs?: (Ref & { handle: string })[]; content_allowed: boolean; truncated: boolean };
 function base(auth: AuthInput, runId: string) { return `/api/v1/workspaces/${encodeURIComponent(auth.workspaceId)}/runs/${encodeURIComponent(runId)}`; }
 
 type ToolEvent = Tools["events"][number];
@@ -69,20 +70,30 @@ export default function ToolEvidencePanel({ runId }: { runId: string }) {
 }
 function Body({ runId }: { runId: string }) {
   const { t } = useI18n();
-  const load = useCallback((auth: AuthInput) => apiRequest<Tools>(`${base(auth, runId)}/tools`, auth.accessToken), [runId]);
+  const load = useCallback((auth: AuthInput) => apiRequest<Tools>(`${base(auth, runId)}/tools?include_citations=true`, auth.accessToken), [runId]);
   const tools = useWorkspaceData(load, `tools:${runId}`);
   const [selected, setSelected] = useState<Ref | null>(null);
   const events = tools.data?.events ?? [];
+  const citations = tools.data?.citation_refs ?? [];
   return <Panel title={t("runEvidence.title")}>
     {tools.loading && <LoadingState label={t("common.loading")} />}
     {tools.error && <ErrorState code={tools.error.code} message={tools.error.message} onRetry={tools.reload} />}
-    {tools.loaded && !events.length && <EmptyState title={t("runEvidence.empty")} />}
+    {tools.loaded && !events.length && !citations.length && <EmptyState title={t("runEvidence.empty")} />}
     {events.length > 0 && (
       <div className="tool-event-list">
         {events.map((event) => <ToolEventRow key={event.sequence} event={event} />)}
       </div>
     )}
     {tools.data?.truncated && <p className="state-hint">{t("runEvidence.truncated")}</p>}
+    {citations.length > 0 && <>
+      <h3>{t("runEvidence.citations")}</h3>
+      <ul>
+        {citations.map(ref => <li key={ref.handle}>
+          <code>{ref.handle}</code> · <code style={{ overflowWrap: "anywhere" }}>{ref.chunk_id}</code>{" · "}
+          <Link href={`/knowledge/playground?knowledge_base_id=${encodeURIComponent(ref.knowledge_base_id)}&snapshot_id=${encodeURIComponent(ref.snapshot_id)}`}>{t("runEvidence.inspectSnapshot")}</Link>
+        </li>)}
+      </ul>
+    </>}
     {tools.data?.evidence_refs.length ? (
       <>
         <h3>{t("runEvidence.evidence")}</h3>

@@ -37,9 +37,17 @@ from apps.warehouse_mcp.sql_guard import (
     split_statements,
     strip_sql_comments,
 )
-from apps.warehouse_mcp.warehouse import METRICS, TABLE_NAMES, Warehouse
+from apps.warehouse_mcp.warehouse import METRICS, SCHEMA_SQL, TABLE_NAMES, Warehouse
 
-EXPECTED_TOOLS = (GET_METRIC_DEFINITION, LIST_TABLES, DESCRIBE_TABLE, QUERY_SQL)
+EXPECTED_TOOLS = (
+    GET_METRIC_DEFINITION,
+    LIST_TABLES,
+    DESCRIBE_TABLE,
+    QUERY_SQL,
+    server.GET_REGISTRATION_CONVERSION,
+    server.GET_ORDER_ACTIVITY,
+    server.GET_PAYING_USER_COUNTS,
+)
 
 # Grouped conversion over the seeded window, split at the 5.2.0 rollout. This
 # is the query an analyst would arrive at, and the numbers below are whatever
@@ -103,7 +111,7 @@ def text_of(result: mcp_types.CallToolResult) -> str:
 
 
 @pytest.mark.asyncio
-async def test_the_tool_list_is_exactly_the_four_read_tools(warehouse: Warehouse) -> None:
+async def test_original_read_tools_and_optional_aggregates_are_listed(warehouse: Warehouse) -> None:
     entry = server.build_server(warehouse).get_request_handler("tools/list")
     assert entry is not None
     listed = await entry.handler(None, None)  # type: ignore[arg-type]
@@ -338,7 +346,10 @@ async def test_a_query_against_a_missing_table_is_an_error_not_a_crash(
 async def test_every_defined_metric_answers_with_the_full_contract(
     warehouse: Warehouse, metric: str
 ) -> None:
-    result = await call_tool(warehouse, GET_METRIC_DEFINITION, {"metric": metric})
+    field = server.METRIC_INPUT_SCHEMA["properties"]["metric"]
+    assert metric in field["description"].split(": ")[-1].split(", ")
+    assert "enum" not in field
+    result = await call_tool(warehouse, GET_METRIC_DEFINITION, {"metric": f" {metric.upper()} "})
     assert result.is_error is False
     payload = result.structured_content
     assert payload is not None
@@ -457,3 +468,286 @@ def _pooled(rows: list[list[Any]], platform: str, period: str) -> float:
     views = sum(row[3] for row in rows if row[0] == platform and row[2] == period)
     signups = sum(row[4] for row in rows if row[0] == platform and row[2] == period)
     return signups / views
+
+
+def window(start: str, end: str) -> dict[str, str]:
+    return {"start_date": start, "end_date": end}
+
+
+@pytest.mark.asyncio
+async def test_conversion_keeps_platform_and_version_grains_separate(warehouse: Warehouse) -> None:
+    result = await call_tool(
+        warehouse,
+        server.GET_REGISTRATION_CONVERSION,
+        {
+            "windows": [window("2026-02-15", "2026-02-28"), window("2026-03-01", "2026-03-14")],
+            "breakdown": "platform_version",
+        },
+    )
+    data = result.structured_content
+    assert data and not result.is_error
+    assert [(r["signups"], r["views"]) for r in data["overall"]["periods"]] == [
+        (406, 1330),
+        (336, 1358),
+    ]
+    assert data["overall"]["change_pp"] == pytest.approx(100 * (336 / 1358 - 406 / 1330))
+    assert next(r for r in data["platforms"] if r["platform"] == "ios")["change_pp"] == 0
+    versions = {(r["platform"], r["app_version"]): r for r in data["versions"]}
+    assert versions["ios", "5.1.1"]["change_pp"] == pytest.approx(100 * (84 / 252 - 112 / 378))
+    assert versions["android", "5.2.0"]["change_pp"] is None
+    assert versions["android", "5.2.0"]["periods"][0] == {
+        "signups": 0,
+        "views": 0,
+        "rate_pct": None,
+    }
+
+
+@pytest.mark.asyncio
+async def test_conversion_single_day_filter_and_offset_boundary(warehouse: Warehouse) -> None:
+    # UTC midnight is the exact cut; view-only and signup-only groups both survive.
+    with sqlite3.connect(warehouse.path) as db:
+        db.executemany(
+            "INSERT INTO signup_page_views VALUES (?, ?, ?, ?, ?)",
+            [
+                (900000, "2028-02-29T23:59:59Z", "ios", "old", "US"),
+                (900001, "2028-03-01T01:00:00+01:00", "ios", "new", "US"),
+                (900002, "2028-03-01T00:00:00Z", "android", "other", "US"),
+            ],
+        )
+        db.execute(
+            "INSERT INTO signups VALUES "
+            "(900000, '2028-03-01T00:00:00Z', 'ios', 'signup-only', 'US')"
+        )
+    result = await call_tool(
+        warehouse,
+        server.GET_REGISTRATION_CONVERSION,
+        {
+            "windows": [window("2028-02-29", "2028-02-29"), window("2028-03-01", "2028-03-01")],
+            "platform": "ios",
+            "breakdown": "platform_version",
+        },
+    )
+    data = result.structured_content
+    assert data and [(p["signups"], p["views"]) for p in data["overall"]["periods"]] == [
+        (0, 1),
+        (1, 1),
+    ]
+    assert data["overall"]["change_pp"] == 100
+    assert (
+        next(v for v in data["versions"] if v["app_version"] == "signup-only")["periods"][1][
+            "rate_pct"
+        ]
+        is None
+    )
+    single = warehouse.registration_conversion([window("2026-03-15", "2026-03-15")], "ios")
+    assert single["overall"]["periods"][0]["rate_pct"] == pytest.approx(100 * 14 / 45)
+    assert (
+        single["overall"]["change_pp"] is None and single["platforms"] == single["versions"] == []
+    )
+
+
+@pytest.mark.parametrize(
+    "args",
+    [
+        {"windows": []},
+        {"windows": [window("2026-03-01", "2026-02-28")]},
+        {"windows": [window("2026-02-29", "2026-03-01")]},
+        {"windows": [window("2026-03-01", "2026-03-02"), window("2026-03-02", "2026-03-03")]},
+        {"windows": [window("2026-03-01", "2026-03-01")] * 3},
+        {"windows": [window("2026-03-01", "2026-03-01")], "sql": "SELECT 1"},
+        {"windows": [window("2026-03-01", "2026-03-01")], "platform": "ios OR 1=1"},
+    ],
+)
+@pytest.mark.asyncio
+async def test_conversion_rejects_invalid_date_windows_and_open_filters(
+    warehouse: Warehouse, args: dict
+) -> None:
+    assert (await call_tool(warehouse, server.GET_REGISTRATION_CONVERSION, args)).is_error
+
+
+@pytest.mark.asyncio
+async def test_conversion_large_breakdown_fails_without_partial_totals(
+    warehouse: Warehouse,
+) -> None:
+    from apps.warehouse_mcp.sql_guard import MAX_ROW_CAP
+
+    with sqlite3.connect(warehouse.path) as db:
+        db.executemany(
+            "INSERT INTO signup_page_views VALUES (?, '2029-05-01T00:00:00Z', 'ios', ?, 'US')",
+            [(910000 + i, str(i)) for i in range(MAX_ROW_CAP)],
+        )
+    args = {"windows": [window("2029-05-01", "2029-05-01")]}
+    large = await call_tool(
+        warehouse,
+        server.GET_REGISTRATION_CONVERSION,
+        {
+            **args,
+            "breakdown": "platform_version",
+        },
+    )
+    assert large.is_error and not large.structured_content
+    assert "coarser breakdown" in text_of(large)
+    coarse = await call_tool(
+        warehouse,
+        server.GET_REGISTRATION_CONVERSION,
+        {
+            **args,
+            "breakdown": "platform",
+        },
+    )
+    assert coarse.structured_content["overall"]["periods"][0]["views"] == MAX_ROW_CAP
+    empty = warehouse.registration_conversion([window("2029-05-02", "2029-05-02")])
+    assert empty["overall"] == {
+        "periods": [{"signups": 0, "views": 0, "rate_pct": None}],
+        "change_pp": None,
+    }
+
+
+@pytest.mark.asyncio
+async def test_paying_user_definition_keeps_failed_first_attempts_out(warehouse: Warehouse) -> None:
+    dictionary = await call_tool(warehouse, GET_METRIC_DEFINITION, {"metric": "paying_user"})
+    formula = dictionary.structured_content["formula"]
+    assert "payments.paid_at, payments.payment_id" in formula
+    assert "after selecting the first attempt" in formula
+
+    # A paid retry is a valid sale; the published first-attempt KPI excludes that user.
+    result = await call_tool(
+        warehouse,
+        QUERY_SQL,
+        {
+            "sql": """
+        WITH attempts AS (
+            SELECT o.user_id, o.status AS order_status, p.status AS payment_status,
+                   row_number() OVER (
+                       PARTITION BY o.user_id ORDER BY p.paid_at, p.payment_id
+                   ) AS sequence
+            FROM signups s JOIN orders o ON o.user_id = s.user_id
+            JOIN payments p ON p.order_id = o.order_id
+        )
+        SELECT count(DISTINCT CASE WHEN sequence = 1 THEN user_id END) AS first_succeeded,
+               count(DISTINCT user_id) AS ever_succeeded
+        FROM attempts WHERE order_status = 'PAID' AND payment_status = 'SUCCEEDED'
+    """
+        },
+    )
+    first, any_success = result.structured_content["rows"][0]
+    assert 0 < first < any_success
+
+
+@pytest.mark.asyncio
+async def test_order_activity_classifies_people_before_counting_their_orders(
+    warehouse: Warehouse,
+) -> None:
+    with sqlite3.connect(warehouse.path) as db:
+        db.executemany(
+            "INSERT INTO orders VALUES (?, ?, ?, 100, ?)",
+            [
+                (900001, 101, "2028-03-01T00:30:00+01:00", "PAID"),  # Previous UTC day.
+                (900002, 101, "2028-03-01T07:00:00Z", "REFUNDED"),
+                (900003, 102, "2028-03-01T07:00:00Z", "PAID"),
+                (900004, 102, "2028-03-01T08:00:00Z", "REFUNDED"),
+                (900005, 103, "2028-03-01T09:00:00Z", "CANCELLED"),
+                (900006, 103, "2028-03-01T10:00:00Z", "CANCELLED"),
+            ],
+        )
+    dates = window("2028-03-01", "2028-03-01")
+    result = await call_tool(warehouse, server.GET_ORDER_ACTIVITY, dates)
+    assert not result.is_error
+    assert result.structured_content == {
+        "window": dates,
+        "ordered_users": 3,
+        "with_paid_order": {
+            "users": 1,
+            "order_rows": 2,
+            "paid_rows": 1,
+            "non_paid_rows": 1,
+            "refunded_rows": 1,
+            "cancelled_rows": 0,
+            "other_status_rows": 0,
+        },
+        "without_paid_order": {
+            "users": 2,
+            "order_rows": 3,
+            "paid_rows": 0,
+            "non_paid_rows": 3,
+            "refunded_rows": 1,
+            "cancelled_rows": 2,
+            "other_status_rows": 0,
+        },
+    }
+    empty = await call_tool(
+        warehouse, server.GET_ORDER_ACTIVITY, window("2029-01-01", "2029-01-01")
+    )
+    assert empty.structured_content["ordered_users"] == 0
+    assert all(n == 0 for n in empty.structured_content["without_paid_order"].values())
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "args",
+    [
+        {"start_date": "2028-03-01", "end_date": "2028-02-29"},
+        {"start_date": "2028-03-01' OR 1=1 --", "end_date": "2028-03-01"},
+        {"start_date": "2028-03-01", "end_date": "2028-03-01", "status": "PAID"},
+    ],
+)
+async def test_order_activity_rejects_invalid_windows_and_filters(warehouse, args):
+    assert (await call_tool(warehouse, server.GET_ORDER_ACTIVITY, args)).is_error
+
+
+@pytest.mark.asyncio
+async def test_paying_user_counts_only_classifies_users_in_the_difference(tmp_path: Path) -> None:
+    source = Warehouse(tmp_path / "first-attempts.sqlite3")
+    with sqlite3.connect(source.path) as db:
+        db.executescript(SCHEMA_SQL)
+        db.executemany(
+            "INSERT INTO signups VALUES (?, '2026-02-01', 'ios', '1.0', 'US')",
+            [(uid,) for uid in range(1, 7)],
+        )
+    empty = await call_tool(source, server.GET_PAYING_USER_COUNTS)
+    assert empty.structured_content == {
+        "strict_first_qualified_users": 0,
+        "any_qualified_users": 0,
+        "any_only_by_first_payment_status": {"failed": 0, "refunded": 0, "other": 0},
+    }
+
+    # (payment, user, day, order status, payment status); one order per test attempt.
+    attempts = [
+        (11, 1, "2026-02-01", "PAID", "FAILED"),
+        (12, 1, "2026-02-02", "PAID", "SUCCEEDED"),
+        (21, 2, "2026-02-01", "REFUNDED", "REFUNDED"),
+        (22, 2, "2026-02-02", "PAID", "SUCCEEDED"),
+        (31, 3, "2026-02-01", "PAID", "SUCCEEDED"),  # Only one attempt; included in both.
+        (41, 4, "2026-02-01", "REFUNDED", "REFUNDED"),  # Neither count.
+        (51, 5, "2026-02-01", "REFUNDED", "SUCCEEDED"),  # Payment alone is insufficient.
+        (52, 5, "2026-02-02", "PAID", "SUCCEEDED"),
+        (62, 6, "2026-02-01", "PAID", "SUCCEEDED"),  # Equal timestamps, higher ID is later.
+        (61, 6, "2026-02-01", "PAID", "FAILED"),
+        (70, 999, "2026-02-01", "PAID", "SUCCEEDED"),  # Unregistered.
+    ]
+    with sqlite3.connect(source.path) as db:
+        for pid, uid, day, order_status, payment_status in attempts:
+            db.execute("INSERT INTO orders VALUES (?, ?, ?, 100, ?)", (pid, uid, day, order_status))
+            db.execute(
+                "INSERT INTO payments VALUES (?, ?, ?, 100, ?)", (pid, pid, day, payment_status)
+            )
+    result = await call_tool(source, server.GET_PAYING_USER_COUNTS)
+    assert not result.is_error
+    assert result.structured_content == {
+        "strict_first_qualified_users": 1,
+        "any_qualified_users": 5,
+        "any_only_by_first_payment_status": {"failed": 2, "refunded": 1, "other": 1},
+    }
+
+
+@pytest.mark.asyncio
+async def test_paying_user_counts_seed_and_rejection_of_filters(warehouse: Warehouse) -> None:
+    result = await call_tool(warehouse, server.GET_PAYING_USER_COUNTS)
+    assert result.structured_content == {
+        "strict_first_qualified_users": 368,
+        "any_qualified_users": 405,
+        "any_only_by_first_payment_status": {"failed": 31, "refunded": 6, "other": 0},
+    }
+    for arguments in ({"start_date": "2026-01-01"}, {"sql": "SELECT 1"}):
+        denied = await call_tool(warehouse, server.GET_PAYING_USER_COUNTS, arguments)
+        assert denied.is_error and denied.structured_content is None

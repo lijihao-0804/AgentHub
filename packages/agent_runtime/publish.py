@@ -110,6 +110,7 @@ _RUNTIME_KEYS = frozenset(DEFAULT_RUNTIME_CONFIG) | {
     "history_policy",
     "summary_policy",
     "support_answer_policy",
+    "analysis_answer_policy",
 }
 # Validated on their own terms: neither is a step count. ``max_cost_micro_usd``
 # is the one runtime key that may be ``None``; ``memory`` is a block of booleans
@@ -123,6 +124,7 @@ _RUNTIME_SCALAR_KEYS = _RUNTIME_KEYS - {
     "memory",
     "summary_policy",
     "support_answer_policy",
+    "analysis_answer_policy",
 }
 _CONTEXT_BUDGET_KEYS = frozenset(DEFAULT_RUNTIME_CONFIG["context_budget"])
 _MEMORY_KEYS = frozenset(
@@ -154,7 +156,13 @@ _RETRIEVAL_OPTIONAL_KEYS = frozenset(
 _RETRIEVAL_KEYS = (
     frozenset(DEFAULT_RETRIEVAL_CONFIG)
     | _RETRIEVAL_OPTIONAL_KEYS
-    | {"evidence_projection", "evidence_set_selector", "rerank_method"}
+    | {
+        "evidence_projection",
+        "evidence_set_selector",
+        "rerank_method",
+        "query_rewrite",
+        "paper_answer_policy",
+    }
 )
 
 
@@ -1062,6 +1070,8 @@ def _profile_projection(
         },
     }
     context_metadata = getattr(profile.capabilities, "context_metadata", None)
+    if getattr(profile.capabilities, "aliyun_deepseek_non_thinking", False) is True:
+        result["capabilities"]["aliyun_deepseek_non_thinking"] = True
     if include_context_metadata and context_metadata is not None:
         result["capabilities"]["context_metadata"] = context_metadata_to_mapping(context_metadata)
     if provider_egress is not None:
@@ -1155,6 +1165,20 @@ def _validate_retrieval_config(
         raise AgentHubError("INVALID_AGENT_CONFIG", "The retrieval config is invalid.", 422)
     if projection is None:
         result.pop("evidence_projection", None)
+    if result.get("paper_answer_policy") is None:
+        result.pop("paper_answer_policy", None)
+    elif (
+        result["paper_answer_policy"]
+        not in ("verified_quotes_v1", "sentence_ids_v1", "sentence_ids_v2")
+        or projection != "compact_v1"
+    ):
+        raise AgentHubError(
+            "INVALID_AGENT_CONFIG", "The paper answer policy requires compact evidence.", 422
+        )
+    if result.get("query_rewrite") is None:
+        result.pop("query_rewrite", None)
+    elif result["query_rewrite"] not in ("paper_comparison_v1", "paper_comparison_v2"):
+        raise AgentHubError("INVALID_AGENT_CONFIG", "The query rewrite is invalid.", 422)
     method = result.get("rerank_method")
     if method is None:
         result.pop("rerank_method", None)
@@ -1396,6 +1420,11 @@ def _validate_runtime_config(
             raise AgentHubError(
                 "INVALID_CONTEXT_POLICY", "The context policy is invalid.", 422
             ) from None
+    analysis_policy = value.get("analysis_answer_policy")
+    if analysis_policy is None:
+        result.pop("analysis_answer_policy", None)
+    elif analysis_policy not in ("grounded_table_v1", "grounded_table_v2"):
+        raise AgentHubError("INVALID_AGENT_CONFIG", "The analysis answer policy is invalid.", 422)
     support_policy = value.get("support_answer_policy")
     if support_policy is None:
         result.pop("support_answer_policy", None)

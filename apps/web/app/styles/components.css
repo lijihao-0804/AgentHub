@@ -41,6 +41,8 @@
   width: 16rem;
   align-items: flex-start;
 }
+.md-table { contain: inline-size; min-width: 0; max-width: 100%; margin-bottom: 0.45rem; }
+.md-table:last-child { margin-bottom: 0; }
 .md-body p { margin: 0 0 0.45rem; overflow-wrap: anywhere; }
 .md-body p:last-child { margin-bottom: 0; }
 .md-body ul, .md-body ol { margin: 0 0 0.45rem; padding-left: 1.2rem; }

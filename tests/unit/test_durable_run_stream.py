@@ -24,6 +24,7 @@ from packages.agent_runtime.events import AgentEvent, AgentEventType
 from packages.agent_runtime.frozen import parse_frozen_agent_spec
 from packages.agent_runtime.publish import _validate_runtime_config
 from packages.agent_runtime.runtime import _cost_guard_failure
+from packages.agent_runtime.runtime_service import AgentRunService
 from packages.agent_runtime.stream_hub import RunStreamHub, RunStreamRegistry
 from packages.core.errors.exceptions import AgentHubError
 
@@ -76,6 +77,27 @@ async def drain(hub: RunStreamHub, *, stop_after: int) -> list[AgentEvent]:
 
 
 # --- hub ownership ---------------------------------------------------------
+
+
+@pytest.mark.asyncio
+async def test_stream_recovery_uses_prepared_version_after_republication(monkeypatch):
+    service = AgentRunService(None)
+    prepared = SimpleNamespace(id=RUN_ID, agent_version_id=AGENT_VERSION_ID)
+    context = SimpleNamespace(
+        workspace_id=str(uuid4()), permissions={"agent_run"}, request_id="replayed-turn"
+    )
+    versions = []
+
+    async def record_dispatch(context, run, version_id, queue, emitter, graph_holder):
+        versions.append((version_id, emitter.agent_version_id))
+        await queue.put(None)
+
+    monkeypatch.setattr(service, "_produce_stream", record_dispatch)
+    hub = await service.open_stream(
+        context, agent_version_id=uuid4(), input_text="retry", prepared_run=prepared
+    )
+    await hub.wait_closed()
+    assert versions == [(AGENT_VERSION_ID, str(AGENT_VERSION_ID))]
 
 
 @pytest.mark.asyncio

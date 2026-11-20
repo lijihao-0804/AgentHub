@@ -3,7 +3,9 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+from contextlib import asynccontextmanager
 from datetime import UTC, datetime
+from types import SimpleNamespace
 from uuid import uuid4
 
 import httpx
@@ -12,6 +14,7 @@ from sqlalchemy import func, select
 
 from apps.api.app import create_app
 from apps.api.dependencies import get_db_session
+from packages.agent_runtime.adapters.langgraph.checkpoint import checkpoint_config
 from packages.agent_runtime.models import AgentRun, AgentRunEvent
 from packages.control_plane.models import AuditLog
 from packages.core.auth.security import issue_access_token
@@ -24,10 +27,14 @@ from packages.evaluation.runner import ExperimentRunner
 from packages.evaluation.service import EvaluationDatasetService
 from packages.feedback.models import RunFeedback
 from packages.feedback.service import FeedbackService
+from packages.knowledge.evidence_plan import assemble_evidence_plan
 from packages.knowledge.models import Document, DocumentChunk, DocumentRevision, KnowledgeBase
 from packages.knowledge.snapshots import KnowledgeSnapshotService
+from packages.model_gateway.contracts import ModelMessage, ModelToolCall
+from packages.observability.cited_chunks import cited_chunk_refs
 from packages.observability.evidence import RunEvidenceService
 from packages.threads.models import AgentThread, ThreadTurn
+from packages.wiki.models import WikiSourceRevocation
 from tests.integration.test_m4c_agent_runtime import _seed
 from tests.integration.test_m7a_evaluation_datasets import _item, _manager_context
 from tests.integration.test_m7b_experiments import _pricing
@@ -445,6 +452,95 @@ async def test_fixed_evidence_retired_revision_scope_and_history(db_factory):
             await RunEvidenceService().tools(
                 session, context.model_copy(update={"workspace_id": str(uuid4())}), run.id
             )
+
+        # A synchronous citation locator has stricter current-source checks than
+        # the existing event-backed excerpt and never contains the model's text.
+        reader = context.model_copy(
+            update={
+                "permissions": context.permissions
+                | {"workspace_read", "agent_run", "tool_run", "knowledge_run"}
+            }
+        )
+        plan = assemble_evidence_plan(
+            [{**ref, "document_id": str(document.id), "snippet": "private snippet"}],
+            [ref],
+            budget=2048,
+            estimator=len,
+            citation_prefix="R00001E",
+        )
+        assert plan is not None
+        answer = "Source [R00001E1]; also [R00099E1]."
+        source = SimpleNamespace(
+            workspace_id=run.workspace_id,
+            id=run.id,
+            agent_version_id=run.agent_version_id,
+            status="SUCCEEDED",
+            thread_turn_id=uuid4(),
+            final_output=answer,
+            effective_knowledge_snapshots=run.effective_knowledge_snapshots,
+        )
+        messages = [
+            ModelMessage("assistant", tool_calls=(ModelToolCall("search_knowledge", {}, "call"),)),
+            ModelMessage(
+                "tool", json.dumps(plan.payload), name="search_knowledge", tool_call_id="call"
+            ),
+            ModelMessage("assistant", answer),
+        ]
+        state = dict(
+            run_id=str(run.id),
+            agent_version_id=str(run.agent_version_id),
+            effective_knowledge_snapshots=run.effective_knowledge_snapshots,
+            final_output=answer,
+            messages=messages,
+            rag_evidence_registry=plan.registry,
+        )
+
+        class Adapter:
+            config_for_run = staticmethod(checkpoint_config)
+
+            @asynccontextmanager
+            async def checkpointer(self):
+                yield self
+
+            async def aget_tuple(self, config):
+                assert config == checkpoint_config(run.workspace_id, run.id)
+                return SimpleNamespace(
+                    config=checkpoint_config(run.workspace_id, run.id, checkpoint_id="final"),
+                    checkpoint={"id": "final", "channel_values": state},
+                )
+
+        assert await cited_chunk_refs(session, viewer, source, None) == []
+        assert (
+            await cited_chunk_refs(
+                session, reader.model_copy(update={"workspace_id": str(uuid4())}), source, None
+            )
+            == []
+        )
+        assert await cited_chunk_refs(session, reader, source, Adapter()) == []  # Retired.
+        revision.lifecycle_status = "ACTIVE"
+        await session.flush()
+        assert await cited_chunk_refs(session, reader, source, Adapter()) == [
+            {"handle": "R00001E1", **ref}
+        ]
+        state["messages"] = [messages[-1]]
+        assert (
+            await cited_chunk_refs(session, reader, source, Adapter()) == []
+        )  # Dropped before dispatch.
+        state["messages"] = messages
+        revision.lifecycle_status = "DELETED"
+        await session.flush()
+        assert await cited_chunk_refs(session, reader, source, Adapter()) == []
+        revision.lifecycle_status = "ACTIVE"
+        session.add(
+            WikiSourceRevocation(
+                workspace_id=run.workspace_id,
+                knowledge_base_id=kb.id,
+                document_revision_id=revision.id,
+                revoked_by="test",
+            )
+        )
+        await session.flush()
+        assert await cited_chunk_refs(session, reader, source, Adapter()) == []
 
 
 @pytest.mark.asyncio

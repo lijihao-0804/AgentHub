@@ -313,6 +313,7 @@ export type QueryCell = string | number | boolean | null;
 export type AnalysisQueryResultContent = {
   question: string | null;
   sql: string;
+  metric_arguments?: Record<string, unknown>;
   columns: string[];
   rows: QueryCell[][];
   row_count: number | null;
@@ -353,6 +354,7 @@ export function readAnalysisQueryResultContent(
   const result: AnalysisQueryResultContent = {
     question: text(content.question),
     sql: text(content.sql) ?? "",
+    ...(isRecord(content.metric_arguments) ? { metric_arguments: content.metric_arguments } : {}),
     columns,
     rows: readRows(content.rows, columns.length),
     row_count: integer(content.row_count),
@@ -374,14 +376,14 @@ export function readAnalysisFindingContent(
     queries: rawQueries
       .filter(isRecord)
       .map(readAnalysisQueryResultContent)
-      .filter((query) => query.sql !== ""),
+      .filter((query) => query.sql !== "" || query.metric_arguments !== undefined),
   };
 }
 
 export function queryResultPayload(query: AnalysisQueryResultContent): Record<string, unknown> {
   return {
     question: query.question,
-    sql: query.sql,
+    ...(query.metric_arguments ? { metric_arguments: query.metric_arguments } : { sql: query.sql }),
     columns: query.columns,
     rows: query.rows,
     row_count: query.row_count,

@@ -68,6 +68,8 @@ class AgentTemplate:
     system_prompt: str
     tool_hints: tuple[str, ...] = field(default=())
     thread_kind: str = "general"
+    query_rewrite: str | None = None
+    analysis_answer_policy: str | None = None
 
 
 __all__ = ["GROUNDING_RULES", "THREAD_CONTEXT_RULES", "AgentTemplate"]

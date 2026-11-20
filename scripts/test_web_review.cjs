@@ -766,6 +766,19 @@ async function testRenewalIdentity() {
 }
 
 async function main() {
+  const artifactClient = load('lib/api/artifacts.ts', {
+    '@/lib/api/client': { isRecord: value => !!value && typeof value === 'object' && !Array.isArray(value) },
+    '@/lib/api/tenancy': {},
+  });
+  const metric = {
+    question: null, metric_arguments: { windows: [{ start_date: '2026-03-15', end_date: '2026-03-15' }], platform: 'ios' },
+    columns: ['signups', 'views'], rows: [[14, 45]], row_count: 1, truncated: false,
+    provenance: { run_id: 'run', tool_identity: 'get_registration_conversion', tool_call_id: 'call', step_sequence: 2 },
+  };
+  const metricQuery = artifactClient.readAnalysisQueryResultContent(metric);
+  assert.deepEqual(artifactClient.queryResultPayload(metricQuery), metric);
+  assert.deepEqual(artifactClient.readAnalysisFindingContent({ queries: [metric] }).queries, [metricQuery]);
+  console.log('PASS metric query arguments, rows and provenance survive finding attachment without SQL');
   await testRenewalIdentity();
   {
     const h = harness();
@@ -902,6 +915,23 @@ async function main() {
   assert.ok(html.includes('<ul><li>bullet</li></ul><ol><li>numbered</li></ol><ul><li>last</li></ul>'));
   console.log('PASS Markdown text, link query, XSS protocol and mixed lists');
 
+  const renderMarkdown = (text) => renderToStaticMarkup(React.createElement(Markdown, { text }));
+  const table = renderMarkdown([
+    'Lead in', '| Group | Units | Note |', '| :--- | ---: | --- |',
+    '| A\\|B | 0 | &lt;img src=x&gt; &amp; \\*literal\\* |',
+    '| \\_name\\_ | -2 | &amp;lt; &quot;Q&quot; &#x27;X&#x27; &#64; &#58; |', 'After',
+  ].join('\n'));
+  assert.match(table, /<p>Lead in<\/p><div class="data-table md-table"><table>/);
+  assert.match(table, /<th scope="col">Group<\/th>/);
+  assert.match(table, /<td>A\|B<\/td><td>0<\/td><td>&lt;img src=x&gt; &amp; \*literal\*<\/td>/);
+  assert.match(table, /<td>_name_<\/td><td>-2<\/td><td>&amp;lt; &quot;Q&quot; &#x27;X&#x27; @ :<\/td>/);
+  assert.match(table, /<\/table><\/div><p>After<\/p>/);
+  assert.ok(!table.includes('<img'));
+  const empty = renderMarkdown('| Region |\n| --- |');
+  assert.match(empty, /<th scope="col">Region<\/th><\/tr><\/thead><tbody><\/tbody>/);
+  assert.ok(!renderMarkdown('literal | prose\n--x | y').includes('<table'));
+  console.log('PASS conversation Markdown pipe tables, empty rows and escaped literal cells');
+
   let previewResult = { data: null, loaded: false, loading: false, error: null, reload() {} };
   const previewHarness = harness({ '@/hooks/use-workspace-data': { useWorkspaceData: () => previewResult } });
   const { SnapshotChunkPreview } = load('components/knowledge/snapshot-preview.tsx', previewHarness.mocks);
@@ -965,6 +995,11 @@ async function main() {
     assert.ok(!fencedHtml.includes('<script>'));
     assert.ok(fencedHtml.includes('&lt;script&gt;'));
     assert.ok(fencedHtml.includes('contain:inline-size'));
+    const fencedTable = renderToStaticMarkup(React.createElement(SafeMarkdown, {
+      text: ['```text', '| name | value |', '| --- | --- |', '| a | 1 |', '```'].join('\n'),
+    }));
+    assert.ok(fencedTable.includes('<pre><code>| name | value |'));
+    assert.ok(!fencedTable.includes('<table>'));
     let tree = copyHarness.render(CodeBlock, { code });
     await elements(tree, (node) => node.type === 'button')[0].props.onClick();
     assert.equal(copied, code);

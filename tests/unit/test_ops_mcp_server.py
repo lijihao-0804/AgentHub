@@ -83,11 +83,16 @@ def test_every_schema_closes_the_door_on_extra_properties(tool: mcp_types.Tool) 
 
 
 @pytest.mark.parametrize("tool", server.TOOLS, ids=[tool.name for tool in server.TOOLS])
-def test_every_output_field_is_required(tool: mcp_types.Tool) -> None:
+def test_every_unconditional_output_field_is_required(tool: mcp_types.Tool) -> None:
     # A field that may be missing forces a consumer to tell "absent" from
     # "unknown", which it cannot do. Nullable-and-present is the contract.
     for node in _objects(tool.output_schema or {}):
-        assert set(node.get("required") or ()) == set(node.get("properties") or {})
+        optional = (
+            {"repository"}
+            if tool.name == "get_deployments" and "deployment_id" in node["properties"]
+            else set()
+        )
+        assert set(node.get("required") or ()) == set(node["properties"]) - optional
 
 
 def _objects(schema: dict[str, Any]) -> list[dict[str, Any]]:
@@ -360,6 +365,35 @@ async def test_the_deploy_and_its_predecessor_are_both_findable() -> None:
     assert newest["status"] == "SUCCEEDED"
     assert newest["environment"] == "production"
     assert newest["commit_sha"] == BAD_COMMIT_SHA
+    assert all("repository" not in row for row in payload["deployments"])
+
+
+@pytest.mark.asyncio
+async def test_deployment_source_can_be_passed_to_commit_lookup() -> None:
+    payload = _structured(
+        await _call(
+            "get_deployments",
+            {
+                "service": "checkout-api",
+                "from_time": "2026-03-13T00:00:00Z",
+                "to_time": "2026-03-14T23:59:00Z",
+                "include_repository": True,
+            },
+        )
+    )
+    assert payload["deployments"]
+    for row in payload["deployments"]:
+        result = _structured(
+            await _call(
+                "get_commit",
+                {
+                    "commit_sha": row["commit_sha"],
+                    "repository": row["repository"],
+                },
+            )
+        )
+        assert result["repository"] == row["repository"]
+        assert result["commit_sha"] == row["commit_sha"]
 
 
 @pytest.mark.asyncio

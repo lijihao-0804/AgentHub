@@ -2,7 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from "react";
 
-import { queryResults } from "@/components/analytics/queries-pane";
+import { QueryTruncation, queryResults } from "@/components/analytics/queries-pane";
 import { EmptyState, InlineError } from "@/components/ui/states";
 import { useFrontendSession } from "@/components/providers/session-provider";
 import { useWorkspaceMutation, type WorkspaceQuery } from "@/hooks/use-workspace-data";
@@ -178,6 +178,9 @@ export default function FindingPane({
             </span>
           </label>
           <p className="state-hint">{t("analytics.finding.attachHint")}</p>
+          {attachQueries && recorded.filter(({ query }) => query.truncated).map(({ artifact, query }) => (
+            <QueryTruncation key={artifact.id} query={query} />
+          ))}
 
           <InlineError error={mutation.error} fallback={t("errors.requestFailed")} />
           {!ready && <p className="state-hint">{t("analytics.finding.needsFields")}</p>}
@@ -205,6 +208,9 @@ export default function FindingPane({
                 </div>
               </header>
               <p className="artifact-note">{finding.conclusion}</p>
+              {finding.queries.map((query, index) => (
+                <QueryTruncation key={index} query={query} />
+              ))}
               {finding.evidence.length > 0 && (
                 <ul className="string-list-items">
                   {finding.evidence.map((item, index) => (

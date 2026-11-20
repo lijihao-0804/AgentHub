@@ -5,7 +5,7 @@ because the schemas below are a frozen contract with AgentHub: they are written
 out literally, not derived from a Python signature that could quietly drift when
 a parameter is renamed.
 
-All four tools are READ, and that is enforced rather than asserted -- see
+All tools are READ, and that is enforced rather than asserted -- see
 ``sql_guard``. They are expected to be imported with
 ``effect=READ / risk=LOW / approval_policy=NEVER``; an approval gate on a query
 that cannot write would only stall a run.
@@ -43,10 +43,94 @@ GET_METRIC_DEFINITION = "get_metric_definition"
 LIST_TABLES = "list_tables"
 DESCRIBE_TABLE = "describe_table"
 QUERY_SQL = "query_sql"
+GET_REGISTRATION_CONVERSION = "get_registration_conversion"
+GET_ORDER_ACTIVITY = "get_order_activity"
+GET_PAYING_USER_COUNTS = "get_paying_user_counts"
+
+
+def _record(properties: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "type": "object",
+        "properties": properties,
+        "required": list(properties),
+        "additionalProperties": False,
+    }
+
+
+_DATE_WINDOW = _record({"start_date": {"type": "string"}, "end_date": {"type": "string"}})
+_ORDER_GROUP = _record(
+    {
+        key: {"type": "integer", "minimum": 0}
+        for key in (
+            "users",
+            "order_rows",
+            "paid_rows",
+            "non_paid_rows",
+            "refunded_rows",
+            "cancelled_rows",
+            "other_status_rows",
+        )
+    }
+)
+ORDER_ACTIVITY_OUTPUT = _record(
+    {
+        "window": _DATE_WINDOW,
+        "ordered_users": {"type": "integer", "minimum": 0},
+        "with_paid_order": _ORDER_GROUP,
+        "without_paid_order": _ORDER_GROUP,
+    }
+)
+_WINDOWS = {"type": "array", "minItems": 1, "maxItems": 2, "items": _DATE_WINDOW}
+CONVERSION_INPUT = {
+    "type": "object",
+    "properties": {
+        "windows": {
+            **_WINDOWS,
+            "description": "One or two chronological, non-overlapping UTC date ranges, "
+            "inclusive YYYY-MM-DD.",
+        },
+        "platform": {"type": "string", "enum": ["android", "ios"]},
+        "breakdown": {
+            "type": "string",
+            "enum": ["none", "platform", "platform_version"],
+            "description": "platform_version returns platform totals "
+            "and joint platform/version detail.",
+        },
+    },
+    "required": ["windows"],
+    "additionalProperties": False,
+}
+_NULLABLE_NUMBER = {"type": ["number", "null"]}
+_PERIOD = _record(
+    {"signups": {"type": "integer"}, "views": {"type": "integer"}, "rate_pct": _NULLABLE_NUMBER}
+)
+_SUMMARY = {"periods": {"type": "array", "items": _PERIOD}, "change_pp": _NULLABLE_NUMBER}
+CONVERSION_OUTPUT = _record(
+    {
+        "windows": _WINDOWS,
+        "overall": _record(_SUMMARY),
+        "platforms": {
+            "type": "array",
+            "items": _record({"platform": {"type": "string"}, **_SUMMARY}),
+        },
+        "versions": {
+            "type": "array",
+            "items": _record(
+                {"platform": {"type": "string"}, "app_version": {"type": "string"}, **_SUMMARY}
+            ),
+        },
+    }
+)
 
 METRIC_INPUT_SCHEMA: dict[str, Any] = {
     "type": "object",
-    "properties": {"metric": {"type": "string", "minLength": 1}},
+    "properties": {
+        "metric": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Metric dictionary name. Canonical names: " + ", ".join(sorted(METRICS)),
+        }
+    },
     "required": ["metric"],
     "additionalProperties": False,
 }
@@ -227,11 +311,53 @@ TOOLS: tuple[mcp_types.Tool, ...] = (
         outputSchema=QUERY_OUTPUT_SCHEMA,
         annotations=READ_ONLY,
     ),
+    mcp_types.Tool(
+        name=GET_REGISTRATION_CONVERSION,
+        title="Get registration conversion",
+        description="Measure registration_conversion_rate from signup events and "
+        "raw signup-page views. Returns counts and percentages for each requested window, "
+        "plus second minus first in percentage points. "
+        "A zero denominator has no rate or comparable change.",
+        inputSchema=CONVERSION_INPUT,
+        outputSchema=CONVERSION_OUTPUT,
+        annotations=READ_ONLY,
+    ),
+    mcp_types.Tool(
+        name=GET_ORDER_ACTIVITY,
+        title="Get order activity",
+        description="Count distinct users who ordered between inclusive UTC dates "
+        "(YYYY-MM-DD). Group users by whether they had any PAID order in that window. "
+        "Each group's row counts include all orders belonging to those users, including "
+        "their REFUNDED or CANCELLED rows. This describes order activity, not the "
+        "paying_user metric or payment attempts.",
+        inputSchema=_DATE_WINDOW,
+        outputSchema=ORDER_ACTIVITY_OUTPUT,
+        annotations=READ_ONLY,
+    ),
+    mcp_types.Tool(
+        name=GET_PAYING_USER_COUNTS,
+        title="Get paying user counts",
+        description="Count registered users over all payment history. An attempt qualifies "
+        "when its payment is SUCCEEDED and its order is PAID. Strict counts a qualifying first "
+        "attempt; any includes the first attempt. Only users in any minus strict are grouped "
+        "by first payment status: FAILED, REFUNDED, or all other states.",
+        inputSchema=LIST_TABLES_INPUT_SCHEMA,
+        outputSchema=_record(
+            {
+                "strict_first_qualified_users": {"type": "integer"},
+                "any_qualified_users": {"type": "integer"},
+                "any_only_by_first_payment_status": _record(
+                    {key: {"type": "integer"} for key in ("failed", "refunded", "other")}
+                ),
+            }
+        ),
+        annotations=READ_ONLY,
+    ),
 )
 
 
 def build_server(warehouse: Warehouse) -> Server[Any]:
-    """Wire the four READ tools onto a low-level MCP server."""
+    """Register the read-only warehouse tools on the MCP server."""
 
     async def on_list_tools(
         _ctx: ServerRequestContext[Any], _params: mcp_types.PaginatedRequestParams | None
@@ -255,6 +381,21 @@ def build_server(warehouse: Warehouse) -> Server[Any]:
             elif params.name == QUERY_SQL:
                 _reject_unknown(arguments, QUERY_INPUT_SCHEMA)
                 payload = _query_sql(warehouse, arguments)
+            elif params.name == GET_ORDER_ACTIVITY:
+                _reject_unknown(arguments, _DATE_WINDOW)
+                payload = warehouse.order_activity(arguments)
+            elif params.name == GET_PAYING_USER_COUNTS:
+                _reject_unknown(arguments, LIST_TABLES_INPUT_SCHEMA)
+                payload = warehouse.paying_user_counts()
+            elif params.name == GET_REGISTRATION_CONVERSION:
+                _reject_unknown(arguments, CONVERSION_INPUT)
+                if "platform" in arguments and arguments["platform"] is None:
+                    raise WarehouseError("Omit platform to include every platform.")
+                payload = warehouse.registration_conversion(
+                    arguments.get("windows"),
+                    arguments.get("platform"),
+                    arguments.get("breakdown", "none"),
+                )
             else:
                 return _tool_error(f"Unknown tool: {params.name}")
         except SqlGuardError as exc:
@@ -351,6 +492,12 @@ def _summary(tool_name: str, payload: dict[str, Any]) -> str:
         return f"Definition of {payload['metric']} returned from the metric dictionary."
     if tool_name == LIST_TABLES:
         return f"{len(payload['tables'])} table(s) in the warehouse."
+    if tool_name == GET_REGISTRATION_CONVERSION:
+        return f"Registration conversion returned for {len(payload['windows'])} UTC window(s)."
+    if tool_name == GET_PAYING_USER_COUNTS:
+        return "All-history first-attempt and any-attempt counts returned for registered users."
+    if tool_name == GET_ORDER_ACTIVITY:
+        return f"{payload['ordered_users']} distinct ordering users in the UTC window."
     if tool_name == DESCRIBE_TABLE:
         return (
             f"Table {payload['table']} has {len(payload['columns'])} column(s) "
@@ -435,6 +582,9 @@ __all__ = [
     "DESCRIBE_TABLE_INPUT_SCHEMA",
     "DESCRIBE_TABLE_OUTPUT_SCHEMA",
     "GET_METRIC_DEFINITION",
+    "GET_ORDER_ACTIVITY",
+    "GET_PAYING_USER_COUNTS",
+    "GET_REGISTRATION_CONVERSION",
     "LIST_TABLES",
     "LIST_TABLES_INPUT_SCHEMA",
     "LIST_TABLES_OUTPUT_SCHEMA",

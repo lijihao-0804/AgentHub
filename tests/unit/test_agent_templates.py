@@ -122,9 +122,17 @@ def test_the_prompts_describe_the_history_the_runtime_actually_supplies(
     assert "filter what you already retrieved" not in prompt
 
 
-def test_the_research_tool_hints_name_only_the_two_tools_v1_has() -> None:
-    # A third tool here would be a promise the literature server does not keep.
-    assert RESEARCH_TEMPLATE.tool_hints == ("search_papers", "get_paper")
+def test_research_keeps_catalog_tools_and_scopes_passage_answers_to_bound_evidence() -> None:
+    assert RESEARCH_TEMPLATE.tool_hints == ("search_papers", "get_paper", "search_knowledge")
+    prompt = RESEARCH_TEMPLATE.system_prompt
+    assert "search_knowledge on the bound papers in this turn" in prompt
+    assert "ID returned with each supporting passage" in prompt
+    assert "catalog abstract alone cannot establish full-text details" in prompt
+    wording = " ".join(prompt.split())
+    assert "For paper discovery only, explain what you searched for" in wording
+    assert "stop after their citations" in wording
+    assert "match each result to the conditions" in wording
+    assert "other models or training details only when requested" in wording
 
 
 def test_the_incident_prompt_leaves_the_write_to_the_approval_gate() -> None:
@@ -136,6 +144,13 @@ def test_the_incident_prompt_leaves_the_write_to_the_approval_gate() -> None:
     assert "say the outcome is\n  unknown" in prompt
 
 
+def test_failed_exact_paper_lookup_with_no_substitutes_ends_the_turn() -> None:
+    prompt = RESEARCH_TEMPLATE.system_prompt
+    assert "exact-ID lookup fails and the user excludes substitutes" in prompt
+    assert "do not repeat the same arguments or search by title" in prompt
+    assert "temporary source error means verification is unavailable now" in prompt
+
+
 def test_the_analyst_prompt_settles_the_definition_before_the_sql() -> None:
     # This is the whole difference from text-to-SQL: the metric is a business
     # decision looked up in the knowledge base, not inferred from a column name.
@@ -143,6 +158,22 @@ def test_the_analyst_prompt_settles_the_definition_before_the_sql() -> None:
     assert DATA_ANALYST_TEMPLATE.tool_hints[0] == "get_metric_definition"
     assert "Settle the definition before you write any SQL" in prompt
     assert "only SELECT and WITH" in prompt
+
+
+def test_analyst_stops_at_the_requested_comparison_grain() -> None:
+    prompt = DATA_ANALYST_TEMPLATE.system_prompt
+    assert prompt.index("Start with a small aggregate") < prompt.index("Stop querying")
+    assert "group by platform and version together" in prompt
+    assert "no comparable rate" in prompt
+    assert "Give the headline result first" in prompt
+
+
+def test_analyst_checks_rate_claims_at_the_grain_of_the_result() -> None:
+    prompt = DATA_ANALYST_TEMPLATE.system_prompt
+    assert "from unrounded counts" in prompt
+    assert "check each comparison" in prompt and "against its own table row" in prompt
+    assert "exclude it from rankings" in prompt
+    assert "A flat platform total can include a rising or falling version" in prompt
 
 
 def test_the_support_prompt_treats_escalation_as_an_outcome() -> None:

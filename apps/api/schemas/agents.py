@@ -34,6 +34,10 @@ class RetrievalConfigRequest(BaseModel):
     max_chunks_per_document: int | None = Field(default=None, ge=1, le=100, strict=True)
     context_budget_bytes: int | None = Field(default=None, ge=2, le=64_000, strict=True)
     evidence_projection: Literal["compact_v1"] | None = None
+    paper_answer_policy: (
+        Literal["verified_quotes_v1", "sentence_ids_v1", "sentence_ids_v2"] | None
+    ) = None
+    query_rewrite: Literal["paper_comparison_v1", "paper_comparison_v2"] | None = None
     rerank_method: Literal["sentence_evidence_v1"] | None = None
     evidence_set_selector: Literal["onyx_v1", "complementary_v1"] | None = None
 
@@ -167,6 +171,7 @@ class RuntimeConfigRequest(BaseModel):
     context_policy: ContextPolicyRequest | None = None
     history_policy: Literal["deterministic_history_v1"] | None = None
     summary_policy: SummaryPolicyRequest | None = None
+    analysis_answer_policy: Literal["grounded_table_v1", "grounded_table_v2"] | None = None
     support_answer_policy: Literal["support_facts_v1"] | None = None
 
     @model_validator(mode="after")

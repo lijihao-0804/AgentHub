@@ -36,6 +36,8 @@ export const zhCN: MessageSchema = {
     status: { PENDING: "待审核", APPROVED: "已批准", REJECTED: "已拒绝" },
   },
   runEvidence: {
+    citations: "回答引用的来源",
+    inspectSnapshot: "查看固定快照",
     title: "工具调用与固定证据", replayHint: "已记录事件可能不完整。参数摘要仅展示字段类型，敏感值不进入摘要。",
     empty: "暂无已记录工具事件", arguments: "参数结构", status: "状态", summaryUnavailable: "历史数据无摘要", evidence: "检索证据",
     noEvidence: "没有已记录的固定证据引用，不会用最新快照替代历史证据。",
@@ -2307,9 +2309,12 @@ export const zhCN: MessageSchema = {
     queries: {
       paneTitle: "查询",
       empty: "还没有查询",
-      emptyHint: "智能体执行的每一条 SELECT 都会连同返回的行记录在这里。",
+      emptyHint: "这里显示 SQL 查询、指标查询及其返回结果。",
       sql: "SQL",
       showSql: "显示 SQL",
+      showArguments: "显示指标参数",
+      metricTruncated: "证据保留了 {total} 行指标结果中的 {kept} 行，包含各时段的整体结果。",
+      hideArguments: "收起指标参数",
       hideSql: "隐藏 SQL",
       rowCount: "{count} 行",
       truncated: "已截断——结果在返回给你之前被限制了行数。",

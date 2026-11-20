@@ -38,6 +38,8 @@ export const enUS = {
     status: { PENDING: "Awaiting review", APPROVED: "Approved", REJECTED: "Rejected" },
   },
   runEvidence: {
+    citations: "Sources cited in the answer",
+    inspectSnapshot: "Inspect snapshot",
     title: "Tool calls and fixed evidence", replayHint: "Recorded events may be incomplete. Argument summaries show field types only; sensitive values are omitted.",
     empty: "No recorded tool events", arguments: "Argument structure", status: "Status", summaryUnavailable: "No summary in historical data", evidence: "Retrieved evidence",
     noEvidence: "No fixed evidence references were recorded. Historical runs are not re-resolved against LATEST.",
@@ -2329,9 +2331,12 @@ export const enUS = {
     queries: {
       paneTitle: "Queries",
       empty: "No queries yet",
-      emptyHint: "Every SELECT the agent runs is recorded here with the rows it returned.",
+      emptyHint: "SQL queries and metric lookups appear here with their results.",
       sql: "SQL",
       showSql: "Show SQL",
+      showArguments: "Show metric arguments",
+      metricTruncated: "The evidence retains {kept} of {total} metric rows, including the overall result for each period.",
+      hideArguments: "Hide metric arguments",
       hideSql: "Hide SQL",
       rowCount: "{count} rows",
       truncated: "Truncated — the result was capped before it reached you.",

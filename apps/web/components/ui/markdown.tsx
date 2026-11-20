@@ -9,7 +9,7 @@ import { useI18n } from "@/i18n/provider";
  * The input is never trusted: React escapes text and attributes, and the
  * result is built as React nodes, so no `dangerouslySetInnerHTML` exists on
  * the path. Supported: headings (#..###), bullet and numbered lists,
- * blockquotes, fenced code blocks, inline code, bold, italic and
+ * blockquotes, pipe tables, fenced code blocks, inline code, bold, italic and
  * http(s) links. Everything else renders as plain text.
  */
 
@@ -61,6 +61,39 @@ function renderInline(escaped: string, keyPrefix: string): ReactNode[] {
         return <Fragment key={key}>{token.value}</Fragment>;
     }
   });
+}
+
+// Decode only the entities used by the warehouse Markdown writer. Decoding is
+// single-pass, and the value is always inserted as a React text node.
+const CELL_ENTITIES: Record<string, string> = {
+  "&amp;": "&", "&lt;": "<", "&gt;": ">", "&quot;": '"', "&#x27;": "'", "&#58;": ":", "&#64;": "@",
+};
+
+function tableCells(line: string): string[] | null {
+  const raw = line.trim();
+  if (!raw.includes("|")) return null;
+  const cells: string[] = [];
+  let cell = "";
+  let lastSeparator = -1;
+  for (let index = 0; index < raw.length; index++) {
+    const char = raw[index];
+    if (char === "\\" && /[\\|`*_~\[\]()!]/.test(raw[index + 1] ?? "")) {
+      cell += raw[++index];
+    } else if (char === "|") {
+      if (index !== 0) cells.push(cell.trim());
+      cell = "";
+      lastSeparator = index;
+    } else {
+      cell += char;
+    }
+  }
+  if (lastSeparator < 0) return null;
+  if (lastSeparator !== raw.length - 1) cells.push(cell.trim());
+  return cells.length ? cells : null;
+}
+
+function cellText(value: string): string {
+  return value.replace(/&(?:amp|lt|gt|quot|#x27|#58|#64);/g, (entity) => CELL_ENTITIES[entity]);
 }
 
 /** Fenced code is rendered verbatim in a text node. */
@@ -138,7 +171,8 @@ export function Markdown({ text }: { text: string }) {
     flushQuote();
   };
 
-  for (const line of lines) {
+  for (let index = 0; index < lines.length; index++) {
+    const line = lines[index];
     if (code !== null) {
       if (line.trim().startsWith("```")) {
         blocks.push(<CodeBlock key={`c-${key++}`} code={code.lines.join("\n")} />);
@@ -152,6 +186,35 @@ export function Markdown({ text }: { text: string }) {
       flushAll();
       code = { lang: line.trim().slice(3), lines: [] };
       continue;
+    }
+    // The separator is required, so ordinary prose containing a pipe stays prose.
+    const next = lines[index + 1];
+    if (line.includes("|") && next?.includes("---")) {
+      const headers = tableCells(line);
+      const divider = tableCells(next);
+      if (headers && divider?.length === headers.length && divider.every((cell) => /^:?-{3,}:?$/.test(cell))) {
+        flushAll();
+        index++;
+        const rows: string[][] = [];
+        while (index + 1 < lines.length) {
+          if (lines[index + 1].trimStart().startsWith("```")) break;
+          const row = tableCells(lines[index + 1]);
+          if (row?.length !== headers.length) break;
+          rows.push(row);
+          index++;
+        }
+        blocks.push(
+          <div key={`table-${key++}`} className="data-table md-table">
+            <table>
+              <thead><tr>{headers.map((header, col) => <th key={col} scope="col">{cellText(header)}</th>)}</tr></thead>
+              <tbody>{rows.map((row, r) => (
+                <tr key={r}>{row.map((cell, col) => <td key={col}>{cellText(cell)}</td>)}</tr>
+              ))}</tbody>
+            </table>
+          </div>,
+        );
+        continue;
+      }
     }
     const heading = /^(#{1,3})\s+(.*)$/.exec(line);
     if (heading) {

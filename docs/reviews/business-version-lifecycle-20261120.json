@@ -1,0 +1,158 @@
+{
+  "date": "2026-11-20",
+  "source_base": "e4292ac8b8daa1638a94859031b8319f45f02a42",
+  "tested_change": "packages/agent_runtime/runtime_service.py: AgentRunService.open_stream uses the prepared run version for both the event emitter and graph initial state.",
+  "environment": "Separate synthetic workspaces for before and after. Real FastAPI, PostgreSQL and checkpoint persistence; loopback deterministic model and synthetic ticket only. No paid provider calls.",
+  "routes_relative_to": "/api/v1/workspaces/{workspace_id}",
+  "stream_recovery": {
+    "fault": "The worker-mode API prepared a run, then its injected queue raised ConnectionError on enqueue. HTTP returned 503 RUN_DISPATCH_UNAVAILABLE before the model started. Another API on the same database accepted the identical turn token after publication.",
+    "before": {
+      "published": [
+        {
+          "version_number": 1,
+          "agent_version_id": "e9a97397-bd3f-469c-927c-72e27ac200bd",
+          "resolved_spec_hash": "1d430ea3df3e359ac471f9d8b0d545bdb59422086877874ac1ea33c43910e50a"
+        },
+        {
+          "version_number": 2,
+          "agent_version_id": "e3fe876f-b5d7-4667-984c-8f5d24db44e5",
+          "resolved_spec_hash": "90180e0f7f7615423b42f174823fc7d646e99136451acbf8af95c4519afd20a6"
+        }
+      ],
+      "run_version": "e9a97397-bd3f-469c-927c-72e27ac200bd",
+      "live_frame_count": 7,
+      "distinct_live_frame_versions": [
+        "e3fe876f-b5d7-4667-984c-8f5d24db44e5"
+      ],
+      "deterministic_model_output": "QA-V1 confirmed"
+    },
+    "after": {
+      "published": [
+        {
+          "version_number": 1,
+          "agent_version_id": "64d1c1b1-0754-4239-843a-0d459a39c40c",
+          "resolved_spec_hash": "daabb6f266613cfaa2396c1ad5d64086c11efbe5d9b296544eaf6d85f2f11077"
+        },
+        {
+          "version_number": 2,
+          "agent_version_id": "b0b56e70-30f3-4624-a27d-ef75901cab56",
+          "resolved_spec_hash": "e155f29bd7e1dce5d9a83439fff46e35ddb93f2449f47d55383caad430bdbbaf"
+        }
+      ],
+      "run_version": "64d1c1b1-0754-4239-843a-0d459a39c40c",
+      "live_frame_count": 7,
+      "distinct_live_frame_versions": [
+        "64d1c1b1-0754-4239-843a-0d459a39c40c"
+      ],
+      "deterministic_model_output": "QA-V1 confirmed"
+    },
+    "after_run_id": "041b2e25-cd3d-4952-baa6-fa109e61d2d0",
+    "durable_reconnect": {
+      "after_sequence": 1,
+      "frame_count": 5,
+      "sequences": [
+        2,
+        3,
+        5,
+        6,
+        7
+      ],
+      "distinct_versions": [
+        "64d1c1b1-0754-4239-843a-0d459a39c40c"
+      ],
+      "observation": "GET replay returns persisted events after the cursor. Transient token deltas are not part of the durable log."
+    },
+    "before_reconnect": "Not measured; the before observation covers the live retry."
+  },
+  "http_observations": {
+    "turn_version_selection": {
+      "same_thread_new_turn_version": "b0b56e70-30f3-4624-a27d-ef75901cab56",
+      "new_thread_first_turn_version": "b0b56e70-30f3-4624-a27d-ef75901cab56",
+      "explicit_v1_run_output": "QA-V1 confirmed",
+      "thread_version_override_status": 422
+    },
+    "idempotency": {
+      "initial_run": "4feb5662-3403-473b-aa23-264019ff3fed",
+      "repeated_token_run": "4feb5662-3403-473b-aa23-264019ff3fed",
+      "conflicting_body": {
+        "http": 409,
+        "code": "THREAD_TURN_IDEMPOTENCY_CONFLICT"
+      },
+      "concurrent_identical_submissions": 2,
+      "distinct_runs": 1
+    },
+    "approval": {
+      "pending_before_publication": true,
+      "v2_tool_bindings": 0,
+      "tool": "create_ticket",
+      "tool_revision_id": "8c198879-e89f-43a9-9f72-e5fa8d2062d4",
+      "run_id": "ba2e92f1-79a9-4356-b33b-18cef4e8a5e8",
+      "version_id": "64d1c1b1-0754-4239-843a-0d459a39c40c",
+      "decision": "APPROVED",
+      "execution": "SUCCEEDED",
+      "attempts": 1,
+      "tickets_after_duplicate_approval": 1,
+      "resumed_model_output": "QA-V1 confirmed"
+    },
+    "derive": "Deriving v1 returned its prompt while the draft still held v2. Explicit PATCH applied the returned draft-owned values. Preflight kept the independently cleared tool bindings. The original v1 snapshot and completed run read back unchanged.",
+    "concurrent_publishes": [
+      {
+        "version_number": 3,
+        "agent_version_id": "c3a5450d-7f2f-493c-b1e0-1d8e07bbc906",
+        "resolved_spec_hash": "051621390621ea17ec5301f16e0d6506da4d1722a347f324dd4c46722df18573"
+      },
+      {
+        "version_number": 4,
+        "agent_version_id": "bd85615f-8151-4ed9-8af6-594033ff5980",
+        "resolved_spec_hash": "051621390621ea17ec5301f16e0d6506da4d1722a347f324dd4c46722df18573"
+      }
+    ],
+    "access": {
+      "viewer_version_metadata": 200,
+      "viewer_publish_derive_explicit_run_and_turn": 403,
+      "cross_workspace_version": {
+        "http": 404,
+        "code": "AGENT_VERSION_NOT_FOUND"
+      }
+    }
+  },
+  "knowledge_and_tool_binding": {
+    "coverage": "Separate PostgreSQL integration cases; the HTTP ticket fixture has no knowledge base.",
+    "pinned": "The pinned snapshot remains fixed after source revisions retire. A published version retains its tool revision after another revision is published.",
+    "latest": "The published LATEST selector resolves the effective snapshot for a new run; observe the persisted snapshot for an existing run or recovery. The selector itself does not change older version records.",
+    "test_files": [
+      "tests/integration/test_m4a_publish.py",
+      "tests/integration/test_context_policy_m2.py"
+    ]
+  },
+  "reproduce": [
+    "Use a fresh workspace, an owner, a viewer, two local deterministic model profiles with distinguishable outputs, and a synthetic customer. Run two API instances on the same test database: inline execution and worker execution with an enqueue stub that raises before dispatch.",
+    "POST /agents; bind create_ticket using PUT /agents/{a}/tool-bindings; POST /agents/{a}/publish for v1. POST /agents/{a}/threads. Submit a normal turn and another requiring ticket approval via POST /threads/{t}/turns. Keep their tokens, versions and run IDs.",
+    "POST /threads/{t}/turns/stream using the failing worker API. After the 503, change the draft prompt/profile and remove the tool, then publish v2. Retry the exact text and token on the inline API. Compare every live frame version with GET /agent-runs/{run}; reconnect via GET /agent-runs/{run}/stream?after_sequence=1.",
+    "Retry the completed turn, change its body with the same token, submit a fresh token and a turn on a new thread. Send a direct POST /agent-versions/{v1}/runs. Approve the original pending action twice via POST /approvals/{id}/approve and count the customer tickets.",
+    "Use POST /agents/{a}/versions/{v1}/derive, inspect the unchanged draft, explicitly PATCH the returned values and preflight. Publish the unchanged draft concurrently twice. Repeat protected calls as viewer and read the version using another workspace."
+  ],
+  "regression": {
+    "unit_tests_passed": 45,
+    "postgres_tests_passed": 18,
+    "unit_files": [
+      "tests/unit/test_durable_run_stream.py",
+      "tests/unit/test_thread_stream_worker_routing.py",
+      "tests/unit/test_worker_run_authorization.py"
+    ],
+    "postgres_files_run_in_full": [
+      "tests/integration/test_m4a_publish.py",
+      "tests/integration/test_hidden_turn_identity.py"
+    ],
+    "selected_postgres_cases_in_test_context_policy_m2": [
+      "test_publish_and_recover_freeze_catalog_proof_and_pinned_snapshot_after_drift",
+      "test_latest_publish_freezes_b_then_recovery_keeps_b_after_source_drift",
+      "test_pinned_snapshot_survives_revision_retirement_and_latest_advances"
+    ],
+    "focused_regression": "tests/unit/test_durable_run_stream.py::test_stream_recovery_uses_prepared_version_after_republication"
+  },
+  "limits": [
+    "The injected failure covers rejection before queue dispatch. A real broker, dispatch acknowledgement loss after delivery, and process-wide crash recovery were not exercised by the HTTP fixture.",
+    "Approval executed one local synthetic ticket. Browser cache behavior, paid-model behavior, and external side effects were outside this verification."
+  ]
+}

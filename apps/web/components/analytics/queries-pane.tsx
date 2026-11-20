@@ -29,6 +29,14 @@ export function queryResults(artifacts: Artifact[]): { artifact: Artifact; query
     .map((artifact) => ({ artifact, query: readAnalysisQueryResultContent(artifact.content) }));
 }
 
+export function QueryTruncation({ query }: { query: AnalysisQueryResultContent }) {
+  const { t, formatNumber } = useI18n();
+  if (!query.truncated) return null;
+  return <p className="state-hint">{query.metric_arguments && query.row_count !== null
+    ? t("analytics.queries.metricTruncated", { kept: formatNumber(query.rows.length), total: formatNumber(query.row_count) })
+    : t("analytics.queries.truncated")}</p>;
+}
+
 export default function QueriesPane({
   threadId,
   artifacts,
@@ -128,21 +136,23 @@ export default function QueriesPane({
                       }
                       aria-expanded={sqlOpen}
                     >
-                      {sqlOpen ? t("analytics.queries.hideSql") : t("analytics.queries.showSql")}
+                      {query.metric_arguments
+                        ? t(sqlOpen ? "analytics.queries.hideArguments" : "analytics.queries.showArguments")
+                        : t(sqlOpen ? "analytics.queries.hideSql" : "analytics.queries.showSql")}
                     </button>
                   </div>
                 </header>
 
                 {sqlOpen && (
                   <div className="query-sql">
-                    <p className="artifact-card-meta">{t("analytics.queries.sql")}</p>
+                    <p className="artifact-card-meta">{query.metric_arguments ? query.provenance?.tool_identity : t("analytics.queries.sql")}</p>
                     <pre>
-                      <code>{query.sql}</code>
+                      <code>{query.metric_arguments ? JSON.stringify(query.metric_arguments, null, 2) : query.sql}</code>
                     </pre>
                   </div>
                 )}
 
-                {query.truncated && <p className="state-hint">{t("analytics.queries.truncated")}</p>}
+                <QueryTruncation query={query} />
 
                 {query.rows.length === 0 ? (
                   <p className="state-hint">{t("analytics.queries.noRows")}</p>
