@@ -3178,7 +3178,9 @@ class _AgentRunGraph:
                     and not any(previous["name"] == name for previous in calls)
                     and not _searched_knowledge_this_turn(state)
                 ):
-                    selective = definition.retrieval_config["query_rewrite"] == "paper_comparison_v2"
+                    selective = (
+                        definition.retrieval_config["query_rewrite"] == "paper_comparison_v2"
+                    )
                     rewritten = paper_comparison_query(
                         self.run.input_text,
                         proposed_query=normalized_arguments["query"] if selective else None,

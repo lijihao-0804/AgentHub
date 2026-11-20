@@ -214,9 +214,9 @@ METRICS: dict[str, dict[str, Any]] = {
         "numerator": "Distinct users with one or more orders.",
         "denominator": None,
         "caveats": (
-            "Activity is defined on orders because this warehouse holds no session "
-            "or event stream, so a user who opened the app every day and bought "
-            "nothing is not active by this definition. Cancelled orders still "
+            "Orders establish activity under this definition. signup_page_views counts visits "
+            "to the registration page; it cannot identify everyone who opened the app. "
+            "There is no general app-open or session source. Cancelled orders still "
             "count as activity: the intent was real even though the revenue was not."
         ),
         "source_tables": ["signups", "orders"],

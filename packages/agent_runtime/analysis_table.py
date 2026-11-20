@@ -8,6 +8,7 @@ import math
 import re
 import unicodedata
 from collections import Counter
+from datetime import date
 from uuid import UUID
 
 from packages.agent_runtime.work_layer import RecordedToolCall
@@ -85,6 +86,11 @@ _CONVERSION = {
     "change_pp": ("变化百分点",),
 }
 _DATE = re.compile(r"(?<![0-9])\d{4}-\d{2}-\d{2}(?![0-9])")
+_RANGE_END = re.compile(
+    r"\s*(?:至|到|through\b|to\b|[–—~～]|\s-\s)\s*"
+    r"(?P<month>\d{1,2})-(?P<day>\d{1,2})(?![\d-])",
+    re.I,
+)
 
 
 def wants_warehouse_table(question: str) -> bool:
@@ -191,9 +197,31 @@ def _parse_table(content: str) -> list[list[str]] | None:
     return table if len(table) > 1 else None
 
 
-def _window_matches(source, question):
+def _question_dates(question: str) -> list[str] | None:
+    dates = []
+    for match in _DATE.finditer(question):
+        try:
+            start = date.fromisoformat(match[0])
+            dates.append(start.isoformat())
+            end = _RANGE_END.match(question, match.end())
+            if end:
+                month, day = int(end["month"]), int(end["day"])
+                finish = date(start.year + (month < start.month), month, day)
+                if finish < start:
+                    return None
+                dates.append(finish.isoformat())
+        except ValueError:
+            return None
+    return dates
+
+
+def _window_matches(source, question, *, expand_ranges=False):
     name = source["tool"]
-    dates = _DATE.findall(question)
+    if name == "query_sql":
+        return True
+    dates = _question_dates(question) if expand_ranges else _DATE.findall(question)
+    if dates is None:
+        return False
     if (
         name == "get_order_activity"
         and dates
@@ -241,7 +269,7 @@ def _valid_columns(name, question, columns, indices):
 
 def _match(table, source, question, *, translated=False):
     name = source["tool"]
-    if not _window_matches(source, question):
+    if not _window_matches(source, question, expand_ranges=translated):
         return None
     aliases = _aliases(name)
     columns = source["columns"]
@@ -348,7 +376,7 @@ _TABLE_NOUN = re.compile(
 _EXCLUSIVE = r"(?:仅(?:仅)?|只(?:需(?:要)?)?|就)"
 _DELIVERY = (
     r"(?:交(?:付|给|出)?(?!易)|给(?:我|出)?|提(?:交|供)|输(?:出)?|返(?:回)?|"
-    r"呈(?:现|交)?|展(?:示)?|显(?:示)?|发(?:送)?|留(?:下)?|保留|用|以|要|需要|需)"
+    r"呈(?:现|交)?|展(?:示)?|显(?:示)?|列(?:出|示)?|发(?:送)?|留(?:下)?|保留|用|以|要|需要|需)"
 )
 # A following modifier can describe the contents or the shape of the table.
 # A restriction on a filter/source followed by a second instruction cannot.
@@ -373,8 +401,14 @@ _NEGATED_FORMAT = re.compile(
 )
 _QUOTES = re.compile(r'“[^”\n]*”|「[^」\n]*」|"[^"\n]*"|`[^`\n]*`')
 _OUTSIDE_TABLE = re.compile(r"表(?:格)?(?:的)?(?:前(?:后)?|后|外|以外|之外)|表格?(?:上下|两侧)")
-_NEGATION = r"(?:不要|不需(?:要)?|无需|不用|不必|不得|禁止|勿|别|不(?:写|加|附|带|要|给|作|放|留|输出)|省略|免去)"
-_PROSE = r"(?:文字|文本|说明|解释|解读|分析|原因|补充|附注|前言|后记|前缀|后缀|总结|叙述|评论|旁白|内容|语句|句子)"
+_NEGATION = (
+    r"(?:不要|不需(?:要)?|无需|不用|不必|不得|禁止|勿|别|"
+    r"不(?:写|加|附|带|要|给|作|放|留|输出)|省略|免去)"
+)
+_PROSE = (
+    r"(?:文字|文本|说明|解释|解读|分析|原因|补充|附注|前言|后记|前缀|"
+    r"后缀|总结|叙述|评论|旁白|内容|语句|句子)"
+)
 _NO_PROSE = re.compile(
     rf"{_NEGATION}(?:在表格?(?:前后|之前|之后|外|上方|下方))?"
     rf"(?:再|都|也|另行|另外|额外|添加|附加|附带|附上|附|插入|出现|输出|撰写|写|给出|加上|加|放|有|"
@@ -453,7 +487,7 @@ def _project_selection(question, selection, source):
         allowed.add("measures")
     elif name == "get_registration_conversion":
         allowed.add("scope")
-    if set(selection) - allowed or not _window_matches(source, question):
+    if set(selection) - allowed or not _window_matches(source, question, expand_ranges=True):
         return None
     columns = source["columns"]
     if (

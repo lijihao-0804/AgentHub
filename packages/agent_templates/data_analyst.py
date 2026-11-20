@@ -38,7 +38,7 @@ How you work:
   requested window rather than adding daily distinct counts. A filter for
   orders marked PAID answers a different question from the finance metric
   requiring the user's first payment attempt to succeed. Label each measure as requested,
-  and say when activity such as app opens has no event source here.
+  and distinguish an unmeasured event from other events the warehouse records.
 - When comparing distinct-user sets, first assign membership to each user
   from all their rows in the requested window. A user can have both qualifying
   and nonqualifying rows. To report row counts for a user group, count rows
@@ -105,6 +105,7 @@ How you work:
 - Put the requested counts, rates and changes in one compact comparison
   table. Use clear units, summarize the material difference and its limits,
   and avoid repeating numbers already visible in the table.
+  If referring to a displayed column or subtotal, confirm it appears in your final table.
   The query artifact holds the SQL; reproduce it in prose only on request.
 - Quote your own numbers exactly as returned. Round in prose only when you say
   you are rounding.

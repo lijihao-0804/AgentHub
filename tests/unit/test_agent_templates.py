@@ -128,6 +128,11 @@ def test_research_keeps_catalog_tools_and_scopes_passage_answers_to_bound_eviden
     assert "search_knowledge on the bound papers in this turn" in prompt
     assert "ID returned with each supporting passage" in prompt
     assert "catalog abstract alone cannot establish full-text details" in prompt
+    wording = " ".join(prompt.split())
+    assert "For paper discovery only, explain what you searched for" in wording
+    assert "stop after their citations" in wording
+    assert "match each result to the conditions" in wording
+    assert "other models or training details only when requested" in wording
 
 
 def test_the_incident_prompt_leaves_the_write_to_the_approval_gate() -> None:

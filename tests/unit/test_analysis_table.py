@@ -31,6 +31,40 @@ QUESTION = (
     "同一个人只能归一组。只要这个表，不用解释付费指标。"
 )
 WINDOW = {"start_date": "2026-02-20", "end_date": "2026-02-24"}
+
+
+@pytest.mark.parametrize(
+    ("start", "short_end", "end"),
+    [("2024-02-27", "02-29", "2024-02-29"), ("2025-12-28", "01-02", "2026-01-02")],
+)
+def test_compact_date_range_validates_both_ends_in_v2(warehouse, start, short_end, end):
+    import json
+
+    from packages.agent_runtime.analysis_table import grounded_answer
+
+    args = {"windows": [{"start_date": start, "end_date": end}], "breakdown": "platform"}
+    call = RecordedToolCall(
+        "warehouse.get_registration_conversion",
+        "conv",
+        1,
+        args,
+        {"structured_content": warehouse.registration_conversion(**args)},
+    )
+    source = table_evidence(call, uuid4(), v2=True)
+    selection = json.dumps({"source": "conv", "scope": "overall", "columns": ["signups"]})
+    question = f"Give signup counts for {start} through {short_end}. Table only."
+    assert grounded_answer(question, selection, [source], "grounded_table_v2") == (
+        "| 注册数 |\n| --- |\n| 0 |"
+    )
+    for invalid in ("04-31", "11-06"):
+        assert (
+            grounded_answer(
+                question.replace(short_end, invalid), selection, [source], "grounded_table_v2"
+            )
+            is None
+        )
+
+
 ORDER = "warehouse.get_order_activity"
 PAYING = "warehouse.get_paying_user_counts"
 EXPECTED = """| 用户分组 | 去重人数 | 全部订单数 | 非 PAID 订单数 |
@@ -397,6 +431,8 @@ async def test_v2_provider_refusal_cannot_become_clarification_or_query():
     "question,expected",
     [
         ("各产地的到港数量，最终结果限为一张核对表。", True),
+        ("仅列一张表：各仓库的可用容量。", True),
+        ("仅列出库存大于零的仓库，按区域整理成表。", False),
         ("各年龄段的留存，请仅呈现分为四档的汇总表。", True),
         ("本周各库的盘点数，就交仓库与箱数两列的对照表。", True),
         ("请用单表展示各区件数，表的前后不要添加任何文字。", True),
