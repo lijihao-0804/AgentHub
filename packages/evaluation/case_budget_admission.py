@@ -138,6 +138,7 @@ _RETRIEVAL_KEYS = frozenset(
         "evidence_set_selector",
         "rerank_method",
         "query_rewrite",
+        "paper_answer_policy",
         "knowledge_binding_mode",
         "knowledge_snapshot_ids",
         "knowledge_snapshots",
@@ -667,6 +668,7 @@ def _frozen_spec_semantic_rejection(
         or raw_retrieval.get("evidence_set_selector") is not None
         or raw_retrieval.get("rerank_method") is not None
         or raw_retrieval.get("query_rewrite") is not None
+        or raw_retrieval.get("paper_answer_policy") is not None
     ):
         return CaseBudgetAdmissionReason.RETRIEVAL_UNSUPPORTED
     return None

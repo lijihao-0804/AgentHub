@@ -18,6 +18,7 @@ function agentsBase(workspaceId: string): string {
 export type ModelRetryPolicy = { max_attempts?: number };
 
 export type RetrievalConfig = {
+  paper_answer_policy?: "verified_quotes_v1" | null;
   query_rewrite?: "paper_comparison_v1" | "paper_comparison_v2" | null;
   embedding_model?: string | null;
   reranker_model?: string | null;

@@ -172,3 +172,25 @@ and context budgets also apply to rewritten searches.
    attributes to that passage. For a numerical comparison, also check the groups,
    units and time range. A resolvable handle establishes where the citation points.
    Factual support requires reading the cited text.
+
+
+### Optional verified source sentences
+
+The ordinary template leaves this policy off. For an evaluation draft, request
+`GET /api/v1/workspaces/{workspace_id}/agent-templates/research?paper_answer_policy=verified_quotes_v1`.
+Copy its returned retrieval configuration into the ordinary agent creation
+request, bind the papers and publish. This variant uses `compact_v1` and a
+12,500-byte retrieval budget. The published version freezes these settings.
+
+The opt-in applies to explicitly cited English questions of the form “In the
+workspace paper *title*, how …? Cite supporting passages.” Each eligible
+passage must come from this turn's admitted built-in search results and match
+the requested document filename or arXiv identifier. When no eligible passage
+is available, or the question falls outside that scope, the ordinary research
+flow continues. On an eligible round the model can search again or select up
+to four sentences from the identified revision. The server checks each quote
+and renders the source wording beside its handle. An invalid final selection
+ends the run with `PAPER_QUOTE_SELECTION_INVALID`. Streamed runs also withhold
+unverified selections. Authentic sentences can still miss the question, omit a
+condition or leave part of a comparison unanswered. Grade those dimensions
+independently before choosing this policy for an agent.

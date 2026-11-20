@@ -8,6 +8,7 @@ application it is serving except the contents of the template it returns.
 
 from __future__ import annotations
 
+from typing import Literal
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
@@ -37,7 +38,7 @@ class AgentTemplateResponse(BaseModel):
     # The UI uses it to send a new thread to the right page; nothing in the
     # runtime reads it.
     thread_kind: str
-    retrieval_config: dict[str, str]
+    retrieval_config: dict[str, str | int]
     runtime_config: dict[str, str]
 
 
@@ -50,7 +51,8 @@ def _response(template: AgentTemplate) -> AgentTemplateResponse:
         tool_hints=list(template.tool_hints),
         thread_kind=template.thread_kind,
         runtime_config={"analysis_answer_policy": template.analysis_answer_policy}
-        if template.analysis_answer_policy else {},
+        if template.analysis_answer_policy
+        else {},
         retrieval_config={"query_rewrite": template.query_rewrite}
         if template.query_rewrite
         else {},
@@ -77,10 +79,22 @@ async def get_agent_template(
     workspace_id: UUID,
     template_key: str,
     context: WorkspaceExecutionContext = context_dependency,
+    paper_answer_policy: Literal["verified_quotes_v1"] | None = None,
 ) -> AgentTemplateResponse:
     del workspace_id
     _require_read(context)
-    return _response(get_template(template_key))
+    template = _response(get_template(template_key))
+    if paper_answer_policy:
+        if template.key != "research":
+            raise AgentHubError(
+                "INVALID_AGENT_CONFIG", "This option requires a research template.", 422
+            )
+        template.retrieval_config.update(
+            evidence_projection="compact_v1",
+            context_budget_bytes=12_500,
+            paper_answer_policy=paper_answer_policy,
+        )
+    return template
 
 
 __all__ = ["router"]

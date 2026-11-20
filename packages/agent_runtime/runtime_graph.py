@@ -62,6 +62,7 @@ from packages.agent_runtime.memory_tools import (
     thread_history_search_definition,
 )
 from packages.agent_runtime.models import AgentRun, AgentVersion, RunStep
+from packages.agent_runtime.paper_quotes import quote_sources, render_quotes, selection_instruction
 from packages.agent_runtime.rag_evidence import project_rag_evidence_payload
 from packages.agent_runtime.runtime_projection import (
     _RUNTIME_POLICY,
@@ -2610,6 +2611,28 @@ class _AgentRunGraph:
             if state["runtime"].get("summary_policy", {}).get("enabled") is True:
                 await self._assert_summary_run_lease()
             admission = self._admit_context(state)
+            quotes = quote_sources(state, admission.messages, getattr(self.run, "input_text", ""))
+            if quotes:
+                # Price the selection contract with the same frozen budget. Use
+                # it only if admission still delivers all selectable passages.
+                base_system = state["messages"][0]
+                augmented = replace(
+                    base_system,
+                    content=(base_system.content or "") + "\n\n" + selection_instruction(quotes),
+                )
+                try:
+                    candidate = self._admit_context(
+                        {**state, "messages": [augmented, *state["messages"][1:]]}
+                    )
+                except AgentHubError as exc:
+                    if exc.code != "AGENT_CONTEXT_BUDGET_EXCEEDED":
+                        raise
+                    quotes = {}
+                else:
+                    if quote_sources(state, candidate.messages, self.run.input_text) == quotes:
+                        admission = candidate
+                    else:
+                        quotes = {}
         except AgentHubError as error:
             await self.step(
                 "MODEL",
@@ -2622,6 +2645,8 @@ class _AgentRunGraph:
             }
 
         _retain_admission(state, admission)
+        if quotes:
+            state["messages"][0] = base_system
         memory_delivery = _memory_delivery_metadata(state, admission)
         context_policy_metadata = _context_policy_metadata(state, admission)
         evidence_update = {
@@ -2757,7 +2782,12 @@ class _AgentRunGraph:
             if state["runtime"].get("summary_policy", {}).get("enabled") is True:
                 await self._assert_summary_run_lease(lock=True)
             if self.mode == "stream":
-                response = await self._stream_model(prepared_gateway, state, request)
+                if quotes:
+                    response = await self._stream_model(
+                        prepared_gateway, state, request, buffer_text=True
+                    )
+                else:
+                    response = await self._stream_model(prepared_gateway, state, request)
             else:
                 response = await prepared_gateway.generate_resolved(
                     self.context, state["spec"].model_plan, request
@@ -2833,6 +2863,35 @@ class _AgentRunGraph:
             )
             for index, call in enumerate(response.tool_calls)
         )
+        if quotes and response.tool_calls:
+            response = replace(response, content="")
+        if (
+            quotes
+            and not response.tool_calls
+            and response.finish_reason not in {"length", "refusal", "content_filter"}
+        ):
+            answer = render_quotes(response.content, quotes)
+            if answer is None:
+                code = "PAPER_QUOTE_SELECTION_INVALID"
+                await self.step(
+                    "MODEL",
+                    "FAILED",
+                    {
+                        "model_round": next_round,
+                        "error_code": code,
+                        **_usage_step_metadata(response),
+                    },
+                )
+                return {
+                    **evidence_update,
+                    "failure_code": code,
+                    "model_round_count": next_round,
+                    "usage_records": list(self.usage_records),
+                }
+            response = replace(response, content=answer)
+        if quotes and response.finish_reason in {"refusal", "content_filter"}:
+            response = replace(response, content="", tool_calls=())
+            normalized_tool_calls = ()
         if table_only and not response.tool_calls:
             if response.finish_reason in {"content_filter", "refusal"}:
                 response = replace(response, content="")
@@ -2906,7 +2965,7 @@ class _AgentRunGraph:
                 "failure_code": "MODEL_OUTPUT_TRUNCATED",
                 **evidence_update,
             }
-        if table_only and self.mode == "stream" and not response.tool_calls:
+        if (table_only or quotes) and self.mode == "stream" and not response.tool_calls:
             await self._emit(AgentEventType.MESSAGE_DELTA, {"delta": response.content})
         await self._emit(
             AgentEventType.MESSAGE_COMPLETED,
@@ -3097,7 +3156,12 @@ class _AgentRunGraph:
         return bool(policy) and table_only_turn(self.run.input_text, policy)
 
     async def _stream_model(
-        self, gateway: ModelGateway, state: AgentRunState, request: ModelRequest
+        self,
+        gateway: ModelGateway,
+        state: AgentRunState,
+        request: ModelRequest,
+        *,
+        buffer_text: bool = False,
     ):
         stream = gateway.stream_resolved(self.context, state["spec"].model_plan, request)
         self.active_model_stream = stream
@@ -3111,7 +3175,7 @@ class _AgentRunGraph:
                 if event.event_type is ModelStreamEventType.MESSAGE_DELTA:
                     delta = event.message_delta or ""
                     content_parts.append(delta)
-                    if delta and not table_only:
+                    if delta and not table_only and not buffer_text:
                         await self._emit(AgentEventType.MESSAGE_DELTA, {"delta": delta})
                 elif event.event_type is ModelStreamEventType.TOOL_CALL_DELTA:
                     delta = event.tool_call_delta

@@ -156,7 +156,13 @@ _RETRIEVAL_OPTIONAL_KEYS = frozenset(
 _RETRIEVAL_KEYS = (
     frozenset(DEFAULT_RETRIEVAL_CONFIG)
     | _RETRIEVAL_OPTIONAL_KEYS
-    | {"evidence_projection", "evidence_set_selector", "rerank_method", "query_rewrite"}
+    | {
+        "evidence_projection",
+        "evidence_set_selector",
+        "rerank_method",
+        "query_rewrite",
+        "paper_answer_policy",
+    }
 )
 
 
@@ -1157,6 +1163,12 @@ def _validate_retrieval_config(
         raise AgentHubError("INVALID_AGENT_CONFIG", "The retrieval config is invalid.", 422)
     if projection is None:
         result.pop("evidence_projection", None)
+    if result.get("paper_answer_policy") is None:
+        result.pop("paper_answer_policy", None)
+    elif result["paper_answer_policy"] != "verified_quotes_v1" or projection != "compact_v1":
+        raise AgentHubError(
+            "INVALID_AGENT_CONFIG", "The paper answer policy requires compact evidence.", 422
+        )
     if result.get("query_rewrite") is None:
         result.pop("query_rewrite", None)
     elif result["query_rewrite"] not in ("paper_comparison_v1", "paper_comparison_v2"):
