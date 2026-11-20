@@ -8,6 +8,7 @@ from packages.model_gateway.adapters.litellm import (
     AliyunDeepSeekRequestMode,
     LiteLLMProviderAdapter,
 )
+from packages.model_gateway.capabilities import capabilities_from_mapping
 from packages.model_gateway.contracts import ModelMessage, ModelRequest
 from packages.model_gateway.errors import ModelGatewayError, ModelGatewayErrorCode
 from packages.model_gateway.models import ModelProfile, ProviderCredential
@@ -96,7 +97,7 @@ def test_request_mode_is_an_exact_provider_default_enum_by_default() -> None:
 
 
 def test_request_mode_rejects_raw_or_unrelated_values() -> None:
-    for value in ("provider_default", "non_thinking", "NON_THINKING"):
+    for value in ("provider_default", "non_thinking", "NON_THINKING", "selector_non_thinking"):
         with pytest.raises(TypeError):
             ModelRequest(
                 messages=(ModelMessage(role="user", content="Reply with OK."),),
@@ -158,6 +159,52 @@ async def test_request_mode_is_applied_independently_per_call() -> None:
     assert "extra_body" not in client.calls[0]
     assert client.calls[1]["extra_body"] == {"enable_thinking": False}
     assert "extra_body" not in client.calls[2]
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("provider", "model", "base_url", "supports_non_thinking", "expected"),
+    [
+        ("openai-compatible", NON_THINKING_MODEL, ALIYUN_BASE_URL, True, True),
+        ("openai-compatible", NON_THINKING_MODEL, ALIYUN_BASE_URL, False, False),
+        ("openai-compatible", NON_THINKING_MODEL, None, True, False),
+        ("deepseek", NON_THINKING_MODEL, ALIYUN_BASE_URL, True, False),
+        ("openai", NON_THINKING_MODEL, ALIYUN_BASE_URL, True, False),
+        ("openai-compatible", "other-model", ALIYUN_BASE_URL, True, False),
+    ],
+)
+async def test_selector_only_disables_thinking_for_opted_in_supported_routes(
+    provider: str,
+    model: str,
+    base_url: str | None,
+    supports_non_thinking: bool,
+    expected: bool,
+) -> None:
+    profile, credential = route(provider=provider, model=model)
+    credential.base_url = base_url
+    profile.capabilities = {"aliyun_deepseek_non_thinking": supports_non_thinking}
+    client = RecordingCompletionClient()
+
+    await LiteLLMProviderAdapter(client).complete(
+        profile, credential, request(AliyunDeepSeekRequestMode.SELECTOR_NON_THINKING)
+    )
+
+    if expected:
+        assert client.calls[0]["extra_body"] == {"enable_thinking": False}
+    else:
+        assert "extra_body" not in client.calls[0]
+
+
+def test_selector_capability_is_opt_in_and_boolean() -> None:
+    assert capabilities_from_mapping({}).aliyun_deepseek_non_thinking is False
+    assert (
+        capabilities_from_mapping(
+            {"aliyun_deepseek_non_thinking": True}
+        ).aliyun_deepseek_non_thinking
+        is True
+    )
+    with pytest.raises(ValueError, match="aliyun_deepseek_non_thinking must be a boolean"):
+        capabilities_from_mapping({"aliyun_deepseek_non_thinking": "true"})
 
 
 @pytest.mark.asyncio

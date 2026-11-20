@@ -94,10 +94,11 @@ class RetryPolicy:
 
 
 class AliyunDeepSeekRequestMode(StrEnum):
-    """Per-request mode for the verified Aliyun DeepSeek route."""
+    """Per-request thinking mode for Aliyun DeepSeek routes."""
 
     PROVIDER_DEFAULT = "provider_default"
     NON_THINKING = "non_thinking"
+    SELECTOR_NON_THINKING = "selector_non_thinking"
 
 
 @dataclass(frozen=True, slots=True)
@@ -240,8 +241,11 @@ class ModelCapabilities:
         default=None,
         metadata={"serialization_type": ContextMetadata},
     )
+    aliyun_deepseek_non_thinking: bool = False
 
     def __post_init__(self) -> None:
+        if type(self.aliyun_deepseek_non_thinking) is not bool:
+            raise ValueError("aliyun_deepseek_non_thinking must be a boolean")
         if self.max_context_tokens is not None and (
             isinstance(self.max_context_tokens, bool)
             or not isinstance(self.max_context_tokens, int)

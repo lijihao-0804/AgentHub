@@ -79,7 +79,8 @@ async def get_agent_template(
     workspace_id: UUID,
     template_key: str,
     context: WorkspaceExecutionContext = context_dependency,
-    paper_answer_policy: Literal["verified_quotes_v1", "sentence_ids_v1"] | None = None,
+    paper_answer_policy: Literal["verified_quotes_v1", "sentence_ids_v1", "sentence_ids_v2"]
+    | None = None,
 ) -> AgentTemplateResponse:
     del workspace_id
     _require_read(context)

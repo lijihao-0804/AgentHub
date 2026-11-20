@@ -354,6 +354,7 @@ def test_plan_serialization_omits_legacy_none_and_round_trips_new_egress() -> No
     )
     legacy = freeze_plan(ResolvedModelExecutionPlan(primary=legacy_profile))
     assert "provider_egress" not in legacy["primary"]
+    assert "aliyun_deepseek_non_thinking" not in legacy["primary"]["capabilities"]
     assert thaw_plan(legacy).primary.provider_egress is None
 
     current_profile = ResolvedModelExecutionProfile(

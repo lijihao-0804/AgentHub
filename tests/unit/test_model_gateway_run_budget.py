@@ -27,7 +27,7 @@ from packages.model_gateway.contracts import (
     RetryPolicy,
 )
 from packages.model_gateway.errors import ModelGatewayError, ModelGatewayErrorCode
-from packages.model_gateway.gateway import ModelGatewayService
+from packages.model_gateway.gateway import ModelGatewayService, capture_rejected_model_responses
 from packages.model_gateway.models import ModelProfile, ProviderCredential
 from packages.model_gateway.run_budget_adapter import (
     AttemptCostUpperBound,
@@ -563,10 +563,14 @@ async def test_successful_response_keeps_the_reservation_unreconciled() -> None:
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("operation", ["generate", "stream"])
-async def test_completed_empty_response_keeps_the_reservation_unreconciled(operation):
+@pytest.mark.parametrize("has_fallback", [False, True])
+async def test_completed_empty_response_keeps_the_reservation_unreconciled(
+    operation, has_fallback
+):
     context, repository, profiles = setup_chain()
-    primary = profiles[0]
-    primary.fallback_profile_id = None
+    primary, fallback = profiles
+    if not has_fallback:
+        primary.fallback_profile_id = None
     events = []
     budget = RecordingAttemptBudget(events)
     provider = RecordingProvider(events)
@@ -575,9 +579,17 @@ async def test_completed_empty_response_keeps_the_reservation_unreconciled(opera
     )
     provider.complete_outcomes["primary"] = [receipt]
     provider.stream_outcomes["primary"] = [receipt]
+    fallback_receipt = ModelResponse(
+        "", "test-provider", "fallback", finish_reason="length", usage=ModelUsage(30, 8, 38)
+    )
+    provider.complete_outcomes["fallback"] = [fallback_receipt]
+    provider.stream_outcomes["fallback"] = [fallback_receipt]
     gateway = ModelGatewayService(repository, provider, attempt_budget=budget)
 
-    with pytest.raises(ModelGatewayError) as exc:
+    with (
+        capture_rejected_model_responses() as rejected_responses,
+        pytest.raises(ModelGatewayError) as exc,
+    ):
         if operation == "generate":
             await gateway.generate(context, primary.id, request())
         else:
@@ -585,7 +597,13 @@ async def test_completed_empty_response_keeps_the_reservation_unreconciled(opera
                 pass
 
     assert exc.value.code == ModelGatewayErrorCode.MODEL_BAD_RESPONSE
-    assert len(budget.reservations) == 1
+    assert rejected_responses == ([receipt, fallback_receipt] if has_fallback else [receipt])
+    provider_event = "provider.complete" if operation == "generate" else "provider.stream"
+    expected_events = [("reserve", "MAIN_MODEL"), (provider_event, "primary")]
+    if has_fallback:
+        expected_events.extend([("reserve", "FALLBACK"), (provider_event, fallback.model)])
+    assert events == expected_events
+    assert len(budget.reservations) == (2 if has_fallback else 1)
     assert budget.unknown == []
 
 

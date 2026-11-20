@@ -19,6 +19,7 @@ from packages.model_gateway.cache_capability import PromptCacheCapability, promp
 from packages.model_gateway.contracts import (
     AliyunDeepSeekRequestMode,
     CostEstimate,
+    ModelCapabilities,
     ModelMessage,
     ModelRequest,
     ModelResponse,
@@ -96,15 +97,31 @@ def _aliyun_deepseek_request_options(
     if mode is AliyunDeepSeekRequestMode.PROVIDER_DEFAULT:
         return {}
     provider = credential.provider.strip().lower().replace("_", "-")
-    if (
+    if mode is AliyunDeepSeekRequestMode.SELECTOR_NON_THINKING:
+        capabilities = profile.capabilities
+        opted_in = (
+            capabilities.aliyun_deepseek_non_thinking
+            if isinstance(capabilities, ModelCapabilities)
+            else isinstance(capabilities, Mapping)
+            and capabilities.get("aliyun_deepseek_non_thinking") is True
+        )
+        if (
+            provider != "openai-compatible"
+            or profile.model not in {"deepseek-v4.1-flash", _ALIYUN_DEEPSEEK_NON_THINKING_MODEL}
+            or not credential.base_url
+            or not opted_in
+        ):
+            return {}
+    elif (
         mode is not AliyunDeepSeekRequestMode.NON_THINKING
         or provider != "openai-compatible"
         or profile.model != _ALIYUN_DEEPSEEK_NON_THINKING_MODEL
         or not _is_verified_aliyun_beijing_openai_endpoint(credential.base_url)
     ):
         raise ModelGatewayError(ModelGatewayErrorCode.MODEL_CAPABILITY_MISMATCH)
-    # Alibaba Cloud documents enable_thinking as an extension request field for
-    # its OpenAI-compatible API. LiteLLM forwards non-standard fields there.
+    # Alibaba Cloud's OpenAI-compatible API takes enable_thinking at the top level.
+    # LiteLLM passes extra_body through to the SDK, which merges it into the body.
+    # https://docs.modelstudio.console.alibabacloud.com/en/model-studio/qwen-api-via-openai-chat-completions
     return {"extra_body": {"enable_thinking": False}}
 
 

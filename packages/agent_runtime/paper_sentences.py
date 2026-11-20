@@ -71,7 +71,8 @@ def sentence_target(state, question: str) -> str | None:
     if (
         definition is None
         or definition.source_kind is not ToolSourceKind.BUILTIN
-        or definition.retrieval_config.get("paper_answer_policy") != "sentence_ids_v1"
+        or definition.retrieval_config.get("paper_answer_policy")
+        not in ("sentence_ids_v1", "sentence_ids_v2")
         or definition.retrieval_config.get("evidence_projection") != "compact_v1"
         or len(question) > 2000
         or not re.search(r"\b(?:cite|citing|citations?|supporting passages?)\b", question, re.I)

@@ -151,6 +151,7 @@ from packages.memory.selection_policy import (
     apply_memory_selection_policy,
 )
 from packages.model_gateway.contracts import (
+    AliyunDeepSeekRequestMode,
     ModelGateway,
     ModelMessage,
     ModelRequest,
@@ -160,8 +161,16 @@ from packages.model_gateway.contracts import (
     ModelToolCall,
     ModelToolDefinition,
 )
-from packages.model_gateway.errors import ModelGatewayError, ModelGatewayErrorCode
-from packages.model_gateway.gateway import ModelGatewayService, SessionScopedModelGenerator
+from packages.model_gateway.errors import (
+    EmptyModelResponseError,
+    ModelGatewayError,
+    ModelGatewayErrorCode,
+)
+from packages.model_gateway.gateway import (
+    ModelGatewayService,
+    SessionScopedModelGenerator,
+    capture_rejected_model_responses,
+)
 from packages.model_gateway.run_budget_adapter import ModelAttemptBudgetError
 from packages.observability.timing import mark_visible_text
 from packages.threads.models import AgentThread, ThreadTurn
@@ -2738,6 +2747,15 @@ class _AgentRunGraph:
         request = ModelRequest(
             messages=delivery.messages,
             tools=delivery.tool_definitions,
+            request_mode=(
+                AliyunDeepSeekRequestMode.SELECTOR_NON_THINKING
+                if sentence_selection is not None
+                and state["tool_definitions"]["search_knowledge"].retrieval_config.get(
+                    "paper_answer_policy"
+                )
+                == "sentence_ids_v2"
+                else AliyunDeepSeekRequestMode.PROVIDER_DEFAULT
+            ),
         )
         self.model_round_count = next_round
         await self._emit(AgentEventType.MESSAGE_STARTED, {"model_round": next_round})
@@ -2799,38 +2817,46 @@ class _AgentRunGraph:
                         request,
                         operation="stream" if self.mode == "stream" else "generate",
                     )
-            local_summary_experiment = getattr(
-                self.service, "local_summary_experiment", None
-            )
+            local_summary_experiment = getattr(self.service, "local_summary_experiment", None)
             if local_summary_experiment is not None and (
-                    prepare_resolved is None
+                prepare_resolved is None
                 or not local_summary_experiment.authorizes_prepared_gateway(
-                        prepared_gateway,
-                        profile_id=state["spec"].model_plan.primary.id,
-                    )
-                ):
-                    raise AgentHubError(
-                        "SUMMARY_EXPERIMENT_ROUTE_MISMATCH",
-                        "The resolved model credential is outside the local experiment route.",
-                        403,
-                    )
+                    prepared_gateway,
+                    profile_id=state["spec"].model_plan.primary.id,
+                )
+            ):
+                raise AgentHubError(
+                    "SUMMARY_EXPERIMENT_ROUTE_MISMATCH",
+                    "The resolved model credential is outside the local experiment route.",
+                    403,
+                )
             # Provider completion/streaming must not retain the credential-resolution
             # session.  The prepared production facade contains only frozen identities
             # and decrypted credentials; test gateways are likewise invoked here, after
             # their factory session has exited.
             if state["runtime"].get("summary_policy", {}).get("enabled") is True:
                 await self._assert_summary_run_lease(lock=True)
-            if self.mode == "stream":
-                if quotes or target:
-                    response = await self._stream_model(
-                        prepared_gateway, state, request, buffer_text=True
+            with capture_rejected_model_responses() as rejected_responses:
+                try:
+                    if self.mode == "stream":
+                        response = await self._stream_model(
+                            prepared_gateway, state, request, buffer_text=bool(quotes or target)
+                        )
+                    else:
+                        response = await prepared_gateway.generate_resolved(
+                            self.context, state["spec"].model_plan, request
+                        )
+                except EmptyModelResponseError as error:
+                    if error.response is not None and all(
+                        receipt is not error.response for receipt in rejected_responses
+                    ):
+                        rejected_responses.append(error.response)
+                    raise
+                finally:
+                    self.usage_records.extend(
+                        _usage_record(receipt) or {"usage": None, "cost": None}
+                        for receipt in rejected_responses
                     )
-                else:
-                    response = await self._stream_model(prepared_gateway, state, request)
-            else:
-                response = await prepared_gateway.generate_resolved(
-                    self.context, state["spec"].model_plan, request
-                )
             if callable(getattr(experiment_attempt_budget, "record_response", None)):
                 try:
                     await experiment_attempt_budget.record_response(response)
@@ -2847,18 +2873,31 @@ class _AgentRunGraph:
             return {
                 **evidence_update,
                 "model_round_count": next_round,
+                "usage_records": list(self.usage_records),
                 **_context_runtime_failure_fields(error.code),
             }
         except ModelGatewayError as error:
+            receipt = error.response if isinstance(error, EmptyModelResponseError) else None
+            error_code = error.code.value
+            purpose = {"model_purpose": "paper_sentence_selection"} if sentence_selection else {}
+            if sentence_selection and receipt is not None and receipt.finish_reason == "length":
+                error_code = "MODEL_OUTPUT_TRUNCATED"
             await self.step(
                 "MODEL",
                 "FAILED",
-                {"model_round": next_round, "error_code": error.code.value, **memory_delivery},
+                {
+                    "model_round": next_round,
+                    "error_code": error_code,
+                    **purpose,
+                    **memory_delivery,
+                    **(_usage_step_metadata(receipt) if receipt is not None else {}),
+                },
             )
             return {
                 **evidence_update,
                 "model_round_count": next_round,
-                "failure_code": error.code.value,
+                "usage_records": list(self.usage_records),
+                "failure_code": error_code,
             }
         except AgentHubError as error:
             await self.step(
@@ -2869,6 +2908,7 @@ class _AgentRunGraph:
             return {
                 **evidence_update,
                 "model_round_count": next_round,
+                "usage_records": list(self.usage_records),
                 **_context_runtime_failure_fields(error.code),
             }
         except Exception:
@@ -2880,6 +2920,7 @@ class _AgentRunGraph:
             return {
                 **evidence_update,
                 "model_round_count": next_round,
+                "usage_records": list(self.usage_records),
                 "failure_code": "MODEL_BAD_RESPONSE",
             }
         usage_record = _usage_record(response)

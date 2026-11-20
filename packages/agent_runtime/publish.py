@@ -1070,6 +1070,8 @@ def _profile_projection(
         },
     }
     context_metadata = getattr(profile.capabilities, "context_metadata", None)
+    if profile.capabilities.aliyun_deepseek_non_thinking:
+        result["capabilities"]["aliyun_deepseek_non_thinking"] = True
     if include_context_metadata and context_metadata is not None:
         result["capabilities"]["context_metadata"] = context_metadata_to_mapping(context_metadata)
     if provider_egress is not None:
@@ -1166,7 +1168,8 @@ def _validate_retrieval_config(
     if result.get("paper_answer_policy") is None:
         result.pop("paper_answer_policy", None)
     elif (
-        result["paper_answer_policy"] not in ("verified_quotes_v1", "sentence_ids_v1")
+        result["paper_answer_policy"]
+        not in ("verified_quotes_v1", "sentence_ids_v1", "sentence_ids_v2")
         or projection != "compact_v1"
     ):
         raise AgentHubError(

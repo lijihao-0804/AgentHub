@@ -25,8 +25,12 @@ from packages.model_gateway.contracts import (
     RetryPolicy,
     StructuredOutputSchema,
 )
-from packages.model_gateway.errors import ModelGatewayError, ModelGatewayErrorCode
-from packages.model_gateway.gateway import ModelGatewayService
+from packages.model_gateway.errors import (
+    EmptyModelResponseError,
+    ModelGatewayError,
+    ModelGatewayErrorCode,
+)
+from packages.model_gateway.gateway import ModelGatewayService, capture_rejected_model_responses
 from packages.model_gateway.models import ModelProfile, ProviderCredential
 from packages.observability.safe import ProductionTraceSink
 from packages.observability.timing import capture_timings
@@ -599,7 +603,7 @@ async def test_completed_empty_response_preserves_only_reported_usage(operation,
     adapter.complete_outcomes = {
         "primary": [
             ModelResponse(
-                "",
+                "  ",
                 credential.provider,
                 "primary",
                 finish_reason="length",
@@ -610,10 +614,19 @@ async def test_completed_empty_response_preserves_only_reported_usage(operation,
     sink = RecordingTraceSink()
     gateway = ModelGatewayService(FakeRepository([primary], [credential]), adapter, sink)
 
-    with capture_timings() as timing, pytest.raises(ModelGatewayError) as exc:
+    with (
+        capture_timings() as timing,
+        capture_rejected_model_responses() as rejected_responses,
+        pytest.raises(EmptyModelResponseError) as exc,
+    ):
         await _perform_receipted_call(gateway, context, primary.id, operation)
 
     assert exc.value.code == ModelGatewayErrorCode.MODEL_BAD_RESPONSE
+    [receipt] = rejected_responses
+    assert receipt is exc.value.response
+    assert receipt.content == "" and receipt.tool_calls == ()
+    assert receipt.finish_reason == "length" and exc.value.output_limit_reached
+    assert receipt.usage == (ModelUsage(100, 256, 356, cached_tokens=40) if has_usage else None)
     assert sink.names == ["model.generate"] and adapter.complete_calls == ["primary"]
     [end] = sink.spans[0].end_calls
     assert end["status"] == "error"
@@ -661,7 +674,7 @@ async def test_fallback_keeps_empty_primary_usage_on_its_own_attempt(
     sink = RecordingTraceSink()
     gateway = ModelGatewayService(FakeRepository(profiles, [credential]), adapter, sink)
 
-    with capture_timings() as timing:
+    with capture_timings() as timing, capture_rejected_model_responses() as rejected_responses:
         if fallback_succeeds:
             final = await _perform_receipted_call(gateway, context, primary.id, operation)
             assert final == response("fallback")
@@ -671,6 +684,12 @@ async def test_fallback_keeps_empty_primary_usage_on_its_own_attempt(
             assert exc.value.code == ModelGatewayErrorCode.MODEL_PROVIDER_UNAVAILABLE
 
     assert adapter.complete_calls == ["primary", "fallback"]
+    [receipt] = rejected_responses
+    assert receipt.model == "primary"
+    assert receipt.usage == (ModelUsage(20, 8, 28) if primary_receipt_metered else None)
+    assert receipt.cost_estimate == (
+        CostEstimate(Decimal("0.001"), "USD") if primary_receipt_metered else None
+    )
     assert sink.names == ["model.generate", "model.empty_response"]
     logical, rejected = [span.end_calls[0] for span in sink.spans]
     first = rejected["attributes"]
@@ -704,15 +723,54 @@ async def test_empty_terminal_receipt_after_visible_text_preserves_usage_without
     gateway = ModelGatewayService(FakeRepository(profiles, [credential]), adapter, sink)
     visible = []
 
-    with pytest.raises(ModelGatewayError) as exc:
+    with (
+        capture_rejected_model_responses() as rejected_responses,
+        pytest.raises(ModelGatewayError) as exc,
+    ):
         async for event in gateway.stream(context, profiles[0].id, request()):
             visible.append(event.message_delta)
 
     assert exc.value.code == ModelGatewayErrorCode.MODEL_STREAM_INTERRUPTED
+    [receipt] = rejected_responses
+    assert receipt.usage == ModelUsage(18, 2, 20)
     assert visible == ["A"] and adapter.complete_calls == ["primary"]
     assert sink.names == ["model.generate"]
     [terminal] = sink.spans[0].end_calls
     assert terminal["status"] == "error" and terminal["attributes"]["total_tokens"] == 20
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("completed", [True, False])
+async def test_stream_usage_event_requires_completed_response_for_rejected_receipt(completed):
+    usage = ModelUsage(40, 2048, 2088)
+
+    class SeparateUsageAdapter(FakeAdapter):
+        async def stream(self, profile, credential, request):
+            yield ModelStreamEvent(event_type=ModelStreamEventType.USAGE, usage=usage)
+            if completed:
+                yield ModelStreamEvent(
+                    event_type=ModelStreamEventType.COMPLETED,
+                    response=ModelResponse(
+                        "", credential.provider, profile.model, finish_reason="length"
+                    ),
+                )
+
+    context, profiles, credential = setup_chain()
+    primary = profiles[0]
+    primary.fallback_profile_id = None
+    gateway = ModelGatewayService(FakeRepository([primary], [credential]), SeparateUsageAdapter())
+    with (
+        capture_rejected_model_responses() as rejected_responses,
+        pytest.raises(ModelGatewayError) as exc,
+    ):
+        await _perform_receipted_call(gateway, context, primary.id, "stream")
+
+    assert exc.value.code == ModelGatewayErrorCode.MODEL_BAD_RESPONSE
+    if completed:
+        [receipt] = rejected_responses
+        assert receipt.usage == usage
+    else:
+        assert rejected_responses == []
 
 
 @pytest.mark.asyncio

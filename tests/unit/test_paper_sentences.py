@@ -11,12 +11,14 @@ from packages.agent_runtime.paper_sentences import (
 )
 from packages.core.errors.exceptions import AgentHubError
 from packages.model_gateway.contracts import (
+    AliyunDeepSeekRequestMode,
     ModelResponse,
     ModelStreamEvent,
     ModelStreamEventType,
     ModelToolCall,
     ModelUsage,
 )
+from packages.model_gateway.errors import EmptyModelResponseError
 from tests.unit.test_runtime_rag_evidence_projection import _frozen_spec
 from tests.unit.test_verified_paper_quotes import ID, Q, S, setup_state
 
@@ -66,12 +68,12 @@ def test_no_silent_tail_drop_or_id_renumbering_under_tight_budget():
     assert len(selection.sentences) == 91
 
 
-async def graph_state():
+async def graph_state(policy="sentence_ids_v1"):
     graph, state = await setup_state()
     definition = state["tool_definitions"]["search_knowledge"]
     state["tool_definitions"]["search_knowledge"] = replace(
         definition,
-        retrieval_config={**definition.retrieval_config, "paper_answer_policy": "sentence_ids_v1"},
+        retrieval_config={**definition.retrieval_config, "paper_answer_policy": policy},
     )
     graph._emit = AsyncMock()
     return graph, state
@@ -129,6 +131,9 @@ async def test_draft_and_selection_are_separate_metered_rounds_and_only_verified
     assert len(second["usage_records"]) == len(first["usage_records"]) + 1
     assert [r["usage"]["total_tokens"] for r in second["usage_records"][-2:]] == [112, 112]
     assert gateway.requests[0].tools and not gateway.requests[1].tools
+    assert all(
+        r.request_mode is AliyunDeepSeekRequestMode.PROVIDER_DEFAULT for r in gateway.requests
+    )
     assert gateway.requests[1].response_schema is None
     assert (
         "S2" in gateway.requests[1].messages[1].content
@@ -139,6 +144,65 @@ async def test_draft_and_selection_are_separate_metered_rounds_and_only_verified
         [second["final_output"]] if mode == "stream" else []
     )
     assert resumed.after_model(second) == "finish"
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("mode", ["sync", "stream"])
+async def test_direct_selector_keeps_receipt_when_provider_returns_no_visible_text(mode):
+    graph, state = await graph_state("sentence_ids_v2")
+    graph.mode = mode
+    graph.step = AsyncMock()
+    failure = EmptyModelResponseError(
+        output_limit_reached=True,
+        response=ModelResponse(
+            content="",
+            model="fixture",
+            provider="fixture",
+            finish_reason="length",
+            usage=ModelUsage(75, 2048, 2123),
+        ),
+    )
+
+    class TruncatedSelector(Gateway):
+        def next_response(self, request):
+            self.requests.append(request)
+            response = next(self.replies)
+            if isinstance(response, Exception):
+                raise response
+            return response
+
+        async def generate_resolved(self, ctx, plan, request):
+            return self.next_response(request)
+
+        async def stream_resolved(self, ctx, plan, request):
+            yield ModelStreamEvent(
+                ModelStreamEventType.COMPLETED, response=self.next_response(request)
+            )
+
+    gateway = TruncatedSelector(
+        [
+            ModelResponse(
+                content="internal draft",
+                model="fixture",
+                provider="fixture",
+                usage=ModelUsage(50, 8, 58),
+            ),
+            failure,
+        ]
+    )
+    graph.service.model_gateway_factory = lambda session: gateway
+    state.update(await graph.model(state))
+    second = await graph.model(state)
+    assert second["failure_code"] == "MODEL_OUTPUT_TRUNCATED"
+    assert [record["usage"]["output_tokens"] for record in second["usage_records"]] == [8, 2048]
+    assert [request.request_mode for request in gateway.requests] == [
+        AliyunDeepSeekRequestMode.PROVIDER_DEFAULT,
+        AliyunDeepSeekRequestMode.SELECTOR_NON_THINKING,
+    ]
+    result = graph.step.await_args.args
+    assert result[:2] == ("MODEL", "FAILED")
+    assert result[2]["model_purpose"] == "paper_sentence_selection"
+    assert (result[2]["input_tokens"], result[2]["output_tokens"]) == (75, 2048)
 
 
 @pytest.mark.asyncio
@@ -234,7 +298,7 @@ def test_named_selector_template_is_explicit_and_preserves_previous_versions():
     with TestClient(app) as client:
         normal = client.get(url).json()["retrieval_config"]
         assert "paper_answer_policy" not in normal
-        for name in ("sentence_ids_v1", "verified_quotes_v1"):
+        for name in ("sentence_ids_v1", "sentence_ids_v2", "verified_quotes_v1"):
             result = client.get(url, params={"paper_answer_policy": name})
             assert result.status_code == 200
             config = result.json()["retrieval_config"]

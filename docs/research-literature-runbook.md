@@ -223,3 +223,18 @@ explicit empty selection. `PAPER_SENTENCE_BUDGET_EXCEEDED` means the entire
 numbered view did not fit the retrieval pool or model input window. Each
 underlying search still observes its own byte cap. Assess directness,
 comparison conditions and coverage separately after a successful selection.
+
+`sentence_ids_v2` uses the same selection prompt and source mapping. Publish
+the version with a model profile that declares
+`capabilities.aliyun_deepseek_non_thinking=true` when its OpenAI-compatible
+endpoint supports Alibaba Cloud's `enable_thinking` option for DeepSeek V4.1
+Flash. Only the final selector sends `enable_thinking: false`. The ordinary
+Agent rounds and the older versions use the provider defaults. The published
+output token limit applies to both rounds.
+
+The Run and its failed model step include measured usage from completed
+responses with empty visible text. An empty selector response with a confirmed
+length stop is reported as `MODEL_OUTPUT_TRUNCATED`. Fees stay unavailable if
+the provider or the configured pricing adapter leaves the corresponding
+monetary amount unknown.
+[DeepSeek API reference](https://help.aliyun.com/en/model-studio/deepseek-api)
