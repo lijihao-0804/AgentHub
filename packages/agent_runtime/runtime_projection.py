@@ -118,6 +118,7 @@ class AgentRunState(TypedDict, total=False):
     model_round_count: int
     tool_call_count: int
     identical_call_counts: dict[str, int]
+    paper_sentence_selection_pending: bool
     analysis_table_sources: list[dict[str, Any]]
     analysis_table_blocked: bool
     final_output: str | None
@@ -628,6 +629,8 @@ def _safe_step_metadata(metadata: Mapping[str, Any]) -> dict[str, Any]:
         "provider",
         "model",
         "usage_source",
+        "model_purpose",
+        "paper_sentence_selection_scheduled",
         "attempt_status",
         "cost_status",
         "memory_projection_version",

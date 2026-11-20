@@ -49,13 +49,11 @@ def quote_sources(state, messages, question: str) -> dict[str, str]:
         or not match["task"].translate(_QUOTES).isascii()
     ):
         return {}
-    title = match["title"].strip()
-    ids = _ID.findall(title)
-    if len(ids) > 1:
-        return {}
-    wanted = ids[0] if ids else title.strip('“”"').casefold()
-    # Read only post-user search messages. The input registry may also contain
-    # approved historical handles and Wiki claims from distinct sources.
+    return current_paper_sources(state, messages, question, match["title"].strip())
+
+
+def current_paper_registry(state, messages, question, *, newest_first=False):
+    """Only the current turn's admitted, registry-validated compact tool observations."""
     current = []
     for message in reversed(messages):
         if message.role == "user":
@@ -66,7 +64,24 @@ def quote_sources(state, messages, question: str) -> dict[str, str]:
             current.append(message)
     else:
         return {}
-    registry = visible_evidence_registry(current, state.get("rag_evidence_registry", {}))
+    if not newest_first:
+        current.reverse()
+    return visible_evidence_registry(current, state.get("rag_evidence_registry", {}))
+
+
+def current_paper_sources(
+    state, messages, question: str, title: str, *, eligible_registry=None
+) -> dict[str, str]:
+    """Resolve already-authorized current-turn RAW evidence for a named source."""
+    ids = _ID.findall(title)
+    if len(ids) > 1:
+        return {}
+    wanted = ids[0] if ids else title.strip('“”"').casefold()
+    # Read only post-user search messages. The input registry may also contain
+    # approved historical handles and Wiki claims from distinct sources.
+    registry = eligible_registry
+    if registry is None:
+        registry = current_paper_registry(state, messages, question, newest_first=True)
     hits: dict[str, str] = {}
     revisions = set()
     for handle, entry in registry.items():

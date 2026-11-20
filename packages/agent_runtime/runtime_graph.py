@@ -62,7 +62,19 @@ from packages.agent_runtime.memory_tools import (
     thread_history_search_definition,
 )
 from packages.agent_runtime.models import AgentRun, AgentVersion, RunStep
-from packages.agent_runtime.paper_quotes import quote_sources, render_quotes, selection_instruction
+from packages.agent_runtime.paper_quotes import (
+    current_paper_registry,
+    current_paper_sources,
+    quote_sources,
+    render_quotes,
+    selection_instruction,
+)
+from packages.agent_runtime.paper_sentences import (
+    admit_sentence_selection,
+    build_sentence_selection,
+    render_sentence_selection,
+    sentence_target,
+)
 from packages.agent_runtime.rag_evidence import project_rag_evidence_payload
 from packages.agent_runtime.runtime_projection import (
     _RUNTIME_POLICY,
@@ -2611,7 +2623,32 @@ class _AgentRunGraph:
             if state["runtime"].get("summary_policy", {}).get("enabled") is True:
                 await self._assert_summary_run_lease()
             admission = self._admit_context(state)
-            quotes = quote_sources(state, admission.messages, getattr(self.run, "input_text", ""))
+            question = getattr(self.run, "input_text", "")
+            target = sentence_target(state, question)
+            sentence_selection = None
+            selector_admission = None
+            if state.get("paper_sentence_selection_pending"):
+                if not target:
+                    raise AgentHubError(
+                        "PAPER_SENTENCE_EVIDENCE_MISSING", "The selected paper is unavailable.", 422
+                    )
+                current = current_paper_registry(state, admission.messages, question)
+                sources = current_paper_sources(
+                    state, admission.messages, question, target, eligible_registry=current
+                )
+                sentence_selection = build_sentence_selection(
+                    question,
+                    sources,
+                    visible_sources={
+                        key: entry["record"]["snippet"] for key, entry in current.items()
+                    },
+                )
+                selector_admission = admit_sentence_selection(
+                    sentence_selection,
+                    state["spec"],
+                    state["runtime"]["context_budget"],
+                )
+            quotes = quote_sources(state, admission.messages, question)
             if quotes:
                 # Price the selection contract with the same frozen budget. Use
                 # it only if admission still delivers all selectable passages.
@@ -2647,8 +2684,8 @@ class _AgentRunGraph:
         _retain_admission(state, admission)
         if quotes:
             state["messages"][0] = base_system
-        memory_delivery = _memory_delivery_metadata(state, admission)
-        context_policy_metadata = _context_policy_metadata(state, admission)
+        memory_delivery = {} if selector_admission else _memory_delivery_metadata(state, admission)
+        context_policy_metadata = _context_policy_metadata(state, selector_admission or admission)
         evidence_update = {
             "memory_message_count": int(state.get("memory_message_count", 0)),
             "history_message_count": int(state.get("history_message_count", 0)),
@@ -2663,8 +2700,10 @@ class _AgentRunGraph:
         state["tool_definitions"] = {
             definition.identity: definition for definition in state["tool_definitions"].values()
         }
-        await self._touch_admitted_memories(state, admission)
-        usage = admission.usage
+        if selector_admission is None:
+            await self._touch_admitted_memories(state, admission)
+        delivery = selector_admission or admission
+        usage = delivery.usage
         budget_data = {
             "model_round": next_round,
             "context_limit": usage.context_limit,
@@ -2697,8 +2736,8 @@ class _AgentRunGraph:
         )
         await _safe_end_span(budget_span, trace_data, status="ok", failure_code=None)
         request = ModelRequest(
-            messages=admission.messages,
-            tools=admission.tool_definitions,
+            messages=delivery.messages,
+            tools=delivery.tool_definitions,
         )
         self.model_round_count = next_round
         await self._emit(AgentEventType.MESSAGE_STARTED, {"model_round": next_round})
@@ -2782,7 +2821,7 @@ class _AgentRunGraph:
             if state["runtime"].get("summary_policy", {}).get("enabled") is True:
                 await self._assert_summary_run_lease(lock=True)
             if self.mode == "stream":
-                if quotes:
+                if quotes or target:
                     response = await self._stream_model(
                         prepared_gateway, state, request, buffer_text=True
                     )
@@ -2863,6 +2902,49 @@ class _AgentRunGraph:
             )
             for index, call in enumerate(response.tool_calls)
         )
+        schedule_selector = bool(
+            target
+            and sentence_selection is None
+            and not response.tool_calls
+            and response.content.strip()
+            and response.finish_reason not in {"length", "refusal", "content_filter"}
+        )
+        if sentence_selection and response.finish_reason not in {
+            "length",
+            "refusal",
+            "content_filter",
+        }:
+            try:
+                if response.tool_calls:
+                    raise AgentHubError(
+                        "PAPER_SENTENCE_FORMAT_INVALID", "The selector returned a tool call.", 422
+                    )
+                response = replace(
+                    response,
+                    content=render_sentence_selection(response.content, sentence_selection),
+                )
+            except AgentHubError as exc:
+                await self.step(
+                    "MODEL",
+                    "FAILED",
+                    {
+                        "model_round": next_round,
+                        "model_purpose": "paper_sentence_selection",
+                        "error_code": exc.code,
+                        **_usage_step_metadata(response),
+                    },
+                )
+                return {
+                    **evidence_update,
+                    "failure_code": exc.code,
+                    "model_round_count": next_round,
+                    "usage_records": list(self.usage_records),
+                }
+        if target and response.finish_reason in {"refusal", "content_filter"}:
+            response = replace(response, content="", tool_calls=())
+            normalized_tool_calls = ()
+        if target and response.tool_calls:
+            response = replace(response, content="")
         if quotes and response.tool_calls:
             response = replace(response, content="")
         if (
@@ -2925,8 +3007,9 @@ class _AgentRunGraph:
         assistant = ModelMessage(
             role="assistant", content=response.content, tool_calls=normalized_tool_calls
         )
-        messages.append(assistant)
-        if "turn_transcript" in state:
+        if not schedule_selector:
+            messages.append(assistant)
+        if not schedule_selector and "turn_transcript" in state:
             evidence_update["turn_transcript"] = [*state["turn_transcript"], assistant]
         if not response.tool_calls and not response.content.strip():
             empty_code = (
@@ -2965,7 +3048,11 @@ class _AgentRunGraph:
                 "failure_code": "MODEL_OUTPUT_TRUNCATED",
                 **evidence_update,
             }
-        if (table_only or quotes) and self.mode == "stream" and not response.tool_calls:
+        if (
+            (table_only or quotes or sentence_selection)
+            and self.mode == "stream"
+            and not response.tool_calls
+        ):
             await self._emit(AgentEventType.MESSAGE_DELTA, {"delta": response.content})
         await self._emit(
             AgentEventType.MESSAGE_COMPLETED,
@@ -2977,6 +3064,8 @@ class _AgentRunGraph:
             {
                 "model_round": next_round,
                 "tool_count": len(response.tool_calls),
+                **({"model_purpose": "paper_sentence_selection"} if sentence_selection else {}),
+                **({"paper_sentence_selection_scheduled": True} if schedule_selector else {}),
                 "context_limit": usage.context_limit,
                 "estimated_input_before": usage.estimated_input_before,
                 "estimated_input_after": usage.estimated_input_after,
@@ -2993,8 +3082,11 @@ class _AgentRunGraph:
         return {
             "messages": messages,
             "model_round_count": next_round,
-            "model_response": response,
-            "final_output": response.content if not response.tool_calls else None,
+            "model_response": None if schedule_selector else response,
+            **({"paper_sentence_selection_pending": schedule_selector} if target else {}),
+            "final_output": response.content
+            if not response.tool_calls and not schedule_selector
+            else None,
             "usage_records": list(self.usage_records),
             **evidence_update,
         }
@@ -4344,6 +4436,10 @@ class _AgentRunGraph:
         return "finish" if state.get("failure_code") else "model"
 
     def after_model(self, state: AgentRunState) -> str:
+        if state.get("paper_sentence_selection_pending") and not (
+            state.get("failure_code") or state.get("run_status")
+        ):
+            return "model"
         return (
             "finish"
             if state.get("failure_code") or state.get("final_output") is not None

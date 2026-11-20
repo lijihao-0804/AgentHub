@@ -1165,7 +1165,10 @@ def _validate_retrieval_config(
         result.pop("evidence_projection", None)
     if result.get("paper_answer_policy") is None:
         result.pop("paper_answer_policy", None)
-    elif result["paper_answer_policy"] != "verified_quotes_v1" or projection != "compact_v1":
+    elif (
+        result["paper_answer_policy"] not in ("verified_quotes_v1", "sentence_ids_v1")
+        or projection != "compact_v1"
+    ):
         raise AgentHubError(
             "INVALID_AGENT_CONFIG", "The paper answer policy requires compact evidence.", 422
         )

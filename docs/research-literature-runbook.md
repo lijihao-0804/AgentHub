@@ -194,3 +194,32 @@ ends the run with `PAPER_QUOTE_SELECTION_INVALID`. Streamed runs also withhold
 unverified selections. Authentic sentences can still miss the question, omit a
 condition or leave part of a comparison unanswered. Grade those dimensions
 independently before choosing this policy for an agent.
+
+
+### Optional numbered-sentence delivery
+
+Request the research template with `?paper_answer_policy=sentence_ids_v1`,
+then use its retrieval configuration to create and publish a draft. The general
+research template leaves this option off. In a qualifying single-paper citation
+question, the normal model keeps its usual tools. It may search multiple times.
+When it proposes a final answer, the runtime withholds that draft and schedules
+one more model round. This round uses the same published model plan, step limit,
+cost guard and usage accounting. Look for `paper_sentence_selection_scheduled`
+on the draft's model step and `model_purpose=paper_sentence_selection` on the
+selection step. A run at its step limit cannot dispatch the selection round.
+
+The selector receives the question and all current-turn admitted compact
+knowledge-search passages in their observed order. It has no tools or provider
+JSON-schema requirement. Only passages matching the requested paper have
+selectable IDs. The other passages are present as reference-only text.
+The server maps selected IDs back to exact source spans and renders them with
+the original evidence handles. Both synchronous and streaming runs withhold the
+draft and raw selector output.
+
+`PAPER_SENTENCE_FORMAT_INVALID` reports malformed selections.
+`PAPER_SENTENCE_ID_OUT_OF_RANGE` reports IDs absent from the delivered list.
+`PAPER_SENTENCE_EVIDENCE_MISSING` reports missing eligible evidence or an
+explicit empty selection. `PAPER_SENTENCE_BUDGET_EXCEEDED` means the entire
+numbered view did not fit the retrieval pool or model input window. Each
+underlying search still observes its own byte cap. Assess directness,
+comparison conditions and coverage separately after a successful selection.
