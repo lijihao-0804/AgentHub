@@ -129,7 +129,18 @@ from packages.agent_runtime.runtime_projection import (
     _usage_record,
     _usage_step_metadata,
 )
+from packages.agent_runtime.status_bar import (
+    AgentStatusSnapshot,
+    attach_tail_status_bar,
+)
 from packages.agent_runtime.support_facts import support_observation, support_system_prompt
+from packages.agent_runtime.tool_offload import (
+    DEFAULT_OFFLOAD_THRESHOLD_BYTES,
+    READ_TOOL_ARTIFACT,
+    maybe_offload_tool_output,
+    read_offloaded_slice,
+    read_tool_artifact_definition,
+)
 from packages.agent_runtime.wiki_history_evidence import validate_wiki_history_evidence
 from packages.agent_runtime.work_layer import (
     HISTORY_SOURCE_MAX_TURNS,
@@ -1121,6 +1132,11 @@ class _AgentRunGraph(_RuntimeGraphSummaryMixin):
                 )
                 if dropped > 0:
                     turn_reminders.append(history_hint(turns_dropped_by_window=dropped))
+            if (
+                isinstance(spec.runtime.get("tool_output_offload"), Mapping)
+                and spec.runtime["tool_output_offload"].get("enabled") is True
+            ):
+                tool_definitions[READ_TOOL_ARTIFACT] = read_tool_artifact_definition()
             ordered_tool_definitions = tuple(
                 sorted(tool_definitions.values(), key=lambda definition: definition.identity)
             )
@@ -1533,8 +1549,24 @@ class _AgentRunGraph(_RuntimeGraphSummaryMixin):
             self.service.trace_sink, "agent.context_budget", trace_data
         )
         await _safe_end_span(budget_span, trace_data, status="ok", failure_code=None)
+        delivery_messages = delivery.messages
+        if state["runtime"].get("status_bar_enabled") is True:
+            identical_counts = state.get("identical_call_counts", {})
+            snapshot = AgentStatusSnapshot(
+                model_round=next_round,
+                max_steps=int(runtime.get("max_steps", 8)),
+                tool_call_count=int(state.get("tool_call_count", 0)),
+                max_tool_calls=int(runtime.get("max_tool_calls", 12)),
+                max_identical_calls=runtime.get("max_identical_calls"),
+                max_observed_identical_calls=(
+                    max(identical_counts.values()) if identical_counts else 0
+                ),
+                estimated_input_tokens=usage.estimated_input_after,
+                available_input_tokens=usage.context_limit,
+            )
+            delivery_messages = tuple(attach_tail_status_bar(delivery.messages, snapshot))
         request = ModelRequest(
-            messages=delivery.messages,
+            messages=delivery_messages,
             tools=delivery.tool_definitions,
             request_mode=(
                 AliyunDeepSeekRequestMode.SELECTOR_NON_THINKING
@@ -2196,6 +2228,16 @@ class _AgentRunGraph(_RuntimeGraphSummaryMixin):
                     )
                     if rewritten is not None:
                         normalized_arguments["query"] = rewritten
+                        rewrite_meta = {
+                            "field": "query",
+                            "strategy": definition.retrieval_config["query_rewrite"],
+                        }
+                    else:
+                        rewrite_meta = None
+                else:
+                    rewrite_meta = None
+            else:
+                rewrite_meta = None
             item = {
                 "name": name,
                 "arguments": normalized_arguments,
@@ -2210,6 +2252,7 @@ class _AgentRunGraph(_RuntimeGraphSummaryMixin):
                     "tool_call_id": stable_id,
                     "tool_identity": name,
                     "arguments_summary": argument_summary(normalized_arguments),
+                    **({"parameter_rewrite": rewrite_meta} if rewrite_meta is not None else {}),
                 },
             )
             if valid:
@@ -2823,6 +2866,18 @@ class _AgentRunGraph(_RuntimeGraphSummaryMixin):
                             call["arguments"],
                             workspace_id=UUID(self.context.workspace_id),
                         )
+                    elif call["name"] == READ_TOOL_ARTIFACT:
+                        slice_data = read_offloaded_slice(
+                            state.get("offloaded_tool_outputs", {}),
+                            call["arguments"],
+                        )
+                        if "error_code" in slice_data:
+                            result = ToolResult.failure(
+                                str(slice_data["error_code"]),
+                                str(slice_data.get("message", "Artifact read failed.")),
+                            )
+                        else:
+                            result = ToolResult.success(slice_data)
                     else:
                         result = await self._execute_published_read(state, call)
                 except AgentHubError as error:
@@ -3015,6 +3070,7 @@ class _AgentRunGraph(_RuntimeGraphSummaryMixin):
         observations: list[dict[str, Any]] = []
         rag_registry = dict(state.get("rag_evidence_registry", {}))
         rag_sequence = state.get("rag_evidence_sequence", 0)
+        offloaded_outputs = dict(state.get("offloaded_tool_outputs", {}))
         compact_updated = False
         terminal_code: str | None = None
         table_only = self._wants_warehouse_table(state)
@@ -3185,6 +3241,23 @@ class _AgentRunGraph(_RuntimeGraphSummaryMixin):
                 if rag_evidence_projected
                 else json.dumps(payload, sort_keys=True, separators=(",", ":"))
             )
+            offload_cfg = state["runtime"].get("tool_output_offload")
+            if (
+                not rag_evidence_projected
+                and isinstance(offload_cfg, Mapping)
+                and offload_cfg.get("enabled") is True
+            ):
+                offload_res = maybe_offload_tool_output(
+                    tool_name=call["name"],
+                    tool_call_id=call["tool_call_id"],
+                    serialized_content=payload_text,
+                    threshold_bytes=int(
+                        offload_cfg.get("threshold_bytes", DEFAULT_OFFLOAD_THRESHOLD_BYTES)
+                    ),
+                )
+                if offload_res.offloaded and offload_res.artifact_ref and offload_res.stored_entry:
+                    payload_text = offload_res.inline_content
+                    offloaded_outputs[offload_res.artifact_ref] = offload_res.stored_entry
             observations.append(
                 {"tool_call_id": call["tool_call_id"], "status": result.status.value}
             )
@@ -3232,6 +3305,11 @@ class _AgentRunGraph(_RuntimeGraphSummaryMixin):
                 else {}
             ),
             "tool_observations": observations,
+            **(
+                {"offloaded_tool_outputs": offloaded_outputs}
+                if offloaded_outputs
+                else {}
+            ),
             "pending_tool_calls": [],
             "proposed_tool_calls": [],
             "pre_observations": {},
