@@ -34,6 +34,10 @@ from packages.agent_runtime.context_budget import (
     ContextBudgetPolicy,
     ContextCategory,
 )
+from packages.agent_runtime.context_calibration import (
+    CalibratedTokenEstimator,
+    update_calibration_scale,
+)
 from packages.agent_runtime.events import AgentEvent, AgentEventEmitter, AgentEventType
 from packages.agent_runtime.evidence_registry import (
     RAG_EVIDENCE_TOOL_IDENTITIES,
@@ -1905,6 +1909,13 @@ class _AgentRunGraph(_RuntimeGraphSummaryMixin):
                 **context_policy_metadata,
             },
         )
+        next_calibration_scale = update_calibration_scale(
+            previous_scale=float(state.get("token_calibration_scale", 1.0)),
+            estimated_input_tokens=usage.estimated_input_after,
+            actual_input_tokens=(
+                response.usage.input_tokens if response.usage is not None else None
+            ),
+        )
         return {
             "messages": messages,
             "model_round_count": next_round,
@@ -1914,16 +1925,32 @@ class _AgentRunGraph(_RuntimeGraphSummaryMixin):
             if not response.tool_calls and not schedule_selector
             else None,
             "usage_records": list(self.usage_records),
+            **(
+                {"token_calibration_scale": next_calibration_scale}
+                if state["runtime"].get("token_calibration_enabled") is True
+                else {}
+            ),
             **evidence_update,
         }
 
-    def _admit_context(self, state: AgentRunState):
+    def _admit_context(
+        self,
+        state: AgentRunState,
+        *,
+        budget_override: ContextBudgetConfig | None = None,
+    ):
         memory_config = state["runtime"].get("memory", {})
-        budget = ContextBudgetConfig(
+        budget = budget_override or ContextBudgetConfig(
             **state["runtime"]["context_budget"],
             max_memory_tokens=memory_config.get("max_memory_tokens"),
         )
-        policy = ContextBudgetPolicy(state["spec"], budget)
+        scale = float(state.get("token_calibration_scale", 1.0))
+        estimator = (
+            CalibratedTokenEstimator(ApproxTokenEstimator(), scale=scale)
+            if scale != 1.0
+            else None
+        )
+        policy = ContextBudgetPolicy(state["spec"], budget, estimator=estimator)
         categorized = _categorize_messages(
             state["messages"],
             memory_message_count=int(state.get("memory_message_count", 0)),
@@ -1938,9 +1965,9 @@ class _AgentRunGraph(_RuntimeGraphSummaryMixin):
         ):
             memory_count = int(state.get("memory_message_count", 0))
             history_count = int(state.get("history_message_count", 0))
-            expected_memory = tuple(state["messages"][2 : 2 + memory_count])
-            expected_history = tuple(
-                state["messages"][2 + memory_count : 2 + memory_count + history_count]
+            expected_history = tuple(state["messages"][2 : 2 + history_count])
+            expected_memory = tuple(
+                state["messages"][2 + history_count : 2 + history_count + memory_count]
             )
             admitted_memory = tuple(
                 message
@@ -1949,7 +1976,7 @@ class _AgentRunGraph(_RuntimeGraphSummaryMixin):
                 )
                 if category is ContextCategory.MEMORY
             )
-            start = 2 + len(admitted_memory)
+            start = 2
             admitted_history = []
             for message, category in zip(
                 admission.messages[start:], admission.message_categories[start:], strict=True

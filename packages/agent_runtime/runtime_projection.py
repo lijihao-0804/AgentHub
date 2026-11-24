@@ -143,6 +143,8 @@ class AgentRunState(TypedDict, total=False):
     # provider as part of a compact evidence view.
     rag_evidence_registry: dict[str, dict[str, Any]]
     rag_evidence_sequence: int
+    token_calibration_scale: float
+    offloaded_tool_outputs: dict[str, dict[str, Any]]
 
 
 @dataclass(frozen=True, slots=True)
