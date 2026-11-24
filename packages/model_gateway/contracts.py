@@ -150,6 +150,13 @@ class ModelUsage:
             if self.cached_tokens > self.input_tokens:
                 raise ValueError("cached_tokens cannot exceed input_tokens")
 
+    @property
+    def cache_hit_rate(self) -> float | None:
+        """Fraction of input tokens served from provider prompt cache, if reported."""
+        if self.cached_tokens is None or self.input_tokens <= 0:
+            return None
+        return round(self.cached_tokens / self.input_tokens, 4)
+
 
 @dataclass(frozen=True, slots=True)
 class CostEstimate:
@@ -242,10 +249,13 @@ class ModelCapabilities:
         metadata={"serialization_type": ContextMetadata},
     )
     aliyun_deepseek_non_thinking: bool = False
+    explicit_prompt_cache: bool = False
 
     def __post_init__(self) -> None:
         if type(self.aliyun_deepseek_non_thinking) is not bool:
             raise ValueError("aliyun_deepseek_non_thinking must be a boolean")
+        if type(self.explicit_prompt_cache) is not bool:
+            raise ValueError("explicit_prompt_cache must be a boolean")
         if self.max_context_tokens is not None and (
             isinstance(self.max_context_tokens, bool)
             or not isinstance(self.max_context_tokens, int)

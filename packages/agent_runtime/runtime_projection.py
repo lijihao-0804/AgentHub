@@ -158,6 +158,7 @@ class AgentRunResult:
     total_output_tokens: int | None = None
     total_tokens: int | None = None
     total_cached_tokens: int | None = None
+    cache_hit_rate: float | None = None
     total_cost_amount: Decimal | None = None
     cost_currency: str | None = None
 
@@ -202,6 +203,19 @@ class AgentRunExecutionOverrides:
         )
 
 
+def _compute_cache_hit_rate(
+    total_cached_tokens: int | None,
+    total_input_tokens: int | None,
+) -> float | None:
+    if (
+        total_cached_tokens is None
+        or total_input_tokens is None
+        or total_input_tokens <= 0
+    ):
+        return None
+    return round(total_cached_tokens / total_input_tokens, 4)
+
+
 def _run_result(run: AgentRun) -> AgentRunResult:
     return AgentRunResult(
         run_id=run.id,
@@ -215,6 +229,9 @@ def _run_result(run: AgentRun) -> AgentRunResult:
         total_output_tokens=run.total_output_tokens,
         total_tokens=run.total_tokens,
         total_cached_tokens=run.total_cached_tokens,
+        cache_hit_rate=_compute_cache_hit_rate(
+            run.total_cached_tokens, run.total_input_tokens
+        ),
         total_cost_amount=run.total_cost_amount,
         cost_currency=run.cost_currency,
     )
@@ -758,22 +775,26 @@ def _aggregate_usage(records: list[dict[str, Any]]) -> dict[str, Any]:
         "total_output_tokens": None,
         "total_tokens": None,
         "total_cached_tokens": None,
+        "cache_hit_rate": None,
         "total_cost_amount": None,
         "cost_currency": None,
         "cost_is_estimate": None,
     }
     usage_values = [record.get("usage") for record in records]
     if records and all(isinstance(value, Mapping) for value in usage_values):
+        total_input = sum(value["input_tokens"] for value in usage_values)
         result.update(
             {
-                "total_input_tokens": sum(value["input_tokens"] for value in usage_values),
+                "total_input_tokens": total_input,
                 "total_output_tokens": sum(value["output_tokens"] for value in usage_values),
                 "total_tokens": sum(value["total_tokens"] for value in usage_values),
             }
         )
         cached = [value.get("cached_tokens") for value in usage_values]
         if all(item is not None for item in cached):
-            result["total_cached_tokens"] = sum(cached)
+            total_cached = sum(cached)
+            result["total_cached_tokens"] = total_cached
+            result["cache_hit_rate"] = _compute_cache_hit_rate(total_cached, total_input)
 
     costs = [record.get("cost") for record in records]
     if costs and all(isinstance(value, Mapping) for value in costs):

@@ -161,6 +161,66 @@ def _message_payload(message: ModelMessage) -> dict[str, Any]:
     return payload
 
 
+_EPHEMERAL_CACHE_CONTROL = {"type": "ephemeral"}
+
+
+def _explicit_prompt_cache_enabled(profile: ModelProfile) -> bool:
+    capabilities = profile.capabilities
+    if isinstance(capabilities, ModelCapabilities):
+        return capabilities.explicit_prompt_cache
+    if isinstance(capabilities, Mapping):
+        return capabilities.get("explicit_prompt_cache") is True
+    return False
+
+
+def _mark_message_cache_breakpoint(message: dict[str, Any]) -> bool:
+    content = message.get("content")
+    if isinstance(content, str) and content:
+        message["content"] = [
+            {
+                "type": "text",
+                "text": content,
+                "cache_control": dict(_EPHEMERAL_CACHE_CONTROL),
+            }
+        ]
+        return True
+    if isinstance(content, list) and content:
+        last_block = content[-1]
+        if isinstance(last_block, dict):
+            last_block["cache_control"] = dict(_EPHEMERAL_CACHE_CONTROL)
+            return True
+    return False
+
+
+def _apply_explicit_cache_breakpoints(
+    messages: list[dict[str, Any]],
+    tools: list[dict[str, Any]] | None,
+) -> None:
+    """Attach ephemeral cache_control breakpoints to the stable prefix and prior turn.
+
+    Follows Anthropic / LiteLLM / Qwen explicit prompt-caching conventions:
+    1. Last tool definition (caches the frozen tool schema prefix).
+    2. Last leading system message (caches the static system prompt prefix).
+    3. Penultimate non-system message when >= 2 conversation turns exist
+       (caches prior conversation history and tool observations up to the new turn).
+    """
+    if tools:
+        tools[-1]["cache_control"] = dict(_EPHEMERAL_CACHE_CONTROL)
+
+    last_leading_system_idx: int | None = None
+    for idx, msg in enumerate(messages):
+        if msg.get("role") == "system":
+            last_leading_system_idx = idx
+        else:
+            break
+    if last_leading_system_idx is not None:
+        _mark_message_cache_breakpoint(messages[last_leading_system_idx])
+
+    non_system_start = 0 if last_leading_system_idx is None else last_leading_system_idx + 1
+    if len(messages) - non_system_start >= 2:
+        _mark_message_cache_breakpoint(messages[-2])
+
+
 def _request_payload(
     profile: ModelProfile,
     credential: ProviderCredential,
@@ -200,6 +260,8 @@ def _request_payload(
             }
             for tool in request.tools
         ]
+    if _explicit_prompt_cache_enabled(profile):
+        _apply_explicit_cache_breakpoints(payload["messages"], payload.get("tools"))
     if request.response_schema is not None:
         schema = request.response_schema
         payload["response_format"] = {
@@ -267,6 +329,8 @@ def _normalize_usage(value: Any) -> ModelUsage | None:
         return None
     details = _value(value, "prompt_tokens_details")
     cached_tokens = _token_count(_value(details, "cached_tokens"))
+    if cached_tokens is None:
+        cached_tokens = _token_count(_value(value, "cache_read_input_tokens"))
     if cached_tokens is not None and cached_tokens > input_tokens:
         cached_tokens = None
     return ModelUsage(
