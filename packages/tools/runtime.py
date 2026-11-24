@@ -411,6 +411,7 @@ class ToolRuntime:
         effective_wiki_publications: tuple[Mapping[str, Any], ...] | None = None,
         selector_binding: SelectorBinding | None = None,
         approval_claim: tuple[UUID, UUID] | None = None,
+        seen_chunk_ids: frozenset[str] = frozenset(),
     ) -> ToolResult:
         if "tool_run" not in context.permissions:
             raise AgentHubError("FORBIDDEN", "You do not have permission.", 403)
@@ -507,6 +508,7 @@ class ToolRuntime:
                                 agent_version_id=version_uuid,
                                 tool_call_id=tool_call_id,
                                 selector_binding=selector_binding,
+                                seen_chunk_ids=seen_chunk_ids,
                             )
                             try:
                                 with execution_deadline(definition.timeout_seconds):

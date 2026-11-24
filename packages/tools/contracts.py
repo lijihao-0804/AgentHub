@@ -90,6 +90,7 @@ class ToolExecutionContext:
     agent_version_id: UUID
     tool_call_id: str
     selector_binding: SelectorBinding | None = None
+    seen_chunk_ids: frozenset[str] = frozenset()
 
     @property
     def workspace_id(self) -> str:

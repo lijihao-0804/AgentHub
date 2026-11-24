@@ -36,6 +36,36 @@ from packages.tools.errors import ToolHandlerError
 
 _MAX_QUERY_LENGTH = 4_000
 _MAX_RESULTS = 10
+_MAX_FILTER_LENGTH = 256
+_MAX_EXCLUDE_IDS = 200
+_ALL_SEEN_HINT = (
+    "All matching passages were already returned in earlier turns. "
+    "Rephrase your query with different terms or filters, or answer based on existing evidence."
+)
+
+
+def _optional_str_filter(arguments: Mapping[str, Any], key: str) -> str | None:
+    value = arguments.get(key)
+    if value is None:
+        return None
+    if not isinstance(value, str) or not value.strip() or len(value) > _MAX_FILTER_LENGTH:
+        raise ToolHandlerError("SEARCH_INVALID_ARGUMENT", f"The {key} filter is invalid.")
+    return value.strip()
+
+
+def _optional_exclude_ids(arguments: Mapping[str, Any]) -> frozenset[str]:
+    raw = arguments.get("exclude_chunk_ids")
+    if raw is None:
+        return frozenset()
+    if (
+        not isinstance(raw, list)
+        or len(raw) > _MAX_EXCLUDE_IDS
+        or any(not isinstance(item, str) or not item.strip() for item in raw)
+    ):
+        raise ToolHandlerError(
+            "SEARCH_INVALID_ARGUMENT", "The exclude_chunk_ids filter is invalid."
+        )
+    return frozenset(item.strip() for item in raw)
 
 
 def _optional_retrieval_limit(value: Any) -> int | None:
@@ -193,6 +223,9 @@ async def search_knowledge(
     limit = arguments.get("limit", 10)
     if isinstance(limit, bool) or not isinstance(limit, int) or not 1 <= limit <= _MAX_RESULTS:
         raise ToolHandlerError("SEARCH_INVALID_ARGUMENT", "The result limit is invalid.")
+    kb_filter = _optional_str_filter(arguments, "knowledge_base_id")
+    title_filter = _optional_str_filter(arguments, "document_title")
+    seen_chunk_ids = context.seen_chunk_ids | _optional_exclude_ids(arguments)
     mismatches = retrieval_model_identity_mismatches(definition.retrieval_config, retriever)
     if mismatches:
         raise ToolHandlerError(
@@ -216,6 +249,14 @@ async def search_knowledge(
         )
     async with session_factory() as session:
         queries = await _snapshot_queries(session, context, definition, text=text, limit=limit)
+    if kb_filter is not None:
+        queries = [q for q in queries if q.knowledge_base_id == kb_filter]
+        if not queries:
+            return {
+                "evidence_refs": [],
+                "results": [],
+                "filter_matched_snapshots": 0,
+            }
 
     evidence = []
     selection_status = []
@@ -231,6 +272,16 @@ async def search_knowledge(
                 raise ToolHandlerError("TOOL_EXECUTION_FAILED", "Missing selection receipt.")
             selection_status.append({"snapshot_id": query.knowledge_snapshot_id, **stage.metadata})
         for item in result.evidence:
+            if title_filter is not None:
+                meta = item.metadata if isinstance(item.metadata, Mapping) else {}
+                candidates_title = (
+                    item.source or "",
+                    str(meta.get("document_name") or ""),
+                    str(meta.get("document_title") or ""),
+                )
+                needle = title_filter.lower()
+                if not any(needle in candidate.lower() for candidate in candidates_title):
+                    continue
             reference = evidence_reference(
                 item,
                 snapshot_id=query.knowledge_snapshot_id,
@@ -249,6 +300,15 @@ async def search_knowledge(
             item[0].chunk_id,
         )
     )
+    already_seen_count = 0
+    if seen_chunk_ids:
+        unseen_evidence = []
+        for item, ref in evidence:
+            if item.chunk_id in seen_chunk_ids:
+                already_seen_count += 1
+            else:
+                unseen_evidence.append((item, ref))
+        evidence = unseen_evidence
     # Multi-snapshot unions can re-admit fixed-window neighbours whose overlap
     # a higher-ranked record already delivers; dropping them here frees result
     # slots for complementary passages. chunk_id hashes the revision id and
@@ -272,11 +332,17 @@ async def search_knowledge(
             ],
             [ref for _, ref in evidence],
         )
-    return {
+    payload: dict[str, Any] = {
         "evidence_refs": references[:limit],
         "results": records[:limit],
         **({"evidence_selection": selection_status} if complementary else {}),
     }
+    if already_seen_count > 0:
+        payload["already_seen_count"] = already_seen_count
+        if not payload["results"]:
+            payload["all_results_already_seen"] = True
+            payload["hint"] = _ALL_SEEN_HINT
+    return payload
 
 
 __all__ = ["search_knowledge"]

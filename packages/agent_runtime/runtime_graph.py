@@ -3965,6 +3965,25 @@ class _AgentRunGraph:
                 ),
                 state["spec"].model_plan,
             )
+        if (
+            call["name"] == "search_knowledge"
+            and definition is not None
+            and definition.source_kind is ToolSourceKind.BUILTIN
+            and definition.retrieval_config.get("cross_turn_dedup") is True
+        ):
+            seen_ids = frozenset(
+                str(cid)
+                for entry in state.get("rag_evidence_registry", {}).values()
+                if isinstance(entry, Mapping)
+                for cid in (
+                    (entry.get("reference") or {}).get("chunk_id")
+                    if isinstance(entry.get("reference"), Mapping)
+                    else None,
+                )
+                if isinstance(cid, str) and cid
+            )
+            if seen_ids:
+                selection["seen_chunk_ids"] = seen_ids
         if approval_claim is not None:
             selection["approval_claim"] = approval_claim
         return await self.service.tool_runtime.execute(
