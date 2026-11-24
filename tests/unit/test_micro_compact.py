@@ -71,3 +71,16 @@ def test_micro_compact_folds_only_stale_non_rag_tool_results_under_high_pressure
     # Most recent 2 tool results stay intact
     assert out[3].content == recent_sql_1
     assert out[4].content == recent_sql_2
+
+    # Cooldown prevents consecutive-turn KV-cache churn
+    out_cool, report_cool = micro_compact_tool_observations(
+        out,
+        estimated_input_tokens=9000,
+        available_input_tokens=10000,
+        current_round=5,
+        last_compacted_round=4,
+        min_rounds_between_compactions=2,
+    )
+    assert report_cool.triggered is False
+    assert report_cool.skipped_reason == "COOLDOWN_ACTIVE"
+    assert out_cool == out

@@ -13,12 +13,14 @@ Implements two complementary mechanisms from Chapter 2 & Chapter 4:
 
 from __future__ import annotations
 
+import math
 import re
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import Any
 from uuid import UUID
 
+from packages.knowledge.contracts import DenseEmbedder
 from packages.tools.contracts import (
     ToolApprovalPolicy,
     ToolDefinition,
@@ -109,11 +111,35 @@ class DeferredToolEntry:
     tags: tuple[str, ...] = ()
 
 
-class ToolDiscoveryRegistry:
-    """Two-stage server -> tool lexical discovery over deferred tool catalogs."""
+def _cosine_similarity(a: Sequence[float], b: Sequence[float]) -> float:
+    dot = sum(x * y for x, y in zip(a, b, strict=False))
+    na = math.sqrt(sum(x * x for x in a))
+    nb = math.sqrt(sum(y * y for y in b))
+    if na <= 0.0 or nb <= 0.0:
+        return 0.0
+    return max(0.0, dot / (na * nb))
 
-    def __init__(self, entries: Sequence[DeferredToolEntry]) -> None:
+
+class ToolDiscoveryRegistry:
+    """Two-stage server -> tool hybrid (dense + lexical) discovery over deferred tools."""
+
+    def __init__(
+        self,
+        entries: Sequence[DeferredToolEntry],
+        *,
+        embedder: DenseEmbedder | None = None,
+    ) -> None:
         self._entries = tuple(sorted(entries, key=lambda e: (e.server, e.name)))
+        self._embedder = embedder
+        self._entry_vectors: dict[tuple[str, str], tuple[float, ...]] = {}
+        if embedder is not None and self._entries:
+            texts = [
+                f"{e.server} {e.name}: {e.description} {' '.join(e.tags)}"
+                for e in self._entries
+            ]
+            vectors = embedder.embed_documents(texts)
+            for entry, vec in zip(self._entries, vectors, strict=True):
+                self._entry_vectors[(entry.server, entry.name)] = tuple(vec)
 
     def discover(
         self,
@@ -134,6 +160,7 @@ class ToolDiscoveryRegistry:
         server_filter = (
             server.strip().lower() if isinstance(server, str) and server.strip() else None
         )
+        query_vec = self._embedder.embed_query(query) if self._embedder is not None else None
 
         scored: list[tuple[float, DeferredToolEntry]] = []
         for entry in self._entries:
@@ -144,13 +171,19 @@ class ToolDiscoveryRegistry:
             desc_tokens = _tokenize(entry.description)
             tag_tokens = _tokenize(" ".join(entry.tags))
             all_tokens = name_tokens | server_tokens | desc_tokens | tag_tokens
-            if not all_tokens:
-                continue
-            overlap = len(q_tokens & all_tokens) / len(q_tokens)
-            # Boost exact server or tool name token hits (two-stage server -> tool bias)
-            name_boost = 0.25 if (q_tokens & name_tokens) else 0.0
-            server_boost = 0.20 if (q_tokens & server_tokens) else 0.0
-            score = round(overlap + name_boost + server_boost, 4)
+            lexical = 0.0
+            if all_tokens:
+                overlap = len(q_tokens & all_tokens) / len(q_tokens)
+                name_boost = 0.25 if (q_tokens & name_tokens) else 0.0
+                server_boost = 0.20 if (q_tokens & server_tokens) else 0.0
+                lexical = min(1.0, overlap + name_boost + server_boost)
+            if query_vec is not None and (entry.server, entry.name) in self._entry_vectors:
+                dense = _cosine_similarity(
+                    query_vec, self._entry_vectors[(entry.server, entry.name)]
+                )
+                score = round(0.65 * dense + 0.35 * lexical, 4)
+            else:
+                score = round(lexical, 4)
             if score >= min_score:
                 scored.append((score, entry))
 

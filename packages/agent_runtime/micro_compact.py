@@ -25,7 +25,8 @@ from packages.model_gateway.contracts import ModelMessage
 DEFAULT_KEEP_RECENT_TOOL_MESSAGES = 3
 DEFAULT_MIN_CHARS_TO_COMPACT = 800
 DEFAULT_PREVIEW_CHARS = 160
-DEFAULT_PRESSURE_TRIGGER_RATIO = 0.75
+DEFAULT_PRESSURE_TRIGGER_RATIO = 0.80
+DEFAULT_MIN_ROUNDS_BETWEEN_COMPACTIONS = 2
 
 
 @dataclass(frozen=True, slots=True)
@@ -33,6 +34,15 @@ class MicroCompactReport:
     compacted_count: int
     saved_chars: int
     triggered: bool
+    skipped_reason: str | None = None
+
+
+def _is_already_compacted(content: str) -> bool:
+    try:
+        parsed = json.loads(content)
+    except ValueError:
+        return False
+    return isinstance(parsed, dict) and parsed.get("micro_compacted") is True
 
 
 def _compact_tool_stub(message: ModelMessage, *, preview_chars: int) -> str:
@@ -73,8 +83,11 @@ def micro_compact_tool_observations(
     keep_recent_tool_messages: int = DEFAULT_KEEP_RECENT_TOOL_MESSAGES,
     min_chars_to_compact: int = DEFAULT_MIN_CHARS_TO_COMPACT,
     preview_chars: int = DEFAULT_PREVIEW_CHARS,
+    current_round: int | None = None,
+    last_compacted_round: int | None = None,
+    min_rounds_between_compactions: int = DEFAULT_MIN_ROUNDS_BETWEEN_COMPACTIONS,
 ) -> tuple[list[ModelMessage], MicroCompactReport]:
-    """Fold stale oversized non-RAG tool observations when context pressure is high."""
+    """Batch-fold stale oversized non-RAG tool observations with hysteresis & cooldown."""
     if (
         estimated_input_tokens is not None
         and available_input_tokens is not None
@@ -82,7 +95,22 @@ def micro_compact_tool_observations(
         and (estimated_input_tokens / available_input_tokens) < pressure_trigger_ratio
     ):
         return list(messages), MicroCompactReport(
-            compacted_count=0, saved_chars=0, triggered=False
+            compacted_count=0,
+            saved_chars=0,
+            triggered=False,
+            skipped_reason="BELOW_HIGH_WATER",
+        )
+
+    if (
+        current_round is not None
+        and last_compacted_round is not None
+        and (current_round - last_compacted_round) < min_rounds_between_compactions
+    ):
+        return list(messages), MicroCompactReport(
+            compacted_count=0,
+            saved_chars=0,
+            triggered=False,
+            skipped_reason="COOLDOWN_ACTIVE",
         )
 
     tool_indices = [
@@ -92,7 +120,10 @@ def micro_compact_tool_observations(
     ]
     if len(tool_indices) <= keep_recent_tool_messages:
         return list(messages), MicroCompactReport(
-            compacted_count=0, saved_chars=0, triggered=True
+            compacted_count=0,
+            saved_chars=0,
+            triggered=True,
+            skipped_reason="NOTHING_TO_COMPACT",
         )
 
     protected = set(
@@ -109,6 +140,7 @@ def micro_compact_tool_observations(
             and idx not in protected
             and isinstance(msg.content, str)
             and len(msg.content) >= min_chars_to_compact
+            and not _is_already_compacted(msg.content)
         ):
             stub = _compact_tool_stub(msg, preview_chars=preview_chars)
             if len(stub) < len(msg.content):
@@ -122,6 +154,7 @@ def micro_compact_tool_observations(
         compacted_count=compacted_count,
         saved_chars=saved_chars,
         triggered=True,
+        skipped_reason=None if compacted_count > 0 else "NOTHING_TO_COMPACT",
     )
 
 

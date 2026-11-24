@@ -137,3 +137,39 @@ async def test_subagent_manager_shares_budget_offloads_large_output_and_cascades
     await mgr.cancel_all()
     assert mgr.is_cancelled is True
     assert slow_handle.done()
+
+
+@pytest.mark.asyncio
+async def test_subagent_manager_enforces_max_total_spawns_and_concurrency() -> None:
+    catalog = {"search_knowledge": _tool_def("search_knowledge", ToolEffect.READ)}
+    tmpl = SubagentTemplate(
+        template_id="reader",
+        model_profile="flash",
+        system_prompt="read",
+        allowed_tools=("search_knowledge",),
+        max_cost_micro_usd=10_000,
+    )
+
+    async def slow_runner(template, task, cancel_ev):  # noqa: ANN001
+        await asyncio.sleep(0.05)
+        return "ok", 5_000
+
+    mgr = SubagentManager(
+        templates=[tmpl],
+        tool_catalog=catalog,
+        runner=slow_runner,
+        parent_budget_micro_usd=1_000_000,
+        max_total_spawns=2,
+        max_concurrent=1,
+    )
+    h1 = mgr.spawn(template_id="reader", task="t1")
+    with pytest.raises(ValueError, match="concurrent"):
+        mgr.spawn(template_id="reader", task="t2")
+    await h1
+
+    h2 = mgr.spawn(template_id="reader", task="t2")
+    await h2
+    assert mgr.total_spawns == 2
+
+    with pytest.raises(ValueError, match="total subagent spawns"):
+        mgr.spawn(template_id="reader", task="t3")

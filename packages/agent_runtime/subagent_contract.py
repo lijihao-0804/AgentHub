@@ -28,6 +28,8 @@ from packages.tools.contracts import ToolDefinition, ToolEffect
 
 MAX_SUBAGENT_DEPTH = 1
 MAX_SUBAGENT_STEPS = 6
+DEFAULT_MAX_TOTAL_SPAWNS = 8
+DEFAULT_MAX_CONCURRENT_SUBAGENTS = 3
 
 
 @dataclass(frozen=True, slots=True)
@@ -136,9 +138,13 @@ class SubagentManager:
         parent_budget_micro_usd: int,
         current_depth: int = 0,
         offload_threshold_bytes: int = DEFAULT_OFFLOAD_THRESHOLD_BYTES,
+        max_total_spawns: int = DEFAULT_MAX_TOTAL_SPAWNS,
+        max_concurrent: int = DEFAULT_MAX_CONCURRENT_SUBAGENTS,
     ) -> None:
         if current_depth < 0:
             raise ValueError("current_depth must be non-negative")
+        if max_total_spawns <= 0 or max_concurrent <= 0:
+            raise ValueError("max_total_spawns and max_concurrent must be positive")
         self._templates: dict[str, SubagentTemplate] = {}
         for tmpl in templates:
             tmpl.validate(tool_catalog)
@@ -147,8 +153,15 @@ class SubagentManager:
         self._remaining_budget = int(parent_budget_micro_usd)
         self._current_depth = current_depth
         self._offload_threshold_bytes = offload_threshold_bytes
+        self._max_total_spawns = max_total_spawns
+        self._max_concurrent = max_concurrent
+        self._total_spawns = 0
         self._cancel_event = asyncio.Event()
         self._active_tasks: dict[str, asyncio.Task[SubagentResult]] = {}
+
+    @property
+    def total_spawns(self) -> int:
+        return self._total_spawns
 
     @property
     def remaining_budget_micro_usd(self) -> int:
@@ -163,6 +176,10 @@ class SubagentManager:
             raise ValueError("Nested subagent recursion is not permitted")
         if self._cancel_event.is_set():
             raise RuntimeError("Parent run has already been cancelled")
+        if self._total_spawns >= self._max_total_spawns:
+            raise ValueError("Maximum total subagent spawns exceeded")
+        if len(self._active_tasks) >= self._max_concurrent:
+            raise ValueError("Maximum concurrent subagents exceeded")
         template = self._templates.get(template_id)
         if template is None:
             raise ValueError(f"Unknown subagent template '{template_id}'")
@@ -170,6 +187,7 @@ class SubagentManager:
             raise ValueError("Insufficient remaining parent budget for subagent")
 
         subagent_id = f"sub-{uuid4().hex[:10]}"
+        self._total_spawns += 1
         self._remaining_budget -= template.max_cost_micro_usd
 
         async def _run_child() -> SubagentResult:

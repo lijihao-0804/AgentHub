@@ -97,3 +97,43 @@ def test_tool_discovery_registry_hierarchical_matching_and_fallback() -> None:
 
     assert load_skill_definition().identity == LOAD_SKILL_TOOL
     assert discover_tools_definition().identity == DISCOVER_TOOLS_TOOL
+
+
+def test_tool_discovery_registry_hybrid_dense_synonym_matching() -> None:
+    class _FakeEmbedder:
+        @property
+        def dimension(self) -> int:
+            return 2
+
+        def embed_documents(self, texts):  # noqa: ANN001
+            out = []
+            for t in texts:
+                if "stock" in t or "quote" in t:
+                    out.append((1.0, 0.0))
+                else:
+                    out.append((0.0, 1.0))
+            return tuple(out)
+
+        def embed_query(self, text: str):
+            return (1.0, 0.0) if "股价" in text else (0.0, 1.0)
+
+    registry = ToolDiscoveryRegistry(
+        [
+            DeferredToolEntry(
+                name="yfinance_quote",
+                server="finance",
+                description="Fetch stock market quote price.",
+                parameters={"type": "object", "properties": {"symbol": {"type": "string"}}},
+            ),
+            DeferredToolEntry(
+                name="jira_create_issue",
+                server="jira",
+                description="Create an issue ticket.",
+                parameters={"type": "object", "properties": {}},
+            ),
+        ],
+        embedder=_FakeEmbedder(),
+    )
+    # Zero lexical overlap ("查苹果股价" vs English "yfinance_quote"), matched via dense embedding!
+    res = registry.discover(query="查苹果股价")
+    assert res["matched"][0]["name"] == "yfinance_quote"
