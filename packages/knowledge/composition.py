@@ -9,6 +9,8 @@ from threading import Lock
 from typing import Any
 
 from packages.core.config.settings import Settings
+from packages.knowledge.adapters.api_embeddings import OpenAICompatibleDenseEmbedder
+from packages.knowledge.adapters.api_reranker import OpenAICompatibleReranker
 from packages.knowledge.adapters.embeddings import BgeM3DenseEmbedder
 from packages.knowledge.adapters.qdrant import QdrantVectorIndex
 from packages.knowledge.adapters.reranker import BgeReranker
@@ -87,14 +89,39 @@ def retrieval_model_identity_mismatches(
 def production_retrieval_components(settings: Settings) -> RetrievalComponents:
     """Build and cache real process-local adapters; tests inject their own factory."""
 
+    embedding_provider = getattr(settings, "knowledge_embedding_provider", "local") or "local"
+    embedding_api_base_url = (
+        getattr(settings, "knowledge_embedding_api_base_url", None) or ""
+    ).strip()
+    embedding_api_key = (getattr(settings, "knowledge_embedding_api_key", None) or "").strip()
+    embedding_api_timeout = float(
+        getattr(settings, "knowledge_embedding_api_timeout_seconds", 30.0) or 30.0
+    )
+    reranker_provider = getattr(settings, "knowledge_reranker_provider", "local") or "local"
+    reranker_api_base_url = (
+        getattr(settings, "knowledge_reranker_api_base_url", None) or ""
+    ).strip()
+    reranker_api_key = (getattr(settings, "knowledge_reranker_api_key", None) or "").strip()
+    reranker_api_timeout = float(
+        getattr(settings, "knowledge_reranker_api_timeout_seconds", 30.0) or 30.0
+    )
+
     key = (
+        embedding_provider,
         settings.knowledge_embedding_model,
         settings.knowledge_embedding_device,
         settings.knowledge_embedding_batch_size,
         settings.knowledge_dense_vector_size,
+        embedding_api_base_url,
+        embedding_api_key,
+        embedding_api_timeout,
+        reranker_provider,
         settings.knowledge_reranker_model,
         settings.knowledge_reranker_device,
         settings.knowledge_reranker_batch_size,
+        reranker_api_base_url,
+        reranker_api_key,
+        reranker_api_timeout,
         settings.qdrant_url,
         settings.knowledge_qdrant_collection,
         settings.knowledge_qdrant_timeout_seconds,
@@ -103,19 +130,52 @@ def production_retrieval_components(settings: Settings) -> RetrievalComponents:
         cached = _components_cache.get(key)
         if cached is not None:
             return cached
-        components = RetrievalComponents(
-            dense=BgeM3DenseEmbedder(
+        dense: DenseEmbedder
+        if embedding_provider == "openai_compatible":
+            dense = OpenAICompatibleDenseEmbedder(
+                base_url=embedding_api_base_url,
+                api_key=embedding_api_key,
+                model_name=settings.knowledge_embedding_model,
+                expected_dimension=settings.knowledge_dense_vector_size,
+                batch_size=settings.knowledge_embedding_batch_size,
+                timeout_seconds=embedding_api_timeout,
+            )
+        elif embedding_provider == "local":
+            dense = BgeM3DenseEmbedder(
                 model_name=settings.knowledge_embedding_model,
                 device=settings.knowledge_embedding_device,
                 batch_size=settings.knowledge_embedding_batch_size,
                 expected_dimension=settings.knowledge_dense_vector_size,
-            ),
-            sparse=BgeM3SparseEncoder(model_name=settings.knowledge_embedding_model),
-            reranker=BgeReranker(
+            )
+        else:
+            raise ValueError(f"Unsupported knowledge_embedding_provider: {embedding_provider!r}")
+
+        reranker: Reranker
+        if reranker_provider == "openai_compatible":
+            reranker = OpenAICompatibleReranker(
+                base_url=reranker_api_base_url,
+                api_key=reranker_api_key,
+                model_name=settings.knowledge_reranker_model,
+                timeout_seconds=reranker_api_timeout,
+            )
+        elif reranker_provider == "local":
+            reranker = BgeReranker(
                 model_name=settings.knowledge_reranker_model,
                 device=settings.knowledge_reranker_device,
                 batch_size=settings.knowledge_reranker_batch_size,
-            ),
+            )
+        else:
+            raise ValueError(f"Unsupported knowledge_reranker_provider: {reranker_provider!r}")
+
+        sparse_model_name = (
+            settings.knowledge_embedding_model
+            if embedding_provider == "local"
+            else "BAAI/bge-m3"
+        )
+        components = RetrievalComponents(
+            dense=dense,
+            sparse=BgeM3SparseEncoder(model_name=sparse_model_name),
+            reranker=reranker,
             index=QdrantVectorIndex(
                 url=settings.qdrant_url,
                 collection_name=settings.knowledge_qdrant_collection,

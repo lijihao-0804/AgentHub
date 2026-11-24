@@ -45,12 +45,20 @@ class Settings(BaseSettings):
     model_provider_private_cidrs: tuple[str, ...] = ()
     knowledge_qdrant_collection: str = "agenthub_knowledge"
     knowledge_dense_vector_size: int = Field(default=1024, ge=1, le=4096)
+    knowledge_embedding_provider: str = "local"
     knowledge_embedding_model: str = "BAAI/bge-m3"
     knowledge_embedding_device: str = "auto"
+    knowledge_embedding_api_base_url: str | None = None
+    knowledge_embedding_api_key: str | None = None
+    knowledge_embedding_api_timeout_seconds: float = Field(default=30.0, gt=0, le=300)
     knowledge_vector_cache_enabled: bool = True
     knowledge_embedding_batch_size: int = Field(default=8, ge=1, le=128)
+    knowledge_reranker_provider: str = "local"
     knowledge_reranker_model: str = "BAAI/bge-reranker-v2-m3"
     knowledge_reranker_device: str = "auto"
+    knowledge_reranker_api_base_url: str | None = None
+    knowledge_reranker_api_key: str | None = None
+    knowledge_reranker_api_timeout_seconds: float = Field(default=30.0, gt=0, le=300)
     knowledge_reranker_batch_size: int = Field(default=8, ge=1, le=64)
     knowledge_qdrant_timeout_seconds: float = Field(default=10, gt=0, le=120)
     knowledge_rrf_k: int = Field(default=60, ge=1, le=10_000)
