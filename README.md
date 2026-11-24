@@ -40,14 +40,20 @@ AgentHub 关注这些执行环节：
 | Agent 与版本 | Draft 配置与不可变 AgentVersion；发布冻结 Prompt、模型行为、工具修订及运行策略，使用版本化规范 JSON 标识规格 |
 | 工具治理 | Built-in、REST、MCP 工具接入；区分 effect 与 risk，结合审批策略控制调用；出站目标执行 SSRF 校验 |
 | 审批与持久恢复 | 审批决定和动作执行分别保存；checkpoint 暂停/恢复；稳定逻辑动作身份；未知副作用转人工关注 |
-| Knowledge / RAG | 文档异步入库、历史修订与知识快照、稠密/稀疏混合检索、重排和引用证据 |
-| Wiki 与上下文 | 带原文来源的派生 Wiki、编译/审阅/发布与版本绑定；ContextBudgetPolicy 对进入模型的上下文做最终准入 |
+| Knowledge / RAG | 文档异步入库、历史修订与知识快照、稠密/稀疏混合检索、重排、可选 API Embedder/Reranker 适配器，以及封装为受治理 `search_knowledge` 工具的 Agentic RAG（支持多轮补查、跨轮去重与定向过滤） |
+| Wiki 与上下文 | 带原文来源的派生 Wiki、编译/审阅/发布与版本绑定；ContextBudgetPolicy 最终准入与 KV-Cache 稳定前缀布局（静态前缀 + 尾部动态提醒 + 可选显式缓存断点与命中率统计） |
 | Memory | 默认关闭的长期 Memory、来源记录、异步抽取与恢复、有效快照回放；语义质量与治理限制单独披露 |
 | 运行观测与接管 | Run 步骤、持久生命周期事件、脱敏 Trace、用量与失败分类，以及反馈和人工接管入口 |
 | Evaluation | 版本化数据集、实验变体、重复试验、配对比较、消融分析与发布门禁；Web 展示摘要、筛选分页和安全逐题证据 |
 
 正式实验绑定已发布 DatasetVersion、解析后的 AgentVersion、有效知识快照、定价快照、
 构建提交与评测器版本。历史结果读取不重新解析当前的 LATEST 配置。
+
+### 近期工程优化与实测结论
+
+- **KV-Cache 友好上下文与命中率观测**：将冻结的 System Prompt、工具定义与历史记录保持在前缀稳定区，把轮次级动态上下文（如当前数据表状态）以尾部 reminder 注入，并支持按 Profile 开关下发显式 `cache_control: {"type": "ephemeral"}` 断点与 `cache_hit_rate` 汇总统计。在阿里云 `deepseek-v4.1-flash-1017` 三轮实测中，稳定前缀热轮次缓存命中率达 **59.3%–60.9%**（第 2 轮耗时下降 45.6%），而改写系统前缀对照组命中率为 **0%**。
+- **RAG 模型与策略配对评测**：在保留本地 `BGE-M3 + BGE-reranker-v2-m3` 默认栈的基础上，新增可选的 OpenAI/百炼兼容 `OpenAICompatibleDenseEmbedder` 与 `OpenAICompatibleReranker` 适配器。完整 SciFact / QASPER / MuSiQue 对比数据与按场景选型建议见 [2026-11-24 基准报告](docs/reviews/rag-qwen37-api-benchmark-20261124.md) 与 [RAG 进度入口](docs/reviews/AGENTHUB_RAG_PROGRESS.md)。
+- **文档与审查索引归档**：核心验收与最新基准保留在 [`docs/reviews/`](docs/reviews/README.md) 顶层，早期阶段性过程稿统一归档至 `docs/reviews/archive/`。
 
 ## 一次受治理的运行
 
