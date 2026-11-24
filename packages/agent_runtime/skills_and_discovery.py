@@ -219,8 +219,10 @@ def load_skill_definition() -> ToolDefinition:
         revision_id=_LOAD_SKILL_REV_ID,
         spec_hash="builtin:load_skill:v1",
         description=(
-            "Load full instructions (layer 2) or a named reference (layer 3) "
-            "for a skill listed in <available_skills>."
+            "Load full instructions (layer 2) or a named reference (layer 3) for a skill listed "
+            "in <available_skills>. Skip if the task does not match a skill's trigger conditions. "
+            "Examples: {\"name\": \"refund_policy\"} or "
+            "{\"name\": \"refund_policy\", \"reference\": \"special_fares.md\"}."
         ),
         input_schema={
             "type": "object",
@@ -245,8 +247,11 @@ def discover_tools_definition() -> ToolDefinition:
         revision_id=_DISCOVER_TOOLS_REV_ID,
         spec_hash="builtin:discover_tools:v1",
         description=(
-            "Search deferred workspace/MCP tools by capability description and "
-            "optional server name. Matched schemas are appended to the trajectory."
+            "Search deferred workspace/MCP tools by capability description and optional server "
+            "name. Use when no currently loaded tool covers the needed operation; do NOT call for "
+            "already-loaded builtin tools. Matched schemas are appended to the trajectory. "
+            "Example: {\"query\": \"list open github pull requests\", \"server\": \"github\", "
+            "\"limit\": 3}."
         ),
         input_schema={
             "type": "object",

@@ -51,7 +51,10 @@ def read_tool_artifact_definition() -> ToolDefinition:
         spec_hash="builtin:read_tool_artifact:v1",
         description=(
             "Read a character slice from an offloaded large tool output by artifact_ref. "
-            "Use offset and limit to paginate through the full output without overloading context."
+            "Use ONLY when a prior tool result returned offloaded=true with an artifact_ref; "
+            "do NOT use for knowledge base search (use search_knowledge) or conversation history "
+            "(use thread_history_search). Example: {\"artifact_ref\": \"offload-call-1\", "
+            "\"offset\": 0, \"limit\": 2000}."
         ),
         input_schema={
             "type": "object",
