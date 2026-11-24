@@ -420,7 +420,9 @@ def _categorize_messages(
     removes a question together with its answer, instead of evicting the question
     and leaving the model an answer to nothing.
 
-    ``memory_message_count`` sits between the two: injected long-term memory is
+    ``memory_message_count`` sits immediately after replayed history (before
+    the current user task) so per-turn dynamic memory retrieval never mutates
+    the ``[system, *history]`` KV-cache prefix. Injected long-term memory is
     written with the ``system`` role so the provider reads it as context rather
     than as something the user said, but it must not be categorized as
     SYSTEM_PROMPT, because SYSTEM_PROMPT is mandatory and memory is evidence.
@@ -430,10 +432,10 @@ def _categorize_messages(
 
     categorized: list[ContextMessage] = []
     tool_groups: dict[str, tuple[str, int]] = {}
-    memory_start = _SYSTEM_PREFIX_LENGTH
-    memory_end = memory_start + max(memory_message_count, 0)
-    history_start = memory_end
+    history_start = _SYSTEM_PREFIX_LENGTH
     history_end = history_start + max(history_message_count, 0)
+    memory_start = history_end
+    memory_end = memory_start + max(memory_message_count, 0)
     if history_exchange_ids is not None and len(history_exchange_ids) != history_message_count:
         raise ValueError("history exchange identities do not match the frozen messages")
     for index, message in enumerate(messages):

@@ -214,11 +214,11 @@ def _messages(*, memory: int, history_turns: int) -> list[ModelMessage]:
         ModelMessage(role="system", content="runtime policy"),
         ModelMessage(role="system", content="agent prompt"),
     ]
-    if memory:
-        built.append(_memory_message(_selected(memory)))
     for index in range(history_turns):
         built.append(ModelMessage(role="user", content=f"old question {index}"))
         built.append(ModelMessage(role="assistant", content=f"old answer {index}"))
+    if memory:
+        built.append(_memory_message(_selected(memory)))
     built.append(ModelMessage(role="user", content="the question being asked now"))
     return built
 

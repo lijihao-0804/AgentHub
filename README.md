@@ -51,7 +51,7 @@ AgentHub 关注这些执行环节：
 
 ### 近期工程优化与实测结论
 
-- **KV-Cache 友好上下文与命中率观测**：将冻结的 System Prompt、工具定义与历史记录保持在前缀稳定区，把轮次级动态上下文（如当前数据表状态）以尾部 reminder 注入，并支持按 Profile 开关下发显式 `cache_control: {"type": "ephemeral"}` 断点与 `cache_hit_rate` 汇总统计。在阿里云 `deepseek-v4.1-flash-1017` 三轮实测中，稳定前缀热轮次缓存命中率达 **59.3%–60.9%**（第 2 轮耗时下降 45.6%），而改写系统前缀对照组命中率为 **0%**。
+- **KV-Cache 友好上下文与命中率观测**：将冻结的 System Prompt、规范排序的工具定义（递归排序参数 JSON key）与 append-only 历史记录保持在前缀稳定区，把轮次级动态上下文（动态召回的 Memory、当前数据表状态）后置到历史之后/当前问题尾部，并支持按 Profile 开关下发显式 `cache_control: {"type": "ephemeral"}` 断点与 `cache_hit_rate` 汇总统计。在阿里云 `deepseek-v4.1-flash-1017` 6 轮多工具 RAG 长上下文实测（第 6 轮 ~7.6k tokens）中：动态 Memory 后置组单轮最高命中 **82.0%**（第 6 轮 **80.3%**，`6,144 / 7,653`），Memory 前置对照组第 6 轮仅 **40.1%**（`3,072 / 7,657`，历史段全部失效），改写系统前缀对照组为 **0%**。
 - **RAG 模型与策略配对评测**：在保留本地 `BGE-M3 + BGE-reranker-v2-m3` 默认栈的基础上，新增可选的 OpenAI/百炼兼容 `OpenAICompatibleDenseEmbedder` 与 `OpenAICompatibleReranker` 适配器。完整 SciFact / QASPER / MuSiQue 对比数据与按场景选型建议见 [2026-11-24 基准报告](docs/reviews/rag-qwen37-api-benchmark-20261124.md) 与 [RAG 进度入口](docs/reviews/AGENTHUB_RAG_PROGRESS.md)。
 - **文档与审查索引归档**：核心验收与最新基准保留在 [`docs/reviews/`](docs/reviews/README.md) 顶层，早期阶段性过程稿统一归档至 `docs/reviews/archive/`。
 

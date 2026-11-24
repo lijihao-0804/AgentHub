@@ -8,7 +8,12 @@ from uuid import uuid4
 
 import pytest
 
-from packages.agent_runtime.runtime_projection import _aggregate_usage, _run_result
+from packages.agent_runtime.context_budget import ContextCategory
+from packages.agent_runtime.runtime_projection import (
+    _aggregate_usage,
+    _categorize_messages,
+    _run_result,
+)
 from packages.model_gateway.adapters.litellm.adapter import (
     _normalize_usage,
     _request_payload,
@@ -172,3 +177,69 @@ def test_aggregate_usage_and_run_result_compute_cache_hit_rate() -> None:
     )
     res = _run_result(fake_run)
     assert res.cache_hit_rate == pytest.approx(round(1000 / 2200, 4))
+
+
+def test_tool_parameters_are_canonicalized_recursively_for_kv_stability() -> None:
+    import json
+
+    req_a = ModelRequest(
+        messages=(ModelMessage(role="user", content="hi"),),
+        tools=(
+            ModelToolDefinition(
+                name="search_knowledge",
+                description="Search KB",
+                parameters={
+                    "required": ["query"],
+                    "properties": {
+                        "limit": {"maximum": 10, "type": "integer"},
+                        "query": {"description": "q", "type": "string"},
+                    },
+                    "type": "object",
+                },
+            ),
+        ),
+    )
+    req_b = ModelRequest(
+        messages=(ModelMessage(role="user", content="hi"),),
+        tools=(
+            ModelToolDefinition(
+                name="search_knowledge",
+                description="Search KB",
+                parameters={
+                    "type": "object",
+                    "properties": {
+                        "query": {"type": "string", "description": "q"},
+                        "limit": {"type": "integer", "maximum": 10},
+                    },
+                    "required": ["query"],
+                },
+            ),
+        ),
+    )
+    payload_a = _request_payload(_fake_profile(), _fake_credential(), req_a)
+    payload_b = _request_payload(_fake_profile(), _fake_credential(), req_b)
+    assert json.dumps(payload_a["tools"]) == json.dumps(payload_b["tools"])
+
+
+def test_categorize_messages_places_memory_after_history_for_kv_prefix_stability() -> None:
+    msgs = [
+        ModelMessage(role="system", content="runtime policy"),
+        ModelMessage(role="system", content="agent prompt"),
+        ModelMessage(role="user", content="turn 1 q"),
+        ModelMessage(role="assistant", content="turn 1 a"),
+        ModelMessage(role="system", content="<memory>recalled fact</memory>"),
+        ModelMessage(role="user", content="turn 2 q"),
+    ]
+    categorized = _categorize_messages(
+        msgs,
+        memory_message_count=1,
+        history_message_count=2,
+    )
+    assert [item.category for item in categorized] == [
+        ContextCategory.RUNTIME_POLICY,
+        ContextCategory.SYSTEM_PROMPT,
+        ContextCategory.CONVERSATION,
+        ContextCategory.CONVERSATION,
+        ContextCategory.MEMORY,
+        ContextCategory.CURRENT_USER_TASK,
+    ]

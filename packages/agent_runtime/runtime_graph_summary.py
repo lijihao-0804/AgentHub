@@ -353,8 +353,10 @@ class _RuntimeGraphSummaryMixin:
             raise AgentHubError("FORBIDDEN", "The Run permissions changed.", 403)
 
     async def _replan_summary_history(self, state: AgentRunState, history: ThreadConversation):
+        history_count = int(state.get("history_message_count", 0))
         memory_count = int(state.get("memory_message_count", 0))
-        memory_messages = state["messages"][2 : 2 + memory_count]
+        memory_start = 2 + history_count
+        memory_messages = state["messages"][memory_start : memory_start + memory_count]
         mandatory = (
             state["messages"][0],
             state["messages"][1],
@@ -1186,13 +1188,17 @@ class _RuntimeGraphSummaryMixin:
                 "The last two complete historical turns were not retained.",
                 422,
             )
+        old_history_count = int(state.get("history_message_count", 0))
         memory_count = int(state.get("memory_message_count", 0))
         original_messages = state["messages"]
-        prefix_messages = original_messages[: 2 + memory_count]
+        system_prefix = original_messages[:2]
+        memory_start = 2 + old_history_count
+        memory_messages = original_messages[memory_start : memory_start + memory_count]
         messages = [
-            *prefix_messages,
+            *system_prefix,
             summary_message,
             *raw_messages,
+            *memory_messages,
             ModelMessage("user", self.run.input_text),
         ]
         updated_exchange_ids = [summary_exchange_id, *exchange_ids]
@@ -1321,8 +1327,7 @@ class _RuntimeGraphSummaryMixin:
             permission_hash=permission_hash,
             model_spec=model_spec,
         )
-        memory_count = int(state.get("memory_message_count", 0))
-        history_start = 2 + memory_count
+        history_start = 2
         history_count = int(state.get("history_message_count", 0))
         if tuple(state.get("history_exchange_ids", ())) != tuple(
             expected.get("history_exchange_ids", ())

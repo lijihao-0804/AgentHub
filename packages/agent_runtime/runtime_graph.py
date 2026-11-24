@@ -1230,15 +1230,15 @@ class _AgentRunGraph(_RuntimeGraphSummaryMixin):
                     "group_count": plan.input_group_count,
                     "reasons": [reason.value for reason in plan.reasons],
                 }
-            # The two system messages stay first and the current task stays
-            # last. That ordering is not cosmetic: the budget categorizer reads
-            # position, and history placed anywhere else would either become
-            # unevictable or displace the question being asked.
+            # Keep invariant system messages and append-only history at the
+            # prefix, and place per-turn dynamic memory immediately before the
+            # current user task so changing recalled memories does not
+            # invalidate provider KV-cache across the conversation history.
             messages = [
                 ModelMessage(role="system", content=runtime_policy),
                 ModelMessage(role="system", content=system_prompt),
-                *memory_messages,
                 *history,
+                *memory_messages,
                 ModelMessage(role="user", content=user_task_content),
             ]
             step_metadata: dict[str, Any] = {

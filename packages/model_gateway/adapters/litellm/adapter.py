@@ -125,6 +125,17 @@ def _aliyun_deepseek_request_options(
     return {"extra_body": {"enable_thinking": False}}
 
 
+def _canonicalize_json(value: Any) -> Any:
+    """Recursively sort mapping keys for deterministic tool schema serialization."""
+    if isinstance(value, Mapping):
+        return {key: _canonicalize_json(value[key]) for key in sorted(value, key=str)}
+    if isinstance(value, list):
+        return [_canonicalize_json(item) for item in value]
+    if isinstance(value, tuple):
+        return [_canonicalize_json(item) for item in value]
+    return value
+
+
 def _tool_arguments_payload(arguments: Mapping[str, Any]) -> str:
     try:
         return json.dumps(arguments, separators=(",", ":"), sort_keys=True)
@@ -255,7 +266,7 @@ def _request_payload(
                 "function": {
                     "name": tool.name,
                     "description": tool.description,
-                    "parameters": dict(tool.parameters),
+                    "parameters": _canonicalize_json(tool.parameters),
                 },
             }
             for tool in request.tools
