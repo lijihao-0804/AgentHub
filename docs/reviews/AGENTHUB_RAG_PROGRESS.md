@@ -1,5 +1,7 @@
 # AgentHub RAG 进度与成果入口
 
+2026-11-24，基于 `43e3093` 新增可选的 OpenAI/百炼兼容 `OpenAICompatibleDenseEmbedder` 与 `OpenAICompatibleReranker` 适配器（保持本地 BGE 默认不变，14 项单测与 ruff 通过），并完成 SciFact、QASPER 与 MuSiQue 三基准系统对照。SciFact Test 300 上 `qwen3.7-text-embedding` + `qwen3-rerank` 将 TOP20 召回由 87.51% 升至 93.60%（纯 Dense nDCG@10 达 0.7903），553 题确认集 TOP20 由 86.46% 升至 92.04%（`flash` 版降至 85.01% 不建议替换）。QASPER 72 题向量对照中 `structural_v1` 搭配 `qwen3.7` + `qwen3-rerank` 将跨 32 篇 TOP5 完整证据由 22.2% 升至 41.7%（本地 BGE 下也由 22.2% 升至 30.6%）。MuSiQue 200 题生产 `consumer_replay` 链路中，`qwen3-rerank` + `complementary_v1`（关思考 198/200 生效）将模型可见证据召回由 78.2% 升至 91.4%、完整证据集合率由 55.0% 升至 78.0%（纯 Dense 降至 74.0%）。[三基准数据、负结果与适配器说明](rag-qwen37-api-benchmark-20261124.md)
+
 2026-11-20，实测关闭选句推理与保留空截断回执。固定历史证据的三题全部恢复交付，p6 完整通过，p4 漏选规则，p7 原输入缺 R@3。真实入口每臂 17 题都交付，新题均 8/8 严格通过，旧题均 7/9 严格通过。候选完整答案少一题，PR #27 未过门槛。98 笔供应商回执全部确认，费率估算 0.52546000 元。[Agent 首答、用量及逐题结果](pr27-selector-repair-20261120.md)
 
 2026-11-20，在 `c721243` 上测试论文选句回填 `15095e3`。固定历史证据恢复 3/4。真实入口新题严格通过从 7/8 到 8/8，历史回归从 6/8 到 5/8。p4、p6、p7 的选句轮均触及 2,048 token 上限，无可见正文。100 次调用全部有回执，费率估算 0.65600064 元。PR #27 未过合并门槛。[逐题证据和费用](pr27-sentence-delivery-20261120.md)
