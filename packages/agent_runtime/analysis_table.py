@@ -472,10 +472,18 @@ def table_only_turn(question: str, policy: str | None) -> bool:
     return has_table and (exclusive or forbids_prose)
 
 
-def analysis_system_prompt(prompt: str, runtime: dict, question: str) -> str:
+def analysis_turn_instruction(runtime: dict, question: str) -> str | None:
+    """Return the per-turn table-only rule without mutating the static system prompt."""
     policy = runtime.get("analysis_answer_policy")
     if policy == "grounded_table_v2" and table_only_turn(question, policy):
-        return prompt + "\n\n" + _SELECTION_RULES
+        return _SELECTION_RULES
+    return None
+
+
+def analysis_system_prompt(prompt: str, runtime: dict, question: str) -> str:
+    instruction = analysis_turn_instruction(runtime, question)
+    if instruction is not None:
+        return prompt + "\n\n" + instruction
     return prompt
 
 

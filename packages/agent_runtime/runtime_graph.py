@@ -23,7 +23,7 @@ from packages.agent_runtime.adapters.langgraph import (
     compile_agent_graph,
 )
 from packages.agent_runtime.analysis_table import (
-    analysis_system_prompt,
+    analysis_turn_instruction,
     grounded_answer,
     table_evidence,
     table_only_turn,
@@ -54,6 +54,7 @@ from packages.agent_runtime.history_checkpoint import (
 from packages.agent_runtime.history_evidence import validate_history_evidence
 from packages.agent_runtime.history_planner import PlanPressure
 from packages.agent_runtime.history_runtime import _namespace_tool_ids, plan_history_view
+from packages.agent_runtime.kv_prefix import append_turn_reminders
 from packages.agent_runtime.local_summary_experiment import LocalSummaryExperimentPermit
 from packages.agent_runtime.memory_tools import (
     MAX_SEARCH_RESULTS,
@@ -1105,22 +1106,30 @@ class _AgentRunGraph:
                     },
                 )
             runtime_policy = _RUNTIME_POLICY
+            turn_reminders: list[str] = []
             if self._thread_history_search_enabled(spec):
                 tool_definitions[THREAD_HISTORY_SEARCH] = thread_history_search_definition()
                 dropped = 0
                 if history_metadata is not None:
                     dropped = int(history_metadata.get("turns_dropped_by_window", 0))
-                # Appended to the policy message rather than added as a third
-                # system message: the budget categorizer reads position, and
-                # ``_SYSTEM_PREFIX_LENGTH`` is what tells it where replayed
-                # history starts.
+                # Keep messages[0] KV-cache-invariant across turns: put only the
+                # static tool hint in the prefix, and move the changing dropped-turn
+                # count to the tail user message reminder.
                 runtime_policy = "\n\n".join(
-                    (_RUNTIME_POLICY, history_hint(turns_dropped_by_window=dropped))
+                    (_RUNTIME_POLICY, history_hint(turns_dropped_by_window=0))
                 )
-            system_prompt = support_system_prompt(
-                spec.system_prompt, spec.runtime, tool_definitions.values()
+                if dropped > 0:
+                    turn_reminders.append(history_hint(turns_dropped_by_window=dropped))
+            ordered_tool_definitions = tuple(
+                sorted(tool_definitions.values(), key=lambda definition: definition.identity)
             )
-            system_prompt = analysis_system_prompt(system_prompt, spec.runtime, self.run.input_text)
+            system_prompt = support_system_prompt(
+                spec.system_prompt, spec.runtime, ordered_tool_definitions
+            )
+            analysis_rule = analysis_turn_instruction(spec.runtime, self.run.input_text)
+            if analysis_rule is not None:
+                turn_reminders.append(analysis_rule)
+            user_task_content = append_turn_reminders(self.run.input_text, turn_reminders)
             history_plan_metadata = None
             history_checkpoint_binding_value = None
             history_exchange_ids = None
@@ -1144,7 +1153,7 @@ class _AgentRunGraph:
                     mandatory_messages=(
                         ModelMessage(role="system", content=runtime_policy),
                         ModelMessage(role="system", content=system_prompt),
-                        ModelMessage(role="user", content=self.run.input_text),
+                        ModelMessage(role="user", content=user_task_content),
                     ),
                     memory_messages=memory_messages,
                     tools=self._model_tool_definitions(tool_definitions),
@@ -1233,7 +1242,7 @@ class _AgentRunGraph:
                 ModelMessage(role="system", content=system_prompt),
                 *memory_messages,
                 *history,
-                ModelMessage(role="user", content=self.run.input_text),
+                ModelMessage(role="user", content=user_task_content),
             ]
             step_metadata: dict[str, Any] = {
                 "tool_count": len(tool_definitions),
@@ -1737,6 +1746,12 @@ class _AgentRunGraph:
             workspace_id=binding.workspace_id,
             agent_version_id=version.id,
         )
+        ordered_definitions = tuple(sorted(definitions, key=lambda definition: definition.identity))
+        summary_reminders = [
+            rule
+            for rule in (analysis_turn_instruction(frozen_spec.runtime, persisted.input_text),)
+            if rule is not None
+        ]
         planned = plan_history_view(
             policy=ContextBudgetPolicy(frozen_spec),
             conversation=conversation,
@@ -1744,15 +1759,13 @@ class _AgentRunGraph:
                 ModelMessage("system", _RUNTIME_POLICY),
                 ModelMessage(
                     "system",
-                    analysis_system_prompt(
-                        support_system_prompt(
-                            frozen_spec.system_prompt, frozen_spec.runtime, definitions
-                        ),
-                        frozen_spec.runtime,
-                        persisted.input_text,
+                    support_system_prompt(
+                        frozen_spec.system_prompt, frozen_spec.runtime, ordered_definitions
                     ),
                 ),
-                ModelMessage("user", persisted.input_text),
+                ModelMessage(
+                    "user", append_turn_reminders(persisted.input_text, summary_reminders)
+                ),
             ),
             memory_messages=(),
             tools=self._model_tool_definitions(
@@ -3221,7 +3234,7 @@ class _AgentRunGraph:
                 description=_tool_description(definition),
                 parameters=definition.input_schema,
             )
-            for definition in definitions.values()
+            for definition in sorted(definitions.values(), key=lambda item: item.identity)
         )
 
     async def _touch_admitted_memories(
