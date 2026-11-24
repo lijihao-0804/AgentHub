@@ -35,6 +35,7 @@ from packages.tools.contracts import (
     ToolRisk,
     ToolSourceKind,
 )
+from packages.tools.error_hints import format_validation_hint
 from packages.tools.errors import ToolHandlerError
 from packages.tools.policy import ToolPolicy, ToolPolicyDecision
 from packages.tools.projections import evidence_refs
@@ -477,10 +478,11 @@ class ToolRuntime:
                                     )
                                 )
                             ) is not None
-                    except (ValidationError, SchemaError):
-                        result = ToolResult.failure(
-                            "TOOL_ARGUMENT_INVALID", "The tool arguments are invalid."
+                    except (ValidationError, SchemaError) as exc:
+                        hint = format_validation_hint(
+                            exc, definition.input_schema if definition is not None else None
                         )
+                        result = ToolResult.failure("TOOL_ARGUMENT_INVALID", hint)
                     except AgentHubError as exc:
                         result = ToolResult.failure(exc.code, exc.message)
 
