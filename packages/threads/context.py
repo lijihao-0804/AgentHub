@@ -57,6 +57,7 @@ from packages.approvals.models import Approval
 from packages.artifacts.models import Artifact
 from packages.core.canonical.json_hash import canonical_json_hash
 from packages.core.errors.exceptions import AgentHubError
+from packages.core.semantic_scoring import SemanticTextScorer, TextEmbedder
 from packages.core.text import search_terms
 from packages.threads.models import ThreadTurn
 
@@ -532,9 +533,19 @@ def _validate_summary_source_policy(value: str | None) -> None:
         raise ValueError(f"summary_source_policy must be {PLAIN_TEXT_PREFIX_V1} or None")
 
 
+_HISTORY_SEMANTIC_CANDIDATE_CAP = 256
+_HISTORY_SEMANTIC_MIN_SCORE = 0.25
+
+
 class SqlAlchemyThreadContextProvider:
-    def __init__(self, session_factory: async_sessionmaker[AsyncSession]) -> None:
+    def __init__(
+        self,
+        session_factory: async_sessionmaker[AsyncSession],
+        *,
+        embedder: TextEmbedder | None = None,
+    ) -> None:
         self.session_factory = session_factory
+        self._semantic_scorer = SemanticTextScorer(embedder) if embedder is not None else None
 
     async def current_turn_sequence(
         self, *, workspace_id: UUID, thread_id: UUID, before_run_id: UUID
@@ -1495,7 +1506,20 @@ class SqlAlchemyThreadContextProvider:
         limit: int,
     ) -> tuple[ThreadHistoryHit, ...]:
         terms = _terms(query)
-        if not terms or limit <= 0:
+        if limit <= 0 or (not terms and not query.strip()):
+            return ()
+        if self._semantic_scorer is not None and query.strip():
+            semantic_hits = await self._search_hybrid_semantic(
+                workspace_id=workspace_id,
+                thread_id=thread_id,
+                sequence=sequence,
+                query=query,
+                terms=terms,
+                limit=limit,
+            )
+            if semantic_hits is not None:
+                return semantic_hits
+        if not terms:
             return ()
         conditions = [
             or_(
@@ -1548,6 +1572,72 @@ class SqlAlchemyThreadContextProvider:
             )
         # Most terms matched wins; ties go to the more recent turn, because in a
         # conversation the later statement is the one that survived revision.
+        scored.sort(key=lambda item: (-item[0], -item[1]))
+        return tuple(hit for _, _, hit in scored[:limit])
+
+    async def _search_hybrid_semantic(
+        self,
+        *,
+        workspace_id: UUID,
+        thread_id: UUID,
+        sequence: int,
+        query: str,
+        terms: tuple[str, ...],
+        limit: int,
+    ) -> tuple[ThreadHistoryHit, ...] | None:
+        """Hybrid dense+lexical recall strictly scoped to one thread before ``sequence``."""
+        assert self._semantic_scorer is not None
+        async with self.session_factory() as session:
+            rows = (
+                await session.execute(
+                    select(ThreadTurn, AgentRun)
+                    .join(
+                        AgentRun,
+                        (AgentRun.workspace_id == ThreadTurn.workspace_id)
+                        & (AgentRun.thread_turn_id == ThreadTurn.id)
+                        & (AgentRun.thread_id == ThreadTurn.thread_id),
+                    )
+                    .where(
+                        ThreadTurn.workspace_id == workspace_id,
+                        ThreadTurn.thread_id == thread_id,
+                        ThreadTurn.sequence < sequence,
+                        AgentRun.status == _SUCCEEDED,
+                        AgentRun.final_output.is_not(None),
+                        AgentRun.input_text == ThreadTurn.user_input,
+                        ThreadTurn.agent_run_id == AgentRun.id,
+                        ThreadTurn.legacy_recovery_required.is_(False),
+                    )
+                    .order_by(ThreadTurn.sequence.desc())
+                    .limit(_HISTORY_SEMANTIC_CANDIDATE_CAP)
+                )
+            ).all()
+        if not rows:
+            return ()
+        docs = [f"{turn.user_input}\n{run.final_output or ''}" for turn, run in rows]
+        scores = self._semantic_scorer.score_documents(query, docs)
+        if scores is None:
+            return None
+        scored: list[tuple[float, int, ThreadHistoryHit]] = []
+        for (turn, run), doc, cos in zip(rows, docs, scores, strict=True):
+            haystack = doc.lower()
+            matched = tuple(term for term in terms if term in haystack)
+            if not matched and cos < _HISTORY_SEMANTIC_MIN_SCORE:
+                continue
+            hybrid_score = len(matched) * 1.0 + (
+                cos * 2.0 if cos >= _HISTORY_SEMANTIC_MIN_SCORE else 0.0
+            )
+            scored.append(
+                (
+                    hybrid_score,
+                    turn.sequence,
+                    ThreadHistoryHit(
+                        sequence=turn.sequence,
+                        user_input=_excerpt(turn.user_input, MAX_HIT_INPUT),
+                        final_output=_excerpt(run.final_output or "", MAX_HIT_OUTPUT),
+                        matched_terms=matched,
+                    ),
+                )
+            )
         scored.sort(key=lambda item: (-item[0], -item[1]))
         return tuple(hit for _, _, hit in scored[:limit])
 

@@ -21,6 +21,7 @@ from sqlalchemy import func, or_, select, text, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
+from packages.core.semantic_scoring import SemanticTextScorer, TextEmbedder
 from packages.core.text import search_terms
 from packages.memory.contracts import (
     MAX_EVIDENCE_LENGTH,
@@ -42,6 +43,8 @@ INVALIDATED = "INVALIDATED"
 # memory that is about the current question beats a memory that is merely
 # popular; salience only breaks ties among equally relevant rows.
 _TERM_WEIGHT = 100
+_SEMANTIC_WEIGHT = 150.0
+_SEMANTIC_MIN_SCORE = 0.25
 
 
 def content_hash(content: str) -> str:
@@ -90,8 +93,14 @@ def normalize_candidate(candidate: MemoryCandidate) -> MemoryCandidate | None:
 
 
 class SqlAlchemyMemoryStore:
-    def __init__(self, session_factory: async_sessionmaker[AsyncSession]) -> None:
+    def __init__(
+        self,
+        session_factory: async_sessionmaker[AsyncSession],
+        *,
+        embedder: TextEmbedder | None = None,
+    ) -> None:
         self.session_factory = session_factory
+        self._semantic_scorer = SemanticTextScorer(embedder) if embedder is not None else None
 
     # -- read ------------------------------------------------------------
 
@@ -125,6 +134,28 @@ class SqlAlchemyMemoryStore:
                     .order_by(WorkspaceMemory.created_at.desc())
                 )
             ).all()
+        semantic_scores: tuple[float, ...] | None = None
+        if self._semantic_scorer is not None and rows and query.strip():
+            semantic_scores = self._semantic_scorer.score_documents(
+                query, [row.content for row in rows]
+            )
+        if semantic_scores is not None:
+            ranked = sorted(
+                zip(rows, semantic_scores, strict=True),
+                key=lambda pair: (
+                    -(
+                        _TERM_WEIGHT * _matches(pair[0].content, terms)
+                        + (
+                            _SEMANTIC_WEIGHT * pair[1]
+                            if pair[1] >= _SEMANTIC_MIN_SCORE
+                            else 0.0
+                        )
+                    ),
+                    -pair[0].salience,
+                    -pair[0].created_at.timestamp(),
+                ),
+            )
+            return tuple(_selected(row) for row, _ in ranked[:limit])
         scored = sorted(
             rows,
             key=lambda row: (
